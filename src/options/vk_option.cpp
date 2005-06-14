@@ -450,7 +450,7 @@ Option::Option( int opt_key, ArgType arg_type, WidgetType w_type,
 }
 
 
-bool Option::isValidArg( int * err_val, const char *argval  )
+bool Option::isValidArg( int* err_val, const char* argval  )
 {
   *err_val = PARSED_OK;
   switch ( argType ) {
