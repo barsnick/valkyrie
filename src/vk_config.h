@@ -1,0 +1,164 @@
+/*---------------------------------------------------------------------- 
+  Configuration file parser                                  vk_config.h
+  ----------------------------------------------------------------------
+*/
+
+#ifndef __VALKYRIE_CONFIG_H
+#define __VALKYRIE_CONFIG_H
+
+#include <qfile.h>
+#include <qmap.h>
+#include <qobject.h>
+#include <qpixmap.h>
+#include <qstring.h>
+
+#include "vk_objects.h"
+
+
+struct EntryData
+{
+  EntryData( const QString &value, bool dirty ) 
+    : mValue(value), mDirty(dirty) { }
+  EntryData() : mValue(QString::null), mDirty(false) { }
+  QString mValue;     /* the actual value we want */
+  bool    mDirty;     /* must the entry be written to disk? */
+};
+
+struct EntryKey
+{
+  EntryKey( const QString &group=QString::null, 
+            const QString &key=QString::null )
+    : mGroup(group), mKey(key), cKey( key.data() ) { }
+  QString mGroup;    /* group to which this EntryKey belongs */
+  QString mKey;      /* key of the entry in question         */
+  const char *cKey;  /* testing equality with operator <     */
+};
+
+/* compares two EntryKeys (needed for QMap) */
+inline bool operator <( const EntryKey &k1, const EntryKey &k2 )
+{
+  int result = qstrcmp( k1.mGroup.data(), k2.mGroup.data() );
+  if ( result != 0 )
+    return ( result < 0 );     
+
+  if ( !k1.cKey && k2.cKey )
+    return true;
+
+  result = 0;
+  if ( k1.cKey && k2.cKey )
+    result = strcmp( k1.cKey, k2.cKey );
+  if ( result != 0 )
+    return result < 0;
+
+  return false;
+}
+
+typedef QMap<EntryKey, EntryData> EntryMap;
+typedef QMap<EntryKey, EntryData>::Iterator EntryMapIterator;
+
+
+
+typedef QPtrList<VkObject> VkObjectList;
+
+class VkConfig : public QObject
+{
+public:
+  VkConfig( bool *ok );
+  ~VkConfig();
+
+  void dontSync();  /* don't write back to disk on exit */
+
+	/* misc make-life-easier stuff --------------------------------------- */
+	int defaultToolId();
+	QString vgdocDir();
+	//RM: QString vgManual( QString url );
+  QString vkdocDir();
+  QString imgDir();
+	QString rcDir();
+	QString logsDir();
+	QString dbaseDir();
+	QString suppDir();
+	QPixmap pixmap( QString pixfile );
+
+	QStringList modFlags( VkObject* obj );
+
+	VkObjectList vkObjList();
+	/* returns a vkObject based on its name */
+	VkObject* vkObject( const QString& obj_name );
+	/* returns a vkObject based on its ObjectId */
+	VkObject* vkObject( int tvid, bool tools_only=false );
+
+  /* returns a string of selected comma-separated suppressions files
+     with marker flag removed */
+	QString selSuppFiles( const QString &pKey, const QString &pGroup );
+
+  /* read fns ---------------------------------------------------------- */
+  QString rdEntry( const QString &pKey, const QString &pGroup );
+  int     rdInt  ( const QString &pKey, const QString &pGroup );
+  bool    rdBool ( const QString &pKey, const QString &pGroup );
+  QFont   rdFont ( const QString &pKey, const QString &pGroup=QString::null );
+  QColor  rdColor( const QString &pKey );
+
+  /* write fns --------------------------------------------------------- */
+  void wrEntry( const QString &pValue, 
+                const QString &pKey,   const QString &pGroup );
+  void wrInt  ( const int     pValue,    
+                const QString &pKey, const QString &pGroup );
+  void wrBool ( const bool    &bValue,    
+                const QString &pKey,   const QString &pGroup );
+  void wrFont ( const QFont   &rFont,  const QString &pKey );
+  void wrColor( const QColor  &pColor, const QString &pKey );
+
+private:
+  enum RetVal { Okay=1, BadFilename, NoDir, NoPerms,
+                BadRcFile, BadRcVersion, CreateRcFile, Fail };
+  void sync();
+
+	bool checkDirs();
+	bool checkPaths();
+  void mkConfigFile( bool rm=false );
+
+  void writebackConfig();
+  void parseConfigFile( QFile &rFile, EntryMap *writeBackMap=NULL );
+  void insertData( const EntryKey &key, const EntryData &data );
+  RetVal parseFile();
+  RetVal checkAccess() const;
+
+	/* creates the various VkObjects and initialises their options,
+		 ready for cmd-line parsing (if any). */
+	bool initVkObjects();
+
+private:
+  char sep;
+  bool mDirty;
+	bool newConfigFile;
+
+	/* path to the config dir */
+  QString  rcPath;
+	/* where the config file lives */
+  QString  rcFileName;
+	/* where valkyrie lives */
+  QString  mPackagePath;
+	/* path to docs dir */
+	QString vkdocPath;
+	/* FIXME: this is a kludge
+		 path to valgrind docs dir */
+	QString vgdocPath;
+	/* path to images */
+	QString imgPath;
+	/* path to log dir */
+	QString logsPath;
+	/* path to dbase dir */
+	QString dbasePath;
+	/* path to user's suppression files dir.
+		 default is ~/.valkyrie-X.X.X/suppressions */
+	QString suppPath;
+
+	/* the config dict */
+  EntryMap mEntryMap;
+
+	/* list of the various objects */
+	VkObjectList vkObjectList;
+};
+
+#endif

@@ -1,0 +1,29 @@
+<?xml version="1.0"?> <!-- -*- sgml -*- -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+
+<book id="manual" xreflabel="Valkyrie User Manual">
+
+  <bookinfo>
+    <title>Valkyrie User Manual</title>
+  </bookinfo>
+
+  <xi:include href="intro.xml" parse="xml" 
+      xmlns:xi="http://www.w3.org/2001/XInclude" />
+<!--
+  <xi:include href="manual-core.xml"  parse="xml" 
+      xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="mc-manual.xml"    parse="xml" 
+      xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="ac-manual.xml"    parse="xml" 
+      xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="cg-manual.xml"    parse="xml" 
+      xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="ms-manual.xml"    parse="xml" 
+      xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="hg-manual.xml"    parse="xml" 
+      xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="nl-manual.xml"    parse="xml" 
+      xmlns:xi="http://www.w3.org/2001/XInclude" />
+-->
+</book>

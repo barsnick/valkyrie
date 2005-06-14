@@ -1,0 +1,11 @@
+<!-- stuff ... -->
+<!ENTITY vk-url      "http://www.valgrind.org/">
+<!ENTITY vk-author   "Donna Robinson">
+<!ENTITY vk-email    "donna@valgrind.org">
+<!ENTITY vk-lifespan "2000-2005">
+
+<!-- and nonsense -->
+<!ENTITY rel-type    "Development release">
+<!ENTITY rel-version "2.1.2">
+<!ENTITY rel-date    "June 30 2005">
+
