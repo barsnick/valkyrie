@@ -367,7 +367,8 @@ void MainWindow::mkMenuBar()
 
   /* toolview menu ----------------------------------------------------- */
   index++;
-  QIconSet bulletSet( QPixmap(black_bullet_xpm) );
+  //QIconSet bulletSet( QPixmap(black_bullet_xpm) );
+  QPixmap bulletSet(black_bullet_xpm);
   toolsMenu = new QPopupMenu( this );
 
   VkObjectList objList = vkConfig->vkObjList();

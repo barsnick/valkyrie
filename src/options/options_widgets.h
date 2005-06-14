@@ -25,7 +25,6 @@ class OptionWidget : public QObject
 {
   Q_OBJECT
 public:
-  //RM: enum wType {NONE=-1, CHECK=0, RADIO, LEDIT, COMBO, SPINBOX, LISTBOX};
   OptionWidget( QWidget* parent, const char* name, 
 								Option* vkopt, bool mklabel );
   ~OptionWidget() { }
@@ -40,7 +39,8 @@ public:
 	virtual void resetDefault() = 0;
   virtual void saveEdit( bool perm );
   virtual void cancelEdit();
-  virtual QHBoxLayout* layout();
+  virtual QHBoxLayout* hlayout();
+  virtual QVBoxLayout* vlayout();
 
 signals:
   void valueChanged( bool, OptionWidget * );
@@ -49,6 +49,7 @@ protected:
   QWidget* widg;
   QLabel*  wLabel;
   QHBoxLayout* hBox;
+  QVBoxLayout* vBox;
 
   QString initialValue;
   QString currentValue;
@@ -126,8 +127,8 @@ public:
   void addButton(QWidget *parent, const QObject * receiver, 
                  const char * slot, QString txt=QString::null,
                  bool icon=true );
-  QPushButton * button();
-  QHBoxLayout * layout();
+  QPushButton* button();
+  QHBoxLayout* hlayout();
 
 private slots:
   void leChanged(const QString& txt);
@@ -150,6 +151,7 @@ public:
 
   void reset();
 	void resetDefault();
+  QHBoxLayout* hlayout();
 
 private slots:
   void cbChanged(const QString& txt);
@@ -167,13 +169,14 @@ class SpWidget : public OptionWidget
 {
   Q_OBJECT
 public:
-  SpWidget(QWidget* parent, Option* vkopt, bool mklabel, int num_sections=1);
+  SpWidget(QWidget* parent, Option* vkopt, bool mklabel, int num_sections);
   ~SpWidget();
 
   void reset();
 	void resetDefault();
   void addSection( int min, int max, int defval=0,
                    int step=1, QString sep_char=" " );
+  QHBoxLayout* hlayout();
 
 private slots:
   void spChanged( const QString &val );

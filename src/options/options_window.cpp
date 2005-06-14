@@ -83,7 +83,7 @@ OptionsWindow::OptionsWindow( QWidget* parent )
 
   optPages.setAutoDelete( true );
   xpos = ypos = -1;
-#if 1
+
   /* status bar */
   QFrame *statusFrame = new QFrame( statusBar() );
   statusBar()->addWidget( statusFrame, 10, true );
@@ -112,31 +112,8 @@ OptionsWindow::OptionsWindow( QWidget* parent )
 	applyButton->setFixedWidth( w );
 	buttLayout->addWidget( applyButton );
 	connect( applyButton, SIGNAL(clicked() ), this, SLOT(apply()));
-#else
-  /* status bar */
-  QFrame *statusFrame = new QFrame( statusBar() );
-  statusBar()->addWidget( statusFrame, 10, true );
-  QHBoxLayout* buttLayout = new QHBoxLayout(statusFrame, 5, -1 );
-  //QPushButton* wt = new ContextHelpButton( statusFrame );
-  //buttLayout->addWidget( wt );
-  buttLayout->addStretch( 10 );
+  applyButton->setEnabled( false );  /* nothing to apply yet */
 
-  const char* pbnames[] = { "&Ok", "&Cancel", "&Apply", 0 };
-  QFontMetrics fm( font() );
-  int w = fm.width( "X&CancelX" );
-  for ( int i=0; i<3; i++ ) {
-    pb[i] = new QPushButton( pbnames[i], statusFrame );
-    pb[i]->setFixedWidth( w );
-    buttLayout->addWidget( pb[i] );
-  }
-
-  connect( pb[OKAY],   SIGNAL(clicked() ), this, SLOT(accept()));
-  connect( pb[CANCEL], SIGNAL(clicked() ), this, SLOT(reject()));
-  connect( pb[APPLY],  SIGNAL(clicked() ), this, SLOT(apply()));
-  pb[APPLY]->setEnabled( false );  /* nothing to apply yet */
-  pb[OKAY]->setDefault( true );
-  pb[OKAY]->setFocus();
-#endif
   QSplitter* splitter = new QSplitter( this );
   setCentralWidget( splitter );
 
@@ -203,7 +180,7 @@ void OptionsWindow::categoryClicked( QListBoxItem *item )
   }
 }
 
-#if 1
+
 OptionsPage * OptionsWindow::mkOptionsPage( int catid )
 {
 	VkObject* obj = vkConfig->vkObject( catid, true );
@@ -236,29 +213,7 @@ OptionsPage * OptionsWindow::mkOptionsPage( int catid )
 
   return page;
 }
-#else
-OptionsPage * OptionsWindow::mkOptionsPage( int catid )
-{
-  OptionsPage* page = 0;
 
-  VkObjectList objList = vkConfig->vkObjList();
-  VkObject* obj;
-  for ( obj = objList.first(); obj; obj = objList.next() ) {
-		if ( obj->id() == catid ) {
-			page = obj->optionsPage();
-		}
-  }
-
-  if ( page ) {
-    optPages.append( page );
-		/* connect 'em up so we can en/disable the buttons */
-		connect( page,   SIGNAL(modified()),
-						 this,   SLOT(modified()) );;
-	}
-
-  return page;
-}
-#endif
 
 void OptionsWindow::showPage( int catid )
 {
@@ -404,6 +359,6 @@ void OptionsWindow::modified()
       break;
     }
   }
-  //RM:pb[APPLY]->setEnabled( ok );
+
 	applyButton->setEnabled( ok );
 }

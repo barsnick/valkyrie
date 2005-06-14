@@ -1016,8 +1016,8 @@ Massif::Massif()
   addOpt(  DEPTH,      Option::ARG_UINT,   Option::SPINBOX, 
           "massif",    '\0',               "depth", 
           "<number>",  "1|20",             "3",
-          "Average admin bytes per heap block:",
-          "average admin bytes per heap block", 
+          "Depth of contexts:",
+          "depth of contexts", 
            urlMassif::Depth );
   addOpt( ALLOC_FN,    Option::ARG_STRING, Option::LEDIT, 
           "massif",    '\0',               "alloc-fn", 
@@ -1028,7 +1028,7 @@ Massif::Massif()
   addOpt( FORMAT,      Option::ARG_STRING,   Option::COMBO,  
           "massif",    '\0',                 "format",
           "<text|html|xml>", "text|html|xml", "text",
-          "Format of textual output",
+          "Format of textual output:",
           "format of textual output",
           urlMassif::Format );
   addOpt(  ALIGNMENT,  Option::ARG_UINT,   Option::SPINBOX, 

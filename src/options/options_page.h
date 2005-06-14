@@ -37,9 +37,8 @@ public:
   bool applyEdits();
   bool isModified() { return mod; }
 
-	void resetDefaults();
+  void resetDefaults();
   virtual bool applyOptions( int id, bool undo=false ) = 0;
-  OptionWidget* optionWidget( int optid, QWidget* parent, bool mklabel );
 
 signals:
   void modified();
@@ -48,10 +47,14 @@ public slots:
   void updateEditList( bool, OptionWidget * );
 
 protected:
-  bool mod; 
-  int topspc;
+  QFrame* sep( QWidget* parent, const char* name );
+  OptionWidget* optionWidget( int optid, QWidget* parent, bool mklabel );
 
-	VkObject * vkObj;
+protected:
+  bool mod; 
+  int topSpace;
+
+  VkObject * vkObj;
 
   /* Prime Numbers: 5, 7, 11, 13, 17, 19, 23, 29 */
   QIntDict<OptionWidget> itemList;

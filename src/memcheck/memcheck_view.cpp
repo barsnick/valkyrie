@@ -287,7 +287,7 @@ void MemcheckView::getSaveFilename()
 }
 
 
-void MemcheckView::saveLogfile( QString fname )
+void MemcheckView::saveLogfile( QString /*fname*/ )
 {
   printf("TODO: how to save output to logfile in xml format\n");
 

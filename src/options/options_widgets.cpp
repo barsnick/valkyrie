@@ -22,11 +22,9 @@ OptionWidget::OptionWidget( QWidget* parent, const char* name,
                             Option* vkopt, bool mklabel )
   : QObject( parent, name ) 
 {
-  //VK_DEBUG("opt->long_flag: %s\n", vkopt->cfgKey().ascii() );
-
+  opt    = vkopt;
   widg   = 0;
   wLabel = 0;
-  opt    = vkopt;
 
   initialValue = vkConfig->rdEntry( opt->cfgKey(), opt->cfgGroup() );
   currentValue = initialValue;
@@ -70,9 +68,9 @@ void OptionWidget::cancelEdit()
 }
 
 
-/* layout for comboboxes / spinboxes so we don't have to code
-   specially for this */
-QHBoxLayout * OptionWidget::layout()
+/* horizontal layout for widgets with labels. comboboxes, spinboxes
+   and lineedits have their own way of doings things */
+QHBoxLayout * OptionWidget::hlayout()
 { 
   vk_assert( wLabel != 0 );
 
@@ -80,21 +78,20 @@ QHBoxLayout * OptionWidget::layout()
   hBox->addWidget( wLabel );
   hBox->addWidget( widg );
 
-  switch ( opt->widgType ) {
-  case Option::COMBO:
-    hBox->setStretchFactor( wLabel, 10 );
-    hBox->setStretchFactor( widg,    0 );
-    break;
-  case Option::SPINBOX:
-    hBox->setStretchFactor( wLabel, 10 );
-    hBox->setStretchFactor( widg,    3 );
-    break;
-  default:
-    break;
-  }
-
   return hBox; 
 }
+
+
+QVBoxLayout* OptionWidget::vlayout()
+{
+	vk_assert( wLabel != 0 );
+	vBox = new QVBoxLayout( -1, "vBox" );
+	vBox->addWidget( wLabel );
+	vBox->addWidget( widg );
+
+	return vBox;
+}
+
 
 
 
@@ -134,20 +131,9 @@ void CkWidget::reset()
 
 void CkWidget::resetDefault()
 {
-#if 1
   bool on = ( opt->defValue() == "1"   || opt->defValue() == "on"  || 
               opt->defValue() == "yes" || opt->defValue() == "true" );
   setOn( on );
-#else
-  currentValue = opt->defValue();
-  bool edited = currentValue != initialValue;
-  bool on = ( opt->defValue() == "1"   || opt->defValue() == "on"  || 
-              opt->defValue() == "yes" || opt->defValue() == "true" );
-  setOn( on );
-  emit valueChanged( edited, this );
-  emit changed( on );
-  emit clicked( opt->key );
-#endif
 }
 
 bool CkWidget::isOn()
@@ -194,20 +180,9 @@ void RbWidget::reset()
 
 void RbWidget::resetDefault()
 {
-#if 1
   bool on = ( opt->defValue() == "1"   || opt->defValue() == "on"  || 
               opt->defValue() == "yes" || opt->defValue() == "true" );
   setOn( on );
-#else
-  currentValue = opt->defValue();
-  bool edited  = currentValue != initialValue;
-  bool on = ( opt->defValue() == "1"   || opt->defValue() == "on"  || 
-              opt->defValue() == "yes" || opt->defValue() == "true" );
-  setOn( on );
-  emit valueChanged( edited, this );
-  emit changed( on );
-  emit clicked( opt->key );
-#endif
 }
 
 bool RbWidget::isOn()
@@ -297,13 +272,14 @@ void LeWidget::addButton( QWidget *parent, const QObject * receiver,
 
 /* layout for line edits where we want to have a pushbutton with
    opt->shortHelp as its text, instead of the standard QLabel */
-QHBoxLayout * LeWidget::layout()
+QHBoxLayout * LeWidget::hlayout()
 {
   hBox = new QHBoxLayout( 6, "le_hBox" );
-  if ( pb != NULL )
+  if ( pb != NULL ) {
     hBox->addWidget( pb );
-  else
+  } else {
     hBox->addWidget( wLabel );
+	}
   hBox->addWidget( widg );
 
   return hBox; 
@@ -370,6 +346,18 @@ void CbWidget::reset()
 void CbWidget::resetDefault()
 { cbChanged( opt->defValue() ); }
 
+QHBoxLayout * CbWidget::hlayout()
+{ 
+  vk_assert( wLabel != 0 );
+
+  hBox = new QHBoxLayout( 6, "hBox" );
+  hBox->addWidget( wLabel );
+  hBox->addWidget( widg );
+	hBox->setStretchFactor( wLabel, 6 );
+	hBox->setStretchFactor( widg,   2 );
+
+  return hBox; 
+}
 
 
 
@@ -383,7 +371,7 @@ SpWidget::~SpWidget()
 }
 
 SpWidget::SpWidget( QWidget* parent, Option* vkopt, 
-                    bool mklabel, int num_sections/*=1*/ )
+										bool mklabel, int num_sections )
   : OptionWidget( parent, "sp_widget", vkopt, mklabel ) 
 {
   numSections = num_sections;
@@ -430,6 +418,17 @@ void SpWidget::resetDefault()
   }
 }
 
+QHBoxLayout * SpWidget::hlayout()
+{ 
+  vk_assert( wLabel != 0 );
+
+  hBox = new QHBoxLayout( 6, "hBox" );
+  hBox->addWidget( wLabel, 20, Qt::AlignLeft );
+	//hBox->addStretch( 100 );
+  hBox->addWidget( widg,    1, Qt::AlignRight );
+
+  return hBox; 
+}
 
 
 

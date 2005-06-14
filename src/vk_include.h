@@ -8,7 +8,7 @@
 
 
 /* This will eventually be replaced by configure.in -------------------- */
-#define VALKYRIE_PATH   "/home/de/Programs/Valkyrie"
+#define VALKYRIE_PATH   "/home/de/Programs/valkyrie/trunk"
 #define EXEC_PREFIX     VALKYRIE_PATH 
 #define DOCS_PATH       "/docs/"
 #define ICONS_PATH      "/icons/"
@@ -27,8 +27,8 @@
    i.e. a snapshot of the current development tree --------------------- */
 #define VK_VERSION   "1.2.0"
 #define VK_COPYRIGHT "(c) 2003-2005"
-#define VK_AUTHOR    "Donna Robinson, OpenWorks LLP"
-#define VK_EMAIL     "donna@open-works.co.uk"
+#define VK_AUTHOR    "Donna Robinson"
+#define VK_EMAIL     "donna@valgrind.org"
 /* so we don't have to update hard-wired in dates for valgrind */
 #define VG_COPYRIGHT "(c) 2000-2005, and GNU GPL'd, by Julian Seward et al."
 

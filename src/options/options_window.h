@@ -82,8 +82,6 @@ private:
 	/* remember where user put the window */
 	int xpos, ypos;
 
-  //RM: QPushButton* pb[4];
-  //RM: enum { RESET=0, OKAY=1, CANCEL=2, APPLY=3 };
 	QPushButton* applyButton;
 
   /* so we can iterate over the vkOptions widgets */

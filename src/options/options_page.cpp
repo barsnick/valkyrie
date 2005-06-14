@@ -32,9 +32,17 @@ OptionsPage::~OptionsPage()
 OptionsPage::OptionsPage( QWidget* parent, VkObject* obj, const char* name )
   : QWidget( parent, name )
 {
-  vkObj  = obj;
-  topspc = 10;
-  mod    = false;
+  vkObj = obj;
+  mod   = false;
+  topSpace = fontMetrics().height();
+}
+
+
+QFrame* OptionsPage::sep( QWidget* parent, const char* name ) 
+{
+  QFrame* line = new QFrame( parent, name );
+  line->setFrameStyle( QFrame::HLine | QFrame::Sunken );
+  return line;
 }
 
 
@@ -174,44 +182,44 @@ bool OptionsPage::applyEdits()
 
 
 OptionWidget* OptionsPage::optionWidget( int optid, QWidget* parent, 
-																				 bool mklabel )
+                                         bool mklabel )
 {
-	OptionWidget* optWidget = 0;
-	Option* opt = vkObj->findOption( optid );
+  OptionWidget* optWidget = 0;
+  Option* opt = vkObj->findOption( optid );
 
-	switch ( opt->widgType ) {
+  switch ( opt->widgType ) {
 
-		case Option::NONE:
-			vk_assert_never_reached();
-			break;
-		case Option::CHECK:
-			optWidget = (OptionWidget*)new CkWidget( parent, opt, mklabel );
-			break;
-		case Option::RADIO:
-			optWidget = (OptionWidget*)new RbWidget( parent, opt, mklabel );
-			break;
-		case Option::LEDIT:
-			optWidget = (OptionWidget*)new LeWidget( parent, opt, mklabel );
-			break;
-		case Option::COMBO:
-			optWidget = (OptionWidget*)new CbWidget( parent, opt, mklabel );
-			break;
-		case Option::LISTBOX:
-			optWidget = (OptionWidget*)new LbWidget( parent, opt, mklabel );
-			break;
-		case Option::SPINBOX:
-			SpWidget* spinw = new SpWidget( parent, opt, mklabel, 3 );
-			int step = 0;
-			QString ival = vkConfig->rdEntry( opt->cfgKey(), opt->cfgGroup() );
-			spinw->addSection( opt->possValues[0].toInt(),  /* min */
+    case Option::NONE:
+      vk_assert_never_reached();
+      break;
+    case Option::CHECK:
+      optWidget = (OptionWidget*)new CkWidget( parent, opt, mklabel );
+      break;
+    case Option::RADIO:
+      optWidget = (OptionWidget*)new RbWidget( parent, opt, mklabel );
+      break;
+    case Option::LEDIT:
+      optWidget = (OptionWidget*)new LeWidget( parent, opt, mklabel );
+      break;
+    case Option::COMBO:
+      optWidget = (OptionWidget*)new CbWidget( parent, opt, mklabel );
+      break;
+    case Option::LISTBOX:
+      optWidget = (OptionWidget*)new LbWidget( parent, opt, mklabel );
+      break;
+    case Option::SPINBOX:
+      SpWidget* spinw = new SpWidget( parent, opt, mklabel, 1 );
+      int step = 0;
+      QString ival = vkConfig->rdEntry( opt->cfgKey(), opt->cfgGroup() );
+      spinw->addSection( opt->possValues[0].toInt(),  /* min */
                          opt->possValues[1].toInt(),  /* max */
                          ival.toInt(),                /* def */
                          step );                      /* use powers */
-			optWidget = (OptionWidget*)spinw;
-			break;
-	}
+      optWidget = (OptionWidget*)spinw;
+      break;
+  }
 
-	vk_assert( optWidget != 0 );
+  vk_assert( optWidget != 0 );
 
   return optWidget;
 }
