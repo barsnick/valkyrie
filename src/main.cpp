@@ -1,7 +1,7 @@
-/*---------------------------------------------------------------------- 
-  Startup: the main program file                                main.cpp
-  ----------------------------------------------------------------------
-*/
+/* --------------------------------------------------------------------- 
+ * Startup: the main program file                               main.cpp
+ * ---------------------------------------------------------------------
+ */
 
 #include <qapplication.h>
 #include <qdir.h>
@@ -79,14 +79,10 @@ QPalette vkPalette()
 
 int main ( int argc, char* argv[] )
 {
+  bool useGui;
   int res = EXIT_SUCCESS;
   MainWindow* vkWin = 0;
-
-  /* start turning the engine over... ---------------------------------- */
-  QApplication app( argc, argv );
-  /* TODO: allow user to chang default application style */
-  app.setStyle( QStyleFactory::create( "windows" ) );
-
+  QApplication* app = 0;
 
   /* vkConfig ---------------------------------------------------------- 
      Check the configuration dir+file ~/.PACKAGE/PACKAGErc is present,
@@ -122,48 +118,53 @@ int main ( int argc, char* argv[] )
     }
   }
 
+  /* find out if we are in non-gui mode -------------------------------- */
+  useGui = vkConfig->rdBool( "gui", "valkyrie" );
+  printf("useGui = %d\n", useGui );
 
-  /* Font -------------------------------------------------------------- 
-     allow user to specify an app-wide font setting */
-  if ( !vkConfig->rdBool( "use-system-font", "Prefs" ) ) {
-    QFont vkfnt = vkConfig->rdFont( "user-font", "Prefs" );
-    app.setFont( vkfnt, true );
+  /* start turning the engine over... ---------------------------------- */
+  app = new QApplication( argc, argv, useGui );
+  if ( !useGui ) {
+    printf("in non-gui mode now\n");
+  } else {
+
+    /* Style -----------------------------------------------------------
+       TODO: allow user to specify an app-wide style */
+    app->setStyle( QStyleFactory::create( "windows" ) );
+
+    /* Font ------------------------------------------------------------
+       allow user to specify an app-wide font setting */
+    if ( !vkConfig->rdBool( "use-system-font", "Prefs" ) ) {
+      QFont vkfnt = vkConfig->rdFont( "user-font", "Prefs" );
+      app->setFont( vkfnt, true );
+    }
+
+    /* palette ---------------------------------------------------------
+       allow user to choose between app. default palette and the
+       default palette assigned by their system. */
+    if ( vkConfig->rdBool( "use-vk-palette", "Prefs" ) ) {
+      app->setPalette( vkPalette(), true );
+    }
+
+    /* we have lift-off -- start up the gui ---------------------------- */
+    vkWin = new MainWindow();
+    app->setMainWidget( vkWin );
+    app->connect( app, SIGNAL(lastWindowClosed()), 
+                  app, SLOT(quit()) );
+
+    vkWin->resize( vkConfig->rdInt("width", "MainWin"),
+                   vkConfig->rdInt("height","MainWin") );
+    vkWin->move( vkConfig->rdInt("x-pos", "MainWin"),
+                 vkConfig->rdInt("y-pos", "MainWin") );
+    vkWin->show();
   }
 
 
-  /* palette -----------------------------------------------------------
-     allow user to choose between app. default palette and the default
-     palette assigned by their system. */
-  if ( vkConfig->rdBool("use-vk-palette", "Prefs") ) {
-    app.setPalette( vkPalette(), true );
-  }
-
-
-  /* we have lift-off - start up the gui ------------------------------- */
-  vkWin = new MainWindow();
-  app.setMainWidget( vkWin );
-  app.connect( &app, SIGNAL(lastWindowClosed()), 
-               &app, SLOT(quit()) );
-
-#if 1
-  vkWin->resize( vkConfig->rdInt("width", "MainWin"),
-                 vkConfig->rdInt("height","MainWin") );
-  vkWin->move( vkConfig->rdInt("x-pos", "MainWin"),
-               vkConfig->rdInt("y-pos", "MainWin") );
-#else
-  vkWin->setGeometry ( vkConfig->rdInt("x-pos", "MainWin"), 
-                       vkConfig->rdInt("y-pos", "MainWin"), 
-                       vkConfig->rdInt("width", "MainWin"), 
-                       vkConfig->rdInt("height","MainWin") );
-#endif
-
-  vkWin->show();
-
-  res = app.exec();
+  res = app->exec();
 
  cleanup_and_exit:
   if ( vkConfig ) { 
-    delete vkConfig; 
+    delete vkConfig;
     vkConfig = 0;
   }
 

@@ -686,7 +686,7 @@ Memcheck::Memcheck()
           "Volume of freed blocks queue:",
           "volume of freed blocks queue",
           urlNone );
-  addOpt( LEAK_CHECK,  Option::ARG_BOOL,   Option::CHECK, 
+  addOpt( LEAK_CHECK,  Option::ARG_STRING, Option::CHECK, 
           "memcheck",  '\0',               "leak-check",
           "<no|summary|full>",  "no|summary|full",  "summary",
           "Search for memory leaks at exit",
