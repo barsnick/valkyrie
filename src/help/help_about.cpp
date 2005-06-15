@@ -3,7 +3,7 @@
  * small tab dialog showing various information re licence etc.
  * --------------------------------------------------------------------- */
 
-#include "help_info.h"
+#include "help_about.h"
 #include "vk_include.h"
 #include "vk_config.h"
 

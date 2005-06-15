@@ -7,7 +7,7 @@
 #define __VK_MAIN_WINDOW_H
 
 #include "workspace.h"
-#include "help_info.h"
+#include "help_about.h"
 #include "hand_book.h"
 #include "options_window.h"
 

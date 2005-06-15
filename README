@@ -28,32 +28,67 @@ The result can be saved to file and/or displayed.
 
 
 
-Documentation
-~~~~~~~~~~~~~
-A comprehensive user guide is supplied.  Point your browser at
-$PREFIX/share/doc/valkyrie/index.html, where $PREFIX is whatever you
-specified with --prefix= when building.
-
-
-
 Building and installing
 ~~~~~~~~~~~~~~~~~~~~~~~
-To install from a tar.bz2 distribution:
 
-  3. Run ./configure, with some options if you wish. The standard
-     options are documented in the INSTALL file.  The only interesting
-     one is the usual --prefix=/where/you/want/it/installed.
+To install from a tar.bz2 distribution, you may need to be logged in
+as root, depending on the permissions of the directories where you
+choose to install Valkyrie.
 
-  4. Do "make".
 
-  5. Do "make install", possibly as root if the destination permissions
-     require that.
+1. Unpack the archive if you have not done so already:
 
-  6. See if it works.  Try "valkyrie ls -l".  Either this works, or 
-     it bombs out with some complaint.  In that case, please let me know.
+     cd /usr/local
+     bzip2 -d valkyrie-X.X.X.tar.bz2  # uncompress the archive
+     tar xvf valkyrie-X.X.X.tar       # unpack it
 
-Important!  Do not move the valkyrie installation into a place
-different from that specified by --prefix at build time.  This will
-cause things to break in subtle and annoying ways.
+   This creates the directory /usr/local/valkyrie-X.X.X containing 
+   the files from the archive.
+
+
+2. Rename valkyrie-X.X.X to valkyrie (or make a symlink):
+
+     mv valkyrie-X.X.X valkyrie
+
+   The rest of this file assumes that Valkyrie is installed in
+   /usr/local/valkyrie.
+
+
+3. Configuring:
+
+   To configure Valkyrie for your machine, type:
+
+     ./configure
+
+   Run ./configure -help to get a list of configuration options; the 
+   standard options are documented in the INSTALL file.  The only
+   interesting one is the usual --prefix=/where/you/want/it/installed.
+
+
+3. Building and compiling:
+
+   To compile, type:
+
+     make
+
+   At this point you will (hopefully) have a binary created in 
+   eg. /usr/local/valkyrie/bin.  If you supplied a custom install 
+   directory using the -prefix parameter in step 2, you can:
+
+     make install
+
+   This will install Valkyrie onto your machine using the paths 
+   you've set. (See ./configure -help for more information). 
+
+
+4. The online HTML documentation is installed in
+   /usr/local/valkyrie/doc/html/.
+   The main page is /usr/local/valkyrie/doc/html/index.html
+
+
+That's all.  Valkyrie is now installed.  See if it works.  
+Try "valkyrie ls -l".  Either this works, or it bombs out with some 
+complaint.  In that case, please let me know.
+
 
 Donna Robinson <donna@valgrind.org>
