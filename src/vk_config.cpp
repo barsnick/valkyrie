@@ -54,7 +54,6 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
 
   mPackagePath = installPath();
   vkdocPath    = mPackagePath + DOCS_PATH;
-	// FIXME: this should be read from valkyrie's opts
 	vgdocPath    = vkdocPath + "manual/";
   imgPath      = mPackagePath + ICONS_PATH;
 
