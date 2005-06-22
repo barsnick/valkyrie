@@ -1,0 +1,11 @@
+QT_DIR=/usr/lib/qt3
+QT_INC_DIR=/usr/lib/qt3/include
+QT_LIB_DIR=/usr/lib/qt3/lib
+QT_MOC=/usr/lib/qt3/bin/moc
+QT_UIC=/usr/lib/qt3/bin/uic
+QT_QMAKE=/usr/lib/qt3/bin/qmake
+VG_EXEC_PATH=/home/sewardj/Vg3LINE/trunk/Inst/bin/valgrind
+VG_SUPP_DIR=/usr/lib/valgrind
+MYSQL_LIB_PATH=-L/usr/lib/mysql
+MYSQL_LIB=-lmysqlclient
+MYSQL_INC=/usr/include/mysql

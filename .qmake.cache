@@ -1,0 +1,18 @@
+CMDLINE=/home/de/Programs/valkyrie/trunk/configure --thread=yes --debug --vg-exec=/home/sewardj/Vg3LINE/trunk/Inst/bin/valgrind --vg-supp=/home/sewardj/Vg3LINE/trunk/Inst/lib/valgrind/
+QT_SOURCE_TREE=/home/de/Programs/valkyrie/trunk
+QT_BUILD_TREE=/home/de/Programs/valkyrie/trunk
+QMAKE_ABSOLUTE_SOURCE_ROOT=$$QT_SOURCE_TREE
+QMAKE_MOC=/usr/lib/qt3/bin/moc
+QMAKE_UIC=/usr/lib/qt3/bin/uic
+QMAKE_QMAKE=/usr/lib/qt3/bin/qmake
+QMAKE_INCDIR_QT=/usr/lib/qt3/include
+QMAKE_LIBDIR_QT=/usr/lib/qt3/lib
+QMAKE_RTLDIR_QT=/usr/lib/qt3/lib
+QMAKE_LIBDIR_FLAGS+=-L/usr/lib/mysql
+LIBS+=-lmysqlclient
+INCLUDEPATH+=/usr/include/mysql
+QT_INSTALL_PREFIX=/home/de/Programs/valkyrie/trunk
+docs.path=/home/de/Programs/valkyrie/trunk/doc/
+bins.path=/home/de/Programs/valkyrie/trunk/bin/
+QMAKESPEC=/usr/lib/qt3/mkspecs/linux-g++
+CONFIG +=  debug warn_on dll thread

@@ -1,0 +1,846 @@
+#!/bin/sh
+#
+# Configures to build Valkyrie
+#
+
+#-------------------------------------------------------------------
+# our identity
+#-------------------------------------------------------------------
+vk_name="valkyrie"
+Vk_Name="Valkyrie"
+VK_VERSION="1.2.0"
+VK_COPYRIGHT="(c) 2003-2005"
+VK_AUTHOR="Donna Robinson"
+VK_EMAIL="donna@valgrind.org"
+VG_COPYRIGHT="(c) 2000-2005, and GNU GPL'd, by Julian Seward et al."
+
+
+#-------------------------------------------------------------------
+# script initialization
+#-------------------------------------------------------------------
+# the name of this script
+relconf=`basename $0`
+# the directory of this script is the "source tree"
+relpath=`dirname $0`
+relpath=`(cd $relpath; /bin/pwd)`
+# the current directory is the "build tree" or "object tree"
+outpath=`/bin/pwd`
+# where we keep all our test scripts
+cfgtests=$relpath/config.tests
+
+# later cache the command line in config.status
+OPT_CMDLINE=`echo $@ | sed "s,-v ,,g; s,-v$,,g"`
+
+
+#-------------------------------------------------------------------
+# operating system detection
+#-------------------------------------------------------------------
+UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
+UNAME_RELEASE=`(uname -r) 2>/dev/null` || UNAME_RELEASE=unknown
+UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
+UNAME_VERSION=`(uname -v) 2>/dev/null` || UNAME_VERSION=unknown
+
+
+#-------------------------------------------------------------------
+# initalize variables used for installation
+#-------------------------------------------------------------------
+# path to our source tree
+VK_SOURCE_TREE=$relpath
+# path to our build tree
+VK_BUILD_TREE=$outpath
+# default outpath
+VK_INSTALL_PREFIX=$outpath
+# default PREFIX/doc
+VK_INSTALL_DOCS=$VK_INSTALL_PREFIX/doc/
+# default PREFIX/bin
+VK_INSTALL_BIN=$VK_INSTALL_PREFIX/bin/
+
+
+#-------------------------------------------------------------------
+# initalize variables for other people's paths
+#-------------------------------------------------------------------
+VG_EXEC_PATH=       # path to valgrind executable
+VG_SUPP_DIR=        # path to valgrind's suppressions dir
+
+MYSQL_LIB=          # path to MySQL library ( -lmysqlclient )
+MYSQL_INC=          # path to MySQL include directory
+
+QT_DIR=             # path to qt install dir ( /usr/lib/qt3/ )
+QT_INC_DIR=         # path to qt include dir ( /usr/lib/qt3/include/ )
+QT_LIB_DIR=         # path to qt lib dir     ( /usr/lib/qt3/lib/ )
+QT_MOC=             # path to moc            ( /usr/lib/qt3/bin/moc )
+QT_UIC=             # path to uic            ( /usr/lib/qt3/bin/uic )
+QT_QMAKE=           # path to qmake          ( /usr/lib/qt3/bin/qmake )
+
+#-------------------------------------------------------------------
+# initalize variables used for building
+#-------------------------------------------------------------------
+# window system detection
+PLATFORM_X11=yes
+SUPPORTED=
+
+# option defaults
+OPT_HELP=no
+OPT_VERBOSE=no
+
+CFG_SHARED=yes      # whether we are linking dynamically or statically
+CFG_THREAD=auto     # if [ auto | yes ] CONFIG += thread if libqt-mt* found
+
+# internal options
+CFG_DEBUG=no        # CONFIG += [ debug | release ]
+CFG_PROFILE=no      # if yes, add -pg to compiler flags
+
+XPLATFORM=
+PLATFORM=$QMAKESPEC
+D_FLAGS=
+I_FLAGS=
+L_FLAGS=
+R_FLAGS=
+l_FLAGS=
+
+QMAKE_VARS=         # configuration hold-all to output to cache file
+QMAKE_CONFIG=       # CONFIG flags to pass to qmake -project
+
+
+
+#-------------------------------------------------------------------
+# parse command line arguments
+#-------------------------------------------------------------------
+while [ "$#" -gt 0 ]; do
+
+  CURRENT_OPT="$1"
+  optarg=`expr "x$CURRENT_OPT" : 'x[^=]*=\(.*\)'`
+
+  case $1 in
+    # options without an argument
+    -h | --help | -help)
+      OPT_HELP=yes ;;
+    -q | --quiet | -quiet)
+      OPT_VERBOSE=no ;;
+    -v | --verbose | -verbose)
+      OPT_VERBOSE=yes ;;
+    # installation paths
+    --prefix=* | -prefix=*)
+      VK_INSTALL_PREFIX=$optarg ;;
+    --docdir=* | -docdir=*)
+      VK_INSTALL_DOCS=$optarg ;;
+    --bindir=* | -bindir=*)
+      VK_INSTALL_BIN=$optarg ;;
+    # program paths
+    --vg-exec=* | -vg-exec=*)
+      VG_EXEC_PATH=$optarg ;;
+    --vg-supp=* | -vg-supp=*)
+      VG_SUPP_DIR=$optarg ;;
+    --qtdir=* | -qtdir=*)
+      QT_DIR=$optarg ;;
+    --mysql-lib=* | -mysql-lib=*)
+      MYSQL_LIB=$optarg ;;
+    --mysql-inc=* | -mysql-inc=*)
+      MYSQL_INC=$optarg ;;
+    # system options
+    --platform=* | -platform=*)
+      PLATFORM=$optarg
+      case $PLATFORM in
+        # keep compatibility with old platform names
+        aix-64)        PLATFORM=aix-xlc-64     ;;
+        hpux-o64)      PLATFORM=hpux-acc-o64   ;;
+        hpux-n64)      PLATFORM=hpux-acc-64    ;;
+        hpux-acc-n64)  PLATFORM=hpux-acc-64    ;;
+        irix-o32)      PLATFORM=irix-cc-o32    ;;
+        irix-n32)      PLATFORM=irix-cc        ;;
+        irix-64)       PLATFORM=irix-cc-64     ;;
+        irix-cc-n64)   PLATFORM=irix-cc-64     ;;
+        reliant-64)    PLATFORM=reliant-cds-64 ;;
+        solaris-64)    PLATFORM=solaris-cc-64  ;;
+        solaris-64)    PLATFORM=solaris-cc-64  ;;
+        openunix-cc)   PLATFORM=unixware-cc    ;;
+        openunix-g++)  PLATFORM=unixware-g++   ;;
+        unixware7-cc)  PLATFORM=unixware-cc    ;;
+        unixware7-g++) PLATFORM=unixware-g++   ;;
+      esac ;;
+    # compile options (might have multiple of these)
+    --thread=* | -thread=*)
+      if [ "$optarg" = "yes" ] || [ "$optarg" = "no" ]; then
+        CFG_THREAD=$optarg
+      else
+        OPT_HELP=yes
+      fi ;;
+    --release | -release)
+      CFG_DEBUG=no ;;
+    --shared | -shared)
+      CFG_SHARED=yes ;;
+    --static | -static)
+      CFG_SHARED=no ;;
+    -D?* | -D)
+      if [ "$1" = "-D" ] ; then
+        shift ; VAL="$1"
+      else
+        VAL=`echo $1 | sed 's,-D,,'`
+      fi
+      D_FLAGS="$D_FLAGS $VAL" ;;
+    -I?*|-I)
+      if [ "$1" = "-I" ] ; then
+        shift ; VAL="$1"
+      else
+        VAL=`echo $1 | sed 's,-I,,'`
+      fi
+      I_FLAGS="$I_FLAGS $VAL" ;;
+    -L?*|-L)
+      if [ "$1" = "-L" ] ; then
+        shift ; VAL="$1"
+      else
+        VAL=`echo $1 | sed 's,-L,,'`
+      fi
+      L_FLAGS="$L_FLAGS -L${VAL}" ;;
+#    -R?*|-R)
+#      if [ "$1" = "-R" ] ; then
+#        shift ; VAL="$1"
+#      else
+#        VAL=`echo $1 | sed 's,-R,,'`
+#      fi
+#      R_FLAGS="$R_FLAGS \$\${QMAKE_RPATH}${VAL}" ;;
+    -l?*)
+      VAL=`echo $1 | sed 's,-l,,'`
+      l_FLAGS="$l_FLAGS -l${VAL}" ;;
+    # internal options (not documented in help)
+    --debug | -debug)
+      CFG_DEBUG=yes ;;
+    --profile | -profile)
+      CFG_PROFILE=yes
+      QMAKE_VARS="$QMAKE_VARS QMAKE_CFLAGS+=-pg QMAKE_CXXFLAGS+=-pg"
+      QMAKE_VARS="$QMAKE_VARS QMAKE_LFLAGS+=-pg" ;;
+    # anything else
+    *)
+      OPT_HELP=yes
+      echo "${1}: unknown argument"
+      echo "${CURRENT_OPT}: invalid command-line switch"
+      exit 0
+      shift
+      continue
+  esac
+  shift
+done
+
+
+#-------------------------------------------------------------------
+# help: emit a usage message if -h flag given or something failed
+#-------------------------------------------------------------------
+if [ "$OPT_HELP" = "yes" ]; then
+
+cat <<_HPEOF
+
+'$relconf' configures $Vk_Name $VK_VERSION to adapt to many kinds of systems.
+
+Usage: $0 [OPTION]... [VAR=VALUE]...
+
+To assign environment variables (e.g., CC, CFLAGS...), specify them as
+VAR=VALUE.  Defaults for the options are specified in brackets.
+The defaults [*] are usually acceptable. Here is a short explanation 
+of each option:
+
+Configuration:
+   -h, --help ............ Print this help and usage information
+   -q, --quiet ........... Do not print 'checking... ' messages
+ * -v, --verbose ......... Print verbose information about each step of
+                            the configure process
+
+Fine tuning of the installation directories (optional):
+By default, 'make install' will install all the files in 'PREFIX/bin',
+'PREFIX/doc' etc   You can specify an installation prefix other than 
+'PREFIX' using '--prefix', eg. '--prefix=$HOME' 
+   --prefix=dir .......... This will install everything relative to dir
+                              [ default $VK_INSTALL_PREFIX ]
+   --bindir=dir .......... Executables will be installed to dir
+                             [ default PREFIX/bin ]
+   --docdir=DIR .......... Documentation will be installed to dir
+                             [ default PREFIX/doc ]
+
+Program paths:
+   --vg-exec=PATH ........ Path to the Valgrind executable
+   --vg-supp=DIR ......... Valgrind suppression files directory
+   --qtdir=DIR ........... The Qt installation directory
+   --mysql-lib=LIB ....... Path to MySQL library
+                             [ -lmysqlclient ]
+   --mysql-inc=DIR ....... Path to MySQL include directory
+
+Compile options:
+ * --release ............. Compile and link with debugging turned off
+   --debug ............... Compile and link with debugging turned on
+   --profile ............. Compile and linke with profiling turned on
+
+ * --shared .............. Use a shared Qt library [libqt so]
+   --static .............. Use a static Qt library [libqt a]
+
+ * --thread=ARG .......... Do / do not compile threading support
+                             [default=yes if libqt-mt found]
+
+   -Dstring .............. Add an explicit define to the preprocessor
+   -Istring .............. Add an explicit include path
+   -Lstring .............. Add an explicit library path
+   -Rstring .............. Add an explicit dynamic library runtime search path
+   -lstring .............. Add an explicit library
+
+System options:
+   --platform=TARGET ... The operating system and compiler you are building
+                            on [$PLATFORM]
+
+_HPEOF
+  exit 0
+fi
+
+
+
+#-------------------------------------------------------------------
+# where to find which
+#-------------------------------------------------------------------
+WHICH=`which which 2>/dev/null`
+if [ -z "$WHICH" ]; then
+  if which which >/dev/null 2>&1; then
+    WHICH=which
+  else
+    SEARCH_DIRS="/usr/ucb /usr/bin /bin /usr/local/bin"
+    for dir in $SEARCH_DIRS; do
+      if [ -x $dir/which ]; then
+        WHICH=$dir/which
+        break;
+      fi
+    done
+  fi
+fi
+
+if [ ! -z "$WHICH" ]; then
+  w=`which "$1" 2>/dev/null`
+  if [ ! -z "$w" -a -x "$w" ]; then
+    echo "$w"
+  fi
+else
+  IFS=:
+  for w in $PATH; do
+    if [ -x $w/$1 ]; then
+      echo "$w/$1"
+    fi
+  done
+fi
+
+
+
+#-------------------------------------------------------------------
+# find out which awk we want to use
+# prefer gawk, then nawk, then awk
+#-------------------------------------------------------------------
+AWK=
+for e in gawk nawk awk; do
+  if $WHICH $e >/dev/null 2>&1 && ( $e -f /dev/null /dev/null ) >/dev/null 2>&1; then
+    AWK=$e
+    break
+  fi
+done
+if [ -z "$AWK" ]; then
+  echo "You don't seem to have any flavour of 'awk' in your PATH"
+  echo "Cannot proceed."
+  exit 1
+fi
+
+
+#-------------------------------------------------------------------
+# find a make command
+#-------------------------------------------------------------------
+MAKE=
+for mk in gmake make; do
+  if $WHICH $mk >/dev/null 2>&1; then
+    MAKE=`$WHICH $mk`
+    break
+  fi
+done
+if [ -z "$MAKE" ]; then
+  echo "You don't seem to have 'make' or 'gmake' in your PATH."
+  echo "Cannot proceed."
+  exit 1
+fi
+
+
+
+#-------------------------------------------------------------------
+# create a temporary cache file for the tests to write to
+#-------------------------------------------------------------------
+VK_CACHE=$relpath/.vk.cache
+[ -f $VK_CACHE ] && rm -f $VK_CACHE
+cat >>$VK_CACHE<<_VKEOF
+_VKEOF
+
+
+#-------------------------------------------------------------------
+# where is qt ?
+# if not supplied on the cmd-line, see if which can find it
+#-------------------------------------------------------------------
+$cfgtests/qt.test $VK_CACHE $CFG_THREAD $QT_DIR && QT_RESULT="$QT_RESULT qt"
+if [ -z "$QT_RESULT" ] ; then
+  echo "   Cannot continue: Qt is a sine qua non"
+  echo "   Rerun configure with --qtdir=/path/to/qt." >&2
+  rm -f $VK_CACHE
+  exit 1
+fi
+
+# set this immediately, if not sooner
+#QMAKE_VARS="$QMAKE_VARS QTDIR=$QT_DIR"
+
+#-------------------------------------------------------------------
+# where is valgrind ?
+# if not supplied on the cmd-line, see if which can find it
+#-------------------------------------------------------------------
+if [ -z "$VG_EXEC_PATH" ] ; then
+  vg=`$WHICH valgrind | sed "s/*//g"`
+  if [ -x "$vg" ] ; then  
+    VG_EXEC_PATH=$vg
+  else
+    echo "   Cannot find valgrind.  " >&2
+    echo "   You don't seem to have valgrind in your PATH."
+    echo "   Rerun configure with --vg-exec=/path/to/valgrind." >&2
+    exit 1
+  fi
+fi
+$cfgtests/valgrind.test $VK_CACHE $VG_EXEC_PATH $VG_SUPP_DIR && VG_RESULT="$VG_RESULT valgrind"
+if [ -z "$VG_RESULT" ] ; then
+  rm -f $VK_CACHE
+  exit 1
+fi
+
+
+#-------------------------------------------------------------------
+# where is mysql ( -lmysqlclient and mysql.h ) ?
+# if not supplied on the cmd-line, try to find it
+#-------------------------------------------------------------------
+$cfgtests/mysql.test $VK_CACHE $MYSQL_LIB $MYSQL_INC && MYSQL_RESULT="$MYSQL_RESULT mysql"
+if [ -z "$MYSQL_RESULT" ] ; then
+  rm -f $VK_CACHE
+  exit 1
+fi
+
+
+#---------------------------------------------------------------------------
+# rescue the stashed options/flags from the temporary .vk.cache
+#--------------------------------------------------------------------------
+MYSQL_LIB_PATH=""
+if [ ! -f $VK_CACHE ] ; then
+  echo "Cache '$VK_CACHE' not found - Aborting"
+  exit 1
+fi
+if [ -r $VK_CACHE ]; then
+  while read line; do
+    #echo "$line"
+    VAR=`echo $line | sed "s,^\(.*\)=.*,\1,"`
+    VAL=`echo $line | sed "s,^.*=\(.*\),\1,"`
+    case $VAR in 
+      QT_DIR)         QT_DIR=$VAL ;;
+      QT_INC_DIR)     QT_INC_DIR=$VAL ;;
+      QT_LIB_DIR)     QT_LIB_DIR=$VAL ;;
+      QT_MOC)         QT_MOC=$VAL ;;
+      QT_UIC)         QT_UIC=$VAL ;;
+      QT_QMAKE)       QT_QMAKE=$VAL ;;
+      VG_EXEC_PATH)   VG_EXEC_PATH=$VAL ;;  # only used in vk_include_h
+      VG_SUPP_DIR)    VG_SUPP_DIR=$VAL ;;   # ditto
+      MYSQL_LIB)      MYSQL_LIB=$VAL ;;
+      MYSQL_LIB_PATH) MYSQL_LIB_PATH=$VAL ;;
+      MYSQL_INC)      MYSQL_INC=$VAL ;;
+      *) ;;
+    esac
+  done < $VK_CACHE
+fi
+
+# delete the temporary cache
+#[ -f $VK_CACHE ] && rm -f $VK_CACHE
+
+# stash our options in 'QMAKE_VARS' for output to .qmake.cache later
+QMAKE_VARS="$QMAKE_VARS QMAKE_MOC=$QT_MOC"
+#QMAKE_VARS="$QMAKE_VARS \"QMAKE_UIC=$QT_UIC -L \$\$QT_BUILD_TREE/plugins\""
+QMAKE_VARS="$QMAKE_VARS QMAKE_UIC=$QT_UIC"
+QMAKE_VARS="$QMAKE_VARS QMAKE_QMAKE=$QT_QMAKE"
+QMAKE_VARS="$QMAKE_VARS QMAKE_INCDIR_QT=$QT_DIR/include"
+QMAKE_VARS="$QMAKE_VARS QMAKE_LIBDIR_QT=$QT_DIR/lib"
+QMAKE_VARS="$QMAKE_VARS QMAKE_RTLDIR_QT=$QT_DIR/lib"
+if [ -n "$MYSQL_LIB" ] && [ -n "$MYSQL_LIB_PATH" ] ; then
+  QMAKE_VARS="$QMAKE_VARS QMAKE_LIBDIR_FLAGS+=$MYSQL_LIB_PATH"
+  QMAKE_VARS="$QMAKE_VARS LIBS+=$MYSQL_LIB"
+  QMAKE_VARS="$QMAKE_VARS INCLUDEPATH+=$MYSQL_INC"
+fi
+# install stuff
+QMAKE_VARS="$QMAKE_VARS QT_INSTALL_PREFIX=${VK_INSTALL_PREFIX}"
+QMAKE_VARS="$QMAKE_VARS docs.path=${VK_INSTALL_DOCS}"
+#QMAKE_VARS="$QMAKE_VARS \"headers.path=${QT_INSTALL_HEADERS}\""
+#QMAKE_VARS="$QMAKE_VARS \"plugins.path=${QT_INSTALL_PLUGINS}\""
+#QMAKE_VARS="$QMAKE_VARS \"libs.path=${QT_INSTALL_LIBS}\""
+QMAKE_VARS="$QMAKE_VARS bins.path=${VK_INSTALL_BIN}"
+#QMAKE_VARS="$QMAKE_VARS \"data.path=${QT_INSTALL_DATA}\""
+#QMAKE_VARS="$QMAKE_VARS \"translations.path=${QT_INSTALL_TRANSLATIONS}\""
+
+
+
+#-------------------------------------------------------------------
+# create .qmake.cache for saving all configuration options
+#-------------------------------------------------------------------
+CACHEFILE=$relpath/.qmake.cache
+[ -f $CACHEFILE ] && rm -f $CACHEFILE
+cat >>$CACHEFILE<<_VKEOF
+CMDLINE=$relpath/$relconf $OPT_CMDLINE
+QT_SOURCE_TREE=$VK_SOURCE_TREE
+QT_BUILD_TREE=$VK_BUILD_TREE
+QMAKE_ABSOLUTE_SOURCE_ROOT=\$\$QT_SOURCE_TREE
+_VKEOF
+#QMAKE_ABSOLUTE_SOURCE_ROOT=$VK_SOURCE_TREE
+#QMAKE_ABSOLUTE_SOURCE_PATH=\$\$QT_SOURCE_TREE
+
+
+
+#-------------------------------------------------------------------
+# we have all the info we need to generate vk_include.h at this point
+# note: if the #includes are changed in any way, update vk_utils.cpp
+#-------------------------------------------------------------------
+echo "Creating ./src/vk_include.h..."
+vk_include_h=$outpath/src/vk_include.h
+[ -f $vk_include_h ] && rm -f $vk_include_h
+
+# get the date
+today=`date`
+# set DEBUG = CFG_DEBUG
+debug=1
+if [ "$CFG_DEBUG" = "yes" ] ; then
+  debug=0
+fi
+
+cat > $vk_include_h <<_INC_EOF
+/* ---------------------------------------------------------------------- 
+ * Main include file                                         vk_include.h
+ * Automatically generated by configure on $today
+ * Do not edit this file - all changes will be lost
+ * ----------------------------------------------------------------------
+ */
+
+#ifndef __VK_INCLUDE_H
+#define __VK_INCLUDE_H
+
+/* Install paths ------------------------------------------------------- */
+#define PREFIX       "$VK_INSTALL_PREFIX"
+#define DOCS_PATH    "/doc"
+#define ICONS_PATH   "/icons"
+#define DBASE_DIR    "/dbase"
+#define LOGS_DIR     "/logs"
+#define SUPPS_DIR    "/suppressions"
+
+/* Name ---------------------------------------------------------------- */
+#define vk_name      "$vk_name"
+#define Vk_Name      "$Vk_Name"
+
+/* Version, as 'MAJOR-NUMBER.MINOR-NUMBER[.PATCHLEVEL]'.
+   A version in the form 'YYYY-MM-DD' is a release-of-the-day, 
+   i.e. a snapshot of the current development tree --------------------- */
+#define VK_VERSION    "$VK_VERSION"
+#define VK_COPYRIGHT  "$VK_COPYRIGHT"
+#define VK_AUTHOR     "$VK_AUTHOR"
+#define VK_EMAIL      "$VK_EMAIL"
+/* so we do not have to update hard-wired-in dates for valgrind */
+#define VG_COPYRIGHT  "$VG_COPYRIGHT"
+
+/* Other paths we need to know about ----------------------------------- */
+#define VG_EXEC_PATH  "$VG_EXEC_PATH"
+#define VG_SUPP_DIR   "$VG_SUPP_DIR"
+
+/* These functions are implemented in vk_utils.cpp --------------------- */
+const char* installPath();
+const char* vkname();
+const char* vkName();
+const char* vkVersion();
+const char* vkCopyright();
+const char* vkAuthor();
+const char* vkEmail();
+const char* vgCopyright();
+const char* vgExec();
+const char* vgSuppDir();
+
+#define DEBUG_ON $debug
+#define oink(n) printf( "Oink %d\n", n )
+
+/* Globally available object ------------------------------------------- */
+class VkConfig;
+extern VkConfig* vkConfig;
+
+#endif
+_INC_EOF
+
+
+#-------------------------------------------------------------------
+# auto-detect all that hasn't been specified in the arguments
+#-------------------------------------------------------------------
+if [ -z "$PLATFORM" ]; then
+  case "$UNAME_SYSTEM:$UNAME_RELEASE" in
+    Darwin:*)   PLATFORM=darwin-g++   ;;
+    AIX:*)      PLATFORM=aix-xlc      ;;
+    QNX:*)      PLATFORM=qnx-g++      ;;
+    GNU:*)      PLATFORM=hurd-g++     ;;
+    dgux:*)     PLATFORM=dgux-g++     ;;
+    ULTRIX:*)   PLATFORM=ultrix-g++   ;;
+    FreeBSD:*)  PLATFORM=freebsd-g++  ;;
+    OpenBSD:*)  PLATFORM=openbsd-g++  ;;
+    NetBSD:*)   PLATFORM=netbsd-g++   ;;
+    IRIX*:*)    PLATFORM=irix-cc      ;;
+    HP-UX:*)    PLATFORM=hpux-acc     ;;
+    OSF1:*)     PLATFORM=tru64-cxx    ;;
+    Linux:*)    PLATFORM=linux-g++    ;;
+    SunOS:5*)   PLATFORM=solaris-cc   ;;
+    CYGWIN*:*)  PLATFORM=cygwin-g++   ;;
+    LynxOS*:*)  PLATFORM=lynxos-g++   ;;
+    OpenUNIX:*) PLATFORM=unixware-cc  ;;
+    UnixWare:*) PLATFORM=unixware-cc  ;;
+    SCO_SV:*)   PLATFORM=sco-cc       ;;
+    UNIX_SV:*)  PLATFORM=unixware-g++ ;;
+    BSD/OS:*|BSD/386:*)         PLATFORM=bsdi-g++    ;;
+    ReliantUNIX-*:*|SINIX-*:*)  PLATFORM=reliant-cds ;;
+    *)
+      echo
+      for p in $PLATFORMS; do
+        echo "   $relconf $* -platform $p"
+      done
+      echo >&2
+      echo "   The build script does not currently recognize all" >&2
+      echo "   platforms supported by Qt." >&2
+      echo "   Rerun this script with a --platform option listed" >&2
+      echo "   to set the system/compiler combination you use." >&2
+      echo >&2
+      exit 2
+  esac
+fi
+
+
+PLATFORMS=`find $QT_DIR/mkspecs/ -type f | grep -v qws | sed "s,$QT_DIR/mkspecs/qws/,,"`
+[ -z "$XPLATFORM" ] && XPLATFORM="$PLATFORM"
+if [ -d "$PLATFORM" ]; then
+  QMAKESPEC="$PLATFORM"
+else
+  QMAKESPEC="$QT_DIR/mkspecs/${PLATFORM}"
+fi
+if [ -d "$XPLATFORM" ]; then
+  XQMAKESPEC="$XPLATFORM"
+else
+  XQMAKESPEC="$QT_DIR/mkspecs/${XPLATFORM}"
+fi
+#if [ "$QMAKESPEC" = "$XQMAKESPEC" ]; then
+#  QMAKE_CONFIG="$QMAKE_CONFIG nocrosscompiler"
+#fi
+
+# check specified platforms are supported --------------------------
+if [ '!' -d "$QMAKESPEC" ]; then
+  echo "   The specified system/compiler is not supported:"
+  echo "     $QMAKESPEC"
+  echo "   Please see the Qt PLATFORMS file for a complete list."
+  exit 2
+fi
+
+# now look at the configs and figure out what platform we are config'd for
+[ '!' -z "`grep QMAKE_LIBS_X11 $XQMAKESPEC/qmake.conf | awk '{print $3;}'`" ] && PLATFORM_X11=yes
+# find default thread option for target
+if grep >/dev/null '^QMAKE_LIBS_THREAD' $XQMAKESPEC/qmake.conf; then
+  AUTOTHREAD=yes
+else
+  AUTOTHREAD=never
+fi
+# common qmake.conf file but dependency on OS version
+if [ "$UNAME_SYSTEM" = "HP-UX" ]; then
+  if echo $UNAME_RELEASE | grep -E "^B\.(09|10)" >/dev/null 2>&1; then
+    AUTOTHREAD=never
+  fi
+fi
+
+if [ $AUTOTHREAD = never ]; then
+  if [ "$CFG_THREAD" = "yes" ]; then
+    echo
+    echo "ERROR: Qt is not configured to support threading on this platform"
+    echo "       See the THREAD settings in $XQMAKESPEC/qmake.conf"
+    echo
+    exit 2
+  fi
+  AUTOTHREAD=no
+fi
+[ "$CFG_THREAD" = "auto" ] && CFG_THREAD=$AUTOTHREAD
+
+
+# compose variable list to give qmake ------------------------------
+extra_flags=
+if [ ! -z "$D_FLAGS" ] ; then
+  QMAKE_VARS="$QMAKE_VARS DEFINES+=$D_FLAGS"
+  extra_flags="Defines .............. $D_FLAGS"
+fi
+if [ ! -z "$L_FLAGS" ] ; then
+  QMAKE_VARS="$QMAKE_VARS QMAKE_LIBDIR_FLAGS+=$L_FLAGS"
+  extra_flags="$extra_flags Library paths ........ $L_FLAGS"
+fi
+if [ ! -z "$l_FLAGS" ] ; then 
+  QMAKE_VARS="$QMAKE_VARS LIBS+=$l_FLAGS"
+  extra_flags="$extra_flags Libraries............. $l_FLAGS"
+fi
+if [ '!' -z "$I_FLAGS" ]; then
+  QMAKE_VARS="$QMAKE_VARS QMAKE_CFLAGS+=$I_FLAGS"
+  QMAKE_VARS="$QMAKE_VARS QMAKE_CXXFLAGS+=$I_FLAGS"
+  extra_flags="$extra_flags Include paths ........ $I_FLAGS"
+fi
+
+#if [ '!' -z "$R_FLAGS" ]; then
+#  if grep QMAKE_RPATH $XQMAKESPEC/qmake.conf >/dev/null; then
+#    echo # Using -R/-rpath, so no need to warn
+#  else
+#    echo "ERROR: -R cannot be used on this platform as \$QMAKE_RPATH is"
+#    echo "       undefined."
+#    echo
+#    exit 1
+#  fi
+#  QMAKE_VARS="$QMAKE_VARS QMAKE_LFLAGS+=$R_FLAGS"
+#  extra_flags="$extra_flags Room flags ........... $R_FLAGS"
+#fi
+
+QMAKE_VARS="$QMAKE_VARS QMAKESPEC=$QMAKESPEC"
+
+#QMAKE_VARS="$QMAKE_VARS \"QMAKE_MOC=$QT_MOC\""
+#QMAKE_VARS="$QMAKE_VARS \"QMAKE_UIC=$QT_UIC -L \$\$QT_BUILD_TREE/plugins\""
+#QMAKE_VARS="$QMAKE_VARS \"QMAKE_QMAKE=$QT_QMAKE\""
+#QMAKE_VARS="$QMAKE_VARS \"QMAKE_INCDIR_QT=$QT_DIR/include\""
+#QMAKE_VARS="$QMAKE_VARS \"QMAKE_LIBDIR_QT=$QT_DIR/lib\""
+#QMAKE_VARS="$QMAKE_VARS \"QMAKE_RTLDIR_QT=$QT_DIR/lib\""
+#QMAKE_VARS="$QMAKE_VARS \"QT_INSTALL_PREFIX=${QT_DIR}\""
+
+# save to .qmake.cache
+#echo "QMAKE_VARS=$QMAKE_VARS" >> $CACHEFILE
+for var in $QMAKE_VARS; do
+  echo $var >> $CACHEFILE
+done
+
+
+#---------------------------------------------------------------------------
+# give feedback on configuration
+#---------------------------------------------------------------------------
+echo
+echo "Configuration:"
+echo "Installing to ........ $VK_INSTALL_PREFIX/"
+if [ "$XPLATFORM" = "$PLATFORM" ]; then
+echo "Build type ........... $PLATFORM"
+else
+echo "Building on .......... $PLATFORM"
+echo "Building for ......... $XPLATFORM"
+fi
+echo "Qt path .............. $QT_DIR/"
+echo "Valgrind ............. $VG_EXEC_PATH"
+output="yes"
+[ -z "$MYSQL_LIB" ] && output="no"
+echo "MySQL support ........ $output"
+echo "Thread support ....... $CFG_THREAD"
+output="dynamically (shared )"
+[ "$CFG_SHARED" = "no" ] && output="statically"
+echo "Linking: ............. $output"
+output="release"
+[ "$CFG_DEBUG" = "yes" ] && output="debug"
+echo "Compile type ......... $output"
+if [ "$CFG_PROFILE" = "yes" ] ; then
+echo "Profiling enabled..... $CFG_PROFILE"
+fi
+output="warn_off"
+[ "$CFG_DEBUG" = "yes" ] && output="warn_on"
+echo "Compiler warnings .... $output"
+if [ -n "$extra_flags" ]; then
+  for flag in $extra_flags; do
+    echo $flag
+  done
+fi
+
+
+#---------------------------------------------------------------------------
+# Create the project file, including all headers/sources
+#---------------------------------------------------------------------------
+echo
+echo "Creating project file $vk_name.pro..."
+# name of this project file
+VK_PROJECT=$relpath/$vk_name.pro
+if [ -f $VK_PROJECT ]; then
+  rm -f $VK_PROJECT
+fi
+
+# compose the list of stuff to give qmake -project
+if [ "$CFG_DEBUG" = "yes" ]; then
+  QMAKE_CONFIG="$QMAKE_CONFIG debug"
+  QMAKE_CONFIG="$QMAKE_CONFIG warn_on"
+elif [ "$CFG_DEBUG" = "no" ]; then
+  QMAKE_CONFIG="$QMAKE_CONFIG release"
+  QMAKE_CONFIG="$QMAKE_CONFIG warn_off"
+fi
+if [ "$CFG_SHARED" = "yes" ]; then
+  QMAKE_CONFIG="$QMAKE_CONFIG dll"
+elif [ "$CFG_SHARED" = "no" ]; then
+  QMAKE_CONFIG="$QMAKE_CONFIG staticlib"
+fi
+if [ "$CFG_THREAD" = "yes" ]; then
+  QMAKE_CONFIG="$QMAKE_CONFIG thread"
+fi
+
+# save to cache file
+echo "CONFIG += $QMAKE_CONFIG" >> $CACHEFILE
+
+
+# compose the configuration for the project file
+QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"TEMPLATE = app\"";
+QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"CONFIG   += qt x11 $QMAKE_CONFIG\""
+QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"TARGET      = $vk_name\""
+QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"DESTDIR     = ./bin\""
+QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"MOC_DIR     = ./.moc\""
+QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"OBJECTS_DIR = ./.obj\""
+
+# build a project file based on the configuration
+EXEC="$QT_QMAKE -project -t app -nopwd ./src $QMAKE_PROJ_OPTS -o $VK_PROJECT"
+
+/bin/sh -c "$EXEC"
+
+
+
+#---------------------------------------------------------------------------
+# build a Makefile based on the configuration
+#---------------------------------------------------------------------------
+EXEC=""
+
+QMAKE_PROJECT=$relpath/$vk_name.pro
+
+echo "Creating Makefile..."
+
+SPEC=$XQMAKESPEC 
+OUTDIR=$outpath
+QMAKE_SPEC_ARGS="-spec $SPEC"
+#EXEC="$QT_QMAKE -makefile $QMAKE_SPEC_ARGS -o $OUTDIR $QMAKE_PROJECT"
+EXEC="$QT_QMAKE -makefile -cache $CACHEFILE $QMAKE_SPEC_ARGS -o $OUTDIR $QMAKE_PROJECT"
+#echo "EXEC = $EXEC"
+
+[ -f "${OUTDIR}/Makefile" ] && chmod +rw ${OUTDIR}/Makefile
+/bin/sh -c "$EXEC"
+
+# aggravatingly, qt only prints the full /path/to/qt for its own Makefiles, 
+# so have to do a search-and-replace to get the full paths in (grrr)
+##mkfile0=${OUTDIR}/Makefile
+##mkfile1=${OUTDIR}/Makefile.1
+##mkfile2=${OUTDIR}/Makefile.2
+
+# replace '$(QTDIR)' with contents of $QT_DIR
+##cat $mkfile0 | sed "s,\$(QTDIR),$QT_DIR,g" >>$mkfile1
+
+# replace 'QMAKE = qmake' with 'QMAKE = /path/to/qmake'
+##cat $mkfile1 | sed "s,= qmake,= $QT_QMAKE," >>$mkfile2
+
+# delete all temporary files
+##mv -f $mkfile2 $mkfile0
+##rm -f $mkfile1
+rm -f config.log 
+
+
+
+#--------------------------------------------------------------------------
+# we are done
+#--------------------------------------------------------------------------
+echo
+echo Valkyrie is now configured for building - just run $MAKE.
+echo To reconfigure, run $MAKE distclean and ./configure.
+echo
+echo Your command line and configuration options have been saved 
+echo in $CACHEFILE.
+echo 

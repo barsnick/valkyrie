@@ -1,0 +1,411 @@
+#!/bin/sh
+#
+# param $1: output file to write to
+# param $2: if 'auto' or 'yes', look for libqt-mt, else libqt
+# param $3: value of QT_DIR, possibly set by user on cmd-line
+
+CACHE_FILE=$1
+THREADING=$2
+QT_DIR=$3
+
+# minimum qt version we need
+QT_MIN_VERSION="3.2.0"
+
+# list of paths to search for qt 
+QT_DIR_SEARCH="/usr/lib/qt /usr/lib/qt3 /usr/local/qt /usr/local/qt3 /usr/share/qt /usr/share/qt3"
+
+# list of paths to search for includes based on $QT_DIR
+INC_DIR_SEARCH="include include/qt include/qt3 include/X11/qt"
+
+# fall-back list of paths to search for qt includes 
+INC_DIR_SEARCH2="/usr/include /usr/include/qt /usr/include/qt3 /usr/include/X11/qt"
+
+# list of paths to search for libs based on QT_DIR or QT_DIR_SEARCH result
+LIB_DIR_SEARCH="/usr/lib/qt /usr/lib/qt3 /usr/lib lib"
+
+# include all the bits and pieces we need for output
+testdir=`dirname $0`
+source "$testdir/logging.sh"
+
+# ------------------------------------------------------------------
+# even if set on the cmd-line, make sure we can find it
+found=no
+result=no
+if [ ! -z "$QT_DIR" ] ; then
+  if [ -d "$QT_DIR" ] ; then
+    # strip any trailing slashes
+    QT_DIR=`echo $QT_DIR | sed -e "s,^\(.*\)\/$,\1,"`
+  fi
+  # quick 'n dirty check
+  if [ -f $QT_DIR/include/qglobal.h ] ; then
+    result="$QT_DIR"
+    found=yes
+  fi
+fi
+
+
+# guess $QT_DIR ----------------------------------------------------
+echo "$sh_me:$LINENO: checking for qt path" >&5
+echo $ECHO_N "checking for qt path... $ECHO_C" >&6
+if [ "$found" = "no" ] ; then
+  for dir in $QT_DIR_SEARCH; do
+    if [ -d "$dir" ] ; then
+      QT_DIR="$dir"
+      result="$QT_DIR"
+      found=yes
+      break
+    fi
+  done
+fi
+
+echo "${ECHO_T}$result" >&6
+
+if [ "$found" = "no" ] ; then
+  exit 1
+fi
+
+
+# guess $QT_INC_DIR from $QT_DIR -----------------------------------
+result=no
+found=no
+QT_INC_DIR=
+
+echo "$sh_me:$LINENO: checking for qt include path" >&5
+echo $ECHO_N "checking for qt include path... $ECHO_C" >&6
+for dir in $INC_DIR_SEARCH; do
+  qdir="$QT_DIR/$dir"
+  if [ -d "$qdir" ] ; then
+    if [ -f $qdir/qglobal.h ] ; then
+      QT_INC_DIR="$qdir"
+      result="$QT_INC_DIR"
+      found=yes
+      break
+    fi
+  fi
+done
+# try to guess $QT_INC_DIR independently
+if [ "$found" = "no" ] ; then
+  for dir in $INC_DIR_SEARCH2; do
+    if [ -d "$dir" ] ; then
+      if [ -f $dir/qglobal.h ] ; then
+        QT_INC_DIR="$dir"
+        result="$QT_INC_DIR"
+        found=yes
+        break
+      fi
+    fi
+  done
+fi
+
+echo "${ECHO_T}$result" >&6
+
+if [ "$found" = "no" ] ; then
+  exit 1
+fi
+
+
+# guess $QT_LIB_DIR from $QT_DIR -----------------------------------
+result=no
+found=no
+QT_LIB_DIR=
+
+# user might _want_ thread support, but can they have it ...
+if [ "$THREADING" = "yes" ] ; then
+  thread_lib=`ls $QT_DIR/lib/libqt-mt.* 2>/dev/null`
+  if [ -z "$thread_lib" ] ; then
+    echo "   Error: cannot find qt thread libraries ( libqt-mt.* )" >&2
+    echo "   Rerun configure with --thread=no "
+    exit 1
+  fi
+fi
+
+echo "$sh_me:$LINENO: checking for qt library path" >&5
+echo $ECHO_N "checking for qt library path... $ECHO_C" >&6
+# first try just tacking 'lib' onto $QT_DIR
+found_lib=`ls $QT_DIR/lib/libqt* 2>/dev/null`
+if [ ! -z "$found_lib" ] ; then
+  QT_LIB_DIR="$QT_DIR/lib"
+  result="$QT_LIB_DIR"
+  found=yes
+else
+  for dir in $LIB_DIR_SEARCH; do
+    found_lib=`ls $QT_DIR/lib/libqt* 2>/dev/null`
+    if [ ! -z "$found_lib" ] ; then
+      QT_LIB_DIR="$dir"
+      result="$QT_LIB_DIR"
+      found=yes
+      break
+    fi
+  done
+fi
+
+echo "${ECHO_T}$result" >&6
+
+if [ "$found" = "no" ] ; then
+  exit 1
+fi
+
+
+# check for MOC ----------------------------------------------------
+result=no
+found=no
+QT_MOC=
+
+echo "$sh_me:$LINENO: checking for moc" >&5
+echo $ECHO_N "checking for moc... $ECHO_C" >&6
+if [ -x "$QT_DIR/bin/moc" ] ; then
+  QT_MOC="$QT_DIR/bin/moc"
+  result="$QT_MOC"
+  found=yes
+else
+  echo "${ECHO_T}no" >&6
+  echo $ECHO_N "checking for moc in PATH... $ECHO_C" >&6
+  # extract the first word of "moc", so it can be a program name with args.
+  set dummy moc; ac_word=$2
+  echo "$sh_me:$LINENO: checking for $ac_word" >&5
+  save_IFS=$IFS; IFS=:  # path separator
+  for as_dir in $PATH ; do
+    IFS=$save_IFS
+    test -z "$as_dir" && as_dir=.
+    if [ -f "$as_dir/$ac_word" ] ; then
+      QT_MOC="$as_dir/moc"
+      result="$QT_MOC"
+      found=yes
+      echo "$sh_me:$LINENO: found $as_dir/$ac_word" >&5
+      break
+    fi
+  done
+fi
+
+echo "${ECHO_T}$result" >&6
+
+if [ "$found" = "no" ] ; then
+  echo "   Error: no acceptable moc( meta object compiler ) found" >&2
+  exit 1
+fi
+
+
+# check for UIC ----------------------------------------------------
+result=no
+found=no
+QT_UIC=
+
+echo "$sh_me:$LINENO: checking for uic" >&5
+echo $ECHO_N "checking for uic... $ECHO_C" >&6
+if [ -x "$QT_DIR/bin/uic" ] ; then
+  QT_UIC="$QT_DIR/bin/uic"
+  result="$QT_UIC"
+  found=yes
+else
+  echo "${ECHO_T}no" >&6
+  echo $ECHO_N "checking for uic in PATH... $ECHO_C" >&6
+  # Extract the first word of "uic", so it can be a program name with args.
+  set dummy uic; ac_word=$2
+  echo "$sh_me:$LINENO: checking for $ac_word" >&5
+  save_IFS=$IFS; IFS=:  # path separator
+  for as_dir in $PATH ; do
+    IFS=$save_IFS
+    test -z "$as_dir" && as_dir=.
+    if [ -f "$as_dir/$ac_word" ] ; then
+      QT_UIC="$as_dir/uic"
+      result="$QT_UIC"
+      found=yes
+      echo "$sh_me:$LINENO: found $as_dir/$ac_word" >&5
+      break
+    fi
+  done
+fi
+
+echo "${ECHO_T}$result" >&6
+
+if [ "$found" = "no" ] ; then
+  echo "   Error: no acceptable uic( user interface compiler ) found" >&2
+  exit 1
+fi
+
+
+# check for QMAKE --------------------------------------------------
+result=no
+found=no
+QT_QMAKE=
+
+echo "$sh_me:$LINENO: checking for qmake" >&5
+echo $ECHO_N "checking for qmake... $ECHO_C" >&6
+if [ -x "$QT_DIR/bin/qmake" ] ; then
+  QT_QMAKE="$QT_DIR/bin/qmake"
+  result="$QT_QMAKE"
+  found=yes
+else
+  echo "${ECHO_T}no" >&6
+  echo $ECHO_N "checking for qmake in PATH... $ECHO_C" >&6
+  # Extract the first word of "qmake", so it can be a program name with args.
+  set dummy qmake; ac_word=$2
+  echo "$sh_me:$LINENO: checking for $ac_word" >&5
+  save_IFS=$IFS; IFS=:  # path separator
+  for as_dir in $PATH ; do
+    IFS=$save_IFS
+    test -z "$as_dir" && as_dir=.
+    if [ -f "$as_dir/$ac_word" ] ; then
+      QT_QMAKE="$as_dir/qmake"
+      result="$QT_QMAKE"
+      found=yes
+      echo "$sh_me:$LINENO: found $as_dir/$ac_word" >&6
+      break
+    fi
+  done
+fi
+
+echo "${ECHO_T}$result" >&6
+
+if [ "$found" = "no" ] ; then
+  echo "   Error: no acceptable qmake( project/makefile generator ) found" >&2
+  exit 1
+fi
+
+
+# process for compiler & linker flags ------------------------------
+echo "$sh_me:$LINENO: checking thread settings" >&5
+echo $ECHO_N "checking thread support... $ECHO_C" >&6
+
+CXXFLAGS="-I${QT_INC_DIR}"
+LDFLAGS="-L${QT_LIB_DIR}"
+if [ "$THREADING" = "no" ] ; then
+  result="-lqt"
+  found=disabled
+  LDFLAGS="$LDFLAGS -lqt"
+else
+  result="-lqt-mt"
+  found=enabled
+  LDFLAGS="$LDFLAGS -lqt-mt"
+  CXXFLAGS="$CXXFLAGS -D_REENTRANT -DQT_THREAD_SUPPORT"
+fi
+echo "${ECHO_T}$found" >&6
+echo "$sh_me: thread settings $found" >&5
+#-------------------------------------------------------------------
+CXX=g++
+ac_compile='$CXX -c $CXXFLAGS conftest.cpp >&5'
+ac_link='$CXX -o conftest $CXXFLAGS $LDFLAGS conftest.cpp >&5'
+#-------------------------------------------------------------------
+echo "$sh_me:$LINENO: checking for main in $result" >&5
+echo $ECHO_N "checking for main in $result... $ECHO_C" >&6
+result=no
+
+cat >> conftest.cpp <<_VKEOF
+#include <stdlib.h>
+int main ()
+{
+  ;
+  return 0;
+}
+_VKEOF
+if { (eval echo "$sh_me:$LINENO: $ac_link") >&5
+     (eval $ac_link) 2>conftest.er1
+     ac_status=$?
+     grep -v '^ *+' conftest.er1 >conftest.err
+     rm -f conftest.er1
+     cat conftest.err >&5
+     echo "$sh_me:$LINENO: \$? = $ac_status" >&5
+     (exit $ac_status); } &&
+   { ac_try='test -z "$ac_cxx_werror_flag"  || test ! -s conftest.err'
+     { (eval echo "$sh_me:$LINENO: $ac_try") >&5
+       (eval $ac_try) 2>&5
+       ac_status=$?
+       echo "$sh_me:$LINENO: \$? = $ac_status" >&5
+       (exit $ac_status); }; } &&
+   { ac_try='test -s conftest'
+     { (eval echo "$sh_me:$LINENO: $ac_try") >&5
+       (eval $ac_try) 2>&5
+       ac_status=$?
+       echo "$sh_me:$LINENO: \$? = $ac_status" >&5
+       (exit $ac_status); }; }; then
+   result=yes
+else
+  echo "$sh_me: failed program was:" >&5
+  sed 's/^/| /' conftest.cpp >&5
+  result=no
+fi
+rm -f conftest.err conftest.o conftest.cpp conftest 
+
+echo "$sh_me:$LINENO: result: $result" >&5
+echo "${ECHO_T}$result" >&6
+
+
+# check Qt version -------------------------------------------------
+echo "$sh_me:$LINENO: checking Qt version >= $QT_MIN_VERSION" >&5
+echo $ECHO_N "checking Qt version >= $QT_MIN_VERSION... $ECHO_C" >&6
+  cat >> conftest.cpp <<_VKEOF
+#include <stdlib.h>
+#include <qglobal.h>
+#include <qstring.h>
+
+/* Convert version strings to have a numeric value of the form:
+   0x mm ii bb (m = major, i = minor, b = bugfix). 
+   For example, Valgrind 3.0.5 --> 0x 030005 */
+int str2hex( QString ver_str )
+{
+  int dot1 = ver_str.find( '.', 0 );
+  int dot2 = ver_str.find( '.', dot1+1 );
+  int dot3 = ver_str.find( '.', dot2+1 );
+
+  int major = ver_str.left( dot1 ).toInt();
+  int minor = ver_str.mid( dot1+1, dot2 - (dot1+1) ).toInt();
+  int plevel;
+  if ( dot3 == -1 )
+    plevel = ver_str.right( ver_str.length() - (dot2+1) ).toInt();
+  else
+    plevel = ver_str.mid( dot2+1, dot3 - (dot2+1) ).toInt();
+
+  int hex = (major << 16) + (minor << 8) + plevel;
+
+  return hex;
+}
+
+int main ()
+{
+  /* QT_VERSION_STR is in the form 'X.X.X' irrespective of age */
+  int found = str2hex( QT_VERSION_STR );
+  int reqd  = str2hex( "$QT_MIN_VERSION" );
+
+  if ( found >=  reqd ) {
+    exit(0);
+  } else {
+    exit(2);
+  }
+}
+_VKEOF
+if { (eval echo "$sh_me:$LINENO: $ac_link") >&5
+     (eval $ac_link) 2>&5
+     ac_status=$?
+     echo "$sh_me:$LINENO: \$? = $ac_status" >&5
+     (exit $ac_status); }  && { ac_try='./conftest'
+     { (eval echo "$sh_me:$LINENO: $ac_try") >&5
+       (eval $ac_try) 2>&5
+       ac_status=$?
+       echo "$sh_me:$LINENO: \$? = $ac_status" >&5
+       (exit $ac_status); }; }; then
+   found=yes
+else
+  echo "$sh_me: program exited with status $ac_status" >&5
+  echo "$sh_me: failed program was:" >&5
+  sed 's/^/| /' conftest.cpp >&5
+  ( exit $ac_status )
+  found=no
+fi
+rm -f conftest.err conftest.o conftest conftest.cpp
+
+echo "$sh_me:$LINENO: result: $found" >&5
+echo "${ECHO_T}$found" >&6
+if test "$found" = "no"; then
+ echo "   Qt version >= $QT_MIN_VERSION is required" >&2
+  exit 1
+fi
+
+# if we got this far, we succeeded
+echo "QT_DIR=$QT_DIR" >> $CACHE_FILE
+echo "QT_INC_DIR=$QT_INC_DIR" >> $CACHE_FILE
+echo "QT_LIB_DIR=$QT_LIB_DIR" >> $CACHE_FILE
+echo "QT_MOC=$QT_MOC" >> $CACHE_FILE
+echo "QT_UIC=$QT_UIC" >> $CACHE_FILE
+echo "QT_QMAKE=$QT_QMAKE" >> $CACHE_FILE
+
+exit 0

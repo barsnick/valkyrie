@@ -1,0 +1,131 @@
+#!/bin/sh
+#
+# param $1: cache file to write to
+# param $2: value of VG_EXEC_PATH, eg. /usr/bin/valgrind
+#           note: this is guaranteed to never be empty
+# param $3: value of VG_SUPP_DIR, possibly set by user on cmd-line
+#
+
+CACHE_FILE=$1
+VG_EXEC_PATH=$2
+VG_SUPP_DIR=$3
+
+# minimum valgrind version we need
+#VG_VERSION=3.0.0
+#VG_VERSION_NUM=3
+VG_VERSION=2.0.0
+VG_VERSION_NUM=2
+
+# list of paths to search for valgrind executable
+EXEC_DIR_SEARCH="/usr/bin /usr/local/bin /opt/valgrind/bin"
+
+# list of paths to search for suppression files
+SUPP_DIR_SEARCH="/usr/lib/valgrind /usr/local/lib/valgrind /opt/valgrind/"
+
+
+# include all the bits and pieces we need for output
+testdir=`dirname $0`
+source "$testdir/logging.sh"
+
+# ------------------------------------------------------------------
+found=no
+result=no
+# check if user supplied a path but no executable
+if [ -d "$VG_EXEC_PATH" ] ; then
+  # strip any trailing slashes
+  dir=`echo $VG_EXEC_PATH | sed -e "s,^\(.*\)\/$,\1,"`
+  VG_EXEC_PATH="$dir/valgrind"
+fi
+
+# quick 'n dirty check
+if [ -x "$VG_EXEC_PATH" ] ; then
+  result="$VG_EXEC_PATH"
+  found=yes
+fi
+
+# guess $VG_EXEC_PATH ---------------------------------------------
+echo "$sh_me:$LINENO: checking for valgrind" >&5
+echo $ECHO_N "checking for valgrind... $ECHO_C" >&6
+
+if [ "$found" = "no" ] ; then
+  for dir in $EXEC_DIR_SEARCH; do
+    if [ -x "$exe/valgrind" ] ; then
+      VG_EXEC_PATH="$exe/valgrind"
+      result="$VG_EXEC_PATH"
+      found=yes
+      break
+    fi
+  done
+fi
+
+echo "${ECHO_T}$result" >&6
+
+if [ "$found" = "no" ] ; then
+  echo "   Cannot find valgrind.  " >&2
+  echo "   Rerun configure with --vg-exec=/path/to/valgrind." >&2
+  exit 1
+fi
+
+
+# check valgrind version -------------------------------------------
+result=no
+found=no
+
+echo "$sh_me:$LINENO: checking valgrind version >= $VG_VERSION" >&5
+echo $ECHO_N "checking valgrind version >= $VG_VERSION... $ECHO_C" >&6
+
+ver=`$VG_EXEC_PATH --version | sed "s,^valgrind-\([0-9]*\)\..*,\1,"`
+if [ "$ver" -ge "$VG_VERSION_NUM" ] ; then
+  result="yes"
+  found=yes
+fi
+echo "${ECHO_T}$result" >&6
+
+if [ "$found" = "no" ] ; then
+  echo "   Valgrind version >= $VG_VERSION is required "
+  echo "   Rerun this script with --vg-exec=/path/to/valgrind." >&2
+  exit 1
+fi
+
+
+
+# try and find the suppressions path -------------------------------
+echo "$sh_me:$LINENO: checking valgrind's suppressions path" >&5
+echo $ECHO_N "checking valgrind's suppressions path... $ECHO_C" >&6
+
+# even if set on the cmd-line, make sure we can find it
+found=no
+result=no
+if [ ! -z "$VG_SUPP_DIR" ] ; then
+  # strip any trailing slashes
+  VG_SUPP_DIR=`echo $VG_SUPP_DIR | sed -e "s,^\(.*\)\/$,\1,"`
+  # quick 'n dirty check
+  if [ -f "$VG_SUPP_DIR/default.supp" ; then 
+    result="$VG_SUPP_DIR"
+    found=yes
+  fi
+fi
+
+if [ "$found" = "no" ] ; then
+  for dir in $SUPP_DIR_SEARCH; do
+    if [ -f "$dir/default.supp" ] ; then 
+      VG_SUPP_DIR="$dir"
+      result="$VG_SUPP_DIR"
+      found=yes
+      break;
+    fi
+  done
+fi
+
+echo "${ECHO_T}$result" >&6
+
+if [ "$found" = "no" ] ; then
+  echo "   Cannot find valgrind's suppressions path.  " >&2
+  echo "   Rerun configure with --vg-supp=/path/to/suppdir" >&2
+  exit 1
+fi
+
+echo "VG_EXEC_PATH=$VG_EXEC_PATH" >> $CACHE_FILE
+echo "VG_SUPP_DIR=$VG_SUPP_DIR" >> $CACHE_FILE
+
+exit 0
