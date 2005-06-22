@@ -78,7 +78,8 @@ OptionsWindow::~OptionsWindow()
 OptionsWindow::OptionsWindow( QWidget* parent ) 
   : QMainWindow( parent, "options_win" )
 {
-  setCaption( Vk_Name " Options" );
+	capt.sprintf("%s Options: ", vkName() );
+  setCaption( capt );
   statusBar()->setSizeGripEnabled( false );
 
   optPages.setAutoDelete( true );
@@ -162,13 +163,14 @@ void OptionsWindow::categoryClicked( QListBoxItem *item )
 {
   if ( item ) {
     CategItem* cit = (CategItem*)item;
-    setCaption( Vk_Name " Options: " + item->text() );
+    //capt.sprintf("%s Options: %s", vkName(), item->text().latin1() );
+    setCaption( capt + item->text() );
 
     /* first time this item has been selected */
     if ( !cit->page() ) {
       OptionsPage* page = mkOptionsPage( cit->catId() );
       if ( !page ) {
-        VK_DEBUG("cit->text = %s", cit->text().ascii()  );
+        VK_DEBUG("cit->text = %s", cit->text().ascii() );
 				return;
 			} else {
         cit->setWidget( page );
@@ -176,8 +178,9 @@ void OptionsWindow::categoryClicked( QListBoxItem *item )
       } 
     }
 
-    wStack->raiseWidget( cit->page() );    
+    wStack->raiseWidget( cit->page() );
   }
+
 }
 
 

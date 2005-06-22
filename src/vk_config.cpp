@@ -52,15 +52,15 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   mDirty    = false;
 	newConfigFile = false;   /* set to true in mkConfigFile() */
 
-  mPackagePath = EXEC_PREFIX;
+  mPackagePath = installPath();
   vkdocPath    = mPackagePath + DOCS_PATH;
 	// FIXME: this should be read from valkyrie's opts
 	vgdocPath    = vkdocPath + "manual/";
   imgPath      = mPackagePath + ICONS_PATH;
 
   rcPath.sprintf( "%s/.%s-%s", 
-                  QDir::homeDirPath().ascii(), vk_name, VK_VERSION );
-  rcFileName.sprintf( "%s/%src", rcPath.ascii(), vk_name );
+                  QDir::homeDirPath().ascii(), vkname(), vkVersion() );
+  rcFileName.sprintf( "%s/%src", rcPath.ascii(), vkname() );
 
   dbasePath = rcPath + DBASE_DIR;
   logsPath  = rcPath + LOGS_DIR;
@@ -70,6 +70,9 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
     *ok = false;
     return;
   }
+  vkdocPath += "/";
+  imgPath   += "/";
+  
   rcPath    += "/";
   dbasePath += "/";
   logsPath  += "/";
@@ -108,7 +111,7 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
             "The configuration file '%s' does not exist, "
             "and %s cannot run without this file.<br>"
             "Creating it now ... ... ", 
-            rcFileName.latin1(), Vk_Name );
+            rcFileName.latin1(), vkName() );
     mkConfigFile();
     num_tries++;
     goto retry;      /* try again */
@@ -133,9 +136,9 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   //RM:if ( !checkPaths() ) {
   //  *ok = false;
   //}
-	if ( newConfigFile ) {
-		*ok = checkPaths();
-	}
+	//if ( newConfigFile ) {
+	//	*ok = checkPaths();
+	//}
 
 }
 
@@ -411,7 +414,7 @@ VkConfig::RetVal VkConfig::parseFile()
     vkFatal( 0, "Parse Config File" 
             "Failed to open the file %s for reading.<br>"
              "%s cannot run without this file.", 
-             rcFileName.latin1(), Vk_Name );
+             rcFileName.latin1(), vkName() );
     return Fail;
   } else {
     /* beam me up, scotty */
@@ -524,7 +527,7 @@ void VkConfig::writebackConfig()
 
       if ( firstEntry ) {
         QString hdr = QString("# %1 %2 Configuration File\n")
-                             .arg(Vk_Name).arg(VK_VERSION);
+                             .arg(vkName()).arg(vkVersion());
 
         fprintf( pStream, hdr.latin1() );
 
@@ -589,7 +592,7 @@ VkConfig::RetVal VkConfig::checkAccess() const
                   "The file %s seems to be corrupted, and\n"
                   "%s cannot run without this file."
                   "Shall I recreate it now?", 
-                  rcFileName.latin1(), Vk_Name );
+                  rcFileName.latin1(), vkName() );
     if ( ok == MsgBox::vkNo )
       return BadRcFile;
     else
@@ -609,7 +612,7 @@ VkConfig::RetVal VkConfig::checkAccess() const
     i = 0;
     while ( line[i].isDigit() || line[i] == '.' )  i++;
     line = line.left( i );
-    if ( line != VK_VERSION )
+    if ( line != vkVersion() )
       return BadRcVersion;
   }
 
@@ -755,7 +758,7 @@ void VkConfig::mkConfigFile( bool rm )
   QDateTime dt = QDateTime::currentDateTime();
 
   QString header = QString("# %1 %2 configuration file\n")
-                          .arg(Vk_Name).arg(VK_VERSION);
+                          .arg(vkName()).arg(vkVersion());
   header += "# " + dt.toString( "MMMM d hh:mm yyyy" ) + "\n\n";
 
 

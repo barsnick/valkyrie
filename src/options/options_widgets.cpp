@@ -569,7 +569,7 @@ void LbWidget::popupMenu( QListBoxItem *item, const QPoint& )
   int REMOVE   = popMenu.insertItem( "Remove File" );
   int ADD      = popMenu.insertItem( "Add a File" );
 
-  SuppFile *suppFile;
+  SuppFile *suppFile = 0;
 
   if ( !item ) {   /* lbox is empty */
     popMenu.setItemEnabled( SELECT, false );

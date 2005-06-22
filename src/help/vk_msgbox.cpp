@@ -62,7 +62,7 @@ MsgBox::MsgBox( QWidget *parent, Icon icon, QString msg,
     msg    += "<p><b>Quitting !</b><br /></p>";
     break;
   case About:
-    caption.sprintf("About %s", Vk_Name );
+    caption.sprintf("About %s", vkName() );
     pm_file = vkConfig->pixmap( "valkyrie.xpm" );
     break;
   default:
@@ -281,8 +281,8 @@ void MsgBox::about( QWidget *parent )
            "<p>%s is a graphical interface for DanceDetails</p>"
            "<p>Copyright: %s %s<br />"
            "Email: %s</p>",
-           vk_name, VK_VERSION, Vk_Name, 
-           VK_COPYRIGHT, VK_AUTHOR, VK_EMAIL);
+           vkname(), vkVersion(), vkName(), 
+           vkCopyright(), vkAuthor(), vkEmail() );
 
   MsgBox *mb = new MsgBox( parent, MsgBox::About, QString(buf) );
   mb->setButtonTexts( QStringList( "O&K" ) );

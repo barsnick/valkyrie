@@ -26,7 +26,7 @@ HandBook::~HandBook() { }
 HandBook::HandBook( QWidget* parent, const char* name )
   : QMainWindow( parent, name, WDestructiveClose )
 {
-  caption = Vk_Name " HandBook";
+	caption.sprintf( "%s HandBook", vkName() );
   setCaption( caption );
   setIcon( QPixmap(help_xpm) );
 

@@ -43,7 +43,7 @@ bool TextEdit::load()
 	switch( tabId ) {
 		case HelpInfo::ABOUT_VK:
 		case HelpInfo::SUPPORT:
-			setText( ts.read().arg(VK_COPYRIGHT).arg(VK_AUTHOR) );
+			setText( ts.read().arg(vkCopyright()).arg(vkAuthor()) );
 			break;
 		case HelpInfo::ABOUT_QT:
 			setText( ts.read().arg(qVersion()) );
@@ -65,7 +65,7 @@ HelpInfo::~HelpInfo() { }
 HelpInfo::HelpInfo(  QWidget* parent, TabId tabid )  
   : QDialog( parent, "help_about", true )
 {
-  title = Vk_Name " Information : ";
+	title.sprintf( "%s Information", vkName() );
   setCaption( title );
 
   /* top layout */
@@ -81,8 +81,10 @@ HelpInfo::HelpInfo(  QWidget* parent, TabId tabid )
   hbox->addWidget( pic );
 
   /* app info */
+  QString str; 
   QLabel* appName = new QLabel( this );
-  appName->setText( Vk_Name " " VK_VERSION );
+	str.sprintf( "%s %s", vkName(), vkVersion() );
+	appName->setText( str );
   appName->setFont(QFont( "Times", 18, QFont::Bold) );
   appName->setFixedSize( appName->sizeHint() );
   hbox->addWidget( appName );
@@ -99,7 +101,8 @@ HelpInfo::HelpInfo(  QWidget* parent, TabId tabid )
     
   /* about_vk tab */
   aboutVk = new TextEdit( tabParent, ABOUT_VK, "about_vk" );
-  tabParent->insertTab( aboutVk, "About " Vk_Name, ABOUT_VK );
+	str.sprintf( "About %s", vkName() );
+  tabParent->insertTab( aboutVk, str, ABOUT_VK );
 
   /* about qt tab */
   aboutQt = new TextEdit( tabParent, ABOUT_QT, "about_qt" );

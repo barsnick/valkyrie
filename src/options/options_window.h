@@ -82,6 +82,7 @@ private:
 	/* remember where user put the window */
 	int xpos, ypos;
 
+  QString capt;
 	QPushButton* applyButton;
 
   /* so we can iterate over the vkOptions widgets */

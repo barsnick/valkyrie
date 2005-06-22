@@ -120,7 +120,7 @@ int main ( int argc, char* argv[] )
 
   /* find out if we are in non-gui mode -------------------------------- */
   useGui = vkConfig->rdBool( "gui", "valkyrie" );
-  printf("useGui = %d\n", useGui );
+  //printf("useGui = %d\n", useGui );
 
   /* start turning the engine over... ---------------------------------- */
   app = new QApplication( argc, argv, useGui );
