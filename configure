@@ -520,11 +520,12 @@ cat > $vk_include_h <<_INC_EOF
 
 /* Install paths ------------------------------------------------------- */
 #define PREFIX       "$VK_INSTALL_PREFIX"
-#define DOCS_PATH    "/doc"
-#define ICONS_PATH   "/icons"
-#define DBASE_DIR    "/dbase"
-#define LOGS_DIR     "/logs"
-#define SUPPS_DIR    "/suppressions"
+#define VK_DOC_PATH  "/doc/"
+#define VG_DOC_PATH  "/doc/vg-html/"
+#define ICONS_PATH   "/icons/"
+#define DBASE_DIR    "/dbase/"
+#define LOGS_DIR     "/logs/"
+#define SUPPS_DIR    "/suppressions/"
 
 /* Name ---------------------------------------------------------------- */
 #define vk_name      "$vk_name"
@@ -544,7 +545,7 @@ cat > $vk_include_h <<_INC_EOF
 #define VG_EXEC_PATH  "$VG_EXEC_PATH"
 #define VG_SUPP_DIR   "$VG_SUPP_DIR"
 
-/* These functions are implemented in vk_utils.cpp --------------------- */
+/* These functions are defined in vk_utils.cpp ------------------------- */
 const char* installPath();
 const char* vkname();
 const char* vkName();
@@ -790,7 +791,7 @@ QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"MOC_DIR     = ./.moc\""
 QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"OBJECTS_DIR = ./.obj\""
 
 # build a project file based on the configuration
-EXEC="$QT_QMAKE -project -t app -nopwd ./src $QMAKE_PROJ_OPTS -o $VK_PROJECT"
+EXEC="$QT_QMAKE -project -t app -nopwd ./src ./icons/ $QMAKE_PROJ_OPTS -o $VK_PROJECT"
 
 /bin/sh -c "$EXEC"
 

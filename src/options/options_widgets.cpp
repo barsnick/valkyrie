@@ -14,6 +14,7 @@
 #include "vk_utils.h"
 #include "vk_config.h"
 #include "vk_msgbox.h"
+#include "context_help.h"
 
 
 
@@ -109,10 +110,14 @@ CkWidget::CkWidget( QWidget* parent, Option* vkopt, bool mklabel )
 { 
   cbox = new QCheckBox( opt->shortHelp, parent, "check_box" );
   widg = cbox;
+
   initialState = vkConfig->rdBool( opt->cfgKey(), opt->cfgGroup() );
   cbox->setChecked( initialState );
   connect( cbox, SIGNAL(toggled(bool)), 
            this, SLOT(ckChanged(bool)) );
+
+	/* not added if the url is empty */
+	ContextHelp::add( widg, opt->url() );
 }
 
 void CkWidget::ckChanged( bool on )
@@ -158,10 +163,14 @@ RbWidget::RbWidget( QWidget* parent, Option* vkopt, bool mklabel )
 { 
   radio = new QRadioButton( opt->shortHelp, parent, "radio_button" );
   widg = radio;
+
   initialState = vkConfig->rdBool( opt->cfgKey(), opt->cfgGroup() );
   radio->setChecked( initialState );
   connect( radio, SIGNAL(toggled(bool)), 
            this, SLOT(rbChanged(bool)) );
+
+	/* not added if the url is empty */
+	ContextHelp::add( widg, opt->url() );
 }
 
 void RbWidget::rbChanged( bool on )
@@ -212,9 +221,13 @@ LeWidget::LeWidget( QWidget *parent, Option * vkopt, bool mklabel )
   pb     = NULL;
   ledit  = new QLineEdit( parent, "line_edit" ); 
   widg = ledit;
+
   ledit->setText( initialValue );
   connect( ledit, SIGNAL( textChanged(const QString &) ),
            this,  SLOT( leChanged(const QString &) ) );
+
+	/* not added if the url is empty */
+	ContextHelp::add( widg, opt->url() );
 }
 
 void LeWidget::setCurrValue( const QString& txt ) 
@@ -301,6 +314,7 @@ CbWidget::CbWidget( QWidget *parent, Option * vkopt, bool mklabel )
   currIdx = 0;
   combo = new QComboBox( true, parent, "combo_box" );
   widg = combo;
+
   combo->setInsertionPolicy( QComboBox::NoInsertion );
   combo->setAutoCompletion( true );
   combo->insertStringList( opt->possValues );
@@ -316,6 +330,9 @@ CbWidget::CbWidget( QWidget *parent, Option * vkopt, bool mklabel )
   combo->setCurrentItem( currIdx );
   connect( combo, SIGNAL( activated(const QString &) ),
            this,  SLOT( cbChanged(const QString &) ) );
+
+	/* not added if the url is empty */
+	ContextHelp::add( widg, opt->url() );
 }
 
 void CbWidget::cbChanged( const QString& txt )
@@ -374,11 +391,15 @@ SpWidget::SpWidget( QWidget* parent, Option* vkopt,
 										bool mklabel, int num_sections )
   : OptionWidget( parent, "sp_widget", vkopt, mklabel ) 
 {
-  numSections = num_sections;
   intspin = new IntSpin( parent, "int_spin" );
   widg = intspin;
+
+  numSections = num_sections;
   connect( intspin, SIGNAL(valueChanged(const QString&)), 
            this,    SLOT(spChanged(const QString&)) );
+
+	/* not added if the url is empty */
+	ContextHelp::add( widg, opt->url() );
 }
 
 void SpWidget::addSection( int min, int max, int defval,
@@ -497,6 +518,9 @@ LbWidget::LbWidget( QWidget *parent, Option * vkopt, bool mklabel )
   connect( lbox, SIGNAL(contextMenuRequested(QListBoxItem*, 
                                              const QPoint &)),
            this, SLOT(popupMenu(QListBoxItem*, const QPoint &)));
+
+	/* not added if the url is empty */
+	ContextHelp::add( widg, opt->url() );
 }
 
 /* Split initialValue at the sep char ',', then strip the [+|-] prefix

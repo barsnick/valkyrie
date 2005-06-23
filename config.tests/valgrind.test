@@ -100,7 +100,7 @@ if [ ! -z "$VG_SUPP_DIR" ] ; then
   # strip any trailing slashes
   VG_SUPP_DIR=`echo $VG_SUPP_DIR | sed -e "s,^\(.*\)\/$,\1,"`
   # quick 'n dirty check
-  if [ -f "$VG_SUPP_DIR/default.supp" ; then 
+  if [ -f "$VG_SUPP_DIR/default.supp" ] ; then 
     result="$VG_SUPP_DIR"
     found=yes
   fi

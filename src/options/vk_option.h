@@ -38,9 +38,10 @@ public:
           QString flag_desc, QString poss_vals, QString default_val, 
           QString shelp,     QString lhelp,     const char* url );
 
-  QString cfgKey()   { return longFlag; }
-  QString cfgGroup() { return configGroup; }
-	QString defValue() { return defaultValue; }
+  QString cfgKey()    { return longFlag; }
+  QString cfgGroup()  { return configGroup; }
+	QString defValue()  { return defaultValue; }
+  QString url() const { return urlHelp; }
 
 	QString fileCheck( int* err_val, const char* fpath, 
 										 bool rd_perms, bool wr_perms );

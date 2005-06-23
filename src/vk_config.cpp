@@ -53,8 +53,8 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
 	newConfigFile = false;   /* set to true in mkConfigFile() */
 
   mPackagePath = installPath();
-  vkdocPath    = mPackagePath + DOCS_PATH;
-	vgdocPath    = vkdocPath + "manual/";
+  vkdocPath    = mPackagePath + VK_DOC_PATH;
+	vgdocPath    = mPackagePath + VG_DOC_PATH;
   imgPath      = mPackagePath + ICONS_PATH;
 
   rcPath.sprintf( "%s/.%s-%s", 
@@ -69,13 +69,7 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
     *ok = false;
     return;
   }
-  vkdocPath += "/";
-  imgPath   += "/";
-  
   rcPath    += "/";
-  dbasePath += "/";
-  logsPath  += "/";
-  suppPath  += "/";
 
   /* The various valgrind, valkyrie, and tool objects ------------------
      Initialise these first, so that if ~/.PACKAGE/PACKAGErc does not

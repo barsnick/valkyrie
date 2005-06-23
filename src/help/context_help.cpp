@@ -266,11 +266,10 @@ void ContextHelp::say( QWidget* widget, const QString &text )
       x = pos.x() + mw->width();
 
     hbook->move( x, pos.y() );
-  }
-
-  if ( !hbook->isVisible() )
     hbook->show();
+	}
 
+  hbook->raise();
   hbook->openUrl( text );
 }
 
@@ -305,9 +304,9 @@ void ContextHelp::newItem( QWidget* widget, const QString& url )
 }
 
 
-/* Adds url as context help for this widget.  The text is destroyed if
-   the widget is later destroyed, so it need not be explicitly
-   removed. */
+/* Adds url as context help for this widget.  
+   The text is destroyed if the widget is later destroyed, 
+   so it need not be explicitly removed. */
 void ContextHelp::add( QWidget* widget, const QString& url )
 {
   vk_assert( widget != NULL );

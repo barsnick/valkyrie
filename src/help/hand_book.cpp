@@ -11,6 +11,7 @@
 
 #include <qfiledialog.h>
 #include <qmenubar.h>
+#include <qmotifstyle.h>
 #include <qpaintdevicemetrics.h>
 #include <qpainter.h>
 #include <qprinter.h>
@@ -44,9 +45,12 @@ HandBook::HandBook( QWidget* parent, const char* name )
   browser->setLinkUnderline( true );
 
 	/* set the list of dirs to search when files are requested */
-  browser->mimeSourceFactory()->setFilePath( vkConfig->vkdocDir() );
+  QStringList paths;
+	paths << vkConfig->vkdocDir() << vkConfig->vgdocDir();
+  browser->mimeSourceFactory()->setFilePath( paths );
+
 	/* default startup is with the index page loaded */
-  browser->setSource( vkConfig->vkdocDir() + "index.html" );
+  browser->setSource( "index.html" );
 
   connect( browser, SIGNAL( textChanged() ),
            this,    SLOT( textChanged() ) );
@@ -250,6 +254,7 @@ void HandBook::pathSelected( const QString &path )
 void HandBook::mkMenuToolBars()
 {
   mainMenu = new QMenuBar( this, "help_menubar" );
+  mainMenu->setStyle( new QMotifStyle() );
 
   /* file menu --------------------------------------------------------- */
   QPopupMenu* fileMenu = new QPopupMenu( this );
@@ -327,6 +332,16 @@ void HandBook::mkMenuToolBars()
            this,    SLOT( setBackwardAvailable( bool ) ) );
   connect( browser, SIGNAL( forwardAvailable( bool ) ),
            this,    SLOT( setForwardAvailable( bool ) ) );
+
+
+  /* dismiss 'button' -------------------------------------------------- */
+  mainMenu->insertSeparator();
+  QToolButton* dismissButton = new QToolButton( this, "tb_dismiss" );
+  dismissButton->setText( "Dismiss" );
+  dismissButton->setAutoRaise( true );
+  connect( dismissButton, SIGNAL( clicked() ), 
+           this,          SLOT( close() ) );
+  mainMenu->insertItem( dismissButton );
 
 
   /* toolbar ----------------------------------------------------------- */
