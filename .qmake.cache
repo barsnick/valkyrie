@@ -1,4 +1,4 @@
-CMDLINE=/home/de/Programs/valkyrie/trunk/configure --thread=yes --debug --vg-exec=/home/sewardj/Vg3LINE/trunk/Inst/bin/valgrind --vg-supp=/home/sewardj/Vg3LINE/trunk/Inst/lib/valgrind/
+CMDLINE=/home/de/Programs/valkyrie/trunk/configure --debug --thread=yes --vg-exec=/home/sewardj/Vg3LINE/trunk/Inst/bin/valgrind --vg-supp=/home/sewardj/Vg3LINE/trunk/Inst/lib/valgrind/
 QT_SOURCE_TREE=/home/de/Programs/valkyrie/trunk
 QT_BUILD_TREE=/home/de/Programs/valkyrie/trunk
 QMAKE_ABSOLUTE_SOURCE_ROOT=$$QT_SOURCE_TREE
@@ -15,4 +15,4 @@ QT_INSTALL_PREFIX=/home/de/Programs/valkyrie/trunk
 docs.path=/home/de/Programs/valkyrie/trunk/doc/
 bins.path=/home/de/Programs/valkyrie/trunk/bin/
 QMAKESPEC=/usr/lib/qt3/mkspecs/linux-g++
-CONFIG +=  debug warn_on dll thread
+CONFIG += qt x11 debug warn_on thread
