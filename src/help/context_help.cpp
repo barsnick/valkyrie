@@ -204,7 +204,7 @@ bool ContextHelp::eventFilter( QObject * obj, QEvent * ev )
       } else if ( ev->type() == QEvent::MouseButtonDblClick ) {
         return true;
       }
-    } break;
+    } /*FIXME: break;*/
 
     case Inactive:
       break;

@@ -50,22 +50,29 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   mEntryMap.clear();
   sep       = ';';         /* separator for lists of strings */
   mDirty    = false;
-	newConfigFile = false;   /* set to true in mkConfigFile() */
+  newConfigFile = false;   /* set to true in mkConfigFile() */
 
-  mPackagePath = installPath();
+  mPackagePath = PREFIX;
   vkdocPath    = mPackagePath + VK_DOC_PATH;
-	vgdocPath    = mPackagePath + VG_DOC_PATH;
+  vgdocPath    = mPackagePath + VG_DOC_PATH;
   imgPath      = mPackagePath + ICONS_PATH;
+
+  vk_name      = Vk_Name;
+  vk_Name      = VK_NAME;
+  vk_version   = VK_VERSION;
+  vk_copyright = VK_COPYRIGHT;
+  vk_author    = VK_AUTHOR;
+  vk_email     = VK_EMAIL;
+  vg_copyright = VG_COPYRIGHT;
 
   rcPath.sprintf( "%s/.%s-%s", 
                   QDir::homeDirPath().ascii(), vkname(), vkVersion() );
   rcFileName.sprintf( "%s/%src", rcPath.ascii(), vkname() );
-
   dbasePath = rcPath + DBASE_DIR;
   logsPath  = rcPath + LOGS_DIR;
   suppPath  = rcPath + SUPPS_DIR;
 
-  if ( !checkDirs() ) {	   /* we always do this on startup */
+  if ( !checkDirs() ) {     /* we always do this on startup */
     *ok = false;
     return;
   }
@@ -91,95 +98,145 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
     } break;
 
   case BadRcVersion:
+#if 1
+    vkPrint( "Configuration:\n"
+						 "The configuration file '%s' version is invalid.\n"
+						 "Removing and re-creating it now...", rcFileName.latin1() );
+#else
     vkInfo( 0, "Configuration",
             "The configuration file '%s' version is invalid.<br> "
             "Removing and re-creating it now ... ... ", 
             rcFileName.latin1() );
+#endif
     mkConfigFile( true );
     num_tries++;
     goto retry;      /* try again */
+    break;
 
   case CreateRcFile:
+#if 1
+    vkPrint( "Configuration:\n"
+						 "The configuration file '%s' does not exist, "
+						 "and %s cannot run without this file.\n"
+						 "Creating it now...", rcFileName.latin1(), vkName() );
+#else
     vkInfo( 0, "Configuration",
             "The configuration file '%s' does not exist, "
             "and %s cannot run without this file.<br>"
             "Creating it now ... ... ", 
             rcFileName.latin1(), vkName() );
+#endif
     mkConfigFile();
     num_tries++;
     goto retry;      /* try again */
+    break;
 
   case NoPerms:
+#if 1
+    vkPrint( "Fatal Configuration Error:\n"
+						 "You do not have read/write permissions set"
+						 "on the directory %s", rcPath.latin1() );
+#else
     vkFatal( 0, "Configuration" 
              "You do not have read/write permissions set"
              "on the directory %s", rcPath.latin1() );
+#endif
     break;
 
   case BadFilename:
   case NoDir:
   case BadRcFile:
   case Fail:
+#if 1
+    vkPrint( "Fatal Configuration Error:\n"
+						 "Initialisation of vkConfig failed" );
+#else
     vkFatal( 0, "Config Creation Failed",
-             "Initialisation of Config failed" );
+      "Initialisation of Config failed" );
+#endif
     break;
   }
 
-  /* check valgrind/suppn/etc. paths are set correctly ----------------- 
-		 we only do this the very first time valkyrie is started up */
-  //RM:if ( !checkPaths() ) {
-  //  *ok = false;
-  //}
-	//if ( newConfigFile ) {
-	//	*ok = checkPaths();
-	//}
+  /* If we've just created valkyrierc, write the vg-exec-path and
+     vg-supp-dir paths found by 'configure' to valkyrierc. 
+     These values can be over-ridden by the user via the Options dialog.*/
+  if ( newConfigFile ) {
+
+    wrEntry( VG_EXEC_PATH, "vg-exec",  "valkyrie" );
+    wrEntry( VG_SUPP_DIR,  "vg-supps", "valkyrie" );
+
+    /* find and store valgrind's suppressions files */
+    QString def_supp   = "";
+    QString supp_files = "";
+    QDir supp_dir( VG_SUPP_DIR );
+    /* see if we have any *.supp files in here - if so, grab 'em while
+       the going's good */
+    QStringList supp_list = supp_dir.entryList( "*.supp", QDir::Files );
+    for ( unsigned int i=0; i<supp_list.count(); i++ ) {
+      supp_files += supp_dir.absPath() + "/" + supp_list[i] + ",";
+      /* the only selected one is the default suppression file */
+      if ( supp_list[i] == rdEntry( "suppressions", "memcheck" ) )
+        def_supp = supp_dir.absPath() + "/" + supp_list[i];
+    }
+    /* chop off the last ',' */
+    supp_files.truncate( supp_files.length() - 1 );
+    /* write the list of found .supp files */
+    wrEntry( supp_files, "all-supps", "valkyrie" );
+    /* and write the default supp. file including path */
+    wrEntry( def_supp, "sel-supps", "valkyrie" );
+    wrEntry( def_supp, "suppressions", "memcheck" );
+
+  }
 
 }
 
 
-/* misc. make-life-easier stuff -------------------------------------- */
+/* misc. make-life-easier stuff ---------------------------------------- */
+int VkConfig::defaultToolId()
+{
+  QString tool_name = rdEntry( "tool", "valgrind" );
 
-QString VkConfig::vkdocDir()     //  /valkyrie-inst-dir/docs/
-{ return vkdocPath; }
-
-// FIXME: this should be read from valkyrie's opts
-// /usr/share/doc/packages/valgrind/
-QString VkConfig::vgdocDir()
-{ 
-	return vgdocPath; 
-	/*FIXME: return rdEntry( "vg-doc-dir", "valkyrie" );*/ 
+  VkObject* obj;
+  for ( obj = vkObjectList.first(); obj; obj = vkObjectList.next() ) {
+    if ( obj->isTool() && obj->name() == tool_name )
+      return obj->id();
+  }
+  return -1;
 }
 
-// /usr/share/doc/packages/valgrind/
-//RM: QString VkConfig::vgManual( QString url )
-//{ 
-//	return vgdocPath + url; 
-	/*FIXME: return rdEntry("vg-doc-dir", "valkyrie") + url;*/ 
-//}
+/* these fns return vars initialised from the #defines set in vk_include.h */
+const char* VkConfig::vkname()      { return vk_name.data();      }
+const char* VkConfig::vkName()      { return vk_Name.data();      }
+const char* VkConfig::vkVersion()   { return vk_version.data();   }
+const char* VkConfig::vkCopyright() { return vk_copyright.data(); }
+const char* VkConfig::vkAuthor()    { return vk_author.data();    }
+const char* VkConfig::vkEmail()     { return vk_email.data();     }
+const char* VkConfig::vgCopyright() { return vg_copyright.data(); }
 
-QString VkConfig::imgDir()     //  /valkyrie-inst-dir/icons/
-{ return imgPath; }
+/* these fns return values held in private vars */
+QString VkConfig::vkdocDir()  { return vkdocPath; }
 
-QString VkConfig::rcDir()      // ~/.valkyrie-X.X.X/
-{ return rcPath;  }
+QString VkConfig::vgdocDir()  { return vgdocPath; }
+//  /valkyrie-inst-dir/icons/
+QString VkConfig::imgDir()    { return imgPath; }
+// ~/.valkyrie-X.X.X/
+QString VkConfig::rcDir()     { return rcPath;  }
+// ~/.valkyrie-X.X.X/dbase/
+QString VkConfig::dbaseDir()  { return dbasePath; }
+// ~/.valkyrie-X.X.X/logs/
+QString VkConfig::logsDir()   { return logsPath; }
+// ~/.valkyrie-X.X.X/suppressions/
+QString VkConfig::suppDir()   { return suppPath;  }
 
-QString VkConfig::dbaseDir()   // ~/.valkyrie-X.X.X/dbase/
-{ return dbasePath; }
-
-QString VkConfig::logsDir()    // ~/.valkyrie-X.X.X/logs/
-{ return logsPath; }
-
-QString VkConfig::suppDir()    // ~/.valkyrie-X.X.X/suppressions/
-{ return suppPath;  }
+QPixmap VkConfig::pixmap( QString pix )
+{
+  QPixmap pm( imgPath + pix );
+  return pm;
+}
 
 VkObjectList VkConfig::vkObjList()
 { return vkObjectList; }
 
-QPixmap VkConfig::pixmap( QString pix )
-{
-  QString fname = imgPath + pix;
-  QPixmap pm( fname );
-  return pm;
-}
 
 
 /* read fns ------------------------------------------------------------ */
@@ -194,7 +251,7 @@ QString VkConfig::rdEntry( const QString &pKey,
   if ( aIt != mEntryMap.end() ) {
     aValue = aIt.data().mValue;
   } else {
-    /* debug: end() points to the element which is one past the
+    /* end() points to the element which is one past the
        last element in the map; ergo, the key wasn't found. */
     VK_DEBUG( "VkConfig::rdEntry(): key not found.\n"
              "\tFile  = %s\n"
@@ -248,15 +305,15 @@ QFont VkConfig::rdFont( const QString &pKey,
     if ( !aRetFont.fromString( aValue ) )
       return QFont();
   }
-  else { // backward compatibility with older formats
-    // find first part (font family)
+  else { /* backward compatibility with older formats */
+    /* find first part (font family) */
     int nIndex = aValue.find( ',' );
     if ( nIndex == -1 ) {
       return QFont();
     }
     aRetFont.setFamily( aValue.left( nIndex ) );
     
-    // find second part (point size)
+    /* find second part (point size) */
     int nOldIndex = nIndex;
     nIndex = aValue.find( ',', nOldIndex+1 );
     if ( nIndex == -1 ) {
@@ -265,7 +322,7 @@ QFont VkConfig::rdFont( const QString &pKey,
     aRetFont.setPointSize( aValue.mid( nOldIndex+1,
                            nIndex-nOldIndex-1 ).toInt() );
 
-    // find third part (style hint)
+    /* find third part (style hint) */
     nOldIndex = nIndex;
     nIndex = aValue.find( ',', nOldIndex+1 );
 
@@ -274,7 +331,7 @@ QFont VkConfig::rdFont( const QString &pKey,
     aRetFont.setStyleHint( (QFont::StyleHint)aValue.mid( nOldIndex+1, 
                                      nIndex-nOldIndex-1 ).toUInt() );
     
-    // find fourth part (char set)
+    /* find fourth part (char set) */
     nOldIndex = nIndex;
     nIndex = aValue.find( ',', nOldIndex+1 );
 
@@ -284,7 +341,7 @@ QFont VkConfig::rdFont( const QString &pKey,
     chStr = aValue.mid( nOldIndex+1,
                         nIndex-nOldIndex-1 );
 
-    // find fifth part (weight)
+    /* find fifth part (weight) */
     nOldIndex = nIndex;
     nIndex = aValue.find( ',', nOldIndex+1 );
     if ( nIndex == -1 )
@@ -292,7 +349,7 @@ QFont VkConfig::rdFont( const QString &pKey,
     aRetFont.setWeight( aValue.mid( nOldIndex+1,
                                     nIndex-nOldIndex-1 ).toUInt() );
 
-    // find sixth part (font bits)
+    /* find sixth part (font bits) */
     uint nFontBits = aValue.right( aValue.length()-nIndex-1 ).toUInt();
     aRetFont.setItalic( nFontBits & 0x01 );
     aRetFont.setUnderline( nFontBits & 0x02 );
@@ -314,20 +371,20 @@ QColor VkConfig::rdColor( const QString &pKey )
   if ( !aValue.isEmpty() ) {
     int nRed = 0, nGreen = 0, nBlue = 0;
 
-    // find first part (red)
+    /* find first part (red) */
     int nIndex = aValue.find( ',' );
     if ( nIndex == -1 )
       return QColor();
     nRed = aValue.left( nIndex ).toInt( &ok );
 
-    // find second part (green)
+    /* find second part (green) */
     int nOldIndex = nIndex;
     nIndex = aValue.find( ',', nOldIndex+1 );
     if ( nIndex == -1 )
       return QColor();
     nGreen = aValue.mid( nOldIndex+1, nIndex-nOldIndex-1 ).toInt( &ok );
 
-    // find third part (blue)
+    /* find third part (blue) */
     nBlue = aValue.right( aValue.length()-nIndex-1 ).toInt( &ok );
 
     aRetColor.setRgb( nRed, nGreen, nBlue );
@@ -356,9 +413,9 @@ void VkConfig::wrEntry( const QString &pValue,
   }
 
   mDirty = true;
-  // set new value
+  /* set new value */
   EntryData entryData( pValue, true );
-  // rewrite the new value
+  /* rewrite the new value */
   insertData( entryKey, entryData );
 }
 
@@ -404,10 +461,17 @@ VkConfig::RetVal VkConfig::parseFile()
 {
   QFile rFile( rcFileName );
   if ( !rFile.open( IO_ReadOnly ) ) {
+#if 1
+		vkPrint( "Fatal Configuration Error:\n"
+						 "Failed to open the file %s for reading.\n"
+						 "%s cannot run without this file.", 
+						 rcFileName.latin1(), vkName() );
+#else
     vkFatal( 0, "Parse Config File" 
             "Failed to open the file %s for reading.<br>"
              "%s cannot run without this file.", 
              rcFileName.latin1(), vkName() );
+#endif
     return Fail;
   } else {
     /* beam me up, scotty */
@@ -444,12 +508,12 @@ void VkConfig::parseConfigFile( QFile &rFile, EntryMap *writeBackMap )
     
     int len = line.length();
     if ( line[0] == QChar('[') && line[len-1] == QChar(']') ) {
-      // found a group
-      line.setLength( len-1 );    // chop off the ']'
-      aGroup = line.remove(0, 1); // ditto re the '['
+      /* found a group */
+      line.setLength( len-1 );    /* chop off the ']' */
+      aGroup = line.remove(0, 1); /* ditto re the '[' */
     }
     else {
-      // key --> value pair
+      /* key --> value pair */
       int pos = line.find('=');
       QString key   = line.left( pos );
       QString value = line.right( len-pos-1 );
@@ -457,11 +521,13 @@ void VkConfig::parseConfigFile( QFile &rFile, EntryMap *writeBackMap )
       EntryKey entryKey( aGroup, key );
       EntryData entryData( value, false );
 
-      // insert into the temporary scratchpad map
-      if ( writeBackMap )
+      if ( writeBackMap ) {
+        /* insert into the temporary scratchpad map */
         writeBackMap->insert( entryKey, entryData );
-      else  // directly insert value into config object
+      } else { 
+        /* directly insert value into config object */
         insertData( entryKey, entryData );
+      }
 
     }
   }
@@ -515,7 +581,7 @@ void VkConfig::writebackConfig()
     const EntryKey  &currKey   = aIt.key();
     const EntryData &currEntry = aIt.data();
 
-    // new group
+    /* new group */
     if ( currGroup != currKey.mGroup ) {
 
       if ( firstEntry ) {
@@ -534,7 +600,7 @@ void VkConfig::writebackConfig()
     }
     firstEntry = false;
 
-    // group data
+    /* group data */
     fprintf( pStream, "%s=%s\n",  
              currKey.mKey.latin1(), currEntry.mValue.latin1() );
   }
@@ -547,14 +613,14 @@ VkConfig::RetVal VkConfig::checkAccess() const
 {
   int ok;
 
-  // 0. first things first ....
+  /* 0. first things first .... */
   if ( rcFileName.isEmpty() ) {
     VK_DEBUG( "checkAccess( %s )\n"
              "rcFileName is empty", VK_STRLOC );
     return BadFilename;
   }
 
-  // 1. check the /rc/ directory actually exists
+  /* 1. check the /rc/ directory actually exists */
   ok = access( rcPath, F_OK );
   if ( ok != 0 ) {
     VK_DEBUG("checkAccess( %s )\n" 
@@ -572,16 +638,25 @@ VkConfig::RetVal VkConfig::checkAccess() const
     return NoPerms;
   }
 
-  // 3. check the rcfile actually exists. If not, create it now.
+  /* 3. check the rcfile actually exists. If not, create it now */
   ok = access( rcFileName, F_OK );
   if ( ok != 0 ) {
     return CreateRcFile;
   }
 
-  // 4. if it already exists, can we read / write it?
+  /* 4. if it already exists, can we read / write it? */
   ok = access( rcFileName, R_OK & W_OK );
+#if 1
+	if ( ok != 0 ) {
+		vkPrint( "Configuration:\n" 
+						 "The file %s seems to be corrupted, and "
+						 "%s cannot run without this file.\n"
+						 "Recreating it now...", rcFileName.latin1(), vk_Name.data() );
+		return BadRcFile;
+	}
+#else
   if ( ok != 0 ) {
-    ok = vkQuery( 0, 2, "Configuration", 
+    ok = vkQuery( 0, 2, "Configuration" 
                   "The file %s seems to be corrupted, and\n"
                   "%s cannot run without this file."
                   "Shall I recreate it now?", 
@@ -591,6 +666,7 @@ VkConfig::RetVal VkConfig::checkAccess() const
     else
       return CreateRcFile;
   }
+#endif
 
   // 5. and finally, check the version no. for compatibility
   QFile rcFile( rcFileName );
@@ -605,7 +681,7 @@ VkConfig::RetVal VkConfig::checkAccess() const
     i = 0;
     while ( line[i].isDigit() || line[i] == '.' )  i++;
     line = line.left( i );
-    if ( line != vkVersion() )
+    if ( line != vk_version.data() )
       return BadRcVersion;
   }
 
@@ -679,19 +755,6 @@ QStringList VkConfig::modFlags( VkObject* vkobj )
   }
 
   return flags;
-}
-
-
-int VkConfig::defaultToolId()
-{
-  QString tool_name = rdEntry( "tool", "valgrind" );
-
-  VkObject* obj;
-  for ( obj = vkObjectList.first(); obj; obj = vkObjectList.next() ) {
-    if ( obj->isTool() && obj->name() == tool_name )
-      return obj->id();
-  }
-  return -1;
 }
 
 
@@ -797,7 +860,7 @@ logfile=\n\n";
     outF.close();
   }
 
-	newConfigFile = true;
+  newConfigFile = true;
 }
 
 
@@ -812,7 +875,6 @@ logfile=\n\n";
 */
 bool VkConfig::checkDirs()
 {
-	// VK_DEBUG("bool VkConfig::checkDirs()");
   QString msg = "";
   bool success = true;
 
@@ -890,190 +952,16 @@ bool VkConfig::checkDirs()
     }  /* end switch ( state ) */
   }    /* end while (1) */
 
-  if ( !msg.isEmpty() )
+#if 1
+  if ( !msg.isEmpty() ) {
+		vkPrint( "Configuration:\n"
+						 "Directory Error: %s", msg.ascii() );
+	}
+#else
+  if ( !msg.isEmpty() ) {
     vkError( 0, "Directory Error", msg.ascii() );
+	}
+#endif
 
   return success;
 }
-
-
-/* The default value for vg-exec is "", so the very first time
-   valkyrie is started, we need to find out:
-   (a) where valgrind lives;
-   (b) what version of valgrind we are being asked to use;
-	 (c) where valgrind's manual lives;
-   (c) where the suppression files live, and
-	 (d) what suppression files exist */
-// FIXME: this lot should be done by automake 
-bool VkConfig::checkPaths()
-{
-	//VK_DEBUG("checking valgrind paths");
-	VK_DEBUG("TODO: find valgrind doc dir\n");
-
-  QFile file;
-  QString caption, str;
-  QString cmd, tmp_fname, vg_exec_path, vg_version, 
-		vg_supp_dir, vg_supp_files, def_supp;
-
-  enum State { 
-    DEF_PATH, SYS_PATH, USR_PATH, 
-    CHECK_EXEC, CHECK_VERSION, SUPP_FILES, DONE, GIVE_UP };
-  State state = DEF_PATH;
-
-  bool success = true;
-
-  /* so we don't get our knickers in a twist */
-  bool def_path_checked, sys_path_checked, usr_path_checked;
-  def_path_checked = sys_path_checked = usr_path_checked = false;
-
-  /* so we know what to tell the user if all fails */
-  bool bad_exec, bad_version, bad_supps;
-  bad_exec = bad_version = bad_supps = false;
-
-  bool not_done = true;
-  while ( not_done ) {
-
-    switch ( state ) {
-
-      /* path to valgrind executable ----------------------------------- */
-      case DEF_PATH: {    /* try the default entry first */
-        vg_exec_path = rdEntry( "vg-exec", "valkyrie" );
-        def_path_checked = true;
-        state = (vg_exec_path.isEmpty()) ? SYS_PATH : CHECK_EXEC;
-      } break;
-
-      case SYS_PATH: {    /* try 'which valgrind' next */
-        tmp_fname = vk_mkstemp( "vg-path", rcPath );
-        cmd.sprintf( "which valgrind > %s", tmp_fname.ascii() );
-        system( cmd.ascii() );
-        file.setName( tmp_fname );
-        if ( file.open( IO_ReadOnly ) ) 
-          file.readLine( vg_exec_path, 100 );
-        file.remove();    /* close and delete the temporary file */
-        vg_exec_path = vg_exec_path.simplifyWhiteSpace();
-        sys_path_checked = true;
-        state = (vg_exec_path.isEmpty()) ? USR_PATH : CHECK_EXEC;
-      } break;
-
-      case USR_PATH: {    /* ask user as a last resort */
-        vg_exec_path = QFileDialog::getOpenFileName( "/usr", 
-                                        "All Files (*)", 0, 
-                                        "f_dlg", "Select Valgrind path" );
-        usr_path_checked = true;
-        state = (vg_exec_path.isEmpty()) ? GIVE_UP : CHECK_EXEC;
-      } break;            /* stop if user clicked cancel */
-
-      case CHECK_EXEC: {
-        QFileInfo fi( vg_exec_path );
-        if ( fi.isFile() && fi.isExecutable() && fi.baseName()=="valgrind" )
-          state = CHECK_VERSION;
-        else if (def_path_checked && (!sys_path_checked && !usr_path_checked))
-					state = SYS_PATH;
-				else if (def_path_checked && sys_path_checked && !usr_path_checked) 
-					state = USR_PATH;
-				else if (def_path_checked && sys_path_checked && usr_path_checked) { 
-					bad_version = true; 
-					state = GIVE_UP; 
-				}
-      } break;
-
-      case CHECK_VERSION: {
-        tmp_fname = vk_mkstemp( "vg-version", rcPath );
-        cmd.sprintf( "%s --version | sed \"s/valgrind-//g\" > %s", 
-                     vg_exec_path.ascii(), tmp_fname.ascii() );
-        system( cmd.ascii() );
-        file.setName( tmp_fname );
-        if ( file.open( IO_ReadOnly ) )
-          file.readLine( vg_version, 100 );
-        file.remove();    /* close and delete the temporary file */
-        vg_version = vg_version.simplifyWhiteSpace();
-        /* do some fancy stuff */
-        int found = str2hex( vg_version );
-        int reqd  = str2hex( "3.0.0" );
-        if ( found >= reqd ) state = SUPP_FILES;
-        else if (def_path_checked && (!sys_path_checked && !usr_path_checked))
-					state = SYS_PATH;
-				else if (def_path_checked && sys_path_checked && !usr_path_checked)
-					state = USR_PATH;
-				else if (def_path_checked && sys_path_checked && usr_path_checked) { 
-					bad_version = true; 
-					state = GIVE_UP; 
-				}
-      } break;
-
-      /* path to valgrind's manual ------------------------------------- 
-				 default vg-doc-path is /usr/share/doc/packages/valgrind/x.html */
-
-      /* suppressions file path -------------------------------------------- 
-         default vg-exec dir is /usr/bin/valgrind
-         default supps   dir is /usr/lib/valgrind/x.supp */
-      case SUPP_FILES: {
-        QDir dir;
-				dir.setPath( vg_exec_path );      /* ho hum    */
-				dir.cd( "../..", false );         /* eg. /usr/ */
-				if ( dir.cd( "lib/valgrind/", false ) ) {
-					vg_supp_dir = dir.absPath();
-				} else {
-					vg_supp_dir = QFileDialog::getExistingDirectory( vg_exec_path, 
-                     0, "d_dlg", "Select Valgrind Suppressions Directory" );
-				}
-        if ( !vg_supp_dir.isEmpty() ) {
-          /* see if we have any *.supp files in here */
-          dir.setPath( vg_supp_dir );
-					/* grab 'em while the going's good */
-					QStringList supp_list = dir.entryList( "*.supp", QDir::Files );
-					vg_supp_files = "";
-					for ( uint i=0; i<supp_list.count(); i++ ) {
-						vg_supp_files += dir.absPath() + "/" + supp_list[i] + ",";
-						/* the only selected one is the default suppression file */
-						if ( supp_list[i] == rdEntry( "suppressions", "memcheck" ) )
-							def_supp = dir.absPath() + "/" + supp_list[i];
-					}
-				}
-				state = ( !vg_supp_files.isEmpty() ) ? DONE : GIVE_UP;
-        bad_supps = ( state == GIVE_UP ) ? true : false;
-      } break;
-
-      case GIVE_UP: {
-        not_done = false;
-        success  = false;
-        if ( bad_exec ) {
-          caption = "   Invalid Valgrind Executable   ";
-          str.sprintf("<p>The file '%s' doesn't look like "
-                      "a valgrind executable.</p>"
-                      "<p>Giving up.</p>", vg_exec_path.ascii() );
-        }  else if ( bad_version ) {
-          caption = "   Incompatible Valgrind Version   ";
-          str.sprintf("<p>Valkyrie requires Valgrind >= v3.0.0.<br>" 
-                      "Valgrind version found in '%s' is v%s</p>"
-                      "<p>Giving up.</p>", vg_exec_path.ascii(), 
-                                           vg_version.ascii() );
-        } else if ( bad_supps ) {
-          caption = "   Invalid Suppressions Directory   ";
-          str.sprintf("<p>Failed to find valgrind's suppressions files."
-                      "<p>Giving up.</p>");
-        }  
-      } break;
-
-      case DONE: {
-        success  = true;
-        not_done = false;
-        /* set the default valgrind path on this machine */
-        wrEntry( vg_exec_path, "vg-exec", "valkyrie" );
-				/* write the list of found .supp files */
-				wrEntry( vg_supp_files, "all-supps", "valkyrie" );
-				/* and write the default supp. file including path */
-				wrEntry( def_supp, "sel-supps", "valkyrie" );
-				wrEntry( def_supp, "suppressions", "memcheck" );
-      } break;
-
-    }  /* end switch ( state ) */
-  }    /* end while ( not_done ) */
-
-  if ( !str.isEmpty() )
-    vkError( 0, caption.ascii(), str.ascii() );
-
-  return success;
-}
-
-

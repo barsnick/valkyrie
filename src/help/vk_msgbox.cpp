@@ -4,7 +4,6 @@
 */
 
 #include "vk_msgbox.h"
-#include "vk_include.h"
 #include "vk_config.h"
 #include "msgbox_icons.h"
 
@@ -62,7 +61,7 @@ MsgBox::MsgBox( QWidget *parent, Icon icon, QString msg,
     msg    += "<p><b>Quitting !</b><br /></p>";
     break;
   case About:
-    caption.sprintf("About %s", vkName() );
+    caption.sprintf("About %s", vkConfig->vkName() );
     pm_file = vkConfig->pixmap( "valkyrie.xpm" );
     break;
   default:
@@ -278,11 +277,12 @@ void MsgBox::about( QWidget *parent )
   char buf[512];
   sprintf( buf,
            "<h3>%s %s</h3>"
-           "<p>%s is a graphical interface for DanceDetails</p>"
+           "<p>%s is a graphical interface for Valgrind</p>"
            "<p>Copyright: %s %s<br />"
            "Email: %s</p>",
-           vkname(), vkVersion(), vkName(), 
-           vkCopyright(), vkAuthor(), vkEmail() );
+           vkConfig->vkname(),   vkConfig->vkVersion(), 
+					 vkConfig->vkName(),   vkConfig->vkCopyright(), 
+					 vkConfig->vkAuthor(), vkConfig->vkEmail() );
 
   MsgBox *mb = new MsgBox( parent, MsgBox::About, QString(buf) );
   mb->setButtonTexts( QStringList( "O&K" ) );
@@ -350,9 +350,7 @@ void MsgBox::fatal( QWidget *parent, QString hdr, QString msg )
 
 
 
-/* message handlers ----------------------------------------------------
-   declared extern in vk_include.h */
-
+/* message handlers ---------------------------------------------------- */
 #define VK_BUFLEN 8196
 
 /* show information message */

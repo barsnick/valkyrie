@@ -10,6 +10,7 @@
 #include <qmap.h>
 #include <qobject.h>
 #include <qpixmap.h>
+#include <qcstring.h>
 #include <qstring.h>
 
 #include "vk_objects.h"
@@ -68,29 +69,37 @@ public:
 
   void dontSync();  /* don't write back to disk on exit */
 
-	/* misc make-life-easier stuff --------------------------------------- */
-	int defaultToolId();
-	QString vgdocDir();
-	//RM: QString vgManual( QString url );
+  /* misc make-life-easier stuff --------------------------------------- */
+  int defaultToolId();
+  /* these fns merely return the values set in vk_include.h */
+  const char* vkname();
+  const char* vkName();
+  const char* vkVersion();
+  const char* vkCopyright();
+  const char* vkAuthor();
+  const char* vkEmail();
+  const char* vgCopyright();
+  /* these fns return values held in private vars */
+  QString vgdocDir();
   QString vkdocDir();
   QString imgDir();
-	QString rcDir();
-	QString logsDir();
-	QString dbaseDir();
-	QString suppDir();
-	QPixmap pixmap( QString pixfile );
+  QString rcDir();
+  QString logsDir();
+  QString dbaseDir();
+  QString suppDir();
+  QPixmap pixmap( QString pixfile );
 
-	QStringList modFlags( VkObject* obj );
+  QStringList modFlags( VkObject* obj );
 
-	VkObjectList vkObjList();
-	/* returns a vkObject based on its name */
-	VkObject* vkObject( const QString& obj_name );
-	/* returns a vkObject based on its ObjectId */
-	VkObject* vkObject( int tvid, bool tools_only=false );
+  VkObjectList vkObjList();
+  /* returns a vkObject based on its name */
+  VkObject* vkObject( const QString& obj_name );
+  /* returns a vkObject based on its ObjectId */
+  VkObject* vkObject( int tvid, bool tools_only=false );
 
   /* returns a string of selected comma-separated suppressions files
      with marker flag removed */
-	QString selSuppFiles( const QString &pKey, const QString &pGroup );
+  QString selSuppFiles( const QString &pKey, const QString &pGroup );
 
   /* read fns ---------------------------------------------------------- */
   QString rdEntry( const QString &pKey, const QString &pGroup );
@@ -114,8 +123,8 @@ private:
                 BadRcFile, BadRcVersion, CreateRcFile, Fail };
   void sync();
 
-	bool checkDirs();
-	bool checkPaths();
+  bool checkDirs();
+  bool checkPaths();
   void mkConfigFile( bool rm=false );
 
   void writebackConfig();
@@ -124,41 +133,45 @@ private:
   RetVal parseFile();
   RetVal checkAccess() const;
 
-	/* creates the various VkObjects and initialises their options,
-		 ready for cmd-line parsing (if any). */
-	bool initVkObjects();
+  /* creates the various VkObjects and initialises their options,
+     ready for cmd-line parsing (if any). */
+  bool initVkObjects();
 
 private:
   char sep;
   bool mDirty;
-	bool newConfigFile;
+  bool newConfigFile;
 
-	/* path to the config dir */
-  QString  rcPath;
-	/* where the config file lives */
-  QString  rcFileName;
-	/* where valkyrie lives */
-  QString  mPackagePath;
-	/* path to docs dir */
-	QString vkdocPath;
-	/* FIXME: this is a kludge
-		 path to valgrind docs dir */
-	QString vgdocPath;
-	/* path to images */
-	QString imgPath;
-	/* path to log dir */
-	QString logsPath;
-	/* path to dbase dir */
-	QString dbasePath;
-	/* path to user's suppression files dir.
-		 default is ~/.valkyrie-X.X.X/suppressions */
-	QString suppPath;
+	QCString vk_name;
+	QCString vk_Name;
+	QCString vk_version;
+	QCString vk_copyright;
+	QCString vk_author;
+	QCString vk_email;
+	QCString vg_copyright;
 
-	/* the config dict */
-  EntryMap mEntryMap;
+  QString mPackagePath;     /* valkyrie's install dir */
+  QString vkdocPath;        /* path to valkyrie docs dir */
+  QString vgdocPath;        /* path to valgrind docs dir */
+  QString imgPath;          /* path to images */
 
-	/* list of the various objects */
-	VkObjectList vkObjectList;
+  QString rcPath;           /* path to ~/valkyrie=X.X.X dir */
+  QString rcFileName;       /* where valkyrierc lives */
+  QString logsPath;         /* path to log dir */
+  QString dbasePath;        /* path to dbase dir */
+  /* path to user's suppression files dir.
+     default is ~/.valkyrie-X.X.X/suppressions */
+  QString suppPath;
+
+  EntryMap mEntryMap;       /* the config dict */
+
+  /* list of the various objects */
+  VkObjectList vkObjectList;
 };
+
+
+
+/* Globally available object ------------------------------------------- */
+extern VkConfig* vkConfig;
 
 #endif

@@ -7,7 +7,6 @@
 #include <qdir.h>
 #include <qstylefactory.h>
 
-#include "vk_include.h"
 #include "vk_utils.h"              // vk_assert(), parseCmdArgs()
 #include "vk_config.h"             // VkConfig
 #include "vk_msgbox.h"             // vkFatal()
@@ -88,8 +87,6 @@ int main ( int argc, char* argv[] )
      Check the configuration dir+file ~/.PACKAGE/PACKAGErc is present,
      and paths are set correctly. If the rc file is corrupted or
      missing or it's an old version, inform user, and (re)create it. 
-     The very first time valkyrie is run, tries to find where valgrind
-     lives; if fails, asks user; checks the version is okay.
      Initialises the various valkyrie / valgrind tool objects */
   bool ok = false;
   vkConfig = new VkConfig( &ok );
@@ -98,7 +95,6 @@ int main ( int argc, char* argv[] )
     goto cleanup_and_exit;
   }
   vk_assert( vkConfig != 0 );
-
 
   /* Command-line parsing ---------------------------------------------- 
      If no command-line flags are present, skip parsing.  Assume that

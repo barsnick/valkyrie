@@ -8,7 +8,6 @@
 #include <qtimer.h>
 
 #include "tool_view.h"
-#include "vk_include.h"
 #include "vk_config.h"
 #include "vk_msgbox.h"
 

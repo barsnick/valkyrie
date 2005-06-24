@@ -12,7 +12,6 @@
 #include <qfiledialog.h>
 
 #include "options_page.h"
-#include "vk_include.h"
 #include "vk_objects.h"
 #include "vk_utils.h"
 #include "vk_config.h"

@@ -4,7 +4,6 @@
  * --------------------------------------------------------------------- */
 
 #include "help_about.h"
-#include "vk_include.h"
 #include "vk_config.h"
 
 #include <qlabel.h>
@@ -43,7 +42,9 @@ bool TextEdit::load()
 	switch( tabId ) {
 		case HelpInfo::ABOUT_VK:
 		case HelpInfo::SUPPORT:
-			setText( ts.read().arg(vkCopyright()).arg(vkAuthor()) );
+			/* FIXME: remove this after xml-ing the valkyrie docs */
+      setText( ts.read().arg(vkConfig->vkCopyright())
+							          .arg(vkConfig->vkAuthor()) );
 			break;
 		case HelpInfo::ABOUT_QT:
 			setText( ts.read().arg(qVersion()) );
@@ -65,7 +66,7 @@ HelpInfo::~HelpInfo() { }
 HelpInfo::HelpInfo(  QWidget* parent, TabId tabid )  
   : QDialog( parent, "help_about", true )
 {
-	title.sprintf( "%s Information", vkName() );
+	title.sprintf( "%s Information", vkConfig->vkName() );
   setCaption( title );
 
   /* top layout */
@@ -83,7 +84,7 @@ HelpInfo::HelpInfo(  QWidget* parent, TabId tabid )
   /* app info */
   QString str; 
   QLabel* appName = new QLabel( this );
-	str.sprintf( "%s %s", vkName(), vkVersion() );
+	str.sprintf( "%s %s", vkConfig->vkName(), vkConfig->vkVersion() );
 	appName->setText( str );
   appName->setFont(QFont( "Times", 18, QFont::Bold) );
   appName->setFixedSize( appName->sizeHint() );
@@ -101,7 +102,7 @@ HelpInfo::HelpInfo(  QWidget* parent, TabId tabid )
     
   /* about_vk tab */
   aboutVk = new TextEdit( tabParent, ABOUT_VK, "about_vk" );
-	str.sprintf( "About %s", vkName() );
+	str.sprintf( "About %s", vkConfig->vkName() );
   tabParent->insertTab( aboutVk, str, ABOUT_VK );
 
   /* about qt tab */

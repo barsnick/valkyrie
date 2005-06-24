@@ -4,28 +4,13 @@
  */
 
 #include "vk_utils.h"
-#include "vk_include.h"
 #include "vk_config.h"
 
-#include <stdlib.h>                  // mkstemp()
+#include <stdlib.h>                 // mkstemp()
 #include <stdio.h>                  // printf and friends
 #include <stdarg.h>                 // va_start, va_end
 
 #include <qfile.h>
-
-
-
-/* install paths from configure, #defined in vk_include.h ------------- */
-const char* installPath() { return PREFIX;       }
-const char* vkname()      { return vk_name;      }
-const char* vkName()      { return Vk_Name;      }
-const char* vkVersion()   { return VK_VERSION;   }
-const char* vkCopyright() { return VK_COPYRIGHT; }
-const char* vkAuthor()    { return VK_AUTHOR;    }
-const char* vkEmail()     { return VK_EMAIL;     }
-const char* vgCopyright() { return VG_COPYRIGHT; }
-const char* vgExec()      { return VG_EXEC_PATH; }
-const char* vgSuppDir()   { return VG_SUPP_DIR;  }
 
 
 
@@ -64,7 +49,7 @@ void vk_assert_never_reached_fail( const char* file,
          "in %s:%u %s\n", file, line, fn );
   printf("Hopefully, you should never see this message.\n"
          "If you are, then Something Really Bad just happened.\n"
-         "Please report this bug to: %s\n", vkEmail() );
+         "Please report this bug to: %s\n", vkConfig->vkEmail() );
   printf("In the bug report, please send the the above text.\n"
          "Thanks.\n\n");
   exit(1);

@@ -4,14 +4,12 @@
  */
 
 #include "memcheck_view.h"
-#include "vk_include.h"
 #include "vk_config.h"
 #include "tb_memcheck_icons.h"
 #include "vk_utils.h"
 #include "async_process.h"
 #include "vk_msgbox.h"
 
-//#include <qapplication.h>
 #include <qcursor.h>
 #include <qfiledialog.h>
 #include <qheader.h>

@@ -57,7 +57,7 @@ VK_INSTALL_BIN=$VK_INSTALL_PREFIX/bin/
 
 
 #-------------------------------------------------------------------
-# initalize variables for other people's paths
+# initalize variables for other people's stuff
 #-------------------------------------------------------------------
 VG_EXEC_PATH=       # path to valgrind executable
 VG_SUPP_DIR=        # path to valgrind's suppressions dir
@@ -83,12 +83,12 @@ SUPPORTED=
 OPT_HELP=no
 OPT_VERBOSE=no
 
-CFG_SHARED=yes      # whether we are linking dynamically or statically
-CFG_THREAD=auto     # if [ auto | yes ] CONFIG += thread if libqt-mt* found
+CFG_SHARED=yes       # whether we are linking dynamically or statically
+CFG_THREAD=auto      # if [ auto | yes ] CONFIG += thread if libqt-mt* found
 
 # internal options
-CFG_DEBUG=no        # CONFIG += [ debug | release ]
-CFG_PROFILE=no      # if yes, add -pg to compiler flags
+CFG_DEBUG=no         # CONFIG += [ debug | release ]
+CFG_PROFILE=no       # if yes, add -pg to compiler flags
 
 XPLATFORM=
 PLATFORM=$QMAKESPEC
@@ -98,9 +98,16 @@ L_FLAGS=
 R_FLAGS=
 l_FLAGS=
 
-QMAKE_VARS=         # configuration hold-all to output to cache file
-QMAKE_CONFIG=       # CONFIG flags to pass to qmake -project
+QMAKE_VARS=          # configuration hold-all to output to cache file
+QMAKE_CONFIG=        # CONFIG flags
 
+QMAKE_CFLAGS=        # extra c flags to pass to the compiler
+QMAKE_CXXFLAGS=      # extra c++ flags to pass to the compiler
+
+QMAKE_LFLAGS=        # ??
+QMAKE_LIBS=          # name of the library, eg. '-lmysqlclient'
+QMAKE_LIBDIR_FLAGS=  # library search paths
+QMAKE_INCLUDEPATH=   # include search paths
 
 
 #-------------------------------------------------------------------
@@ -192,13 +199,13 @@ while [ "$#" -gt 0 ]; do
         VAL=`echo $1 | sed 's,-L,,'`
       fi
       L_FLAGS="$L_FLAGS -L${VAL}" ;;
-#    -R?*|-R)
-#      if [ "$1" = "-R" ] ; then
-#        shift ; VAL="$1"
-#      else
-#        VAL=`echo $1 | sed 's,-R,,'`
-#      fi
-#      R_FLAGS="$R_FLAGS \$\${QMAKE_RPATH}${VAL}" ;;
+    -R?*|-R)
+      if [ "$1" = "-R" ] ; then
+        shift ; VAL="$1"
+      else
+        VAL=`echo $1 | sed 's,-R,,'`
+      fi
+      R_FLAGS="$R_FLAGS \$\${QMAKE_RPATH}${VAL}" ;;
     -l?*)
       VAL=`echo $1 | sed 's,-l,,'`
       l_FLAGS="$l_FLAGS -l${VAL}" ;;
@@ -206,9 +213,7 @@ while [ "$#" -gt 0 ]; do
     --debug | -debug)
       CFG_DEBUG=yes ;;
     --profile | -profile)
-      CFG_PROFILE=yes
-      QMAKE_VARS="$QMAKE_VARS QMAKE_CFLAGS+=-pg QMAKE_CXXFLAGS+=-pg"
-      QMAKE_VARS="$QMAKE_VARS QMAKE_LFLAGS+=-pg" ;;
+      CFG_PROFILE=yes ;;
     # anything else
     *)
       OPT_HELP=yes
@@ -381,8 +386,6 @@ if [ -z "$QT_RESULT" ] ; then
   exit 1
 fi
 
-# set this immediately, if not sooner
-#QMAKE_VARS="$QMAKE_VARS QTDIR=$QT_DIR"
 
 #-------------------------------------------------------------------
 # where is valgrind ?
@@ -448,47 +451,7 @@ if [ -r $VK_CACHE ]; then
 fi
 
 # delete the temporary cache
-#[ -f $VK_CACHE ] && rm -f $VK_CACHE
-
-# stash our options in 'QMAKE_VARS' for output to .qmake.cache later
-QMAKE_VARS="$QMAKE_VARS QMAKE_MOC=$QT_MOC"
-#QMAKE_VARS="$QMAKE_VARS \"QMAKE_UIC=$QT_UIC -L \$\$QT_BUILD_TREE/plugins\""
-QMAKE_VARS="$QMAKE_VARS QMAKE_UIC=$QT_UIC"
-QMAKE_VARS="$QMAKE_VARS QMAKE_QMAKE=$QT_QMAKE"
-QMAKE_VARS="$QMAKE_VARS QMAKE_INCDIR_QT=$QT_DIR/include"
-QMAKE_VARS="$QMAKE_VARS QMAKE_LIBDIR_QT=$QT_DIR/lib"
-QMAKE_VARS="$QMAKE_VARS QMAKE_RTLDIR_QT=$QT_DIR/lib"
-if [ -n "$MYSQL_LIB" ] && [ -n "$MYSQL_LIB_PATH" ] ; then
-  QMAKE_VARS="$QMAKE_VARS QMAKE_LIBDIR_FLAGS+=$MYSQL_LIB_PATH"
-  QMAKE_VARS="$QMAKE_VARS LIBS+=$MYSQL_LIB"
-  QMAKE_VARS="$QMAKE_VARS INCLUDEPATH+=$MYSQL_INC"
-fi
-# install stuff
-QMAKE_VARS="$QMAKE_VARS QT_INSTALL_PREFIX=${VK_INSTALL_PREFIX}"
-QMAKE_VARS="$QMAKE_VARS docs.path=${VK_INSTALL_DOCS}"
-#QMAKE_VARS="$QMAKE_VARS \"headers.path=${QT_INSTALL_HEADERS}\""
-#QMAKE_VARS="$QMAKE_VARS \"plugins.path=${QT_INSTALL_PLUGINS}\""
-#QMAKE_VARS="$QMAKE_VARS \"libs.path=${QT_INSTALL_LIBS}\""
-QMAKE_VARS="$QMAKE_VARS bins.path=${VK_INSTALL_BIN}"
-#QMAKE_VARS="$QMAKE_VARS \"data.path=${QT_INSTALL_DATA}\""
-#QMAKE_VARS="$QMAKE_VARS \"translations.path=${QT_INSTALL_TRANSLATIONS}\""
-
-
-
-#-------------------------------------------------------------------
-# create .qmake.cache for saving all configuration options
-#-------------------------------------------------------------------
-CACHEFILE=$relpath/.qmake.cache
-[ -f $CACHEFILE ] && rm -f $CACHEFILE
-cat >>$CACHEFILE<<_VKEOF
-CMDLINE=$relpath/$relconf $OPT_CMDLINE
-QT_SOURCE_TREE=$VK_SOURCE_TREE
-QT_BUILD_TREE=$VK_BUILD_TREE
-QMAKE_ABSOLUTE_SOURCE_ROOT=\$\$QT_SOURCE_TREE
-_VKEOF
-#QMAKE_ABSOLUTE_SOURCE_ROOT=$VK_SOURCE_TREE
-#QMAKE_ABSOLUTE_SOURCE_PATH=\$\$QT_SOURCE_TREE
-
+[ -f $VK_CACHE ] && rm -f $VK_CACHE
 
 
 #-------------------------------------------------------------------
@@ -501,15 +464,10 @@ vk_include_h=$outpath/src/vk_include.h
 
 # get the date
 today=`date`
-# set DEBUG = CFG_DEBUG
-debug=1
-if [ "$CFG_DEBUG" = "yes" ] ; then
-  debug=0
-fi
 
 cat > $vk_include_h <<_INC_EOF
 /* ---------------------------------------------------------------------- 
- * Main include file                                         vk_include.h
+ * This file is only included by vk_config.cpp               vk_include.h
  * Automatically generated by configure on $today
  * Do not edit this file - all changes will be lost
  * ----------------------------------------------------------------------
@@ -518,7 +476,7 @@ cat > $vk_include_h <<_INC_EOF
 #ifndef __VK_INCLUDE_H
 #define __VK_INCLUDE_H
 
-/* Install paths ------------------------------------------------------- */
+/* valkyrie install paths ---------------------------------------------- */
 #define PREFIX       "$VK_INSTALL_PREFIX"
 #define VK_DOC_PATH  "/doc/"
 #define VG_DOC_PATH  "/doc/vg-html/"
@@ -526,12 +484,15 @@ cat > $vk_include_h <<_INC_EOF
 #define DBASE_DIR    "/dbase/"
 #define LOGS_DIR     "/logs/"
 #define SUPPS_DIR    "/suppressions/"
+/* valgrind paths ------------------------------------------------------ */
+#define VG_EXEC_PATH  "$VG_EXEC_PATH"
+#define VG_SUPP_DIR   "$VG_SUPP_DIR"
 
-/* Name ---------------------------------------------------------------- */
-#define vk_name      "$vk_name"
-#define Vk_Name      "$Vk_Name"
+/* names --------------------------------------------------------------- */
+#define Vk_Name      "$vk_name"
+#define VK_NAME      "$Vk_Name"
 
-/* Version, as 'MAJOR-NUMBER.MINOR-NUMBER[.PATCHLEVEL]'.
+/* version, as 'MAJOR-NUMBER.MINOR-NUMBER[.PATCHLEVEL]'.
    A version in the form 'YYYY-MM-DD' is a release-of-the-day, 
    i.e. a snapshot of the current development tree --------------------- */
 #define VK_VERSION    "$VK_VERSION"
@@ -540,29 +501,6 @@ cat > $vk_include_h <<_INC_EOF
 #define VK_EMAIL      "$VK_EMAIL"
 /* so we do not have to update hard-wired-in dates for valgrind */
 #define VG_COPYRIGHT  "$VG_COPYRIGHT"
-
-/* Other paths we need to know about ----------------------------------- */
-#define VG_EXEC_PATH  "$VG_EXEC_PATH"
-#define VG_SUPP_DIR   "$VG_SUPP_DIR"
-
-/* These functions are defined in vk_utils.cpp ------------------------- */
-const char* installPath();
-const char* vkname();
-const char* vkName();
-const char* vkVersion();
-const char* vkCopyright();
-const char* vkAuthor();
-const char* vkEmail();
-const char* vgCopyright();
-const char* vgExec();
-const char* vgSuppDir();
-
-#define DEBUG_ON $debug
-#define oink(n) printf( "Oink %d\n", n )
-
-/* Globally available object ------------------------------------------- */
-class VkConfig;
-extern VkConfig* vkConfig;
 
 #endif
 _INC_EOF
@@ -623,9 +561,6 @@ if [ -d "$XPLATFORM" ]; then
 else
   XQMAKESPEC="$QT_DIR/mkspecs/${XPLATFORM}"
 fi
-#if [ "$QMAKESPEC" = "$XQMAKESPEC" ]; then
-#  QMAKE_CONFIG="$QMAKE_CONFIG nocrosscompiler"
-#fi
 
 # check specified platforms are supported --------------------------
 if [ '!' -d "$QMAKESPEC" ]; then
@@ -683,34 +618,20 @@ if [ '!' -z "$I_FLAGS" ]; then
   extra_flags="$extra_flags Include paths ........ $I_FLAGS"
 fi
 
-#if [ '!' -z "$R_FLAGS" ]; then
-#  if grep QMAKE_RPATH $XQMAKESPEC/qmake.conf >/dev/null; then
-#    echo # Using -R/-rpath, so no need to warn
-#  else
-#    echo "ERROR: -R cannot be used on this platform as \$QMAKE_RPATH is"
-#    echo "       undefined."
-#    echo
-#    exit 1
-#  fi
-#  QMAKE_VARS="$QMAKE_VARS QMAKE_LFLAGS+=$R_FLAGS"
-#  extra_flags="$extra_flags Room flags ........... $R_FLAGS"
-#fi
+if [ '!' -z "$R_FLAGS" ]; then
+  if grep QMAKE_RPATH $XQMAKESPEC/qmake.conf >/dev/null; then
+    echo # Using -R/-rpath, so no need to warn
+  else
+    echo "ERROR: -R cannot be used on this platform as \$QMAKE_RPATH is"
+    echo "       undefined."
+    echo
+    exit 1
+  fi
+  QMAKE_VARS="$QMAKE_VARS QMAKE_LFLAGS+=$R_FLAGS"
+  extra_flags="$extra_flags Room flags ........... $R_FLAGS"
+fi
 
 QMAKE_VARS="$QMAKE_VARS QMAKESPEC=$QMAKESPEC"
-
-#QMAKE_VARS="$QMAKE_VARS \"QMAKE_MOC=$QT_MOC\""
-#QMAKE_VARS="$QMAKE_VARS \"QMAKE_UIC=$QT_UIC -L \$\$QT_BUILD_TREE/plugins\""
-#QMAKE_VARS="$QMAKE_VARS \"QMAKE_QMAKE=$QT_QMAKE\""
-#QMAKE_VARS="$QMAKE_VARS \"QMAKE_INCDIR_QT=$QT_DIR/include\""
-#QMAKE_VARS="$QMAKE_VARS \"QMAKE_LIBDIR_QT=$QT_DIR/lib\""
-#QMAKE_VARS="$QMAKE_VARS \"QMAKE_RTLDIR_QT=$QT_DIR/lib\""
-#QMAKE_VARS="$QMAKE_VARS \"QT_INSTALL_PREFIX=${QT_DIR}\""
-
-# save to .qmake.cache
-#echo "QMAKE_VARS=$QMAKE_VARS" >> $CACHEFILE
-for var in $QMAKE_VARS; do
-  echo $var >> $CACHEFILE
-done
 
 
 #---------------------------------------------------------------------------
@@ -757,82 +678,127 @@ echo
 echo "Creating project file $vk_name.pro..."
 # name of this project file
 VK_PROJECT=$relpath/$vk_name.pro
-if [ -f $VK_PROJECT ]; then
-  rm -f $VK_PROJECT
-fi
+[ -f $VK_PROJECT ] && rm -f $VK_PROJECT
 
-# compose the list of stuff to give qmake -project
+# compose the configuration flags
+QMAKE_CONFIG="qt x11"
 if [ "$CFG_DEBUG" = "yes" ]; then
-  QMAKE_CONFIG="$QMAKE_CONFIG debug"
-  QMAKE_CONFIG="$QMAKE_CONFIG warn_on"
+  QMAKE_CONFIG="$QMAKE_CONFIG debug warn_on"
+  DEBUG_FLAGS="-O0 -g -Wundef -Wredundant-decls -Wno-unreachable-code -Werror -fno-inline"
+  QMAKE_CFLAGS="$QMAKE_CFLAGS $DEBUG_FLAGS"
+  QMAKE_CXXFLAGS="$QMAKE_CXXFLAGS $DEBUG_FLAGS"
 elif [ "$CFG_DEBUG" = "no" ]; then
-  QMAKE_CONFIG="$QMAKE_CONFIG release"
-  QMAKE_CONFIG="$QMAKE_CONFIG warn_off"
-fi
-if [ "$CFG_SHARED" = "yes" ]; then
-  QMAKE_CONFIG="$QMAKE_CONFIG dll"
-elif [ "$CFG_SHARED" = "no" ]; then
-  QMAKE_CONFIG="$QMAKE_CONFIG staticlib"
+  QMAKE_CONFIG="$QMAKE_CONFIG release warn_off"
 fi
 if [ "$CFG_THREAD" = "yes" ]; then
   QMAKE_CONFIG="$QMAKE_CONFIG thread"
 fi
+if [ "$QMAKESPEC" = "$XQMAKESPEC" ]; then
+  QMAKE_CONFIG="$QMAKE_CONFIG nocrosscompiler"
+fi
 
-# save to cache file
-echo "CONFIG += $QMAKE_CONFIG" >> $CACHEFILE
+# compose the compiler flags
+if [ "$CFG_PROFILE" = "yes" ] ; then
+  QMAKE_CFLAGS="$QMAKE_CFLAGS -pg"
+  QMAKE_CXXFLAGS="$QMAKE_CXXFLAGS -pg"
+  QMAKE_LFLAGS="$QMAKE_LFLAGS -pg"
+fi
+
+# compose any extra libs
+if [ -n "$MYSQL_LIB" ] && [ -n "$MYSQL_LIB_PATH" ] ; then
+  QMAKE_LIBS="$QMAKE_LIBS $MYSQL_LIB"
+  QMAKE_LIBDIR_FLAGS="$QMAKE_LIBDIR_FLAGS $MYSQL_LIB_PATH"
+  QMAKE_INCLUDEPATH="$QMAKE_INCLUDEPATH $MYSQL_INC"
+fi
 
 
-# compose the configuration for the project file
-QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"TEMPLATE = app\"";
-QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"CONFIG   += qt x11 $QMAKE_CONFIG\""
-QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"TARGET      = $vk_name\""
-QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"DESTDIR     = ./bin\""
-QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"MOC_DIR     = ./.moc\""
-QMAKE_PROJ_OPTS="$QMAKE_PROJ_OPTS \"OBJECTS_DIR = ./.obj\""
+# save to tmp.pro
+cat > $relpath/tmp.pro <<_PRO_EOF
+# Project file to create a Makefile
+# Automatically generated by configure on $today
 
-# build a project file based on the configuration
-EXEC="$QT_QMAKE -project -t app -nopwd ./src ./icons/ $QMAKE_PROJ_OPTS -o $VK_PROJECT"
+# the kind of Makefile to create
+TEMPLATE = app
+CONFIG   = $QMAKE_CONFIG
 
+# target name and destination, + where to put the moc and object files
+TARGET      = $vk_name
+DESTDIR     = ./bin
+MOC_DIR     = ./.moc
+OBJECTS_DIR = ./.obj
+
+# compiler flags
+QMAKE_CFLAGS   += $QMAKE_CFLAGS
+QMAKE_CXXFLAGS += $QMAKE_CXXFLAGS
+QMAKE_LFLAGS   += $QMAKE_LFLAGS
+
+# additional libraries and includes
+LIBS += $QMAKE_LIBS
+QMAKE_LIBDIR_FLAGS += $QMAKE_LIBDIR_FLAGS
+INCLUDEPATH += $QMAKE_INCLUDEPATH
+
+# paths to qt things
+QMAKE_MOC   = $QT_MOC
+#QMAKE_UIC  = $QT_UIC
+QMAKE_UIC   = $QT_UIC -L $QT_DIR/plugins
+QMAKE_QMAKE = $QT_QMAKE
+QMAKE_INCDIR_QT = $QT_DIR/include
+QMAKE_LIBDIR_QT = $QT_DIR/lib
+QMAKE_RTLDIR_QT = $QT_DIR/lib
+QMAKESPEC       = $QT_DIR/mkspecs/linux-g++
+
+# paths to valkyrie things
+QMAKE_ABSOLUTE_SOURCE_ROOT = $VK_SOURCE_TREE
+#QMAKE_ABSOLUTE_SOURCE_PATH = $VK_SOURCE_TREE
+QT_SOURCE_TREE    = $VK_SOURCE_TREE
+QT_BUILD_TREE     = $VK_BUILD_TREE
+QT_INSTALL_PREFIX = $VK_INSTALL_PREFIX
+docs.path = $VK_INSTALL_DOCS
+bins.path = $VK_INSTALL_BIN
+
+_PRO_EOF
+
+
+# generate the list of headers + sources
+EXEC="$QT_QMAKE -project -nopwd ./src ./icons/ -o $relpath/tmp.sources"
 /bin/sh -c "$EXEC"
 
+# concatenate the two files ...
+EXEC="cat tmp.pro tmp.sources > $VK_PROJECT"
+/bin/sh -c "$EXEC"
+
+# ... and delete the temporary files
+rm -f $relpath/tmp.pro
+rm -f $relpath/tmp.sources
 
 
 #---------------------------------------------------------------------------
 # build a Makefile based on the configuration
 #---------------------------------------------------------------------------
+echo "Creating Makefile from $vk_name.pro..."
+
 EXEC=""
-
-QMAKE_PROJECT=$relpath/$vk_name.pro
-
-echo "Creating Makefile..."
-
-SPEC=$XQMAKESPEC 
 OUTDIR=$outpath
-QMAKE_SPEC_ARGS="-spec $SPEC"
-#EXEC="$QT_QMAKE -makefile $QMAKE_SPEC_ARGS -o $OUTDIR $QMAKE_PROJECT"
-EXEC="$QT_QMAKE -makefile -cache $CACHEFILE $QMAKE_SPEC_ARGS -o $OUTDIR $QMAKE_PROJECT"
-#echo "EXEC = $EXEC"
+#EXEC="$QT_QMAKE -makefile -o Makefile $VK_PROJECT"
+EXEC="$QT_QMAKE -makefile -spec $XQMAKESPEC -o Makefile $VK_PROJECT"
+echo "EXEC = $EXEC"
 
 [ -f "${OUTDIR}/Makefile" ] && chmod +rw ${OUTDIR}/Makefile
 /bin/sh -c "$EXEC"
 
-# aggravatingly, qt only prints the full /path/to/qt for its own Makefiles, 
-# so have to do a search-and-replace to get the full paths in (grrr)
-##mkfile0=${OUTDIR}/Makefile
-##mkfile1=${OUTDIR}/Makefile.1
-##mkfile2=${OUTDIR}/Makefile.2
-
-# replace '$(QTDIR)' with contents of $QT_DIR
-##cat $mkfile0 | sed "s,\$(QTDIR),$QT_DIR,g" >>$mkfile1
-
-# replace 'QMAKE = qmake' with 'QMAKE = /path/to/qmake'
-##cat $mkfile1 | sed "s,= qmake,= $QT_QMAKE," >>$mkfile2
-
-# delete all temporary files
-##mv -f $mkfile2 $mkfile0
-##rm -f $mkfile1
+# delete temporary files
 rm -f config.log 
 
+
+
+#---------------------------------------------------------------------------
+# save the configure command to config.status
+#---------------------------------------------------------------------------
+cfg_status=$outpath/config.status
+[ -f $cfg_status ] && rm -f $cfg_status
+echo "#!/bin/sh" >$cfg_status
+echo $relpath/$relconf $OPT_CMDLINE >>$cfg_status
+chmod +x $cfg_status
 
 
 #--------------------------------------------------------------------------
@@ -843,5 +809,5 @@ echo Valkyrie is now configured for building - just run $MAKE.
 echo To reconfigure, run $MAKE distclean and ./configure.
 echo
 echo Your command line and configuration options have been saved 
-echo in $CACHEFILE.
+echo in $cfg_status.
 echo 

@@ -124,8 +124,8 @@ public:
     FONT_USER     = 7,
     SRC_EDITOR    = 8,
     SRC_LINES     = 9,
-    VG_EXEC       = 10,          // /usr/bin/valgrind
-    VG_DOCS_DIR   = 11,          // /usr/share/doc/packages/valgrind/
+    VG_EXEC       = 10,      // /usr/bin/valgrind
+    VG_SUPPS      = 11,      // /usr/share/doc/packages/valgrind/
     /* list of user suppressions _and_ default suppression, inc. path */
     ALL_SUPPS     = 12,
     /* just the currently selected suppressions */

@@ -6,7 +6,6 @@
 
 #include "hand_book.h"
 #include "tb_handbook_icons.h"
-#include "vk_include.h"
 #include "vk_config.h"
 
 #include <qfiledialog.h>
@@ -27,7 +26,7 @@ HandBook::~HandBook() { }
 HandBook::HandBook( QWidget* parent, const char* name )
   : QMainWindow( parent, name, WDestructiveClose )
 {
-	caption.sprintf( "%s HandBook", vkName() );
+	caption.sprintf( "%s HandBook", vkConfig->vkName() );
   setCaption( caption );
   setIcon( QPixmap(help_xpm) );
 

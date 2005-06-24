@@ -4,7 +4,6 @@
  */
 
 #include "vk_objects.h"
-#include "vk_include.h"        // vkConfig
 #include "vk_config.h"
 #include "vk_utils.h"          // vk_assert(), vk_strcmp(), 
 #include "vk_popt_option.h"    // PERROR* and friends 
@@ -284,18 +283,22 @@ Valkyrie::Valkyrie()
           "Extra lines shown above/below the target line", "",
           urlNone );
   /*--------------------------------------------------------------- */
+	/* path to valgrind executable (found by configure) */
   addOpt( VG_EXEC,     Option::NOT_POPT,   Option::LEDIT, 
           "valkyrie",  '\0',               "vg-exec",
-          "",          "",                 "/usr/bin/valgrind",
+          "",          "",                 "",
           "Valgrind:", "",                 urlNone );
-  addOpt( VG_DOCS_DIR, Option::NOT_POPT,   Option::LEDIT, 
-          "valkyrie",  '\0',               "vg-docs-dir",
-          "",          "",                 "/usr/share/doc/valgrind/",
-          "Valgrind Docs:",   "",          urlNone );
+	/* path to valgrind's supp files dir (found by configure) */
+  addOpt( VG_SUPPS,    Option::NOT_POPT,   Option::LEDIT, 
+          "valkyrie",  '\0',               "vg-supps",
+          "",          "",                 "",
+          "Supp'ns:",  "",                 urlNone );
+	/* this holds a list of *all* suppression files ever found */
   addOpt( ALL_SUPPS,   Option::NOT_POPT,   Option::NONE, 
           "valkyrie",  '\0',               "all-supps",
           "",          "",                 "",
           "",          "",                 urlNone );
+	/* this holds a list of supp files currently being used */
   addOpt( SEL_SUPPS,   Option::NOT_POPT,   Option::NONE, 
           "valkyrie",  '\0',               "sel-supps",
           "",          "",                 "",
@@ -638,8 +641,8 @@ Memcheck::Memcheck()
   addOpt( SUPPS,        Option::ARG_STRING, Option::NONE,
           "memcheck",   '\0',              "suppressions",
           "<file1,...>",
-          "default.supp|xfree-3.supp|xfree-4.supp|glibc-2.1.supp|glibc-2.2.supp|glibc-2.3.supp",
-          "default.supp",
+          //"default.supp|xfree-3.supp|xfree-4.supp|glibc-2.1.supp|glibc-2.2.supp|glibc-2.3.supp",
+          "",           "default.supp",
           "Use error-suppresion file(s):",
           "suppress errors described in suppressions file(s)", 
           urlNone );

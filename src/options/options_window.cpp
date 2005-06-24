@@ -13,7 +13,6 @@
 #include <qstatusbar.h>
 
 #include "options_window.h"
-#include "vk_include.h"
 #include "vk_utils.h"
 #include "vk_objects.h"
 #include "vk_config.h"
@@ -78,7 +77,7 @@ OptionsWindow::~OptionsWindow()
 OptionsWindow::OptionsWindow( QWidget* parent ) 
   : QMainWindow( parent, "options_win" )
 {
-	capt.sprintf("%s Options: ", vkName() );
+	capt.sprintf("%s Options: ", vkConfig->vkName() );
   setCaption( capt );
   statusBar()->setSizeGripEnabled( false );
 
@@ -190,18 +189,18 @@ OptionsPage * OptionsWindow::mkOptionsPage( int catid )
   OptionsPage* page = 0;
 
   switch ( obj->id() ) {
-		case VkObject::VALKYRIE:
-			//page = (OptionsPage*)new ValkyrieOptionsPage( this, );
-			break;
-		case VkObject::VALGRIND:
-			//page = (OptionsPage*)new ValgrindOptionsPage( this );
-			break;
-		case VkObject::MEMCHECK:
-			//page = (OptionsPage*)new MemcheckOptionsPage( this );
-			break;
-		case VkObject::CACHEGRIND:
-			//page = (OptionsPage*)new CachegrindOptionsPage( this );
-			break;
+		//case VkObject::VALKYRIE:
+		//	page = (OptionsPage*)new ValkyrieOptionsPage( this, );
+		//	break;
+		//case VkObject::VALGRIND:
+		//	page = (OptionsPage*)new ValgrindOptionsPage( this );
+		//	break;
+		//case VkObject::MEMCHECK:
+		//	page = (OptionsPage*)new MemcheckOptionsPage( this );
+		//	break;
+		//case VkObject::CACHEGRIND:
+		//	page = (OptionsPage*)new CachegrindOptionsPage( this );
+		//	break;
 		case VkObject::MASSIF:
 			page = (OptionsPage*)new MassifOptionsPage( this, obj );
 			break;

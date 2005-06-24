@@ -1,5 +1,4 @@
 #include "vk_objects.h"
-#include "vk_include.h"
 #include "vk_utils.h"
 #include "vk_popt.h"
 #include "vk_config.h"
@@ -15,7 +14,7 @@ int showHelp( vkPoptContext con, int key )
   switch ( key ) {
 
   case 'v':
-    printf("%s-%s\n", vkName(), vkVersion() );
+    printf("%s-%s\n", vkConfig->vkName(), vkConfig->vkVersion() );
     break;
 
   case 'h':
@@ -23,14 +22,16 @@ int showHelp( vkPoptContext con, int key )
     printf( "\n%s is copyright %s %s\n"
 						"and licensed under the GNU General Public License, version 2.\n"
 						"Bug reports, feedback, praise, abuse, etc, to <%s>\n\n",
-						vkName(), vkCopyright(), vkAuthor(), vkEmail() );
+						vkConfig->vkName(), vkConfig->vkCopyright(), 
+						vkConfig->vkAuthor(), vkConfig->vkEmail() );
     break;
 
   case 'V':
     vkPoptPrintHelp( con, stdout, NULL );
     printf("\n%s is copyright %s %s\n", 
-					 vkName(), vkCopyright(), vkAuthor() );
-    printf("Valgrind is copyright %s\n\n", vgCopyright() );
+					 vkConfig->vkName(), 
+					 vkConfig->vkCopyright(), vkConfig->vkAuthor() );
+    printf("Valgrind is copyright %s\n\n", vkConfig->vgCopyright() );
     break;
 
   }

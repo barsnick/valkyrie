@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------
-	 Various utility functions                                  vk_utils.h
-	 ---------------------------------------------------------------------
-*/
+ * Various utility functions                                  vk_utils.h
+ * ---------------------------------------------------------------------
+ */
 
 #ifndef __VK_UTILS_H
 #define __VK_UTILS_H
@@ -9,12 +9,18 @@
 #include <qstring.h>
 
 
-/* vk_assert can never be turned off :) ------------------------------- */
+#define DEBUG_ON 1
+
 #define VK_STRINGIFY_ARG(contents) #contents
 #define vkStringify(macro_or_string) VK_STRINGIFY_ARG(macro_or_string)
 #define VK_STRLOC  __FILE__ ":" vkStringify(__LINE__)
 #define VK_STRING(__str)  #__str
 
+#define oink(n) printf("oink %d\n", n )
+#define oynk    printf("oynk %s:%d\n", __FILE__, __LINE__)
+
+
+/* vk_assert can never be turned off :) ------------------------------- */
 extern void vk_assert_fail( const char* expr, const char* file, 
                             unsigned int line, const char* fn )
   __attribute__ ((__noreturn__));

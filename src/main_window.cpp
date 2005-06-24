@@ -14,7 +14,6 @@
 
 #include "main_window.h"
 #include "tb_mainwin_icons.h"
-#include "vk_include.h"
 #include "vk_config.h"
 #include "vk_utils.h"
 #include "vk_msgbox.h"
@@ -59,7 +58,7 @@ MainWindow::MainWindow() : QMainWindow( 0, "mainWindow" )
   valkyrie   = (Valkyrie*)vkConfig->vkObject( "valkyrie" );
   vk_assert( valkyrie != 0 );
 
-  setCaption( vkName() );
+  setCaption( vkConfig->vkName() );
   setIcon( vkConfig->pixmap( "valkyrie.xpm" ) );
   statusBar()->setSizeGripEnabled( false );
 

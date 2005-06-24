@@ -9,7 +9,6 @@
 #include <qpixmap.h>
 
 #include "intspinbox.h"
-#include "vk_include.h"
 #include "vk_utils.h"
 
 
