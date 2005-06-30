@@ -9,7 +9,7 @@ THREADING=$2
 QT_DIR=$3
 
 # minimum qt version we need
-QT_MIN_VERSION="3.2.0"
+QT_MIN_VERSION="3.0.0"
 
 # list of paths to search for qt 
 QT_DIR_SEARCH="/usr/lib/qt /usr/lib/qt3 /usr/local/qt /usr/local/qt3 /usr/share/qt /usr/share/qt3"

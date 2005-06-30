@@ -92,19 +92,12 @@ CFG_PROFILE=no       # if yes, add -pg to compiler flags
 
 XPLATFORM=
 PLATFORM=$QMAKESPEC
-D_FLAGS=
-I_FLAGS=
-L_FLAGS=
-R_FLAGS=
-l_FLAGS=
 
-QMAKE_VARS=          # configuration hold-all to output to cache file
 QMAKE_CONFIG=        # CONFIG flags
 
 QMAKE_CFLAGS=        # extra c flags to pass to the compiler
 QMAKE_CXXFLAGS=      # extra c++ flags to pass to the compiler
-
-QMAKE_LFLAGS=        # ??
+QMAKE_LFLAGS=        # 
 QMAKE_LIBS=          # name of the library, eg. '-lmysqlclient'
 QMAKE_LIBDIR_FLAGS=  # library search paths
 QMAKE_INCLUDEPATH=   # include search paths
@@ -113,6 +106,7 @@ QMAKE_INCLUDEPATH=   # include search paths
 #-------------------------------------------------------------------
 # parse command line arguments
 #-------------------------------------------------------------------
+INVALID_ARG=none
 while [ "$#" -gt 0 ]; do
 
   CURRENT_OPT="$1"
@@ -128,22 +122,49 @@ while [ "$#" -gt 0 ]; do
       OPT_VERBOSE=yes ;;
     # installation paths
     --prefix=* | -prefix=*)
+      if [ ! -d $optarg ]; then
+        INVALID_ARG="--prefix: '$optarg'"
+      fi
       VK_INSTALL_PREFIX=$optarg ;;
-    --docdir=* | -docdir=*)
-      VK_INSTALL_DOCS=$optarg ;;
     --bindir=* | -bindir=*)
+      if [ ! -d $optarg ]; then
+        INVALID_ARG="--bindir: '$optarg'"
+      fi
       VK_INSTALL_BIN=$optarg ;;
+    --docdir=* | -docdir=*)
+      if [ ! -d $optarg ]; then
+        INVALID_ARG="--docdir: '$optarg'"
+      fi
+      VK_INSTALL_DOCS=$optarg ;;
     # program paths
     --vg-exec=* | -vg-exec=*)
       VG_EXEC_PATH=$optarg ;;
     --vg-supp=* | -vg-supp=*)
       VG_SUPP_PATH=$optarg ;;
-    --qtdir=* | -qtdir=*)
+    --qt-dir=* | -qt-dir=*)
       QT_DIR=$optarg ;;
     --mysql-lib=* | -mysql-lib=*)
       MYSQL_LIB=$optarg ;;
     --mysql-inc=* | -mysql-inc=*)
       MYSQL_INC=$optarg ;;
+    # compile options (might have multiple of these)
+    --shared | -shared)
+      CFG_SHARED=yes ;;
+    --static | -static)
+      CFG_SHARED=no ;;
+    --thread=* | -thread=*)
+      if [ "$optarg" = "yes" ] || [ "$optarg" = "no" ]; then
+        CFG_THREAD=$optarg
+      else
+        INVALID_ARG="--thread: '$optarg'"
+      fi ;;
+    --release | -release)
+      CFG_DEBUG=no ;;
+    # these two are really internal options
+    --debug | -debug)
+      CFG_DEBUG=yes ;;
+    --profile | -profile)
+      CFG_PROFILE=yes ;;
     # system options
     --platform=* | -platform=*)
       PLATFORM=$optarg
@@ -165,55 +186,6 @@ while [ "$#" -gt 0 ]; do
         unixware7-cc)  PLATFORM=unixware-cc    ;;
         unixware7-g++) PLATFORM=unixware-g++   ;;
       esac ;;
-    # compile options (might have multiple of these)
-    --thread=* | -thread=*)
-      if [ "$optarg" = "yes" ] || [ "$optarg" = "no" ]; then
-        CFG_THREAD=$optarg
-      else
-        OPT_HELP=yes
-      fi ;;
-    --release | -release)
-      CFG_DEBUG=no ;;
-    --shared | -shared)
-      CFG_SHARED=yes ;;
-    --static | -static)
-      CFG_SHARED=no ;;
-    -D?* | -D)
-      if [ "$1" = "-D" ] ; then
-        shift ; VAL="$1"
-      else
-        VAL=`echo $1 | sed 's,-D,,'`
-      fi
-      D_FLAGS="$D_FLAGS $VAL" ;;
-    -I?*|-I)
-      if [ "$1" = "-I" ] ; then
-        shift ; VAL="$1"
-      else
-        VAL=`echo $1 | sed 's,-I,,'`
-      fi
-      I_FLAGS="$I_FLAGS $VAL" ;;
-    -L?*|-L)
-      if [ "$1" = "-L" ] ; then
-        shift ; VAL="$1"
-      else
-        VAL=`echo $1 | sed 's,-L,,'`
-      fi
-      L_FLAGS="$L_FLAGS -L${VAL}" ;;
-    -R?*|-R)
-      if [ "$1" = "-R" ] ; then
-        shift ; VAL="$1"
-      else
-        VAL=`echo $1 | sed 's,-R,,'`
-      fi
-      R_FLAGS="$R_FLAGS \$\${QMAKE_RPATH}${VAL}" ;;
-    -l?*)
-      VAL=`echo $1 | sed 's,-l,,'`
-      l_FLAGS="$l_FLAGS -l${VAL}" ;;
-    # internal options (not documented in help)
-    --debug | -debug)
-      CFG_DEBUG=yes ;;
-    --profile | -profile)
-      CFG_PROFILE=yes ;;
     # anything else
     *)
       OPT_HELP=yes
@@ -226,6 +198,15 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
+#-------------------------------------------------------------------
+# see if we have anything in INVALID_ARG
+#-------------------------------------------------------------------
+if [ ! "$INVALID_ARG" = "none" ]; then
+  echo
+  echo "ERROR: Invalid arg given to $INVALID_ARG"
+  OPT_HELP=yes
+fi
+
 
 #-------------------------------------------------------------------
 # help: emit a usage message if -h flag given or something failed
@@ -234,60 +215,47 @@ if [ "$OPT_HELP" = "yes" ]; then
 
 cat <<_HPEOF
 
-'$relconf' configures $Vk_Name $VK_VERSION to adapt to many kinds of systems.
+Usage:  ./$relconf [-h] [-q] [-v] [--prefix=dir] [--bindir=dir] 
+  [--docdir=dir] [--vg-exec=] [--vg-supp=] [--qt-dir=] [--mysql-lib=] 
+  [--mysql-inc=] [--release] [--debug] [--profile] [--shared] [--static] 
+  [--thread=] [--platform=] 
 
-Usage: $0 [OPTION]... [VAR=VALUE]...
-
-To assign environment variables (e.g., CC, CFLAGS...), specify them as
-VAR=VALUE.  Defaults for the options are specified in brackets.
-The defaults [*] are usually acceptable. Here is a short explanation 
+Option defaults (*) are usually acceptable. Here is a short explanation 
 of each option:
 
-Configuration:
    -h, --help ............ Print this help and usage information
    -q, --quiet ........... Do not print 'checking... ' messages
  * -v, --verbose ......... Print verbose information about each step of
-                            the configure process
+                           the configure process
 
 Fine tuning of the installation directories (optional):
-By default, 'make install' will install all the files in 'PREFIX/bin',
-'PREFIX/doc' etc   You can specify an installation prefix other than 
-'PREFIX' using '--prefix', eg. '--prefix=$HOME' 
    --prefix=dir .......... This will install everything relative to dir
-                              [ default $VK_INSTALL_PREFIX ]
+                             [ default $VK_INSTALL_PREFIX ]
    --bindir=dir .......... Executables will be installed to dir
-                             [ default PREFIX/bin ]
-   --docdir=DIR .......... Documentation will be installed to dir
-                             [ default PREFIX/doc ]
+                             [ default $VK_INSTALL_PREFIX/bin ]
+   --docdir=dir .......... Documentation will be installed to dir
+                             [ default $VK_INSTALL_PREFIX/doc ]
 
 Program paths:
-   --vg-exec=PATH ........ Path to the Valgrind executable
-   --vg-supp=DIR ......... Valgrind suppression files directory
-   --qtdir=DIR ........... The Qt installation directory
-   --mysql-lib=LIB ....... Path to MySQL library
-                             [ -lmysqlclient ]
-   --mysql-inc=DIR ....... Path to MySQL include directory
+   --vg-exec=path ........ Path to the Valgrind executable
+   --vg-supp=dir ......... Path to Valgrind suppression files directory
+   --qt-dir=dir .......... Path to the Qt installation directory
+   --mysql-lib=dir ....... Path to MySQL library (-lmysqlclient)
+   --mysql-inc=dir ....... Path to MySQL include directory
 
 Compile options:
+ * --shared .............. Use a shared Qt library [libqt so]
+   --static .............. Use a static Qt library [libqt a]
+
+ * --thread=arg .......... Do / do not compile threading support
+                             [default=yes if libqt-mt found]
+
  * --release ............. Compile and link with debugging turned off
    --debug ............... Compile and link with debugging turned on
    --profile ............. Compile and linke with profiling turned on
 
- * --shared .............. Use a shared Qt library [libqt so]
-   --static .............. Use a static Qt library [libqt a]
-
- * --thread=ARG .......... Do / do not compile threading support
-                             [default=yes if libqt-mt found]
-
-   -Dstring .............. Add an explicit define to the preprocessor
-   -Istring .............. Add an explicit include path
-   -Lstring .............. Add an explicit library path
-   -Rstring .............. Add an explicit dynamic library runtime search path
-   -lstring .............. Add an explicit library
-
 System options:
-   --platform=TARGET ... The operating system and compiler you are building
-                            on [$PLATFORM]
+   --platform=target ... The operating system / compiler you are building on
 
 _HPEOF
   exit 0
@@ -381,7 +349,7 @@ _VKEOF
 $cfgtests/qt.test $VK_CACHE $CFG_THREAD $QT_DIR && QT_RESULT="$QT_RESULT qt"
 if [ -z "$QT_RESULT" ] ; then
   echo "   Cannot continue: Qt is a sine qua non"
-  echo "   Rerun configure with --qtdir=/path/to/qt." >&2
+  echo "   Rerun configure with --qt-dir=/path/to/qt." >&2
   rm -f $VK_CACHE
   exit 1
 fi
@@ -430,7 +398,6 @@ if [ ! -f $VK_CACHE ] ; then
 fi
 if [ -r $VK_CACHE ]; then
   while read line; do
-    #echo "$line"
     VAR=`echo $line | sed "s,^\(.*\)=.*,\1,"`
     VAL=`echo $line | sed "s,^.*=\(.*\),\1,"`
     case $VAR in 
@@ -598,44 +565,8 @@ fi
 [ "$CFG_THREAD" = "auto" ] && CFG_THREAD=$AUTOTHREAD
 
 
-# compose variable list to give qmake ------------------------------
-extra_flags=
-if [ ! -z "$D_FLAGS" ] ; then
-  QMAKE_VARS="$QMAKE_VARS DEFINES+=$D_FLAGS"
-  extra_flags="Defines .............. $D_FLAGS"
-fi
-if [ ! -z "$L_FLAGS" ] ; then
-  QMAKE_VARS="$QMAKE_VARS QMAKE_LIBDIR_FLAGS+=$L_FLAGS"
-  extra_flags="$extra_flags Library paths ........ $L_FLAGS"
-fi
-if [ ! -z "$l_FLAGS" ] ; then 
-  QMAKE_VARS="$QMAKE_VARS LIBS+=$l_FLAGS"
-  extra_flags="$extra_flags Libraries............. $l_FLAGS"
-fi
-if [ '!' -z "$I_FLAGS" ]; then
-  QMAKE_VARS="$QMAKE_VARS QMAKE_CFLAGS+=$I_FLAGS"
-  QMAKE_VARS="$QMAKE_VARS QMAKE_CXXFLAGS+=$I_FLAGS"
-  extra_flags="$extra_flags Include paths ........ $I_FLAGS"
-fi
-
-if [ '!' -z "$R_FLAGS" ]; then
-  if grep QMAKE_RPATH $XQMAKESPEC/qmake.conf >/dev/null; then
-    echo # Using -R/-rpath, so no need to warn
-  else
-    echo "ERROR: -R cannot be used on this platform as \$QMAKE_RPATH is"
-    echo "       undefined."
-    echo
-    exit 1
-  fi
-  QMAKE_VARS="$QMAKE_VARS QMAKE_LFLAGS+=$R_FLAGS"
-  extra_flags="$extra_flags Room flags ........... $R_FLAGS"
-fi
-
-QMAKE_VARS="$QMAKE_VARS QMAKESPEC=$QMAKESPEC"
-
-
 #---------------------------------------------------------------------------
-# give feedback on configuration
+# Give feedback on configuration
 #---------------------------------------------------------------------------
 echo
 echo "Configuration:"
@@ -646,7 +577,7 @@ else
 echo "Building on .......... $PLATFORM"
 echo "Building for ......... $XPLATFORM"
 fi
-echo "Qt path .............. $QT_DIR/"
+echo "Qt ................... $QT_DIR/"
 echo "Valgrind ............. $VG_EXEC_PATH"
 output="yes"
 [ -z "$MYSQL_LIB" ] && output="no"
@@ -664,11 +595,7 @@ fi
 output="warn_off"
 [ "$CFG_DEBUG" = "yes" ] && output="warn_on"
 echo "Compiler warnings .... $output"
-if [ -n "$extra_flags" ]; then
-  for flag in $extra_flags; do
-    echo $flag
-  done
-fi
+
 
 
 #---------------------------------------------------------------------------
@@ -739,7 +666,6 @@ INCLUDEPATH += $QMAKE_INCLUDEPATH
 
 # paths to qt things
 QMAKE_MOC   = $QT_MOC
-#QMAKE_UIC  = $QT_UIC
 QMAKE_UIC   = $QT_UIC -L $QT_DIR/plugins
 QMAKE_QMAKE = $QT_QMAKE
 QMAKE_INCDIR_QT = $QT_DIR/include
@@ -749,7 +675,6 @@ QMAKESPEC       = $QT_DIR/mkspecs/linux-g++
 
 # paths to valkyrie things
 QMAKE_ABSOLUTE_SOURCE_ROOT = $VK_SOURCE_TREE
-#QMAKE_ABSOLUTE_SOURCE_PATH = $VK_SOURCE_TREE
 QT_SOURCE_TREE    = $VK_SOURCE_TREE
 QT_BUILD_TREE     = $VK_BUILD_TREE
 QT_INSTALL_PREFIX = $VK_INSTALL_PREFIX
@@ -779,9 +704,8 @@ echo "Creating Makefile from $vk_name.pro..."
 
 EXEC=""
 OUTDIR=$outpath
-#EXEC="$QT_QMAKE -makefile -o Makefile $VK_PROJECT"
 EXEC="$QT_QMAKE -makefile -spec $XQMAKESPEC -o Makefile $VK_PROJECT"
-echo "EXEC = $EXEC"
+#echo "EXEC = $EXEC"
 
 [ -f "${OUTDIR}/Makefile" ] && chmod +rw ${OUTDIR}/Makefile
 /bin/sh -c "$EXEC"

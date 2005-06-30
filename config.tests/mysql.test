@@ -1,17 +1,17 @@
 #!/bin/sh
 #
 # param $1: cache file to write to
-# param $2: value of MYSQL_LIB, eg. /usr/lib/libmysqlclient.so
-# param $3: value of MYSQL_INC, eg. /usr/include
+# param $2: value of MYSQL_LIB, eg. /usr/lib/mysql
+# param $3: value of MYSQL_INC, eg. /usr/include/mysql
 #
 
 CACHE_FILE=$1
-MYSQL_LIB=$2
+MYSQL_PATH=$2
 MYSQL_INC=$3
 
 MYSQL_CLIENT="libmysqlclient.*"
-#LIB_DIR_SEARCH="/lib /usr/lib /usr/lib/mysql /usr/local/lib"
-LIB_DIR_SEARCH="/usr/lib/mysql /lib /usr/lib /usr/local/lib"
+MYSQL_LIB="$MYSQL_CLIENT"
+LIB_DIR_SEARCH="/lib /usr/lib /usr/lib/mysql /usr/local/lib"
 
 MYSQL_HEADER="mysql.h"
 INC_DIR_SEARCH="/usr/include /usr/include/mysql /usr/local/include /usr/local/include/mysql"
@@ -34,23 +34,19 @@ found=no
 result=no
 MYSQL_DIR=
 
-if [ -z "$MYSQL_LIB" ] ; then
-  MYSQL_LIB="$MYSQL_CLIENT"
-else
-  if [ -d "$MYSQL_LIB" ] ; then
-    # strip any trailing slashes
-    MYSQL_DIR=`echo $MYSQL_LIB | sed -e "s,^\(.*\)\/$,\1,"`
-    MYSQL_LIB="$MYSQL_CLIENT"
-    found_lib=`ls $MYSQL_DIR/$MYSQL_LIB 2>/dev/null`
-    if [ ! -z "$found_lib" ] ; then
-      MYSQL_LIB="$MYSQL_DIR/$MYSQL_LIB"
-      result="$MYSQL_LIB"
-      found=yes
-    fi
-  elif [ -f "$MYSQL_LIB" ] ; then
-    # allow user to specify a particular library
-    MYSQL_DIR=`dirname $MYSQL_LIB`
+if [ -d "$MYSQL_PATH" ] ; then
+  # strip any trailing slashes
+  MYSQL_DIR=`echo $MYSQL_PATH | sed -e "s,^\(.*\)\/$,\1,"`
+  found_lib=`ls $MYSQL_DIR/$MYSQL_CLIENT 2>/dev/null`
+  if [ ! -z "$found_lib" ] ; then
+    MYSQL_LIB="$MYSQL_DIR/$MYSQL_CLIENT"
     result="$MYSQL_LIB"
+    found=yes
+  fi
+  # quick 'n dirty check
+  if [ -f "$MYSQL_LIB" ] ; then
+    MYSQL_DIR=`dirname $MYSQL_LIB`
+    result="$MYSQL_LIB/$MYSQL_CLIENT"
     found=yes
   fi
 fi
@@ -64,7 +60,7 @@ if [ "$found" = "no" ] ; then
     found_lib=`ls $dir/$MYSQL_LIB 2>/dev/null`
     if [ ! -z "$found_lib" ] ; then
       MYSQL_DIR="$dir"
-      result="$MYSQL_DIR"
+      result="$MYSQL_DIR/$MYSQL_LIB"
       found=yes
       break;
     fi
@@ -83,7 +79,6 @@ if [ "$found" = "yes" ] ; then
   # strip the 'lib' prefix
   mysql_lib=`echo $lib | sed "s,^lib\([^.]*\).*,\1,"`
   # add on the '-l' bit
-  #mysql_lib="-L$MYSQL_DIR -l$mysql_lib"
   mysql_lib_path="-L$MYSQL_DIR"
   mysql_lib="-l$mysql_lib"
 elif [ "$found" = "no" ] ; then
