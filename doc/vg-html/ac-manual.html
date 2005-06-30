@@ -1,0 +1,134 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>4. Addrcheck: a lightweight memory checker</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="manual.html" title="Valgrind User Manual">
+<link rel="previous" href="mc-manual.clientreqs.html" title="3.7. Client Requests">
+<link rel="next" href="cg-manual.html" title="5. Cachegrind: a cache profiler">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="mc-manual.clientreqs.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="manual.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">Valgrind User Manual</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="cg-manual.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="chapter" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title">
+<a name="ac-manual"></a>4. Addrcheck: a lightweight memory checker</h2></div></div>
+<div></div>
+</div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl><dt><span class="sect1"><a href="ac-manual.html#id2627528">4.1. Kinds of bugs that Addrcheck can find</a></span></dt></dl>
+</div>
+<p>To use this tool, you must specify
+<tt class="computeroutput">--tool=addrcheck</tt> on the Valgrind
+command line.</p>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="id2627528"></a>4.1. Kinds of bugs that Addrcheck can find</h2></div></div>
+<div></div>
+</div>
+<p>Addrcheck is a simplified version of the Memcheck tool
+described in Section 3.  It is identical in every way to
+Memcheck, except for one important detail: it does not do the
+undefined-value checks that Memcheck does.  This means Addrcheck
+is about twice as fast as Memcheck, and uses less memory.
+Addrcheck can detect the following errors:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>Reading/writing memory after it has been free'd</p></li>
+<li><p>Reading/writing off the end of malloc'd blocks</p></li>
+<li><p>Reading/writing inappropriate areas on the stack</p></li>
+<li><p>Memory leaks -- where pointers to malloc'd blocks are lost
+    forever</p></li>
+<li><p>Mismatched use of malloc/new/new [] vs free/delete/delete []</p></li>
+<li><p>Overlapping <tt class="computeroutput">src</tt> and
+    <tt class="computeroutput">dst</tt> pointers in
+    <tt class="computeroutput">memcpy()</tt> and related
+    functions</p></li>
+<li><p>Some misuses of the POSIX pthreads API</p></li>
+</ul></div>
+<p>Rather than duplicate much of the Memcheck docs here
+(a.k.a. since I am a lazy b'stard), users of Addrcheck are
+advised to read <a href="mc-manual.html#mc-manual.bugs">Kinds of bugs that Memcheck can find</a>.  Some important
+points:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>Addrcheck is exactly like Memcheck, except that all the
+    value-definedness tracking machinery has been removed.
+    Therefore, the Memcheck documentation which discusses
+    definedess ("V-bits") is irrelevant.  The stuff on
+    addressibility ("A-bits") is still relevant.</p></li>
+<li><p>Addrcheck accepts the same command-line flags as
+    Memcheck, with the exception of ... (to be filled in).</p></li>
+<li>
+<p>Like Memcheck, Addrcheck will do memory leak checking
+    (internally, the same code does leak checking for both
+    tools).  The only difference is how the two tools decide
+    which memory locations to consider when searching for
+    pointers to blocks.  Memcheck will only consider 4-byte
+    aligned locations which are validly addressible and which
+    hold defined values.  Addrcheck does not track definedness
+    and so cannot apply the last, "defined value",
+    criteria.</p>
+<p>The result is that Addrcheck's leak checker may
+    "discover" pointers to blocks that Memcheck would not.  So it
+    is possible that Memcheck could (correctly) conclude that a
+    block is leaked, yet Addrcheck would not conclude
+    that.</p>
+<p>Whether or not this has any effect in practice is
+    unknown.  I suspect not, but that is mere speculation at this
+    stage.</p>
+</li>
+</ul></div>
+<p>Addrcheck is, therefore, a fine-grained address checker.
+All it really does is check each memory reference to say whether
+or not that location may validly be addressed.  Addrcheck has a
+memory overhead of one bit per byte of used address space.  In
+contrast, Memcheck has an overhead of nine bits per byte.</p>
+<p>Due to lazyness on the part of the implementor (Julian),
+error messages from Addrcheck do not distinguish reads from
+writes.  So it will say, for example, "Invalid memory access of
+size 4", whereas Memcheck would have said whether the access is a
+read or a write.  This could easily be remedied, if anyone is
+particularly bothered.</p>
+<p>Addrcheck is quite pleasant to use.  It's faster than
+Memcheck, and the lack of valid-value checks has another side
+effect: the errors it does report are relatively easy to track
+down, compared to the tedious and often confusing search
+sometimes needed to find the cause of uninitialised-value errors
+reported by Memcheck.</p>
+<p>Because it is faster and lighter than Memcheck, our hope is
+that Addrcheck is more suitable for less-intrusive, larger scale
+testing than is viable with Memcheck.  As of mid-November 2002,
+we have experimented with running the KDE-3.1 desktop on
+Addrcheck (the entire process tree, starting from
+<tt class="computeroutput">startkde</tt>).  Running on a 512MB,
+1.7 GHz P4, the result is nearly usable.  The ultimate aim is
+that is fast and unintrusive enough that (eg) KDE sessions may be
+unintrusively monitored for addressing errors whilst people do
+real work with their KDE desktop.</p>
+<p>Addrcheck is a new experiment in the Valgrind world.  We'd
+be interested to hear your feedback on it.</p>
+</div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="mc-manual.clientreqs.html">&lt;&lt; 3.7. Client Requests</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="manual.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="cg-manual.html">5. Cachegrind: a cache profiler &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

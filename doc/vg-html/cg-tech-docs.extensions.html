@@ -1,0 +1,53 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>2.10. Similar work, extensions</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="cg-tech-docs.html" title="2. How Cachegrind works">
+<link rel="previous" href="cg-tech-docs.annotate.html" title="2.9. Annotation">
+<link rel="next" href="writing-tools.html" title="3. Writing a New Valgrind Tool">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="cg-tech-docs.annotate.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="cg-tech-docs.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">2. How Cachegrind works</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="writing-tools.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="cg-tech-docs.extensions"></a>2.10. Similar work, extensions</h2></div></div>
+<div></div>
+</div>
+<p>It would be relatively straightforward to do other
+simulations and obtain line-by-line information about interesting
+events.  A good example would be branch prediction -- all
+branches could be instrumented to interact with a branch
+prediction simulator, using very similar techniques to those
+described above.</p>
+<p>In particular, cg_annotate would not need to change -- the
+file format is such that it is not specific to the cache
+simulation, but could be used for any kind of line-by-line
+information.  The only part of cg_annotate that is specific to
+the cache simulation is the name of the input file
+(<tt class="computeroutput">cachegrind.out</tt>), although it
+would be very simple to add an option to control this.</p>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="cg-tech-docs.annotate.html">&lt;&lt; 2.9. Annotation</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="cg-tech-docs.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="writing-tools.html">3. Writing a New Valgrind Tool &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

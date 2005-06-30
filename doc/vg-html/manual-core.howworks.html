@@ -1,0 +1,202 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>2.13. How It Works -- A Rough Overview</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="manual-core.html" title="2. Using and understanding the Valgrind core">
+<link rel="previous" href="manual-core.limits.html" title="2.12. Limitations">
+<link rel="next" href="manual-core.example.html" title="2.14. An Example Run">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="manual-core.limits.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="manual-core.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">2. Using and understanding the Valgrind core</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="manual-core.example.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="manual-core.howworks"></a>2.13. How It Works -- A Rough Overview</h2></div></div>
+<div></div>
+</div>
+<p>Some gory details, for those with a passion for gory
+details.  You don't need to read this section if all you want to
+do is use Valgrind.  What follows is an outline of the machinery.
+A more detailed (and somewhat out of date) description is to be
+found <a href="mc-tech-docs.html">The design and implementation of Valgrind</a>.</p>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="manual-core.startb"></a>2.13.1. Getting started</h3></div></div>
+<div></div>
+</div>
+<p>Valgrind is compiled into two executables:
+<tt class="computeroutput">valgrind</tt>, and
+<tt class="computeroutput">stage2</tt>.
+<tt class="computeroutput">valgrind</tt> is a statically-linked executable
+which loads at the normal address (0x8048000).
+<tt class="computeroutput">stage2</tt> is a normal dynamically-linked
+executable; it is either linked to load at a high address (0xb8000000) or is
+a Position Independent Executable.</p>
+<p><tt class="computeroutput">Valgrind</tt> (also known as <tt class="computeroutput">stage1</tt>):
+</p>
+<div class="orderedlist"><ol type="1">
+<li><p>Decides where to load stage2.</p></li>
+<li><p>Pads the address space with
+    <tt class="computeroutput">mmap</tt>, leaving holes only where stage2
+    should load.</p></li>
+<li><p>Loads stage2 in the same manner as
+    <tt class="computeroutput">execve()</tt> would, but
+    "manually".</p></li>
+<li><p>Jumps to the start of stage2.</p></li>
+</ol></div>
+<p>Once stage2 is loaded, it uses
+<tt class="computeroutput">dlopen()</tt> to load the tool, unmaps all
+traces of stage1, initializes the client's state, and starts the synthetic
+CPU.</p>
+<p>Each thread runs in its own kernel thread, and loops in
+<tt class="computeroutput">VG_(schedule)</tt> as it runs.  When the thread
+terminates, <tt class="computeroutput">VG_(schedule)</tt> returns.  Once
+all the threads have terminated, Valgrind as a whole exits.</p>
+<p>Each thread also has two stacks.  One is the client's stack, which
+is manipulated with the client's instructions.  The other is
+Valgrind's internal stack, which is used by all Valgrind's code on
+behalf of that thread.  It is important to not get them confused.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="manual-core.engine"></a>2.13.2. The translation/instrumentation engine</h3></div></div>
+<div></div>
+</div>
+<p>Valgrind does not directly run any of the original
+program's code.  Only instrumented translations are run.
+Valgrind maintains a translation table, which allows it to find
+the translation quickly for any branch target (code address).  If
+no translation has yet been made, the translator - a just-in-time
+translator - is summoned.  This makes an instrumented
+translation, which is added to the collection of translations.
+Subsequent jumps to that address will use this
+translation.</p>
+<p>Valgrind no longer directly supports detection of
+self-modifying code.  Such checking is expensive, and in practice
+(fortunately) almost no applications need it.  However, to help
+people who are debugging dynamic code generation systems, there
+is a Client Request (basically a macro you can put in your
+program) which directs Valgrind to discard translations in a
+given address range.  So Valgrind can still work in this
+situation provided the client tells it when code has become
+out-of-date and needs to be retranslated.</p>
+<p>The JITter translates basic blocks -- blocks of
+straight-line-code -- as single entities.  To minimise the
+considerable difficulties of dealing with the x86 instruction
+set, x86 instructions are first translated to a RISC-like
+intermediate code, similar to sparc code, but with an infinite
+number of virtual integer registers.  Initially each insn is
+translated seperately, and there is no attempt at
+instrumentation.</p>
+<p>The intermediate code is improved, mostly so as to try and
+cache the simulated machine's registers in the real machine's
+registers over several simulated instructions.  This is often
+very effective.  Also, we try to remove redundant updates of the
+simulated machines's condition-code register.</p>
+<p>The intermediate code is then instrumented, giving more
+intermediate code.  There are a few extra intermediate-code
+operations to support instrumentation; it is all refreshingly
+simple.  After instrumentation there is a cleanup pass to remove
+redundant value checks.</p>
+<p>This gives instrumented intermediate code which mentions
+arbitrary numbers of virtual registers.  A linear-scan register
+allocator is used to assign real registers and possibly generate
+spill code.  All of this is still phrased in terms of the
+intermediate code.  This machinery is inspired by the work of
+Reuben Thomas (Mite).</p>
+<p>Then, and only then, is the final x86 code emitted.  The
+intermediate code is carefully designed so that x86 code can be
+generated from it without need for spare registers or other
+inconveniences.</p>
+<p>The translations are managed using a traditional LRU-based
+caching scheme.  The translation cache has a default size of
+about 14MB.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="manual-core.track"></a>2.13.3. Tracking the Status of Memory</h3></div></div>
+<div></div>
+</div>
+<p>Each byte in the process' address space has nine bits
+associated with it: one A bit and eight V bits.  The A and V bits
+for each byte are stored using a sparse array, which flexibly and
+efficiently covers arbitrary parts of the 32-bit address space
+without imposing significant space or performance overheads for
+the parts of the address space never visited.  The scheme used,
+and speedup hacks, are described in detail at the top of the
+source file <tt class="filename">coregrind/vg_memory.c</tt>, so you
+should read that for the gory details.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="manual-core.syscalls"></a>2.13.4. System calls</h3></div></div>
+<div></div>
+</div>
+<p>All system calls are intercepted.  The memory status map is
+consulted before and updated after each call.  It's all rather
+tiresome.  See <tt class="filename">coregrind/vg_syscalls.c</tt> for
+details.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="manual-core.syssignals"></a>2.13.5. Signals</h3></div></div>
+<div></div>
+</div>
+<p>All signal-related system calls are intercepted.  If the client
+program is trying to set a signal handler, Valgrind makes a note of the
+handler address and which signal it is for.  Valgrind then arranges for the
+same signal to be delivered to its own handler.</p>
+<p>When such a signal arrives, Valgrind's own handler catches
+it, and notes the fact.  At a convenient safe point in execution,
+Valgrind builds a signal delivery frame on the client's stack and
+runs its handler.  If the handler longjmp()s, there is nothing
+more to be said.  If the handler returns, Valgrind notices this,
+zaps the delivery frame, and carries on where it left off before
+delivering the signal.</p>
+<p>The purpose of this nonsense is that setting signal
+handlers essentially amounts to giving callback addresses to the
+Linux kernel.  We can't allow this to happen, because if it did,
+signal handlers would run on the real CPU, not the simulated one.
+This means the checking machinery would not operate during the
+handler run, and, worse, memory permissions maps would not be
+updated, which could cause spurious error reports once the
+handler had returned.</p>
+<p>An even worse thing would happen if the signal handler
+longjmp'd rather than returned: Valgrind would completely lose
+control of the client program.</p>
+<p>Upshot: we can't allow the client to install signal
+handlers directly.  Instead, Valgrind must catch, on behalf of
+the client, any signal the client asks to catch, and must
+delivery it to the client on the simulated CPU, not the real one.
+This involves considerable gruesome fakery; see
+<tt class="filename">coregrind/vg_signals.c</tt> for details.</p>
+</div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="manual-core.limits.html">&lt;&lt; 2.12. Limitations</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="manual-core.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="manual-core.example.html">2.14. An Example Run &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

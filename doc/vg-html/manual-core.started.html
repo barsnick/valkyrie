@@ -1,0 +1,92 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>2.2. Getting started</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="manual-core.html" title="2. Using and understanding the Valgrind core">
+<link rel="previous" href="manual-core.html" title="2. Using and understanding the Valgrind core">
+<link rel="next" href="manual-core.comment.html" title="2.3. The commentary">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="manual-core.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="manual-core.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">2. Using and understanding the Valgrind core</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="manual-core.comment.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="manual-core.started"></a>2.2. Getting started</h2></div></div>
+<div></div>
+</div>
+<p>First off, consider whether it might be beneficial to
+recompile your application and supporting libraries with
+debugging info enabled (the <tt class="computeroutput">-g</tt>
+flag).  Without debugging info, the best Valgrind tools will be
+able to do is guess which function a particular piece of code
+belongs to, which makes both error messages and profiling output
+nearly useless.  With <tt class="computeroutput">-g</tt>, you'll
+hopefully get messages which point directly to the relevant
+source code lines.</p>
+<p>Another flag you might like to consider, if you are working
+with C++, is <tt class="computeroutput">-fno-inline</tt>.  That
+makes it easier to see the function-call chain, which can help
+reduce confusion when navigating around large C++ apps.  For
+whatever it's worth, debugging OpenOffice.org with Memcheck is a
+bit easier when using this flag.</p>
+<p>You don't have to do this, but doing so helps Valgrind
+produce more accurate and less confusing error reports.  Chances
+are you're set up like this already, if you intended to debug
+your program with GNU gdb, or some other debugger.</p>
+<p>This paragraph applies only if you plan to use Memcheck: On
+rare occasions, optimisation levels at
+<tt class="computeroutput">-O2</tt> and above have been observed
+to generate code which fools Memcheck into wrongly reporting
+uninitialised value errors.  We have looked in detail into fixing
+this, and unfortunately the result is that doing so would give a
+further significant slowdown in what is already a slow tool.  So
+the best solution is to turn off optimisation altogether.  Since
+this often makes things unmanagably slow, a plausible compromise
+is to use <tt class="computeroutput">-O</tt>.  This gets you the
+majority of the benefits of higher optimisation levels whilst
+keeping relatively small the chances of false complaints from
+Memcheck.  All other tools (as far as we know) are unaffected by
+optimisation level.</p>
+<p>Valgrind understands both the older "stabs" debugging
+format, used by gcc versions prior to 3.1, and the newer DWARF2
+format used by gcc 3.1 and later.  We continue to refine and
+debug our debug-info readers, although the majority of effort
+will naturally enough go into the newer DWARF2 reader.</p>
+<p>When you're ready to roll, just run your application as you
+would normally, but place <tt class="computeroutput">valgrind
+--tool=tool_name</tt> in front of your usual
+command-line invocation.  Note that you should run the real
+(machine-code) executable here.  If your application is started
+by, for example, a shell or perl script, you'll need to modify it
+to invoke Valgrind on the real executables.  Running such scripts
+directly under Valgrind will result in you getting error reports
+pertaining to <tt class="computeroutput">/bin/sh</tt>,
+<tt class="computeroutput">/usr/bin/perl</tt>, or whatever
+interpreter you're using.  This may not be what you want and can
+be confusing.  You can force the issue by giving the flag
+<tt class="computeroutput">--trace-children=yes</tt>, but
+confusion is still likely.</p>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="manual-core.html">&lt;&lt; 2. Using and understanding the Valgrind core</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="manual-core.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="manual-core.comment.html">2.3. The commentary &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

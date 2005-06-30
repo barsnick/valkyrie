@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>2.12. Limitations</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="manual-core.html" title="2. Using and understanding the Valgrind core">
+<link rel="previous" href="manual-core.problems.html" title="2.11. If You Have Problems">
+<link rel="next" href="manual-core.howworks.html" title="2.13. How It Works -- A Rough Overview">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="manual-core.problems.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="manual-core.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">2. Using and understanding the Valgrind core</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="manual-core.howworks.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="manual-core.limits"></a>2.12. Limitations</h2></div></div>
+<div></div>
+</div>
+<p>The following list of limitations seems depressingly long.
+However, most programs actually work fine.</p>
+<p>Valgrind will run x86-GNU/Linux ELF dynamically linked
+binaries, on a kernel 2.4.X or 2.6.X system, subject to
+the following constraints:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>No support for 3DNow instructions.  If the translator
+   encounters these, Valgrind will generate a SIGILL when the
+   instruction is executed.</p></li>
+<li><p>Atomic instruction sequences are not supported, which will affect
+   any use of synchronization objects being shared between processes.  They
+   will appear to work, but fail sporadically.</p></li>
+<li><p>Memcheck assumes that the floating point registers are
+   not used as intermediaries in memory-to-memory copies, so it
+   immediately checks definedness of values loaded from memory by
+   floating-point loads.  If you want to write code which copies
+   around possibly-uninitialised values, you must ensure these
+   travel through the integer registers, not the FPU.</p></li>
+<li><p>If your program does its own memory management, rather
+   than using malloc/new/free/delete, it should still work, but
+   Valgrind's error checking won't be so effective.  If you
+   describe your program's memory management scheme using "client
+   requests" (Section 3.7 of this manual), Memcheck can do
+   better.  Nevertheless, using malloc/new and free/delete is
+   still the best approach.</p></li>
+<li><p>Valgrind's signal simulation is not as robust as it
+   could be.  Basic POSIX-compliant sigaction and sigprocmask
+   functionality is supplied, but it's conceivable that things
+   could go badly awry if you do weird things with signals.
+   Workaround: don't.  Programs that do non-POSIX signal tricks
+   are in any case inherently unportable, so should be avoided if
+   possible.</p></li>
+<li><p>Programs which switch stacks are not well handled.
+   Valgrind does have support for this, but I don't have great
+   faith in it.  It's difficult -- there's no cast-iron way to
+   decide whether a large change in %esp is as a result of the
+   program switching stacks, or merely allocating a large object
+   temporarily on the current stack -- yet Valgrind needs to
+   handle the two situations differently.</p></li>
+<li><p>x86 instructions, and system calls, have been
+   implemented on demand.  So it's possible, although unlikely,
+   that a program will fall over with a message to that effect.
+   If this happens, please report ALL the details printed out, so
+   we can try and implement the missing feature.</p></li>
+<li><p>x86 floating point works correctly, but floating-point
+   code may run even more slowly than integer code, due to my
+   simplistic approach to FPU emulation.</p></li>
+<li><p>Memory consumption of your program is majorly increased
+   whilst running under Valgrind.  This is due to the large
+   amount of administrative information maintained behind the
+   scenes.  Another cause is that Valgrind dynamically translates
+   the original executable.  Translated, instrumented code is
+   14-16 times larger than the original (!) so you can easily end
+   up with 30+ MB of translations when running (eg) a web
+   browser.</p></li>
+<li><p>Valgrind can handle dynamically-generated code just
+   fine. However, if you regenerate code over the top of old code
+   (ie. at the same memory addresses) Valgrind will not realise
+   the code has changed, and will run its old translations, which
+   will be out-of-date.  You need to use the
+   VALGRIND_DISCARD_TRANSLATIONS client request in that case. For
+   the same reason gcc's <a href="http://gcc.gnu.org/onlinedocs/gcc/Nested-Functions.html" target="_top">trampolines
+   for nested functions</a> are currently unsupported, see
+   <a href="http://bugs.kde.org/show_bug.cgi?id=69511" target="_top">bug
+   69511</a>.</p></li>
+</ul></div>
+<p>Programs which are known not to work are:</p>
+<div class="itemizedlist"><ul type="disc"><li><p>emacs starts up but immediately concludes it is out of
+   memory and aborts.  Emacs has it's own memory-management
+   scheme, but I don't understand why this should interact so
+   badly with Valgrind.  Emacs works fine if you build it to use
+   the standard malloc/free routines.</p></li></ul></div>
+<p>Known platform-specific limitations, as of release 2.4.0:</p>
+<div class="itemizedlist"><ul type="disc"><li><p>(none)</p></li></ul></div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="manual-core.problems.html">&lt;&lt; 2.11. If You Have Problems</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="manual-core.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="manual-core.howworks.html">2.13. How It Works -- A Rough Overview &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

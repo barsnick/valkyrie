@@ -1,0 +1,52 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>2.9. Handling of Signals</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="manual-core.html" title="2. Using and understanding the Valgrind core">
+<link rel="previous" href="manual-core.pthreads.html" title="2.8. Support for Threads">
+<link rel="next" href="manual-core.install.html" title="2.10. Building and Installing">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="manual-core.pthreads.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="manual-core.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">2. Using and understanding the Valgrind core</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="manual-core.install.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="manual-core.signals"></a>2.9. Handling of Signals</h2></div></div>
+<div></div>
+</div>
+<p>Valgrind has a fairly complete signal implementation.  It should be
+able to cope with any valid use of signals.</p>
+<p>If you're using signals in clever ways (for example, catching
+SIGSEGV, modifying page state and restarting the instruction), you're
+probably relying on precise exceptions.  In this case, you will need
+to use <tt class="computeroutput">--single-step=yes</tt>.</p>
+<p>If your program dies as a result of a fatal core-dumping signal,
+Valgrind will generate its own core file
+(<tt class="computeroutput">vgcore.pidNNNNN</tt>) containing your program's
+state.  You may use this core file for post-mortem debugging with gdb or
+similar.  (Note: it will not generate a core if your core dump size limit is
+0.)</p>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="manual-core.pthreads.html">&lt;&lt; 2.8. Support for Threads</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="manual-core.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="manual-core.install.html">2.10. Building and Installing &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

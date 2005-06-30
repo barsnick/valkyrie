@@ -1,0 +1,79 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>2. How Cachegrind works</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="tech-docs.html" title="Valgrind Technical Documentation">
+<link rel="previous" href="mc-tech-docs.easystuff.html" title="1.4. Easy stuff which ought to be done">
+<link rel="next" href="cg-tech-docs.costcentres.html" title="2.2. Cost centres">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="mc-tech-docs.easystuff.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="tech-docs.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">Valgrind Technical Documentation</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="cg-tech-docs.costcentres.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="chapter" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title">
+<a name="cg-tech-docs"></a>2. How Cachegrind works</h2></div></div>
+<div></div>
+</div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl>
+<dt><span class="sect1"><a href="cg-tech-docs.html#cg-tech-docs.profiling">2.1. Cache profiling</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.costcentres.html">2.2. Cost centres</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.ccstore.html">2.3. Storing cost-centres</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.instrum.html">2.4. Instrumentation</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.retranslations.html">2.5. Handling basic block retranslations</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.cachesim.html">2.6. The cache simulation</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.output.html">2.7. Output</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.summary.html">2.8. Summary of performance features</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.annotate.html">2.9. Annotation</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.extensions.html">2.10. Similar work, extensions</a></span></dt>
+</dl>
+</div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="cg-tech-docs.profiling"></a>2.1. Cache profiling</h2></div></div>
+<div></div>
+</div>
+<p>[Note: this document is now very old, and a lot of its contents are out
+of date, and misleading.]</p>
+<p>Valgrind is a very nice platform for doing cache profiling
+and other kinds of simulation, because it converts horrible x86
+instructions into nice clean RISC-like UCode.  For example, for
+cache profiling we are interested in instructions that read and
+write memory; in UCode there are only four instructions that do
+this: <tt class="computeroutput">LOAD</tt>,
+<tt class="computeroutput">STORE</tt>,
+<tt class="computeroutput">FPU_R</tt> and
+<tt class="computeroutput">FPU_W</tt>.  By contrast, because of
+the x86 addressing modes, almost every instruction can read or
+write memory.</p>
+<p>Most of the cache profiling machinery is in the file
+<tt class="filename">vg_cachesim.c</tt>.</p>
+<p>These notes are a somewhat haphazard guide to how
+Valgrind's cache profiling works.</p>
+</div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="mc-tech-docs.easystuff.html">&lt;&lt; 1.4. Easy stuff which ought to be done</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="tech-docs.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="cg-tech-docs.costcentres.html">2.2. Cost centres &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

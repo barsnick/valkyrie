@@ -1,0 +1,152 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>2.3. The commentary</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="manual-core.html" title="2. Using and understanding the Valgrind core">
+<link rel="previous" href="manual-core.started.html" title="2.2. Getting started">
+<link rel="next" href="manual-core.report.html" title="2.4. Reporting of errors">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="manual-core.started.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="manual-core.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">2. Using and understanding the Valgrind core</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="manual-core.report.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="manual-core.comment"></a>2.3. The commentary</h2></div></div>
+<div></div>
+</div>
+<p>Valgrind tools write a commentary, a stream of text,
+detailing error reports and other significant events.  All lines
+in the commentary have following form:
+
+</p>
+<pre class="programlisting">
+==12345== some-message-from-Valgrind</pre>
+<p>
+</p>
+<p>The <tt class="computeroutput">12345</tt> is the process
+ID.  This scheme makes it easy to distinguish program output from
+Valgrind commentary, and also easy to differentiate commentaries
+from different processes which have become merged together, for
+whatever reason.</p>
+<p>By default, Valgrind tools write only essential messages to
+the commentary, so as to avoid flooding you with information of
+secondary importance.  If you want more information about what is
+happening, re-run, passing the
+<tt class="computeroutput">-v</tt> flag to Valgrind.</p>
+<p>You can direct the commentary to three different
+places:</p>
+<div class="orderedlist"><ol type="1">
+<li><p><a name="manual-core.out2fd"></a>The default: send it to a file descriptor, which is by
+   default 2 (stderr).  So, if you give the core no options, it
+   will write commentary to the standard error stream.  If you
+   want to send it to some other file descriptor, for example
+   number 9, you can specify
+   <tt class="computeroutput">--log-fd=9</tt>.</p></li>
+<li>
+<p><a name="manual-core.out2file"></a>A less intrusive option is to write the commentary to a
+   file, which you specify by
+   <tt class="computeroutput">--log-file=filename</tt>.  Note
+   carefully that the commentary is <span><b class="command">not</b></span>
+   written to the file you specify, but instead to one called
+   <tt class="computeroutput">filename.pid12345</tt>, if for
+   example the pid of the traced process is 12345.  This is
+   helpful when valgrinding a whole tree of processes at once,
+   since it means that each process writes to its own logfile,
+   rather than the result being jumbled up in one big
+   logfile.  If <tt class="computeroutput">filename.pid12345</tt> already
+   exists, then it will name new files
+   <tt class="computeroutput">filename.pid12345.1</tt> and so on.
+   </p>
+<p>If you want to specify precisely the file name to use,
+   without the trailing
+   <tt class="computeroutput">.pid12345</tt>part, you can instead use
+   <tt class="computeroutput">--log-file-exactly=filename</tt>.
+   </p>
+</li>
+<li>
+<p><a name="manual-core.out2socket"></a>The least intrusive option is to send the commentary to
+   a network socket.  The socket is specified as an IP address
+   and port number pair, like this:
+   <tt class="computeroutput">--log-socket=192.168.0.1:12345</tt>
+   if you want to send the output to host IP 192.168.0.1 port
+   12345 (I have no idea if 12345 is a port of pre-existing
+   significance).  You can also omit the port number:
+   <tt class="computeroutput">--log-socket=192.168.0.1</tt>, in
+   which case a default port of 1500 is used.  This default is
+   defined by the constant
+   <tt class="computeroutput">VG_CLO_DEFAULT_LOGPORT</tt> in the
+   sources.</p>
+<p>Note, unfortunately, that you have to use an IP address
+   here, rather than a hostname.</p>
+<p>Writing to a network socket is pretty useless if you
+   don't have something listening at the other end.  We provide a
+   simple listener program,
+   <tt class="computeroutput">valgrind-listener</tt>, which
+   accepts connections on the specified port and copies whatever
+   it is sent to stdout.  Probably someone will tell us this is a
+   horrible security risk.  It seems likely that people will
+   write more sophisticated listeners in the fullness of
+   time.</p>
+<p>valgrind-listener can accept simultaneous connections
+   from up to 50 valgrinded processes.  In front of each line of
+   output it prints the current number of active connections in
+   round brackets.</p>
+<p>valgrind-listener accepts two command-line flags:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><tt class="computeroutput">-e</tt> or 
+      <tt class="computeroutput">--exit-at-zero</tt>: when the
+      number of connected processes falls back to zero, exit.
+      Without this, it will run forever, that is, until you send
+      it Control-C.</p></li>
+<li><p><tt class="computeroutput">portnumber</tt>: changes
+      the port it listens on from the default (1500).  The
+      specified port must be in the range 1024 to 65535.  The
+      same restriction applies to port numbers specified by a
+      <tt class="computeroutput">--log-socket=</tt> to Valgrind
+      itself.</p></li>
+</ul></div>
+<p>If a valgrinded process fails to connect to a listener,
+    for whatever reason (the listener isn't running, invalid or
+    unreachable host or port, etc), Valgrind switches back to
+    writing the commentary to stderr.  The same goes for any
+    process which loses an established connection to a listener.
+    In other words, killing the listener doesn't kill the
+    processes sending data to it.</p>
+</li>
+</ol></div>
+<p>Here is an important point about the relationship between
+the commentary and profiling output from tools.  The commentary
+contains a mix of messages from the Valgrind core and the
+selected tool.  If the tool reports errors, it will report them
+to the commentary.  However, if the tool does profiling, the
+profile data will be written to a file of some kind, depending on
+the tool, and independent of what
+<tt class="computeroutput">--log-*</tt> options are in force.
+The commentary is intended to be a low-bandwidth, human-readable
+channel.  Profiling data, on the other hand, is usually
+voluminous and not meaningful without further processing, which
+is why we have chosen this arrangement.</p>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="manual-core.started.html">&lt;&lt; 2.2. Getting started</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="manual-core.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="manual-core.report.html">2.4. Reporting of errors &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

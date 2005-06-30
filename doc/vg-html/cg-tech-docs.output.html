@@ -1,0 +1,106 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>2.7. Output</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="cg-tech-docs.html" title="2. How Cachegrind works">
+<link rel="previous" href="cg-tech-docs.cachesim.html" title="2.6. The cache simulation">
+<link rel="next" href="cg-tech-docs.summary.html" title="2.8. Summary of performance features">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="cg-tech-docs.cachesim.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="cg-tech-docs.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">2. How Cachegrind works</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="cg-tech-docs.summary.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="cg-tech-docs.output"></a>2.7. Output</h2></div></div>
+<div></div>
+</div>
+<p>Output is fairly straightforward, basically printing the
+cost centre for every instruction, grouped by files and
+functions.  Total counts (eg. total cache accesses, total L1
+misses) are calculated when traversing this structure rather than
+during execution, to save time; the cache simulation functions
+are called so often that even one or two extra adds can make a
+sizeable difference.</p>
+<p>Input file has the following format:</p>
+<pre class="programlisting">
+file         ::= desc_line* cmd_line events_line data_line+ summary_line
+desc_line    ::= "desc:" ws? non_nl_string
+cmd_line     ::= "cmd:" ws? cmd
+events_line  ::= "events:" ws? (event ws)+
+data_line    ::= file_line | fn_line | count_line
+file_line    ::= ("fl=" | "fi=" | "fe=") filename
+fn_line      ::= "fn=" fn_name
+count_line   ::= line_num ws? (count ws)+
+summary_line ::= "summary:" ws? (count ws)+
+count        ::= num | "."</pre>
+<p>Where:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><tt class="computeroutput">non_nl_string</tt> is any
+    string not containing a newline.</p></li>
+<li><p><tt class="computeroutput">cmd</tt> is a command line
+    invocation.</p></li>
+<li><p><tt class="computeroutput">filename</tt> and
+    <tt class="computeroutput">fn_name</tt> can be anything.</p></li>
+<li><p><tt class="computeroutput">num</tt> and
+    <tt class="computeroutput">line_num</tt> are decimal
+    numbers.</p></li>
+<li><p><tt class="computeroutput">ws</tt> is whitespace.</p></li>
+<li><p><tt class="computeroutput">nl</tt> is a newline.</p></li>
+</ul></div>
+<p>The contents of the "desc:" lines is printed out at the top
+of the summary.  This is a generic way of providing simulation
+specific information, eg. for giving the cache configuration for
+cache simulation.</p>
+<p>Counts can be "." to represent "N/A", eg. the number of
+write misses for an instruction that doesn't write to
+memory.</p>
+<p>The number of counts in each
+<tt class="computeroutput">line</tt> and the
+<tt class="computeroutput">summary_line</tt> should not exceed
+the number of events in the
+<tt class="computeroutput">event_line</tt>.  If the number in
+each <tt class="computeroutput">line</tt> is less, cg_annotate
+treats those missing as though they were a "." entry.</p>
+<p>A <tt class="computeroutput">file_line</tt> changes the
+current file name.  A <tt class="computeroutput">fn_line</tt>
+changes the current function name.  A
+<tt class="computeroutput">count_line</tt> contains counts that
+pertain to the current filename/fn_name.  A "fn="
+<tt class="computeroutput">file_line</tt> and a
+<tt class="computeroutput">fn_line</tt> must appear before any
+<tt class="computeroutput">count_line</tt>s to give the context
+of the first <tt class="computeroutput">count_line</tt>s.</p>
+<p>Each <tt class="computeroutput">file_line</tt> should be
+immediately followed by a
+<tt class="computeroutput">fn_line</tt>.  "fi="
+<tt class="computeroutput">file_lines</tt> are used to switch
+filenames for inlined functions; "fe="
+<tt class="computeroutput">file_lines</tt> are similar, but are
+put at the end of a basic block in which the file name hasn't
+been switched back to the original file name.  (fi and fe lines
+behave the same, they are only distinguished to help
+debugging.)</p>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="cg-tech-docs.cachesim.html">&lt;&lt; 2.6. The cache simulation</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="cg-tech-docs.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="cg-tech-docs.summary.html">2.8. Summary of performance features &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

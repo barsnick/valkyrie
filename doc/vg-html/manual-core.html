@@ -1,0 +1,142 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>2. Using and understanding the Valgrind core</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="manual.html" title="Valgrind User Manual">
+<link rel="previous" href="manual-intro.navigation.html" title="1.2. How to navigate this manual">
+<link rel="next" href="manual-core.started.html" title="2.2. Getting started">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="manual-intro.navigation.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="manual.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">Valgrind User Manual</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="manual-core.started.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="chapter" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title">
+<a name="manual-core"></a>2. Using and understanding the Valgrind core</h2></div></div>
+<div></div>
+</div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl>
+<dt><span class="sect1"><a href="manual-core.html#manual-core.whatdoes">2.1. What Valgrind does with your program</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.started.html">2.2. Getting started</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.comment.html">2.3. The commentary</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.report.html">2.4. Reporting of errors</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.suppress.html">2.5. Suppressing errors</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.flags.html">2.6. Command-line flags for the Valgrind core</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="manual-core.flags.html#manual-core.toolopts">2.6.1. Tool-selection option</a></span></dt>
+<dt><span class="sect2"><a href="manual-core.flags.html#manual-core.basicopts">2.6.2. Basic Options</a></span></dt>
+<dt><span class="sect2"><a href="manual-core.flags.html#manual-core.erropts">2.6.3. Error-related options</a></span></dt>
+<dt><span class="sect2"><a href="manual-core.flags.html#manual-core.mallocopts">2.6.4. malloc()-related Options</a></span></dt>
+<dt><span class="sect2"><a href="manual-core.flags.html#manual-core.rareopts">2.6.5. Rare Options</a></span></dt>
+<dt><span class="sect2"><a href="manual-core.flags.html#manual-core.debugopts">2.6.6. Debugging Valgrind Options</a></span></dt>
+<dt><span class="sect2"><a href="manual-core.flags.html#manual-core.defopts">2.6.7. Setting default Options</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="manual-core.clientreq.html">2.7. The Client Request mechanism</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.pthreads.html">2.8. Support for Threads</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.signals.html">2.9. Handling of Signals</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.install.html">2.10. Building and Installing</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.problems.html">2.11. If You Have Problems</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.limits.html">2.12. Limitations</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.howworks.html">2.13. How It Works -- A Rough Overview</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="manual-core.howworks.html#manual-core.startb">2.13.1. Getting started</a></span></dt>
+<dt><span class="sect2"><a href="manual-core.howworks.html#manual-core.engine">2.13.2. The translation/instrumentation engine</a></span></dt>
+<dt><span class="sect2"><a href="manual-core.howworks.html#manual-core.track">2.13.3. Tracking the Status of Memory</a></span></dt>
+<dt><span class="sect2"><a href="manual-core.howworks.html#manual-core.syscalls">2.13.4. System calls</a></span></dt>
+<dt><span class="sect2"><a href="manual-core.howworks.html#manual-core.syssignals">2.13.5. Signals</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="manual-core.example.html">2.14. An Example Run</a></span></dt>
+<dt><span class="sect1"><a href="manual-core.warnings.html">2.15. Warning Messages You Might See</a></span></dt>
+</dl>
+</div>
+<p>This section describes the Valgrind core services, flags
+and behaviours.  That means it is relevant regardless of what
+particular tool you are using.  A point of terminology: most
+references to "valgrind" in the rest of this section (Section 2)
+refer to the valgrind core services.</p>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="manual-core.whatdoes"></a>2.1. What Valgrind does with your program</h2></div></div>
+<div></div>
+</div>
+<p>Valgrind is designed to be as non-intrusive as possible. It
+works directly with existing executables. You don't need to
+recompile, relink, or otherwise modify, the program to be
+checked.</p>
+<p>Simply put <tt class="computeroutput">valgrind
+--tool=tool_name</tt> at the start of the command
+line normally used to run the program.  For example, if want to
+run the command <tt class="computeroutput">ls -l</tt> using the
+heavyweight memory-checking tool Memcheck, issue the
+command:</p>
+<pre class="programlisting">
+valgrind --tool=memcheck ls -l</pre>
+<p>Regardless of which tool is in use, Valgrind takes control
+of your program before it starts.  Debugging information is read
+from the executable and associated libraries, so that error
+messages and other outputs can be phrased in terms of source code
+locations (if that is appropriate).</p>
+<p>Your program is then run on a synthetic x86 CPU provided by
+the Valgrind core.  As new code is executed for the first time,
+the core hands the code to the selected tool.  The tool adds its
+own instrumentation code to this and hands the result back to the
+core, which coordinates the continued execution of this
+instrumented code.</p>
+<p>The amount of instrumentation code added varies widely
+between tools.  At one end of the scale, Memcheck adds code to
+check every memory access and every value computed, increasing
+the size of the code at least 12 times, and making it run 25-50
+times slower than natively.  At the other end of the spectrum,
+the ultra-trivial "none" tool (a.k.a. Nulgrind) adds no
+instrumentation at all and causes in total "only" about a 4 times
+slowdown.</p>
+<p>Valgrind simulates every single instruction your program
+executes.  Because of this, the active tool checks, or profiles,
+not only the code in your application but also in all supporting
+dynamically-linked (<tt class="computeroutput">.so</tt>-format)
+libraries, including the GNU C library, the X client libraries,
+Qt, if you work with KDE, and so on.</p>
+<p>If you're using one of the error-detection tools, Valgrind
+will often detect errors in libraries, for example the GNU C or
+X11 libraries, which you have to use.  You might not be
+interested in these errors, since you probably have no control
+over that code.  Therefore, Valgrind allows you to selectively
+suppress errors, by recording them in a suppressions file which
+is read when Valgrind starts up.  The build mechanism attempts to
+select suppressions which give reasonable behaviour for the libc
+and XFree86 versions detected on your machine.  To make it easier
+to write suppressions, you can use the
+<tt class="computeroutput">--gen-suppressions=yes</tt> option
+which tells Valgrind to print out a suppression for each error
+that appears, which you can then copy into a suppressions
+file.</p>
+<p>Different error-checking tools report different kinds of
+errors.  The suppression mechanism therefore allows you to say
+which tool or tool(s) each suppression applies to.</p>
+</div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="manual-intro.navigation.html">&lt;&lt; 1.2. How to navigate this manual</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="manual.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="manual-core.started.html">2.2. Getting started &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

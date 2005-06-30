@@ -1,0 +1,135 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Valgrind Technical Documentation</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="index.html" title="Valgrind Documentation">
+<link rel="previous" href="faq.help.html" title="7. How To Get Further Assistance">
+<link rel="next" href="mc-tech-docs.html" title="1. The Design and Implementation of Valgrind">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="faq.help.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="index.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">Valgrind Documentation</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="mc-tech-docs.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="book" lang="en">
+<div class="titlepage">
+<div><div><h1 class="title">
+<a name="tech-docs"></a>Valgrind Technical Documentation</h1></div></div>
+<div></div>
+<hr>
+</div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl>
+<dt><span class="chapter"><a href="mc-tech-docs.html">1. The Design and Implementation of Valgrind</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="mc-tech-docs.html#mc-tech-docs.intro">1.1. Introduction</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="mc-tech-docs.html#mc-tech-docs.history">1.1.1. History</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.html#mc-tech-docs.overview">1.1.2. Design overview</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.html#mc-tech-docs.design">1.1.3. Design decisions</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.html#mc-tech-docs.correctness">1.1.4. Correctness</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.html#mc-tech-docs.limits">1.1.5. Current limitations</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="mc-tech-docs.jitter.html">1.2. The instrumenting JITter</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.storage">1.2.1. Run-time storage, and the use of host registers</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.startup">1.2.2. Startup, shutdown, and system calls</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.ucode">1.2.3. Introduction to UCode</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.tags">1.2.4. UCode operand tags: type Tag</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.uinstr">1.2.5. UCode instructions: type UInstr</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.trans">1.2.6. Translation into UCode</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.optim">1.2.7. UCode optimisation</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.instrum">1.2.8. UCode instrumentation</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.cleanup">1.2.9. UCode post-instrumentation cleanup</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.transfrom">1.2.10. Translation from UCode</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.dispatch">1.2.11. Top-level dispatch loop</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.lazy">1.2.12. Lazy updates of the simulated program counter</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.signals">1.2.13. Signals</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.todo">1.2.14. To be written</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="mc-tech-docs.extensions.html">1.3. Extensions</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="mc-tech-docs.extensions.html#mc-tech-docs.bugs">1.3.1. Bugs</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.extensions.html#mc-tech-docs.threads">1.3.2. Threads</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.extensions.html#mc-tech-docs.verify">1.3.3. Verification suite</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.extensions.html#mc-tech-docs.porting">1.3.4. Porting to other platforms</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="mc-tech-docs.easystuff.html">1.4. Easy stuff which ought to be done</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="mc-tech-docs.easystuff.html#mc-tech-docs.mmx">1.4.1. MMX Instructions</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.easystuff.html#mc-tech-docs.fixstabs">1.4.2. Fix stabs-info reader</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.easystuff.html#mc-tech-docs.x86instr">1.4.3. BT/BTC/BTS/BTR</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.easystuff.html#mc-tech-docs.prefetch">1.4.4. Using PREFETCH Instructions</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.easystuff.html#mc-tech-docs.pranges">1.4.5. User-defined Permission Ranges</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="chapter"><a href="cg-tech-docs.html">2. How Cachegrind works</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="cg-tech-docs.html#cg-tech-docs.profiling">2.1. Cache profiling</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.costcentres.html">2.2. Cost centres</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.ccstore.html">2.3. Storing cost-centres</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.instrum.html">2.4. Instrumentation</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.retranslations.html">2.5. Handling basic block retranslations</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.cachesim.html">2.6. The cache simulation</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.output.html">2.7. Output</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.summary.html">2.8. Summary of performance features</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.annotate.html">2.9. Annotation</a></span></dt>
+<dt><span class="sect1"><a href="cg-tech-docs.extensions.html">2.10. Similar work, extensions</a></span></dt>
+</dl></dd>
+<dt><span class="chapter"><a href="writing-tools.html">3. Writing a New Valgrind Tool</a></span></dt>
+<dd><dl>
+<dt><span class="sect1"><a href="writing-tools.html#writing-tools.intro">3.1. Introduction</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="writing-tools.html#writing-tools.supexec">3.1.1. Supervised Execution</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.html#writing-tools.tools">3.1.2. Tools</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.html#writing-tools.execspaces">3.1.3. Execution Spaces</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="writing-tools.writingatool.html">3.2. Writing a Tool</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.whywriteatool">3.2.1. Why write a tool?</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.suggestedtools">3.2.2. Suggested tools</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.howtoolswork">3.2.3. How tools work</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.gettingcode">3.2.4. Getting the code</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.gettingstarted">3.2.5. Getting started</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.writingcode">3.2.6. Writing the code</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.init">3.2.7. Initialisation</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.instr">3.2.8. Instrumentation</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.fini">3.2.9. Finalisation</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.otherinfo">3.2.10. Other Important Information</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.advice">3.2.11. Words of Advice</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="writing-tools.advtopics.html">3.3. Advanced Topics</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.suppressions">3.3.1. Suppressions</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.docs">3.3.2. Documentation</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.regtests">3.3.3. Regression Tests</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.profiling">3.3.4. Profiling</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.mkhackery">3.3.5. Other Makefile Hackery</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.ifacever">3.3.6. Core/tool Interface Versions</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="writing-tools.finalwords.html">3.4. Final Words</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="faq.help.html">&lt;&lt; 7. How To Get Further Assistance</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="mc-tech-docs.html">1. The Design and Implementation of Valgrind &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

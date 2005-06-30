@@ -1,0 +1,200 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>2.7. The Client Request mechanism</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="manual-core.html" title="2. Using and understanding the Valgrind core">
+<link rel="previous" href="manual-core.flags.html" title="2.6. Command-line flags for the Valgrind core">
+<link rel="next" href="manual-core.pthreads.html" title="2.8. Support for Threads">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="manual-core.flags.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="manual-core.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">2. Using and understanding the Valgrind core</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="manual-core.pthreads.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="manual-core.clientreq"></a>2.7. The Client Request mechanism</h2></div></div>
+<div></div>
+</div>
+<p>Valgrind has a trapdoor mechanism via which the client
+program can pass all manner of requests and queries to Valgrind
+and the current tool.  Internally, this is used extensively to
+make malloc, free, signals, threads, etc, work, although you
+don't see that.</p>
+<p>For your convenience, a subset of these so-called client
+requests is provided to allow you to tell Valgrind facts about
+the behaviour of your program, and conversely to make queries.
+In particular, your program can tell Valgrind about changes in
+memory range permissions that Valgrind would not otherwise know
+about, and so allows clients to get Valgrind to do arbitrary
+custom checks.</p>
+<p>Clients need to include a header file to make this work.
+Which header file depends on which client requests you use.  Some
+client requests are handled by the core, and are defined in the
+header file <tt class="filename">valgrind/valgrind.h</tt>.  Tool-specific
+header files are named after the tool, e.g.
+<tt class="filename">valgrind/memcheck.h</tt>.  All header files can be found
+in the <tt class="literal">include/valgrind</tt> directory of wherever Valgrind
+was installed.</p>
+<p>The macros in these header files have the magical property
+that they generate code in-line which Valgrind can spot.
+However, the code does nothing when not run on Valgrind, so you
+are not forced to run your program under Valgrind just because you
+use the macros in this file.  Also, you are not required to link your
+program with any extra supporting libraries.</p>
+<p>The code left in your binary has negligible performance impact.
+However, if you really wish to compile out the client requests, you can
+compile with <tt class="computeroutput">-DNVALGRIND</tt> (analogous to
+<tt class="computeroutput">-DNDEBUG</tt>'s effect on
+<tt class="computeroutput">assert()</tt>).
+</p>
+<p>You are encouraged to copy the <tt class="filename">valgrind/*.h</tt> headers
+into your project's include directory, so your program doesn't have a
+compile-time dependency on Valgrind being installed.  The Valgrind headers,
+unlike the rest of the code, is under a BSD-style license so you may include
+them without worrying about license incompatibility.</p>
+<p>Here is a brief description of the macros available in
+<tt class="filename">valgrind.h</tt>, which work with more than one
+tool (see the tool-specific documentation for explanations of the
+tool-specific macros).</p>
+<div class="variablelist"><dl>
+<dt><span class="term"><tt class="computeroutput">RUNNING_ON_VALGRIND</tt>:</span></dt>
+<dd><p>returns 1 if running on Valgrind, 0 if running on the
+    real CPU.  If you are running Valgrind under itself, it will return the
+    number of layers of Valgrind emulation we're running under.
+    </p></dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_DISCARD_TRANSLATIONS</tt>:</span></dt>
+<dd>
+<p>discard translations of code in the specified address
+    range.  Useful if you are debugging a JITter or some other
+    dynamic code generation system.  After this call, attempts to
+    execute code in the invalidated address range will cause
+    Valgrind to make new translations of that code, which is
+    probably the semantics you want.  Note that this is
+    implemented naively, and involves checking all 200191 entries
+    in the translation table to see if any of them overlap the
+    specified address range.  So try not to call it often, or
+    performance will nosedive.  Note that you can be clever about
+    this: you only need to call it when an area which previously
+    contained code is overwritten with new code.  You can choose
+    to write coode into fresh memory, and just call this
+    occasionally to discard large chunks of old code all at
+    once.</p>
+<p><span><b class="command">Warning:</b></span> minimally tested,
+    especially for tools other than Memcheck.</p>
+</dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_COUNT_ERRORS</tt>:</span></dt>
+<dd><p>returns the number of errors found so far by Valgrind.
+    Can be useful in test harness code when combined with the
+    <tt class="computeroutput">--log-fd=-1</tt> option; this
+    runs Valgrind silently, but the client program can detect
+    when errors occur.  Only useful for tools that report errors,
+    e.g. it's useful for Memcheck, but for Cachegrind it will
+    always return zero because Cachegrind doesn't report
+    errors.</p></dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_MALLOCLIKE_BLOCK</tt>:</span></dt>
+<dd><p>If your program manages its own memory instead of using
+    the standard <tt class="computeroutput">malloc()</tt> /
+    <tt class="computeroutput">new</tt> /
+    <tt class="computeroutput">new[]</tt>, tools that track
+    information about heap blocks will not do nearly as good a
+    job.  For example, Memcheck won't detect nearly as many
+    errors, and the error messages won't be as informative.  To
+    improve this situation, use this macro just after your custom
+    allocator allocates some new memory.  See the comments in
+    <tt class="filename">valgrind.h</tt> for information on how to use
+    it.</p></dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_FREELIKE_BLOCK</tt>:</span></dt>
+<dd><p>This should be used in conjunction with
+    <tt class="computeroutput">VALGRIND_MALLOCLIKE_BLOCK</tt>.
+    Again, see <tt class="filename">memcheck/memcheck.h</tt> for
+    information on how to use it.</p></dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_CREATE_MEMPOOL</tt>:</span></dt>
+<dd><p>This is similar to
+    <tt class="computeroutput">VALGRIND_MALLOCLIKE_BLOCK</tt>,
+    but is tailored towards code that uses memory pools.  See the
+    comments in <tt class="filename">valgrind.h</tt> for information
+    on how to use it.</p></dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_DESTROY_MEMPOOL</tt>:</span></dt>
+<dd><p>This should be used in conjunction with
+    <tt class="computeroutput">VALGRIND_CREATE_MEMPOOL</tt>
+    Again, see the comments in <tt class="filename">valgrind.h</tt> for
+    information on how to use it.</p></dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_MEMPOOL_ALLOC</tt>:</span></dt>
+<dd><p>This should be used in conjunction with
+    <tt class="computeroutput">VALGRIND_CREATE_MEMPOOL</tt>
+    Again, see the comments in <tt class="filename">valgrind.h</tt> for
+    information on how to use it.</p></dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_MEMPOOL_FREE</tt>:</span></dt>
+<dd><p>This should be used in conjunction with
+    <tt class="computeroutput">VALGRIND_CREATE_MEMPOOL</tt>
+    Again, see the comments in <tt class="filename">valgrind.h</tt> for
+    information on how to use it.</p></dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_NON_SIMD_CALL[0123]</tt>:</span></dt>
+<dd>
+<p>executes a function of 0, 1, 2 or 3 args in the client
+    program on the <span class="emphasis"><em>real</em></span> CPU, not the virtual
+    CPU that Valgrind normally runs code on.  These are used in
+    various ways internally to Valgrind.  They might be useful to
+    client programs.</p>
+<p><b>Warning: </b>Only use these if you <span class="emphasis"><em>really</em></span> know
+    what you are doing.</p>
+</dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_PRINTF(format, ...)</tt>:</span></dt>
+<dd><p>printf a message to the log file when running under
+    Valgrind.  Nothing is output if not running under Valgrind.
+    Returns the number of characters output.</p></dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_PRINTF_BACKTRACE(format, ...)</tt>:</span></dt>
+<dd><p>printf a message to the log file along with a stack
+    backtrace when running under Valgrind.  Nothing is output if
+    not running under Valgrind.  Returns the number of characters
+    output.</p></dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_STACK_REGISTER(start, end)</tt>:</span></dt>
+<dd>
+<p>Register a new stack.  Informs Valgrind that the memory range
+    between start and end is a unique stack.  Returns a stack identifier
+    that can be used with other
+    <tt class="computeroutput">VALGRIND_STACK_*</tt> calls.</p>
+<p>Valgrind will use this information to determine if a change to
+    the stack pointer is an item pushed onto the stack or a change over
+    to a new stack.  Use this if you're using a user-level thread package
+    and are noticing spurious errors from Valgrind about uninitialized
+    memory reads.</p>
+</dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_STACK_DEREGISTER(id)</tt>:</span></dt>
+<dd><p>Deregister a previously registered stack.  Informs
+    Valgrind that previously registered memory range with stack id
+    <tt class="computeroutput">id</tt> is no longer a stack.</p></dd>
+<dt><span class="term"><tt class="computeroutput">VALGRIND_STACK_CHANGE(id, start, end)</tt>:</span></dt>
+<dd><p>Change a previously registered stack.  Informs
+    Valgrind that the previously registerer stack with stack id
+    <tt class="computeroutput">id</tt> has changed it's start and end
+    values.  Use this if your user-level thread package implements
+    stack growth.</p></dd>
+</dl></div>
+<p>Note that <tt class="filename">valgrind.h</tt> is included by
+all the tool-specific header files (such as
+<tt class="filename">memcheck.h</tt>), so you don't need to include it
+in your client if you include a tool-specific header.</p>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="manual-core.flags.html">&lt;&lt; 2.6. Command-line flags for the Valgrind core</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="manual-core.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="manual-core.pthreads.html">2.8. Support for Threads &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

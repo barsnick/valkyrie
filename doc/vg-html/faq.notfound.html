@@ -1,0 +1,129 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>5. Memcheck doesn't find my bug</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="FAQ.html" title="Valgrind FAQ">
+<link rel="previous" href="faq.unexpected.html" title="4. Valgrind behaves unexpectedly">
+<link rel="next" href="faq.misc.html" title="6. Miscellaneous">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="faq.unexpected.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="FAQ.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">Valgrind FAQ</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="faq.misc.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="chapter" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title">
+<a name="faq.notfound"></a>5. Memcheck doesn't find my bug</h2></div></div>
+<div></div>
+</div>
+<div class="qandaset">
+<dl>
+<dt>5.1. <a href="faq.notfound.html#faq.hiddenbug">I try running "valgrind --tool=memcheck my_program" and
+  get Valgrind's startup message, but I don't get any errors and
+  I know my program has errors.</a>
+</dt>
+<dt>5.2. <a href="faq.notfound.html#faq.overruns">Why doesn't Memcheck find the array overruns in this program?</a>
+</dt>
+</dl>
+<table border="0" summary="Q and A Set">
+<col align="left" width="1%">
+<tbody>
+<tr class="question">
+<td align="left" valign="top">
+<a name="faq.hiddenbug"></a><a name="id2527939"></a><b>5.1.</b>
+</td>
+<td align="left" valign="top"><p>I try running "valgrind --tool=memcheck my_program" and
+  get Valgrind's startup message, but I don't get any errors and
+  I know my program has errors.</p></td>
+</tr>
+<tr class="answer">
+<td> </td>
+<td align="left" valign="top">
+<p>There are two possible causes of this.</p>
+<p>First, by default, Valgrind only traces the top-level process.
+  So if your program spawns children, they won't be traced by
+  Valgrind by default.  Also, if your program is started by a
+  shell script, Perl script, or something similar, Valgrind will
+  trace the shell, or the Perl interpreter, or equivalent.</p>
+<p>To trace child processes, use the
+  <tt class="literal">--trace-children=yes</tt> option.</p>
+<p>If you are tracing large trees of processes, it can be
+  less disruptive to have the output sent over the network.  Give
+  Valgrind the flag
+  <tt class="literal">--log-socket=127.0.0.1:12345</tt> (if you want
+  logging output sent to <tt class="literal">port 12345</tt> on
+  <tt class="literal">localhost</tt>).  You can use the
+  valgrind-listener program to listen on that port:</p>
+<pre class="programlisting">
+valgrind-listener 12345
+</pre>
+<p>Obviously you have to start the listener process first.
+  See the Manual: <a href="http://www.valgrind.org/docs/bookset/manual-core.out2file.html" target="_top">Directing output to file</a> for more details.</p>
+<p>Second, if your program is statically linked, most Valgrind tools
+  won't work as well, because they won't be able to replace certain
+  functions, such as malloc(), with their own versions.  A key indicator of
+  this is if Memcheck says:
+</p>
+<pre class="programlisting">
+No malloc'd blocks -- no leaks are possible
+</pre>
+<p>
+when you know your program calls malloc().  The workaround is to avoid
+statically linking your program.</p>
+</td>
+</tr>
+<tr><td colspan="2"> </td></tr>
+<tr class="question">
+<td align="left" valign="top">
+<a name="faq.overruns"></a><a name="id2632273"></a><b>5.2.</b>
+</td>
+<td align="left" valign="top"><p>Why doesn't Memcheck find the array overruns in this program?</p></td>
+</tr>
+<tr class="answer">
+<td> </td>
+<td align="left" valign="top">
+<pre class="programlisting">
+int static[5];
+
+int main(void)
+{
+  int stack[5];
+
+  static[5] = 0;
+  stack [5] = 0;
+          
+  return 0;
+}
+</pre>
+<p>Unfortunately, Memcheck doesn't do bounds checking on
+  static or stack arrays.  We'd like to, but it's just not
+  possible to do in a reasonable way that fits with how Memcheck
+  works.  Sorry.</p>
+</td>
+</tr>
+<tr><td colspan="2"> </td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="faq.unexpected.html">&lt;&lt; 4. Valgrind behaves unexpectedly</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="FAQ.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="faq.misc.html">6. Miscellaneous &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

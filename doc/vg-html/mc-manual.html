@@ -1,0 +1,96 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>3. Memcheck: a heavyweight memory checker</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="manual.html" title="Valgrind User Manual">
+<link rel="previous" href="manual-core.warnings.html" title="2.15. Warning Messages You Might See">
+<link rel="next" href="mc-manual.flags.html" title="3.2. Command-line flags specific to memcheck">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="manual-core.warnings.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="manual.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">Valgrind User Manual</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="mc-manual.flags.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="chapter" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title">
+<a name="mc-manual"></a>3. Memcheck: a heavyweight memory checker</h2></div></div>
+<div></div>
+</div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl>
+<dt><span class="sect1"><a href="mc-manual.html#mc-manual.bugs">3.1. Kinds of bugs that Memcheck can find</a></span></dt>
+<dt><span class="sect1"><a href="mc-manual.flags.html">3.2. Command-line flags specific to memcheck</a></span></dt>
+<dt><span class="sect1"><a href="mc-manual.errormsgs.html">3.3. Explanation of error messages from Memcheck</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.badrw">3.3.1. Illegal read / Illegal write errors</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.uninitvals">3.3.2. Use of uninitialised values</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.badfrees">3.3.3. Illegal frees</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.rudefn">3.3.4. When a block is freed with an inappropriate deallocation
+function</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.badperm">3.3.5. Passing system call parameters with inadequate read/write
+permissions</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.overlap">3.3.6. Overlapping source and destination blocks</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="mc-manual.suppfiles.html">3.4. Writing suppressions files</a></span></dt>
+<dt><span class="sect1"><a href="mc-manual.machine.html">3.5. Details of Memcheck's checking machinery</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="mc-manual.machine.html#mc-manual.value">3.5.1. Valid-value (V) bits</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.machine.html#mc-manual.vaddress">3.5.2. Valid-address (A) bits</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.machine.html#mc-manual.together">3.5.3. Putting it all together</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="mc-manual.leaks.html">3.6. Memory leak detection</a></span></dt>
+<dt><span class="sect1"><a href="mc-manual.clientreqs.html">3.7. Client Requests</a></span></dt>
+</dl>
+</div>
+<p>To use this tool, you must specify
+<tt class="computeroutput">--tool=memcheck</tt> on the Valgrind
+command line.</p>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="mc-manual.bugs"></a>3.1. Kinds of bugs that Memcheck can find</h2></div></div>
+<div></div>
+</div>
+<p>Memcheck is Valgrind-1.0.X's checking mechanism bundled up
+into a tool.  All reads and writes of memory are checked, and
+calls to malloc/new/free/delete are intercepted. As a result,
+memcheck can detect the following problems:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>Use of uninitialised memory</p></li>
+<li><p>Reading/writing memory after it has been free'd</p></li>
+<li><p>Reading/writing off the end of malloc'd blocks</p></li>
+<li><p>Reading/writing inappropriate areas on the stack</p></li>
+<li><p>Memory leaks -- where pointers to malloc'd blocks are
+   lost forever</p></li>
+<li><p>Mismatched use of malloc/new/new [] vs
+    free/delete/delete []</p></li>
+<li><p>Overlapping <tt class="computeroutput">src</tt> and
+    <tt class="computeroutput">dst</tt> pointers in
+    <tt class="computeroutput">memcpy()</tt> and related
+    functions</p></li>
+<li><p>Some misuses of the POSIX pthreads API</p></li>
+</ul></div>
+</div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="manual-core.warnings.html">&lt;&lt; 2.15. Warning Messages You Might See</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="manual.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="mc-manual.flags.html">3.2. Command-line flags specific to memcheck &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

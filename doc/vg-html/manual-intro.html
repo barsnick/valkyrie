@@ -1,0 +1,179 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>1. Introduction</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="manual.html" title="Valgrind User Manual">
+<link rel="previous" href="manual.html" title="Valgrind User Manual">
+<link rel="next" href="manual-intro.navigation.html" title="1.2. How to navigate this manual">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="manual.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="manual.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">Valgrind User Manual</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="manual-intro.navigation.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="chapter" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title">
+<a name="manual-intro"></a>1. Introduction</h2></div></div>
+<div></div>
+</div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl>
+<dt><span class="sect1"><a href="manual-intro.html#manual-intro.overview">1.1. An Overview of Valgrind</a></span></dt>
+<dt><span class="sect1"><a href="manual-intro.navigation.html">1.2. How to navigate this manual</a></span></dt>
+</dl>
+</div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="manual-intro.overview"></a>1.1. An Overview of Valgrind</h2></div></div>
+<div></div>
+</div>
+<p>Valgrind is a flexible system for debugging and profiling
+Linux-x86 executables.  The system consists of a core, which
+provides a synthetic x86 CPU in software, and a series of tools,
+each of which performs some kind of debugging, profiling, or
+similar task.  The architecture is modular, so that new tools can
+be created easily and without disturbing the existing
+structure.</p>
+<p>A number of useful tools are supplied as standard.  In
+summary, these are:</p>
+<div class="orderedlist"><ol type="1">
+<li>
+<p><span><b class="command">Memcheck</b></span> detects memory-management
+    problems in your programs.  All reads and writes of memory
+    are checked, and calls to malloc/new/free/delete are
+    intercepted. As a result, Memcheck can detect the following
+    problems:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>Use of uninitialised memory</p></li>
+<li><p>Reading/writing memory after it has been
+      free'd</p></li>
+<li><p>Reading/writing off the end of malloc'd
+      blocks</p></li>
+<li><p>Reading/writing inappropriate areas on the
+      stack</p></li>
+<li><p>Memory leaks -- where pointers to malloc'd
+      blocks are lost forever</p></li>
+<li><p>Mismatched use of malloc/new/new [] vs
+      free/delete/delete []</p></li>
+<li><p>Overlapping <tt class="computeroutput">src</tt> and
+      <tt class="computeroutput">dst</tt> pointers in
+      <tt class="computeroutput">memcpy()</tt> and related
+      functions</p></li>
+<li><p>Some misuses of
+      the POSIX pthreads API</p></li>
+</ul></div>
+<p>Problems like these can be difficult to find by other
+    means, often lying undetected for long periods, then causing
+    occasional, difficult-to-diagnose crashes.</p>
+</li>
+<li>
+<p><span><b class="command">Addrcheck</b></span> is a lightweight version
+    of Memcheck.  It is identical to Memcheck except for the
+    single detail that it does not do any uninitialised-value
+    checks.  All of the other checks -- primarily the
+    fine-grained address checking -- are still done.  The
+    downside of this is that you don't catch the
+    uninitialised-value errors that Memcheck can find.</p>
+<p>But the upside is significant: programs run about twice
+    as fast as they do on Memcheck, and a lot less memory is
+    used.  It still finds reads/writes of freed memory, memory
+    off the end of blocks and in other invalid places, bugs which
+    you really want to find before release!</p>
+<p>Because Addrcheck is lighter and faster than Memcheck,
+    you can run more programs for longer, and so you may be able
+    to cover more test scenarios.  Addrcheck was created because
+    one of us (Julian) wanted to be able to run a complete KDE
+    desktop session with checking.  As of early November 2002, we
+    have been able to run KDE-3.0.3 on a 1.7 GHz P4 with 512 MB
+    of memory, using Addrcheck.  Although the result is not
+    stellar, it's quite usable, and it seems plausible to run KDE
+    for long periods at a time like this, collecting up all the
+    addressing errors that appear.</p>
+</li>
+<li>
+<p><span><b class="command">Cachegrind</b></span> is a cache profiler.  It
+    performs detailed simulation of the I1, D1 and L2 caches in
+    your CPU and so can accurately pinpoint the sources of cache
+    misses in your code.  If you desire, it will show the number
+    of cache misses, memory references and instructions accruing
+    to each line of source code, with per-function, per-module
+    and whole-program summaries.  If you ask really nicely it
+    will even show counts for each individual x86
+    instruction.</p>
+<p>Cachegrind auto-detects your machine's cache
+    configuration using the
+    <tt class="computeroutput">CPUID</tt> instruction, and so
+    needs no further configuration info, in most cases.</p>
+<p>Cachegrind is nicely complemented by Josef
+    Weidendorfer's amazing KCacheGrind visualisation tool 
+    (<a href="http://kcachegrind.sourceforge.net" target="_top">http://kcachegrind.sourceforge.net</a>),
+    a KDE application which presents these profiling results in a
+    graphical and easier-to-understand form.</p>
+</li>
+<li>
+<p><span><b class="command">Helgrind</b></span> finds data races in
+    multithreaded programs.  Helgrind looks for memory locations
+    which are accessed by more than one (POSIX p-)thread, but for
+    which no consistently used (pthread_mutex_)lock can be found.
+    Such locations are indicative of missing synchronisation
+    between threads, and could cause hard-to-find
+    timing-dependent problems.</p>
+<p>Helgrind ("Hell's Gate", in Norse mythology) implements
+    the so-called "Eraser" data-race-detection algorithm, along
+    with various refinements (thread-segment lifetimes) which
+    reduce the number of false errors it reports.  It is as yet
+    somewhat of an experimental tool, so your feedback is
+    especially welcomed here.</p>
+<p>Helgrind has been hacked on extensively by Jeremy
+    Fitzhardinge, and we have him to thank for getting it to a
+    releasable state.</p>
+</li>
+</ol></div>
+<p>A number of minor tools (<span><b class="command">Corecheck</b></span>,
+<span><b class="command">Lackey</b></span> and <span><b class="command">Nulgrind</b></span>) are
+also supplied.  These aren't particularly useful -- they exist to
+illustrate how to create simple tools and to help the valgrind
+developers in various ways.</p>
+<p>Valgrind is closely tied to details of the CPU, operating
+system and to a less extent, compiler and basic C libraries. This
+makes it difficult to make it portable, so we have chosen at the
+outset to concentrate on what we believe to be a widely used
+platform: Linux on x86s.  Valgrind uses the standard Unix
+<tt class="computeroutput">./configure</tt>,
+<tt class="computeroutput">make</tt>, <tt class="computeroutput">make
+install</tt> mechanism, and we have attempted to
+ensure that it works on machines with kernel 2.4 or 2.6 and glibc
+2.1.X--2.3.X.</p>
+<p>Valgrind is licensed under the <a href="license.gpl.html"> The GNU General Public License</a>,
+version 2.  The <tt class="computeroutput">valgrind/*.h</tt> headers are
+distributed under a BSD-style license, so you may include them in your code
+without worrying about license conflicts.  Some of the PThreads test cases,
+<tt class="computeroutput">pth_*.c</tt>, are taken from
+"Pthreads Programming" by Bradford Nichols, Dick Buttlar &amp;
+Jacqueline Proulx Farrell, ISBN 1-56592-115-1, published by
+O'Reilly &amp; Associates, Inc.</p>
+</div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="manual.html">&lt;&lt; Valgrind User Manual</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="manual.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="manual-intro.navigation.html">1.2. How to navigate this manual &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

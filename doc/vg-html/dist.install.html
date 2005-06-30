@@ -1,0 +1,225 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>3. INSTALL</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="dist.html" title="Distribution Documents">
+<link rel="previous" href="dist.authors.html" title="2. AUTHORS">
+<link rel="next" href="dist.news.html" title="4. NEWS">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="dist.authors.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="dist.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">Distribution Documents</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="dist.news.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="chapter" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title">
+<a name="dist.install"></a>3. INSTALL</h2></div></div>
+<div></div>
+</div>
+<div class="literallayout"><p><br>
+      Basic Installation<br>
+==================<br>
+<br>
+   These are generic installation instructions.<br>
+<br>
+   The `configure' shell script attempts to guess correct values for<br>
+various system-dependent variables used during compilation.  It uses<br>
+those values to create a `Makefile' in each directory of the package.<br>
+It may also create one or more `.h' files containing system-dependent<br>
+definitions.  Finally, it creates a shell script `config.status' that<br>
+you can run in the future to recreate the current configuration, a file<br>
+`config.cache' that saves the results of its tests to speed up<br>
+reconfiguring, and a file `config.log' containing compiler output<br>
+(useful mainly for debugging `configure').<br>
+<br>
+   If you need to do unusual things to compile the package, please try<br>
+to figure out how `configure' could check whether to do them, and mail<br>
+diffs or instructions to the address given in the `README' so they can<br>
+be considered for the next release.  If at some point `config.cache'<br>
+contains results you don't want to keep, you may remove or edit it.<br>
+<br>
+   The file `configure.in' is used to create `configure' by a program<br>
+called `autoconf'.  You only need `configure.in' if you want to change<br>
+it or regenerate `configure' using a newer version of `autoconf'.<br>
+<br>
+The simplest way to compile this package is:<br>
+<br>
+  1. `cd' to the directory containing the package's source code and type<br>
+     `./configure' to configure the package for your system.  If you're<br>
+     using `csh' on an old version of System V, you might need to type<br>
+     `sh ./configure' instead to prevent `csh' from trying to execute<br>
+     `configure' itself.<br>
+<br>
+     Running `configure' takes awhile.  While running, it prints some<br>
+     messages telling which features it is checking for.<br>
+<br>
+  2. Type `make' to compile the package.<br>
+<br>
+  3. Optionally, type `make check' to run any self-tests that come with<br>
+     the package.<br>
+<br>
+  4. Type `make install' to install the programs and any data files and<br>
+     documentation.<br>
+<br>
+  5. You can remove the program binaries and object files from the<br>
+     source code directory by typing `make clean'.  To also remove the<br>
+     files that `configure' created (so you can compile the package for<br>
+     a different kind of computer), type `make distclean'.  There is<br>
+     also a `make maintainer-clean' target, but that is intended mainly<br>
+     for the package's developers.  If you use it, you may have to get<br>
+     all sorts of other programs in order to regenerate files that came<br>
+     with the distribution.<br>
+<br>
+Compilers and Options<br>
+=====================<br>
+<br>
+   Some systems require unusual options for compilation or linking that<br>
+the `configure' script does not know about.  You can give `configure'<br>
+initial values for variables by setting them in the environment.  Using<br>
+a Bourne-compatible shell, you can do that on the command line like<br>
+this:<br>
+     CC=c89 CFLAGS=-O2 LIBS=-lposix ./configure<br>
+<br>
+Or on systems that have the `env' program, you can do it like this:<br>
+     env CPPFLAGS=-I/usr/local/include LDFLAGS=-s ./configure<br>
+<br>
+Compiling For Multiple Architectures<br>
+====================================<br>
+<br>
+   You can compile the package for more than one kind of computer at the<br>
+same time, by placing the object files for each architecture in their<br>
+own directory.  To do this, you must use a version of `make' that<br>
+supports the `VPATH' variable, such as GNU `make'.  `cd' to the<br>
+directory where you want the object files and executables to go and run<br>
+the `configure' script.  `configure' automatically checks for the<br>
+source code in the directory that `configure' is in and in `..'.<br>
+<br>
+   If you have to use a `make' that does not supports the `VPATH'<br>
+variable, you have to compile the package for one architecture at a time<br>
+in the source code directory.  After you have installed the package for<br>
+one architecture, use `make distclean' before reconfiguring for another<br>
+architecture.<br>
+<br>
+Installation Names<br>
+==================<br>
+<br>
+   By default, `make install' will install the package's files in<br>
+`/usr/local/bin', `/usr/local/man', etc.  You can specify an<br>
+installation prefix other than `/usr/local' by giving `configure' the<br>
+option `--prefix=PATH'.<br>
+<br>
+   You can specify separate installation prefixes for<br>
+architecture-specific files and architecture-independent files.  If you<br>
+give `configure' the option `--exec-prefix=PATH', the package will use<br>
+PATH as the prefix for installing programs and libraries.<br>
+Documentation and other data files will still use the regular prefix.<br>
+<br>
+   In addition, if you use an unusual directory layout you can give<br>
+options like `--bindir=PATH' to specify different values for particular<br>
+kinds of files.  Run `configure --help' for a list of the directories<br>
+you can set and what kinds of files go in them.<br>
+<br>
+   If the package supports it, you can cause programs to be installed<br>
+with an extra prefix or suffix on their names by giving `configure' the<br>
+option `--program-prefix=PREFIX' or `--program-suffix=SUFFIX'.<br>
+<br>
+Optional Features<br>
+=================<br>
+<br>
+   Some packages pay attention to `--enable-FEATURE' options to<br>
+`configure', where FEATURE indicates an optional part of the package.<br>
+They may also pay attention to `--with-PACKAGE' options, where PACKAGE<br>
+is something like `gnu-as' or `x' (for the X Window System).  The<br>
+`README' should mention any `--enable-' and `--with-' options that the<br>
+package recognizes.<br>
+<br>
+   For packages that use the X Window System, `configure' can usually<br>
+find the X include and library files automatically, but if it doesn't,<br>
+you can use the `configure' options `--x-includes=DIR' and<br>
+`--x-libraries=DIR' to specify their locations.<br>
+<br>
+Specifying the System Type<br>
+==========================<br>
+<br>
+   There may be some features `configure' can not figure out<br>
+automatically, but needs to determine by the type of host the package<br>
+will run on.  Usually `configure' can figure that out, but if it prints<br>
+a message saying it can not guess the host type, give it the<br>
+`--host=TYPE' option.  TYPE can either be a short name for the system<br>
+type, such as `sun4', or a canonical name with three fields:<br>
+     CPU-COMPANY-SYSTEM<br>
+<br>
+See the file `config.sub' for the possible values of each field.  If<br>
+`config.sub' isn't included in this package, then this package doesn't<br>
+need to know the host type.<br>
+<br>
+   If you are building compiler tools for cross-compiling, you can also<br>
+use the `--target=TYPE' option to select the type of system they will<br>
+produce code for and the `--build=TYPE' option to select the type of<br>
+system on which you are compiling the package.<br>
+<br>
+Sharing Defaults<br>
+================<br>
+<br>
+   If you want to set default values for `configure' scripts to share,<br>
+you can create a site shell script called `config.site' that gives<br>
+default values for variables like `CC', `cache_file', and `prefix'.<br>
+`configure' looks for `PREFIX/share/config.site' if it exists, then<br>
+`PREFIX/etc/config.site' if it exists.  Or, you can set the<br>
+`CONFIG_SITE' environment variable to the location of the site script.<br>
+A warning: not all `configure' scripts look for a site script.<br>
+<br>
+Operation Controls<br>
+==================<br>
+<br>
+   `configure' recognizes the following options to control how it<br>
+operates.<br>
+<br>
+`--cache-file=FILE'<br>
+     Use and save the results of the tests in FILE instead of<br>
+     `./config.cache'.  Set FILE to `/dev/null' to disable caching, for<br>
+     debugging `configure'.<br>
+<br>
+`--help'<br>
+     Print a summary of the options to `configure', and exit.<br>
+<br>
+`--quiet'<br>
+`--silent'<br>
+`-q'<br>
+     Do not print messages saying which checks are being made.  To<br>
+     suppress all normal output, redirect it to `/dev/null' (any error<br>
+     messages will still be shown).<br>
+<br>
+`--srcdir=DIR'<br>
+     Look for the package's source code in directory DIR.  Usually<br>
+     `configure' can determine that directory automatically.<br>
+<br>
+`--version'<br>
+     Print the version of Autoconf used to generate the `configure'<br>
+     script, and exit.<br>
+<br>
+`configure' also accepts some other, not widely useful, options.<br>
+<br>
+    </p></div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="dist.authors.html">&lt;&lt; 2. AUTHORS</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="dist.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="dist.news.html">4. NEWS &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>7. Helgrind: a data-race detector</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="manual.html" title="Valgrind User Manual">
+<link rel="previous" href="ms-manual.options.html" title="6.4. Massif options">
+<link rel="next" href="nl-manual.html" title="8. Nulgrind: the ``null'' tool">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="ms-manual.options.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="manual.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">Valgrind User Manual</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="nl-manual.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="chapter" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title">
+<a name="hg-manual"></a>7. Helgrind: a data-race detector</h2></div></div>
+<div></div>
+</div>
+<p>Helgrind is a Valgrind tool for detecting data races in C
+and C++ programs that use the Pthreads library.</p>
+<p>To use this tool, you specify
+<tt class="computeroutput">--tool=helgrind</tt> on the Valgrind
+command line.</p>
+<p>It uses the Eraser algorithm described in:
+
+ </p>
+<div class="address"><p>Eraser: A Dynamic Data Race Detector for Multithreaded Programs<br>
+  Stefan Savage, Michael Burrows, Greg Nelson, Patrick Sobalvarro and Thomas Anderson<br>
+  ACM Transactions on Computer Systems, 15(4):391-411<br>
+  November 1997.<br>
+ </p></div>
+<p>
+</p>
+<p>We also incorporate significant improvements from this paper:
+
+ </p>
+<div class="address"><p>Runtime Checking of Multithreaded Applications with Visual Threads<br>
+  Jerry J. Harrow, Jr.<br>
+  Proceedings of the 7th International SPIN Workshop on Model Checking of Software<br>
+  Stanford, California, USA<br>
+  August 2000<br>
+  LNCS 1885, pp331--342<br>
+  K. Havelund, J. Penix, and W. Visser, editors.<br>
+ </p></div>
+<p>
+</p>
+<p>Basically what Helgrind does is to look for memory
+locations which are accessed by more than one thread.  For each
+such location, Helgrind records which of the program's
+(pthread_mutex_)locks were held by the accessing thread at the
+time of the access.  The hope is to discover that there is indeed
+at least one lock which is used by all threads to protect that
+location.  If no such lock can be found, then there is
+(apparently) no consistent locking strategy being applied for
+that location, and so a possible data race might result.</p>
+<p>Helgrind also allows for "thread segment lifetimes".  If
+the execution of two threads cannot overlap -- for example, if
+your main thread waits on another thread with a
+<tt class="computeroutput">pthread_join()</tt> operation -- they
+can both access the same variable without holding a lock.</p>
+<p>There's a lot of other sophistication in Helgrind, aimed at
+reducing the number of false reports, and at producing useful
+error reports.  We hope to have more documentation one
+day...</p>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="ms-manual.options.html">&lt;&lt; 6.4. Massif options</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="manual.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="nl-manual.html">8. Nulgrind: the ``null'' tool &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

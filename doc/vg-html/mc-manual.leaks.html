@@ -1,0 +1,76 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>3.6. Memory leak detection</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="mc-manual.html" title="3. Memcheck: a heavyweight memory checker">
+<link rel="previous" href="mc-manual.machine.html" title="3.5. Details of Memcheck's checking machinery">
+<link rel="next" href="mc-manual.clientreqs.html" title="3.7. Client Requests">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="mc-manual.machine.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="mc-manual.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">3. Memcheck: a heavyweight memory checker</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="mc-manual.clientreqs.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="mc-manual.leaks"></a>3.6. Memory leak detection</h2></div></div>
+<div></div>
+</div>
+<p>Memcheck keeps track of all memory blocks issued in
+response to calls to malloc/calloc/realloc/new.  So when the
+program exits, it knows which blocks are still outstanding --
+have not been returned, in other words.  Ideally, you want your
+program to have no blocks still in use at exit.  But many
+programs do.</p>
+<p>For each such block, Memcheck scans the entire address
+space of the process, looking for pointers to the block.  One of
+three situations may result:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>A pointer to the start of the block is found.  This
+    usually indicates programming sloppiness; since the block is
+    still pointed at, the programmer could, at least in
+    principle, free'd it before program exit.</p></li>
+<li><p>A pointer to the interior of the block is found.  The
+    pointer might originally have pointed to the start and have
+    been moved along, or it might be entirely unrelated.
+    Memcheck deems such a block as "dubious", that is, possibly
+    leaked, because it's unclear whether or not a pointer to it
+    still exists.</p></li>
+<li><p>The worst outcome is that no pointer to the block can
+    be found.  The block is classified as "leaked", because the
+    programmer could not possibly have free'd it at program exit,
+    since no pointer to it exists.  This might be a symptom of
+    having lost the pointer at some earlier point in the
+    program.</p></li>
+</ul></div>
+<p>Memcheck reports summaries about leaked and dubious blocks.
+For each such block, it will also tell you where the block was
+allocated.  This should help you figure out why the pointer to it
+has been lost.  In general, you should attempt to ensure your
+programs do not have any leaked or dubious blocks at exit.</p>
+<p>The precise area of memory in which Memcheck searches for
+pointers is: all naturally-aligned 4-byte words for which all A
+bits indicate addressibility and all V bits indicated that the
+stored value is actually valid.</p>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="mc-manual.machine.html">&lt;&lt; 3.5. Details of Memcheck's checking machinery</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="mc-manual.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="mc-manual.clientreqs.html">3.7. Client Requests &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>3. Writing a New Valgrind Tool</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="tech-docs.html" title="Valgrind Technical Documentation">
+<link rel="previous" href="cg-tech-docs.extensions.html" title="2.10. Similar work, extensions">
+<link rel="next" href="writing-tools.writingatool.html" title="3.2. Writing a Tool">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="cg-tech-docs.extensions.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="tech-docs.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">Valgrind Technical Documentation</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="writing-tools.writingatool.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="chapter" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title">
+<a name="writing-tools"></a>3. Writing a New Valgrind Tool</h2></div></div>
+<div></div>
+</div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl>
+<dt><span class="sect1"><a href="writing-tools.html#writing-tools.intro">3.1. Introduction</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="writing-tools.html#writing-tools.supexec">3.1.1. Supervised Execution</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.html#writing-tools.tools">3.1.2. Tools</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.html#writing-tools.execspaces">3.1.3. Execution Spaces</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="writing-tools.writingatool.html">3.2. Writing a Tool</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.whywriteatool">3.2.1. Why write a tool?</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.suggestedtools">3.2.2. Suggested tools</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.howtoolswork">3.2.3. How tools work</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.gettingcode">3.2.4. Getting the code</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.gettingstarted">3.2.5. Getting started</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.writingcode">3.2.6. Writing the code</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.init">3.2.7. Initialisation</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.instr">3.2.8. Instrumentation</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.fini">3.2.9. Finalisation</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.otherinfo">3.2.10. Other Important Information</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.writingatool.html#writing-tools.advice">3.2.11. Words of Advice</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="writing-tools.advtopics.html">3.3. Advanced Topics</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.suppressions">3.3.1. Suppressions</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.docs">3.3.2. Documentation</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.regtests">3.3.3. Regression Tests</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.profiling">3.3.4. Profiling</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.mkhackery">3.3.5. Other Makefile Hackery</a></span></dt>
+<dt><span class="sect2"><a href="writing-tools.advtopics.html#writing-tools.ifacever">3.3.6. Core/tool Interface Versions</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="writing-tools.finalwords.html">3.4. Final Words</a></span></dt>
+</dl>
+</div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="writing-tools.intro"></a>3.1. Introduction</h2></div></div>
+<div></div>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="writing-tools.supexec"></a>3.1.1. Supervised Execution</h3></div></div>
+<div></div>
+</div>
+<p>Valgrind provides a generic infrastructure for supervising
+the execution of programs.  This is done by providing a way to
+instrument programs in very precise ways, making it relatively
+easy to support activities such as dynamic error detection and
+profiling.</p>
+<p>Although writing a tool is not easy, and requires learning
+quite a few things about Valgrind, it is much easier than
+instrumenting a program from scratch yourself.</p>
+<p>[Nb: What follows is slightly out of date.  In particular,
+there are various references to a file include/tool.h which has been
+split into a number of header files in include/.]</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="writing-tools.tools"></a>3.1.2. Tools</h3></div></div>
+<div></div>
+</div>
+<p>The key idea behind Valgrind's architecture is the division
+between its "core" and "tools".</p>
+<p>The core provides the common low-level infrastructure to
+support program instrumentation, including the x86-to-x86 JIT
+compiler, low-level memory manager, signal handling and a
+scheduler (for pthreads).  It also provides certain services that
+are useful to some but not all tools, such as support for error
+recording and suppression.</p>
+<p>But the core leaves certain operations undefined, which
+must be filled by tools.  Most notably, tools define how program
+code should be instrumented.  They can also define certain
+variables to indicate to the core that they would like to use
+certain services, or be notified when certain interesting events
+occur.  But the core takes care of all the hard work.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="writing-tools.execspaces"></a>3.1.3. Execution Spaces</h3></div></div>
+<div></div>
+</div>
+<p>An important concept to understand before writing a tool is
+that there are three spaces in which program code executes:</p>
+<div class="orderedlist"><ol type="1">
+<li>
+<p>User space: this covers most of the program's execution.
+  The tool is given the code and can instrument it any way it
+  likes, providing (more or less) total control over the
+  code.</p>
+<p>Code executed in user space includes all the program
+  code, almost all of the C library (including things like the
+  dynamic linker), and almost all parts of all other
+  libraries.</p>
+</li>
+<li>
+<p>Core space: a small proportion of the program's execution
+   takes place entirely within Valgrind's core.  This includes:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>Dynamic memory management 
+      (<tt class="computeroutput">malloc()</tt> etc.)</p></li>
+<li><p>Pthread operations and scheduling</p></li>
+<li><p>Signal handling</p></li>
+</ul></div>
+<p>A tool has no control over these operations; it never
+   "sees" the code doing this work and thus cannot instrument it.
+   However, the core provides hooks so a tool can be notified
+   when certain interesting events happen, for example when when
+   dynamic memory is allocated or freed, the stack pointer is
+   changed, or a pthread mutex is locked, etc.</p>
+<p>Note that these hooks only notify tools of events
+   relevant to user space.  For example, when the core allocates
+   some memory for its own use, the tool is not notified of this,
+   because it's not directly part of the supervised program's
+   execution.</p>
+</li>
+<li>
+<p>Kernel space: execution in the kernel.  Two kinds:</p>
+<div class="orderedlist"><ol type="a">
+<li><p>System calls: can't be directly observed by either
+      the tool or the core.  But the core does have some idea of
+      what happens to the arguments, and it provides hooks for a
+      tool to wrap system calls.</p></li>
+<li><p>Other: all other kernel activity (e.g. process
+      scheduling) is totally opaque and irrelevant to the
+      program.</p></li>
+</ol></div>
+</li>
+<li><p>It should be noted that a tool only has direct control
+   over code executed in user space.  This is the vast majority
+   of code executed, but it is not absolutely all of it, so any
+   profiling information recorded by a tool won't be totally
+   accurate.</p></li>
+</ol></div>
+</div>
+</div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="cg-tech-docs.extensions.html">&lt;&lt; 2.10. Similar work, extensions</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="tech-docs.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="writing-tools.writingatool.html">3.2. Writing a Tool &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>

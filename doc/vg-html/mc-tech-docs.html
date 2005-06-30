@@ -1,0 +1,568 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>1. The Design and Implementation of Valgrind</title>
+<link rel="stylesheet" href="vg_basic.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<link rel="home" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="tech-docs.html" title="Valgrind Technical Documentation">
+<link rel="previous" href="tech-docs.html" title="Valgrind Technical Documentation">
+<link rel="next" href="mc-tech-docs.jitter.html" title="1.2. The instrumenting JITter">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="tech-docs.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="tech-docs.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">Valgrind Technical Documentation</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="mc-tech-docs.jitter.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="chapter" lang="en">
+<div class="titlepage">
+<div>
+<div><h2 class="title">
+<a name="mc-tech-docs"></a>1. The Design and Implementation of Valgrind</h2></div>
+<div><h3 class="subtitle"><i>Detailed technical notes for hackers, maintainers and
+          the overly-curious</i></h3></div>
+</div>
+<div></div>
+</div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl>
+<dt><span class="sect1"><a href="mc-tech-docs.html#mc-tech-docs.intro">1.1. Introduction</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="mc-tech-docs.html#mc-tech-docs.history">1.1.1. History</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.html#mc-tech-docs.overview">1.1.2. Design overview</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.html#mc-tech-docs.design">1.1.3. Design decisions</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.html#mc-tech-docs.correctness">1.1.4. Correctness</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.html#mc-tech-docs.limits">1.1.5. Current limitations</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="mc-tech-docs.jitter.html">1.2. The instrumenting JITter</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.storage">1.2.1. Run-time storage, and the use of host registers</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.startup">1.2.2. Startup, shutdown, and system calls</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.ucode">1.2.3. Introduction to UCode</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.tags">1.2.4. UCode operand tags: type Tag</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.uinstr">1.2.5. UCode instructions: type UInstr</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.trans">1.2.6. Translation into UCode</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.optim">1.2.7. UCode optimisation</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.instrum">1.2.8. UCode instrumentation</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.cleanup">1.2.9. UCode post-instrumentation cleanup</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.transfrom">1.2.10. Translation from UCode</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.dispatch">1.2.11. Top-level dispatch loop</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.lazy">1.2.12. Lazy updates of the simulated program counter</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.signals">1.2.13. Signals</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.jitter.html#mc-tech-docs.todo">1.2.14. To be written</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="mc-tech-docs.extensions.html">1.3. Extensions</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="mc-tech-docs.extensions.html#mc-tech-docs.bugs">1.3.1. Bugs</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.extensions.html#mc-tech-docs.threads">1.3.2. Threads</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.extensions.html#mc-tech-docs.verify">1.3.3. Verification suite</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.extensions.html#mc-tech-docs.porting">1.3.4. Porting to other platforms</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="mc-tech-docs.easystuff.html">1.4. Easy stuff which ought to be done</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="mc-tech-docs.easystuff.html#mc-tech-docs.mmx">1.4.1. MMX Instructions</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.easystuff.html#mc-tech-docs.fixstabs">1.4.2. Fix stabs-info reader</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.easystuff.html#mc-tech-docs.x86instr">1.4.3. BT/BTC/BTS/BTR</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.easystuff.html#mc-tech-docs.prefetch">1.4.4. Using PREFETCH Instructions</a></span></dt>
+<dt><span class="sect2"><a href="mc-tech-docs.easystuff.html#mc-tech-docs.pranges">1.4.5. User-defined Permission Ranges</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="mc-tech-docs.intro"></a>1.1. Introduction</h2></div></div>
+<div></div>
+</div>
+<p>This document contains a detailed, highly-technical
+description of the internals of Valgrind.  This is not the user
+manual; if you are an end-user of Valgrind, you do not want to
+read this.  Conversely, if you really are a hacker-type and want
+to know how it works, I assume that you have read the user manual
+thoroughly.</p>
+<p>You may need to read this document several times, and
+carefully.  Some important things, I only say once.</p>
+<p>[Note: this document is now very old, and a lot of its contents are out
+of date, and misleading.]</p>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="mc-tech-docs.history"></a>1.1.1. History</h3></div></div>
+<div></div>
+</div>
+<p>Valgrind came into public view in late Feb 2002.  However,
+it has been under contemplation for a very long time, perhaps
+seriously for about five years.  Somewhat over two years ago, I
+started working on the x86 code generator for the Glasgow Haskell
+Compiler (http://www.haskell.org/ghc), gaining familiarity with
+x86 internals on the way.  I then did Cacheprof,
+gaining further x86 experience.  Some
+time around Feb 2000 I started experimenting with a user-space
+x86 interpreter for x86-Linux.  This worked, but it was clear
+that a JIT-based scheme would be necessary to give reasonable
+performance for Valgrind.  Design work for the JITter started in
+earnest in Oct 2000, and by early 2001 I had an x86-to-x86
+dynamic translator which could run quite large programs.  This
+translator was in a sense pointless, since it did not do any
+instrumentation or checking.</p>
+<p>Most of the rest of 2001 was taken up designing and
+implementing the instrumentation scheme.  The main difficulty,
+which consumed a lot of effort, was to design a scheme which did
+not generate large numbers of false uninitialised-value warnings.
+By late 2001 a satisfactory scheme had been arrived at, and I
+started to test it on ever-larger programs, with an eventual eye
+to making it work well enough so that it was helpful to folks
+debugging the upcoming version 3 of KDE.  I've used KDE since
+before version 1.0, and wanted to Valgrind to be an indirect
+contribution to the KDE 3 development effort.  At the start of
+Feb 02 the kde-core-devel crew started using it, and gave a huge
+amount of helpful feedback and patches in the space of three
+weeks.  Snapshot 20020306 is the result.</p>
+<p>In the best Unix tradition, or perhaps in the spirit of
+Fred Brooks' depressing-but-completely-accurate epitaph "build
+one to throw away; you will anyway", much of Valgrind is a second
+or third rendition of the initial idea.  The instrumentation
+machinery (<tt class="filename">vg_translate.c</tt>,
+<tt class="filename">vg_memory.c</tt>) and core CPU simulation
+(<tt class="filename">vg_to_ucode.c</tt>,
+<tt class="filename">vg_from_ucode.c</tt>) have had three redesigns
+and rewrites; the register allocator, low-level memory manager
+(<tt class="filename">vg_malloc2.c</tt>) and symbol table reader
+(<tt class="filename">vg_symtab2.c</tt>) are on the second rewrite.
+In a sense, this document serves to record some of the knowledge
+gained as a result.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="mc-tech-docs.overview"></a>1.1.2. Design overview</h3></div></div>
+<div></div>
+</div>
+<p>Valgrind is compiled into a Linux shared object,
+<tt class="filename">valgrind.so</tt>, and also a dummy one,
+<tt class="filename">valgrinq.so</tt>, of which more later.  The
+<tt class="filename">valgrind</tt> shell script adds
+<tt class="filename">valgrind.so</tt> to the
+<tt class="computeroutput">LD_PRELOAD</tt> list of extra
+libraries to be loaded with any dynamically linked library.  This
+is a standard trick, one which I assume the
+<tt class="computeroutput">LD_PRELOAD</tt> mechanism was
+developed to support.</p>
+<p><tt class="filename">valgrind.so</tt> is linked with the
+<tt class="computeroutput">-z initfirst</tt> flag, which
+requests that its initialisation code is run before that of any
+other object in the executable image.  When this happens,
+valgrind gains control.  The real CPU becomes "trapped" in
+<tt class="filename">valgrind.so</tt> and the translations it
+generates.  The synthetic CPU provided by Valgrind does, however,
+return from this initialisation function.  So the normal startup
+actions, orchestrated by the dynamic linker
+<tt class="filename">ld.so</tt>, continue as usual, except on the
+synthetic CPU, not the real one.  Eventually
+<tt class="computeroutput">main</tt> is run and returns, and
+then the finalisation code of the shared objects is run,
+presumably in inverse order to which they were initialised.
+Remember, this is still all happening on the simulated CPU.
+Eventually <tt class="filename">valgrind.so</tt>'s own finalisation
+code is called.  It spots this event, shuts down the simulated
+CPU, prints any error summaries and/or does leak detection, and
+returns from the initialisation code on the real CPU.  At this
+point, in effect the real and synthetic CPUs have merged back
+into one, Valgrind has lost control of the program, and the
+program finally <tt class="computeroutput">exit()s</tt> back to
+the kernel in the usual way.</p>
+<p>The normal course of activity, once Valgrind has started
+up, is as follows.  Valgrind never runs any part of your program
+(usually referred to as the "client"), not a single byte of it,
+directly.  Instead it uses function
+<tt class="computeroutput">VG_(translate)</tt> to translate
+basic blocks (BBs, straight-line sequences of code) into
+instrumented translations, and those are run instead.  The
+translations are stored in the translation cache (TC),
+<tt class="computeroutput">vg_tc</tt>, with the translation
+table (TT), <tt class="computeroutput">vg_tt</tt> supplying the
+original-to-translation code address mapping.  Auxiliary array
+<tt class="computeroutput">VG_(tt_fast)</tt> is used as a
+direct-map cache for fast lookups in TT; it usually achieves a
+hit rate of around 98% and facilitates an orig-to-trans lookup in
+4 x86 insns, which is not bad.</p>
+<p>Function <tt class="computeroutput">VG_(dispatch)</tt> in
+<tt class="filename">vg_dispatch.S</tt> is the heart of the JIT
+dispatcher.  Once a translated code address has been found, it is
+executed simply by an x86 <tt class="computeroutput">call</tt>
+to the translation.  At the end of the translation, the next
+original code addr is loaded into
+<tt class="computeroutput">%eax</tt>, and the translation then
+does a <tt class="computeroutput">ret</tt>, taking it back to
+the dispatch loop, with, interestingly, zero branch
+mispredictions.  The address requested in
+<tt class="computeroutput">%eax</tt> is looked up first in
+<tt class="computeroutput">VG_(tt_fast)</tt>, and, if not found,
+by calling C helper
+<tt class="computeroutput">VG_(search_transtab)</tt>.  If there
+is still no translation available,
+<tt class="computeroutput">VG_(dispatch)</tt> exits back to the
+top-level C dispatcher
+<tt class="computeroutput">VG_(toploop)</tt>, which arranges for
+<tt class="computeroutput">VG_(translate)</tt> to make a new
+translation.  All fairly unsurprising, really.  There are various
+complexities described below.</p>
+<p>The translator, orchestrated by
+<tt class="computeroutput">VG_(translate)</tt>, is complicated
+but entirely self-contained.  It is described in great detail in
+subsequent sections.  Translations are stored in TC, with TT
+tracking administrative information.  The translations are
+subject to an approximate LRU-based management scheme.  With the
+current settings, the TC can hold at most about 15MB of
+translations, and LRU passes prune it to about 13.5MB.  Given
+that the orig-to-translation expansion ratio is about 13:1 to
+14:1, this means TC holds translations for more or less a
+megabyte of original code, which generally comes to about 70000
+basic blocks for C++ compiled with optimisation on.  Generating
+new translations is expensive, so it is worth having a large TC
+to minimise the (capacity) miss rate.</p>
+<p>The dispatcher,
+<tt class="computeroutput">VG_(dispatch)</tt>, receives hints
+from the translations which allow it to cheaply spot all control
+transfers corresponding to x86
+<tt class="computeroutput">call</tt> and
+<tt class="computeroutput">ret</tt> instructions.  It has to do
+this in order to spot some special events:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>Calls to
+    <tt class="computeroutput">VG_(shutdown)</tt>.  This is
+    Valgrind's cue to exit.  NOTE: actually this is done a
+    different way; it should be cleaned up.</p></li>
+<li><p>Returns of system call handlers, to the return address
+    <tt class="computeroutput">VG_(signalreturn_bogusRA)</tt>.
+    The signal simulator needs to know when a signal handler is
+    returning, so we spot jumps (returns) to this address.</p></li>
+<li><p>Calls to <tt class="computeroutput">vg_trap_here</tt>.
+    All <tt class="computeroutput">malloc</tt>,
+    <tt class="computeroutput">free</tt>, etc calls that the
+    client program makes are eventually routed to a call to
+    <tt class="computeroutput">vg_trap_here</tt>, and Valgrind
+    does its own special thing with these calls.  In effect this
+    provides a trapdoor, by which Valgrind can intercept certain
+    calls on the simulated CPU, run the call as it sees fit
+    itself (on the real CPU), and return the result to the
+    simulated CPU, quite transparently to the client
+    program.</p></li>
+</ul></div>
+<p>Valgrind intercepts the client's
+<tt class="computeroutput">malloc</tt>,
+<tt class="computeroutput">free</tt>, etc, calls, so that it can
+store additional information.  Each block
+<tt class="computeroutput">malloc</tt>'d by the client gives
+rise to a shadow block in which Valgrind stores the call stack at
+the time of the <tt class="computeroutput">malloc</tt> call.
+When the client calls <tt class="computeroutput">free</tt>,
+Valgrind tries to find the shadow block corresponding to the
+address passed to <tt class="computeroutput">free</tt>, and
+emits an error message if none can be found.  If it is found, the
+block is placed on the freed blocks queue
+<tt class="computeroutput">vg_freed_list</tt>, it is marked as
+inaccessible, and its shadow block now records the call stack at
+the time of the <tt class="computeroutput">free</tt> call.
+Keeping <tt class="computeroutput">free</tt>'d blocks in this
+queue allows Valgrind to spot all (presumably invalid) accesses
+to them.  However, once the volume of blocks in the free queue
+exceeds <tt class="computeroutput">VG_(clo_freelist_vol)</tt>,
+blocks are finally removed from the queue.</p>
+<p>Keeping track of <tt class="literal">A</tt> and
+<tt class="literal">V</tt> bits (note: if you don't know what these
+are, you haven't read the user guide carefully enough) for memory
+is done in <tt class="filename">vg_memory.c</tt>.  This implements a
+sparse array structure which covers the entire 4G address space
+in a way which is reasonably fast and reasonably space efficient.
+The 4G address space is divided up into 64K sections, each
+covering 64Kb of address space.  Given a 32-bit address, the top
+16 bits are used to select one of the 65536 entries in
+<tt class="computeroutput">VG_(primary_map)</tt>.  The resulting
+"secondary" (<tt class="computeroutput">SecMap</tt>) holds A and
+V bits for the 64k of address space chunk corresponding to the
+lower 16 bits of the address.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="mc-tech-docs.design"></a>1.1.3. Design decisions</h3></div></div>
+<div></div>
+</div>
+<p>Some design decisions were motivated by the need to make
+Valgrind debuggable.  Imagine you are writing a CPU simulator.
+It works fairly well.  However, you run some large program, like
+Netscape, and after tens of millions of instructions, it crashes.
+How can you figure out where in your simulator the bug is?</p>
+<p>Valgrind's answer is: cheat.  Valgrind is designed so that
+it is possible to switch back to running the client program on
+the real CPU at any point.  Using the
+<tt class="computeroutput">--stop-after= </tt> flag, you can ask
+Valgrind to run just some number of basic blocks, and then run
+the rest of the way on the real CPU.  If you are searching for a
+bug in the simulated CPU, you can use this to do a binary search,
+which quickly leads you to the specific basic block which is
+causing the problem.</p>
+<p>This is all very handy.  It does constrain the design in
+certain unimportant ways.  Firstly, the layout of memory, when
+viewed from the client's point of view, must be identical
+regardless of whether it is running on the real or simulated CPU.
+This means that Valgrind can't do pointer swizzling -- well, no
+great loss -- and it can't run on the same stack as the client --
+again, no great loss.  Valgrind operates on its own stack,
+<tt class="computeroutput">VG_(stack)</tt>, which it switches to
+at startup, temporarily switching back to the client's stack when
+doing system calls for the client.</p>
+<p>Valgrind also receives signals on its own stack,
+<tt class="computeroutput">VG_(sigstack)</tt>, but for different
+gruesome reasons discussed below.</p>
+<p>This nice clean
+switch-back-to-the-real-CPU-whenever-you-like story is muddied by
+signals.  Problem is that signals arrive at arbitrary times and
+tend to slightly perturb the basic block count, with the result
+that you can get close to the basic block causing a problem but
+can't home in on it exactly.  My kludgey hack is to define
+<tt class="computeroutput">SIGNAL_SIMULATION</tt> to 1 towards
+the bottom of <tt class="filename">vg_syscall_mem.c</tt>, so that
+signal handlers are run on the real CPU and don't change the BB
+counts.</p>
+<p>A second hole in the switch-back-to-real-CPU story is that
+Valgrind's way of delivering signals to the client is different
+from that of the kernel.  Specifically, the layout of the signal
+delivery frame, and the mechanism used to detect a sighandler
+returning, are different.  So you can't expect to make the
+transition inside a sighandler and still have things working, but
+in practice that's not much of a restriction.</p>
+<p>Valgrind's implementation of
+<tt class="computeroutput">malloc</tt>,
+<tt class="computeroutput">free</tt>, etc, (in
+<tt class="filename">vg_clientmalloc.c</tt>, not the low-level stuff
+in <tt class="filename">vg_malloc2.c</tt>) is somewhat complicated by
+the need to handle switching back at arbitrary points.  It does
+work tho.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="mc-tech-docs.correctness"></a>1.1.4. Correctness</h3></div></div>
+<div></div>
+</div>
+<p>There's only one of me, and I have a Real Life (tm) as well
+as hacking Valgrind [allegedly :-].  That means I don't have time
+to waste chasing endless bugs in Valgrind.  My emphasis is
+therefore on doing everything as simply as possible, with
+correctness, stability and robustness being the number one
+priority, more important than performance or functionality.  As a
+result:</p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+<p>The code is absolutely loaded with assertions, and
+    these are <span><b class="command">permanently enabled.</b></span> I have no
+    plan to remove or disable them later.  Over the past couple
+    of months, as valgrind has become more widely used, they have
+    shown their worth, pulling up various bugs which would
+    otherwise have appeared as hard-to-find segmentation
+    faults.</p>
+<p>I am of the view that it's acceptable to spend 5% of
+    the total running time of your valgrindified program doing
+    assertion checks and other internal sanity checks.</p>
+</li>
+<li>
+<p>Aside from the assertions, valgrind contains various
+    sets of internal sanity checks, which get run at varying
+    frequencies during normal operation.
+    <tt class="computeroutput">VG_(do_sanity_checks)</tt> runs
+    every 1000 basic blocks, which means 500 to 2000 times/second
+    for typical machines at present.  It checks that Valgrind
+    hasn't overrun its private stack, and does some simple checks
+    on the memory permissions maps.  Once every 25 calls it does
+    some more extensive checks on those maps.  Etc, etc.</p>
+<p>The following components also have sanity check code,
+    which can be enabled to aid debugging:</p>
+<div class="itemizedlist"><ul type="circle">
+<li><p>The low-level memory-manager
+        (<tt class="computeroutput">VG_(mallocSanityCheckArena)</tt>).
+        This does a complete check of all blocks and chains in an
+        arena, which is very slow.  Is not engaged by default.</p></li>
+<li><p>The symbol table reader(s): various checks to
+        ensure uniqueness of mappings; see
+        <tt class="computeroutput">VG_(read_symbols)</tt> for a
+        start.  Is permanently engaged.</p></li>
+<li><p>The A and V bit tracking stuff in
+        <tt class="filename">vg_memory.c</tt>.  This can be compiled
+        with cpp symbol
+        <tt class="computeroutput">VG_DEBUG_MEMORY</tt> defined,
+        which removes all the fast, optimised cases, and uses
+        simple-but-slow fallbacks instead.  Not engaged by
+        default.</p></li>
+<li><p>Ditto
+        <tt class="computeroutput">VG_DEBUG_LEAKCHECK</tt>.</p></li>
+<li><p>The JITter parses x86 basic blocks into sequences
+        of UCode instructions.  It then sanity checks each one
+        with <tt class="computeroutput">VG_(saneUInstr)</tt> and
+        sanity checks the sequence as a whole with
+        <tt class="computeroutput">VG_(saneUCodeBlock)</tt>.
+        This stuff is engaged by default, and has caught some
+        way-obscure bugs in the simulated CPU machinery in its
+        time.</p></li>
+<li><p>The system call wrapper does
+        <tt class="computeroutput">VG_(first_and_last_secondaries_look_plausible)</tt>
+        after every syscall; this is known to pick up bugs in the
+        syscall wrappers.  Engaged by default.</p></li>
+<li><p>The main dispatch loop, in
+        <tt class="computeroutput">VG_(dispatch)</tt>, checks
+        that translations do not set
+        <tt class="computeroutput">%ebp</tt> to any value
+        different from
+        <tt class="computeroutput">VG_EBP_DISPATCH_CHECKED</tt>
+        or <tt class="computeroutput">&amp; VG_(baseBlock)</tt>.
+        In effect this test is free, and is permanently
+        engaged.</p></li>
+<li><p>There are a couple of ifdefed-out consistency
+        checks I inserted whilst debugging the new register
+        allocater,
+        <tt class="computeroutput">vg_do_register_allocation</tt>.</p></li>
+</ul></div>
+</li>
+<li><p>I try to avoid techniques, algorithms, mechanisms, etc,
+    for which I can supply neither a convincing argument that
+    they are correct, nor sanity-check code which might pick up
+    bugs in my implementation.  I don't always succeed in this,
+    but I try.  Basically the idea is: avoid techniques which
+    are, in practice, unverifiable, in some sense.  When doing
+    anything, always have in mind: "how can I verify that this is
+    correct?"</p></li>
+</ul></div>
+<p>Some more specific things are:</p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+<p>Valgrind runs in the same namespace as the client, at
+    least from <tt class="filename">ld.so</tt>'s point of view, and it
+    therefore absolutely had better not export any symbol with a
+    name which could clash with that of the client or any of its
+    libraries.  Therefore, all globally visible symbols exported
+    from <tt class="filename">valgrind.so</tt> are defined using the
+    <tt class="computeroutput">VG_</tt> CPP macro.  As you'll
+    see from <tt class="filename">vg_constants.h</tt>, this appends
+    some arbitrary prefix to the symbol, in order that it be, we
+    hope, globally unique.  Currently the prefix is
+    <tt class="computeroutput">vgPlain_</tt>.  For convenience
+    there are also <tt class="computeroutput">VGM_</tt>,
+    <tt class="computeroutput">VGP_</tt> and
+    <tt class="computeroutput">VGOFF_</tt>.  All locally defined
+    symbols are declared <tt class="computeroutput">static</tt>
+    and do not appear in the final shared object.</p>
+<p>To check this, I periodically do <tt class="computeroutput">nm
+    valgrind.so | grep " T "</tt>, which shows you
+    all the globally exported text symbols.  They should all have
+    an approved prefix, except for those like
+    <tt class="computeroutput">malloc</tt>,
+    <tt class="computeroutput">free</tt>, etc, which we
+    deliberately want to shadow and take precedence over the same
+    names exported from <tt class="filename">glibc.so</tt>, so that
+    valgrind can intercept those calls easily.  Similarly,
+    <tt class="computeroutput">nm valgrind.so | grep " D "</tt>
+    allows you to find any rogue data-segment symbol
+    names.</p>
+</li>
+<li>
+<p>Valgrind tries, and almost succeeds, in being
+    completely independent of all other shared objects, in
+    particular of <tt class="filename">glibc.so</tt>.  For example, we
+    have our own low-level memory manager in
+    <tt class="filename">vg_malloc2.c</tt>, which is a fairly standard
+    malloc/free scheme augmented with arenas, and
+    <tt class="filename">vg_mylibc.c</tt> exports reimplementations of
+    various bits and pieces you'd normally get from the C
+    library.</p>
+<p>Why all the hassle?  Because imagine the potential
+    chaos of both the simulated and real CPUs executing in
+    <tt class="filename">glibc.so</tt>.  It just seems simpler and
+    cleaner to be completely self-contained, so that only the
+    simulated CPU visits <tt class="filename">glibc.so</tt>.  In
+    practice it's not much hassle anyway.  Also, valgrind starts
+    up before glibc has a chance to initialise itself, and who
+    knows what difficulties that could lead to.  Finally, glibc
+    has definitions for some types, specifically
+    <tt class="computeroutput">sigset_t</tt>, which conflict
+    (are different from) the Linux kernel's idea of same.  When
+    Valgrind wants to fiddle around with signal stuff, it wants
+    to use the kernel's definitions, not glibc's definitions.  So
+    it's simplest just to keep glibc out of the picture
+    entirely.</p>
+<p>To find out which glibc symbols are used by Valgrind,
+    reinstate the link flags <tt class="computeroutput">-nostdlib
+    -Wl,-no-undefined</tt>.  This causes linking to
+    fail, but will tell you what you depend on.  I have mostly,
+    but not entirely, got rid of the glibc dependencies; what
+    remains is, IMO, fairly harmless.  AFAIK the current
+    dependencies are: <tt class="computeroutput">memset</tt>,
+    <tt class="computeroutput">memcmp</tt>,
+    <tt class="computeroutput">stat</tt>,
+    <tt class="computeroutput">system</tt>,
+    <tt class="computeroutput">sbrk</tt>,
+    <tt class="computeroutput">setjmp</tt> and
+    <tt class="computeroutput">longjmp</tt>.</p>
+</li>
+<li>
+<p>Similarly, valgrind should not really import any
+    headers other than the Linux kernel headers, since it knows
+    of no API other than the kernel interface to talk to.  At the
+    moment this is really not in a good state, and
+    <tt class="computeroutput">vg_syscall_mem</tt> imports, via
+    <tt class="filename">vg_unsafe.h</tt>, a significant number of
+    C-library headers so as to know the sizes of various structs
+    passed across the kernel boundary.  This is of course
+    completely bogus, since there is no guarantee that the C
+    library's definitions of these structs matches those of the
+    kernel.  I have started to sort this out using
+    <tt class="filename">vg_kerneliface.h</tt>, into which I had
+    intended to copy all kernel definitions which valgrind could
+    need, but this has not gotten very far.  At the moment it
+    mostly contains definitions for
+    <tt class="computeroutput">sigset_t</tt> and
+    <tt class="computeroutput">struct sigaction</tt>, since the
+    kernel's definition for these really does clash with glibc's.
+    I plan to use a <tt class="computeroutput">vki_</tt> prefix
+    on all these types and constants, to denote the fact that
+    they pertain to <span><b class="command">V</b></span>algrind's
+    <span><b class="command">K</b></span>ernel
+    <span><b class="command">I</b></span>nterface.</p>
+<p>Another advantage of having a
+    <tt class="filename">vg_kerneliface.h</tt> file is that it makes
+    it simpler to interface to a different kernel.  Once can, for
+    example, easily imagine writing a new
+    <tt class="filename">vg_kerneliface.h</tt> for FreeBSD, or x86
+    NetBSD.</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="mc-tech-docs.limits"></a>1.1.5. Current limitations</h3></div></div>
+<div></div>
+</div>
+<p>Support for weird (non-POSIX) signal stuff is patchy.  Does
+anybody care?</p>
+</div>
+</div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="tech-docs.html">&lt;&lt; Valgrind Technical Documentation</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="tech-docs.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="mc-tech-docs.jitter.html">1.2. The instrumenting JITter &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>
