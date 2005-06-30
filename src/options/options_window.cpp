@@ -16,20 +16,25 @@
 #include "vk_utils.h"
 #include "vk_objects.h"
 #include "vk_config.h"
+#include "main_window.h"
 
+#include "valkyrie_options_page.h"
+#include "valgrind_options_page.h"
+#include "memcheck_options_page.h"
+#include "cachegrind_options_page.h"
 #include "massif_options_page.h"
 
 
 /* class Categories ---------------------------------------------------- */
 Categories::Categories( QWidget* parent )
-	: QListBox( parent, "cat_listbox" ) 
+  : QListBox( parent, "cat_listbox" ) 
 {
-	QFont fnt = font();
-	fnt.setWeight( QFont::Bold );
-	setFont( fnt );
+  QFont fnt = font();
+  fnt.setWeight( QFont::Bold );
+  setFont( fnt );
 
-	QFontMetrics fm = fontMetrics();
-	categht = fm.height() * 2; 
+  QFontMetrics fm = fontMetrics();
+  categht = fm.height() * 2; 
 }
 
 int Categories::categHeight() 
@@ -77,7 +82,7 @@ OptionsWindow::~OptionsWindow()
 OptionsWindow::OptionsWindow( QWidget* parent ) 
   : QMainWindow( parent, "options_win" )
 {
-	capt.sprintf("%s Options: ", vkConfig->vkName() );
+  capt.sprintf("%s Options: ", vkConfig->vkName() );
   setCaption( capt );
   statusBar()->setSizeGripEnabled( false );
 
@@ -89,29 +94,29 @@ OptionsWindow::OptionsWindow( QWidget* parent )
   statusBar()->addWidget( statusFrame, 10, true );
   QHBoxLayout* buttLayout = new QHBoxLayout(statusFrame, 5, -1 );
 
-	/* reset: reset default options */
-	QPushButton* pb = new QPushButton( "Reset Defaults", statusFrame );
-	connect( pb, SIGNAL(clicked() ), this, SLOT(resetDefaults()));
+  /* reset: reset default options */
+  QPushButton* pb = new QPushButton( "Reset Defaults", statusFrame );
+  connect( pb, SIGNAL(clicked() ), this, SLOT(resetDefaults()));
   buttLayout->addWidget( pb );
   buttLayout->addStretch( 10 );
 
-	int w = fontMetrics().width( "X&CancelX" );
-	/* okay: apply and quit in one go */
-	pb = new QPushButton( "&Ok", statusFrame );
-	pb->setFixedWidth( w );
+  int w = fontMetrics().width( "X&CancelX" );
+  /* okay: apply and quit in one go */
+  pb = new QPushButton( "&Ok", statusFrame );
+  pb->setFixedWidth( w );
   pb->setDefault( true );
-	buttLayout->addWidget( pb );
+  buttLayout->addWidget( pb );
   connect( pb, SIGNAL(clicked() ), this, SLOT(accept()) );
-	/* cancel: forget everything I just said, and quit */
-	pb = new QPushButton( "&Cancel", statusFrame );
-	pb->setFixedWidth( w );
-	buttLayout->addWidget( pb );
-	connect( pb, SIGNAL(clicked() ), this, SLOT(reject()));
-	/* apply: do what I said, but let me change my mind */
-	applyButton = new QPushButton( "&Apply", statusFrame );
-	applyButton->setFixedWidth( w );
-	buttLayout->addWidget( applyButton );
-	connect( applyButton, SIGNAL(clicked() ), this, SLOT(apply()));
+  /* cancel: forget everything I just said, and quit */
+  pb = new QPushButton( "&Cancel", statusFrame );
+  pb->setFixedWidth( w );
+  buttLayout->addWidget( pb );
+  connect( pb, SIGNAL(clicked() ), this, SLOT(reject()));
+  /* apply: do what I said, but let me change my mind */
+  applyButton = new QPushButton( "&Apply", statusFrame );
+  applyButton->setFixedWidth( w );
+  buttLayout->addWidget( applyButton );
+  connect( applyButton, SIGNAL(clicked() ), this, SLOT(apply()));
   applyButton->setEnabled( false );  /* nothing to apply yet */
 
   QSplitter* splitter = new QSplitter( this );
@@ -130,7 +135,7 @@ OptionsWindow::OptionsWindow( QWidget* parent )
   VkObjectList objList = vkConfig->vkObjList();
   VkObject* obj;
   for ( obj = objList.first(); obj; obj = objList.next() ) {
-		addCategory( obj->id(), obj->title() );
+    addCategory( obj->id(), obj->title() );
   }
 }
 
@@ -170,8 +175,8 @@ void OptionsWindow::categoryClicked( QListBoxItem *item )
       OptionsPage* page = mkOptionsPage( cit->catId() );
       if ( !page ) {
         VK_DEBUG("cit->text = %s", cit->text().ascii() );
-				return;
-			} else {
+        return;
+      } else {
         cit->setWidget( page );
         wStack->addWidget( page, cit->catId() );
       } 
@@ -185,33 +190,35 @@ void OptionsWindow::categoryClicked( QListBoxItem *item )
 
 OptionsPage * OptionsWindow::mkOptionsPage( int catid )
 {
-	VkObject* obj = vkConfig->vkObject( catid, true );
+  VkObject* obj = vkConfig->vkObject( catid, false );
   OptionsPage* page = 0;
 
   switch ( obj->id() ) {
-		//case VkObject::VALKYRIE:
-		//	page = (OptionsPage*)new ValkyrieOptionsPage( this, );
-		//	break;
-		//case VkObject::VALGRIND:
-		//	page = (OptionsPage*)new ValgrindOptionsPage( this );
-		//	break;
-		//case VkObject::MEMCHECK:
-		//	page = (OptionsPage*)new MemcheckOptionsPage( this );
-		//	break;
-		//case VkObject::CACHEGRIND:
-		//	page = (OptionsPage*)new CachegrindOptionsPage( this );
-		//	break;
-		case VkObject::MASSIF:
-			page = (OptionsPage*)new MassifOptionsPage( this, obj );
-			break;
-		default:
-			vk_assert_never_reached();
-			break;
+
+    case VkObject::VALKYRIE: {
+      page = (OptionsPage*)new ValkyrieOptionsPage( this, obj );
+    } break;
+    case VkObject::VALGRIND: {
+      page = (OptionsPage*)new ValgrindOptionsPage( this, obj );
+    } break;
+    case VkObject::MEMCHECK: {
+      page = (OptionsPage*)new MemcheckOptionsPage( this, obj );
+    } break;
+    case VkObject::CACHEGRIND: {
+      page = (OptionsPage*)new CachegrindOptionsPage( this, obj );
+    } break;
+    case VkObject::MASSIF: {
+      page = (OptionsPage*)new MassifOptionsPage( this, obj );
+    } break;
+    default: {
+      vk_assert_never_reached();
+    } break;
+
   }
   vk_assert( page != 0 );
 
-	optPages.append( page );
-	connect( page, SIGNAL(modified()), this, SLOT(modified()) );
+  optPages.append( page );
+  connect( page, SIGNAL(modified()), this, SLOT(modified()) );
 
   return page;
 }
@@ -220,7 +227,7 @@ OptionsPage * OptionsWindow::mkOptionsPage( int catid )
 void OptionsWindow::showPage( int catid )
 {
   if ( isMinimized() ) {
-		setCategory( catid );
+    setCategory( catid );
     showNormal();
     raise();
     return;
@@ -228,7 +235,7 @@ void OptionsWindow::showPage( int catid )
 
   /* been there, done that ... */
   if ( xpos != -1 && ypos != -1 ) {
-		setCategory( catid );
+    setCategory( catid );
     show();
     return;
   }
@@ -237,7 +244,7 @@ void OptionsWindow::showPage( int catid )
   if ( !isVisible() ) {
     adjustSize();
     adjustPosition();
-		setCategory( catid );
+    setCategory( catid );
     show();
   }
 }
@@ -292,7 +299,7 @@ void OptionsWindow::adjustPosition()
 
 void OptionsWindow::accept()
 {
-	OptionsPage* page;
+  OptionsPage* page;
   for ( page = optPages.first(); page; page = optPages.next() ) {
     if ( !page->acceptEdits() ) {
       VK_DEBUG("Failed to save edits");
@@ -300,13 +307,19 @@ void OptionsWindow::accept()
     }
   }
 
-  close(); 
+	/* let the toolviews know that the flags (may) have changed */
+  emit flagsChanged();
+	/* then tell MainWin to (possibly) reload the flagsWidget */
+	MainWindow* vkWin = (MainWindow*)qApp->mainWidget();
+	vkWin->updateFlagsWidget();
+
+  close();
 }
 
 
 void OptionsWindow::reject()
 {
-	OptionsPage* page;
+  OptionsPage* page;
   for ( page = optPages.first(); page; page = optPages.next() ) {
     if ( !page->rejectEdits() ) {
       VK_DEBUG("Failed to reject edits");
@@ -319,7 +332,7 @@ void OptionsWindow::reject()
 
 void OptionsWindow::apply()
 {
-	OptionsPage* page;
+  OptionsPage* page;
   for ( page = optPages.first(); page; page = optPages.next() ) {
     if ( !page->applyEdits() ) {
       VK_DEBUG("Failed to apply edits");
@@ -330,13 +343,13 @@ void OptionsWindow::apply()
 
 void OptionsWindow::resetDefaults()
 {
-	/* get the current page */
-	int catid = categories->currentItem();
-	if ( catid != -1 ) {
-		CategItem* cit = (CategItem*)categories->item(catid);
-		OptionsPage* optpage = cit->page();
-		optpage->resetDefaults();
-	}
+  /* get the current page */
+  int catid = categories->currentItem();
+  if ( catid != -1 ) {
+    CategItem* cit = (CategItem*)categories->item(catid);
+    OptionsPage* optpage = cit->page();
+    optpage->resetDefaults();
+  }
 }
 
 
@@ -353,14 +366,14 @@ void OptionsWindow::closeEvent( QCloseEvent * )
 
 void OptionsWindow::modified()
 {
-  bool ok = false;
-	OptionsPage* page;
+  bool edited = false;
+  OptionsPage* page;
   for ( page = optPages.first(); page; page = optPages.next() ) {
     if ( page->isModified() ) {
-      ok = true;
+      edited = true;
       break;
     }
   }
 
-	applyButton->setEnabled( ok );
+  applyButton->setEnabled( edited );
 }

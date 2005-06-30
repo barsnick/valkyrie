@@ -17,3 +17,9 @@ CachegrindView::CachegrindView( QWidget* parent, VkObject* obj )
 
 
 }
+
+
+void CachegrindView::toggleToolbarLabels( bool /*state*/ )
+{
+
+}

@@ -17,3 +17,9 @@ MassifView::MassifView( QWidget* parent, VkObject* obj )
 
 
 }
+
+
+void MassifView::toggleToolbarLabels( bool /*state*/ )
+{
+
+}

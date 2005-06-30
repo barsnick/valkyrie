@@ -34,6 +34,32 @@ namespace urlVgCore {
 	extern const char* Alignment;
 }
 
+
+/* Memcheck ------------------------------------------------------------ */
+namespace urlMemcheck { 
+	extern const char* Partial;
+	extern const char* Freelist;
+	extern const char* Leakcheck;
+	extern const char* Leakres;
+	extern const char* Showreach;
+	extern const char* gcc296;
+	extern const char* Strlen;
+}
+
+
+/* Cachegrind ---------------------------------------------------------- */
+namespace urlCachegrind { 
+	extern const char* Cacheopts;
+  extern const char* Pid;
+  extern const char* Sort;
+  extern const char* Show;
+  extern const char* Threshold;
+  extern const char* Auto;
+  extern const char* Context;
+  extern const char* Include;
+}
+
+
 /* Massif -------------------------------------------------------------- */
 namespace urlMassif { 
 	extern const char* Heap;

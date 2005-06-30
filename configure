@@ -60,7 +60,7 @@ VK_INSTALL_BIN=$VK_INSTALL_PREFIX/bin/
 # initalize variables for other people's stuff
 #-------------------------------------------------------------------
 VG_EXEC_PATH=       # path to valgrind executable
-VG_SUPP_DIR=        # path to valgrind's suppressions dir
+VG_SUPP_PATH=       # path to valgrind's suppressions dir
 
 MYSQL_LIB=          # path to MySQL library ( -lmysqlclient )
 MYSQL_INC=          # path to MySQL include directory
@@ -137,7 +137,7 @@ while [ "$#" -gt 0 ]; do
     --vg-exec=* | -vg-exec=*)
       VG_EXEC_PATH=$optarg ;;
     --vg-supp=* | -vg-supp=*)
-      VG_SUPP_DIR=$optarg ;;
+      VG_SUPP_PATH=$optarg ;;
     --qtdir=* | -qtdir=*)
       QT_DIR=$optarg ;;
     --mysql-lib=* | -mysql-lib=*)
@@ -402,7 +402,7 @@ if [ -z "$VG_EXEC_PATH" ] ; then
     exit 1
   fi
 fi
-$cfgtests/valgrind.test $VK_CACHE $VG_EXEC_PATH $VG_SUPP_DIR && VG_RESULT="$VG_RESULT valgrind"
+$cfgtests/valgrind.test $VK_CACHE $VG_EXEC_PATH $VG_SUPP_PATH && VG_RESULT="$VG_RESULT valgrind"
 if [ -z "$VG_RESULT" ] ; then
   rm -f $VK_CACHE
   exit 1
@@ -441,7 +441,7 @@ if [ -r $VK_CACHE ]; then
       QT_UIC)         QT_UIC=$VAL ;;
       QT_QMAKE)       QT_QMAKE=$VAL ;;
       VG_EXEC_PATH)   VG_EXEC_PATH=$VAL ;;  # only used in vk_include_h
-      VG_SUPP_DIR)    VG_SUPP_DIR=$VAL ;;   # ditto
+      VG_SUPP_PATH)   VG_SUPP_PATH=$VAL ;;   # ditto
       MYSQL_LIB)      MYSQL_LIB=$VAL ;;
       MYSQL_LIB_PATH) MYSQL_LIB_PATH=$VAL ;;
       MYSQL_INC)      MYSQL_INC=$VAL ;;
@@ -477,16 +477,16 @@ cat > $vk_include_h <<_INC_EOF
 #define __VK_INCLUDE_H
 
 /* valkyrie install paths ---------------------------------------------- */
-#define PREFIX       "$VK_INSTALL_PREFIX"
-#define VK_DOC_PATH  "/doc/"
-#define VG_DOC_PATH  "/doc/vg-html/"
-#define ICONS_PATH   "/icons/"
-#define DBASE_DIR    "/dbase/"
-#define LOGS_DIR     "/logs/"
-#define SUPPS_DIR    "/suppressions/"
+#define PREFIX        "$VK_INSTALL_PREFIX"
+#define VK_DOC_PATH   "/doc/"
+#define VG_DOC_PATH   "/doc/vg-html/"
+#define VK_ICONS_PATH "/icons/"
+#define VK_DBASE_DIR  "/dbase/"
+#define VK_LOGS_DIR   "/logs/"
+#define VK_SUPPS_DIR  "/suppressions/"
 /* valgrind paths ------------------------------------------------------ */
 #define VG_EXEC_PATH  "$VG_EXEC_PATH"
-#define VG_SUPP_DIR   "$VG_SUPP_DIR"
+#define VG_SUPP_PATH  "$VG_SUPP_PATH"
 
 /* names --------------------------------------------------------------- */
 #define Vk_Name      "$vk_name"

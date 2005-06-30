@@ -16,12 +16,13 @@
 SpinWidget::SpinWidget( QWidget* parent, const char* name )
   : QWidget( parent, name )
 {
-  upEnabled = true;
+  upEnabled   = true;
   downEnabled = true;
-  theButton = 0;
+
+  ed         = 0;
+  timerUp    = 0;
+  theButton  = 0;
   buttonDown = 0;
-  timerUp = 0;
-  ed = 0;
 
   connect( &auRepTimer, SIGNAL( timeout() ), 
            this,        SLOT( timerDone() ) );
@@ -198,7 +199,7 @@ void SpinWidget::paintEvent( QPaintEvent * )
   QStyle::SFlags flags = QStyle::Style_Default;
   if ( isEnabled() )
     flags |= QStyle::Style_Enabled;
-  if (hasFocus() || focusProxy() && focusProxy()->hasFocus())
+  if ( hasFocus() || focusProxy() && focusProxy()->hasFocus() )
     flags |= QStyle::Style_HasFocus;
 
   QStyle::SCFlags active;
@@ -325,8 +326,6 @@ void SpinWidget::setDownEnabled( bool on )
 
 
 
-
-
 /* class NumberSection ------------------------------------------------- 
    of course '0' isn't a power of two - but we have to have some sort
    of default 'not used' units :) */
@@ -337,7 +336,7 @@ static int powers[MAX_POW+1] = {
    16384,  32768,  65536, 131072, 262144, 1048576
 };
 
-NumberSection::NumberSection( int idx, QString sep_char )
+NumberSection::NumberSection( int idx/*=-1*/, QString sep_char/*=" : "*/ )
 {
   sep      = sep_char;
   secIndex = idx;
@@ -621,7 +620,7 @@ void Editor::paintEvent( QPaintEvent * )
   p.drawPixmap( frameW, frameW, *pmBuf );
 }
 
-bool Editor::eventFilter( QObject *obj, QEvent *ev )
+bool Editor::eventFilter( QObject* obj, QEvent* ev )
 {
   if ( obj == this ) {
     if ( ev->type() == QEvent::KeyPress ) {
@@ -659,7 +658,7 @@ bool Editor::eventFilter( QObject *obj, QEvent *ev )
       case Key_BackTab: {
         if ( ke->state() == Qt::ControlButton )
           return false;
-        QWidget *w = this;
+        QWidget* w = this;
         w = w->parentWidget();
         if ( w ) {
           qApp->sendEvent( w, ev );
@@ -719,15 +718,15 @@ IntSpin::IntSpin( QWidget* parent, const char* name )
 }
 
 
-void IntSpin::addSection( int min, int max, int curr, 
-                          int step, QString sep_char )
+void IntSpin::addSection( int min, int max, int curr/*=0*/, 
+                          int step/*=1*/, QString sep_char/*=" : "*/ )
 {
   sections.append( new NumberSection(numSecs, sep_char) );
   sections.at(numSecs)->setValues( min, max, curr, step );
   numSecs++;
 }
 
-void IntSpin::setValue( int v, int sec )
+void IntSpin::setValue( int v, int sec/*=0*/ )
 { 
   vk_assert( sec < (int)sections.count() );
   sections.at(sec)->setValue( v );
@@ -752,7 +751,7 @@ QSize IntSpin::sizeHint() const
   int tw = 0;
   QString s;
   QPtrListIterator<NumberSection> it( sections );
-  NumberSection *aSection;
+  NumberSection* aSection;
   while ( (aSection = it.current()) != 0 ) {
     ++it;
     s = QString::number( aSection->minVal() );
@@ -764,8 +763,9 @@ QSize IntSpin::sizeHint() const
   tw += controls->UpRect().width();
   /* When we only have one section, the controls come out smaller, and
      we need just a bit more width for the number. ho hum. */
-  if ( sections.count() == 1 )
-    tw += fm.width( " " ) * 3;
+  if ( sections.count() == 1 ) {
+    tw += fm.width("   ");
+	}
 
   return style().sizeFromContents( QStyle::CT_LineEdit, this,
      QSize(tw,h).expandedTo( QApplication::globalStrut() ));

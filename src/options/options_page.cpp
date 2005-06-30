@@ -16,6 +16,7 @@
 #include "vk_utils.h"
 #include "vk_config.h"
 #include "context_help.h"
+#include "vk_msgbox.h"
 
 
 /* class OptionsPage --------------------------------------------------- */
@@ -113,10 +114,16 @@ bool OptionsPage::acceptEdits()
 
 void OptionsPage::resetDefaults()
 {
-  QIntDictIterator<OptionWidget> it( itemList );
-  for ( ;  it.current(); ++it ) {
-    it.current()->resetDefault();
-  }
+	int ok = vkQuery( this, 2, "Reset Defaults", 
+										"<p>This will reset <b>all</b> options for %s "
+										"to the installation defaults.</p>"
+										"<p>Continue ?</p>", vkObj->title().latin1() );
+  if ( ok == MsgBox::vkYes ) { 
+		QIntDictIterator<OptionWidget> it( itemList );
+		for ( ;  it.current(); ++it ) {
+			it.current()->resetDefault();
+		}
+	}
 }
 
 
@@ -206,19 +213,21 @@ OptionWidget* OptionsPage::optionWidget( int optid, QWidget* parent,
     case Option::LISTBOX:
       optWidget = (OptionWidget*)new LbWidget( parent, opt, mklabel );
       break;
-    case Option::SPINBOX:
+    case Option::SPINBOX: {
+			/* 0 == use_powers_of_two, 1 == do not */
+			int use_powers = ( opt->key == Memcheck::ALIGNMENT || 
+												 opt->key == Massif::ALIGNMENT ) ? 0 : 1;
       SpWidget* spinw = new SpWidget( parent, opt, mklabel, 1 );
-      int step = 0;
       QString ival = vkConfig->rdEntry( opt->cfgKey(), opt->cfgGroup() );
       spinw->addSection( opt->possValues[0].toInt(),  /* min */
                          opt->possValues[1].toInt(),  /* max */
                          ival.toInt(),                /* def */
-                         step );                      /* use powers */
+                         use_powers );
       optWidget = (OptionWidget*)spinw;
-      break;
+		} break;
+
   }
 
   vk_assert( optWidget != 0 );
-
   return optWidget;
 }

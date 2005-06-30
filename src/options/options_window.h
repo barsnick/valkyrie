@@ -60,6 +60,9 @@ public:
   ~OptionsWindow();
 	void showPage( int catid );
 
+signals:
+  void flagsChanged();
+
 protected:
   void closeEvent( QCloseEvent * );
   void moveEvent( QMoveEvent * );
@@ -79,8 +82,7 @@ private:
   OptionsPage * mkOptionsPage( int catid );
 
 private:
-	/* remember where user put the window */
-	int xpos, ypos;
+	int xpos, ypos;	  /* remember where user put the window */
 
   QString capt;
 	QPushButton* applyButton;

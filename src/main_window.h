@@ -25,11 +25,21 @@ public:
   MainWindow();
   ~MainWindow();
 
+	/* so optionsWin can tell MainWin when flags have changed */
+  void updateFlagsWidget();
+
 public slots:
   /* sets run and stop buttons to correct state */
 	void updateButtons( bool running );
 	/* show a message in the status bar */
 	void setStatus( QString );
+  /* en/disable tooltips */
+  void toggleToolTips();
+	/* show toolbutton text labels (or not) */
+  void toggleToolbarLabels();
+
+signals:
+  void toolbarLabelsToggled(bool);
 
 protected:
   void resizeEvent( QResizeEvent* re );
@@ -49,7 +59,6 @@ private slots:
 	void dummy() { printf("dummy()\n"); }
 	void dummy(int n) { printf("dummy( %d )\n", n); }
 	void dummy( bool b ) { printf("dummy( %d )\n", b ); }
-
 	void helpInfo( int id );
 
 private:
@@ -71,6 +80,9 @@ private:
 
 	/* messages label for status bar */
 	QLabel* statusMsg;
+
+  bool showToolTips;
+  bool showToolbarLabels;
 
   QPopupMenu* fileMenu;
 	enum menuIds{ FILE_RUN, FILE_STOP, FILE_CLOSE };

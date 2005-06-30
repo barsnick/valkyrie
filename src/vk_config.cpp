@@ -1,7 +1,7 @@
-/*---------------------------------------------------------------------- 
-  Configuration file Parser                                vk_config.cpp
-  ----------------------------------------------------------------------
-*/
+/* ---------------------------------------------------------------------- 
+ * Configuration file Parser                                vk_config.cpp
+ * ----------------------------------------------------------------------
+ */
 
 #include "vk_config.h"
 #include "vk_include.h"
@@ -48,14 +48,14 @@ void VkConfig::sync()
 VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
 {
   mEntryMap.clear();
-  sep       = ';';         /* separator for lists of strings */
+  sep       = ',';         /* separator for lists of strings */
   mDirty    = false;
   newConfigFile = false;   /* set to true in mkConfigFile() */
 
   mPackagePath = PREFIX;
   vkdocPath    = mPackagePath + VK_DOC_PATH;
   vgdocPath    = mPackagePath + VG_DOC_PATH;
-  imgPath      = mPackagePath + ICONS_PATH;
+  imgPath      = mPackagePath + VK_ICONS_PATH;
 
   vk_name      = Vk_Name;
   vk_Name      = VK_NAME;
@@ -68,9 +68,9 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   rcPath.sprintf( "%s/.%s-%s", 
                   QDir::homeDirPath().ascii(), vkname(), vkVersion() );
   rcFileName.sprintf( "%s/%src", rcPath.ascii(), vkname() );
-  dbasePath = rcPath + DBASE_DIR;
-  logsPath  = rcPath + LOGS_DIR;
-  suppPath  = rcPath + SUPPS_DIR;
+  dbasePath = rcPath + VK_DBASE_DIR;
+  logsPath  = rcPath + VK_LOGS_DIR;
+  suppPath  = rcPath + VK_SUPPS_DIR;
 
   if ( !checkDirs() ) {     /* we always do this on startup */
     *ok = false;
@@ -100,8 +100,8 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   case BadRcVersion:
 #if 1
     vkPrint( "Configuration:\n"
-						 "The configuration file '%s' version is invalid.\n"
-						 "Removing and re-creating it now...", rcFileName.latin1() );
+             "The configuration file '%s' version is invalid.\n"
+             "Removing and re-creating it now...", rcFileName.latin1() );
 #else
     vkInfo( 0, "Configuration",
             "The configuration file '%s' version is invalid.<br> "
@@ -116,9 +116,9 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   case CreateRcFile:
 #if 1
     vkPrint( "Configuration:\n"
-						 "The configuration file '%s' does not exist, "
-						 "and %s cannot run without this file.\n"
-						 "Creating it now...", rcFileName.latin1(), vkName() );
+             "The configuration file '%s' does not exist, "
+             "and %s cannot run without this file.\n"
+             "Creating it now...", rcFileName.latin1(), vkName() );
 #else
     vkInfo( 0, "Configuration",
             "The configuration file '%s' does not exist, "
@@ -134,8 +134,8 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   case NoPerms:
 #if 1
     vkPrint( "Fatal Configuration Error:\n"
-						 "You do not have read/write permissions set"
-						 "on the directory %s", rcPath.latin1() );
+             "You do not have read/write permissions set"
+             "on the directory %s", rcPath.latin1() );
 #else
     vkFatal( 0, "Configuration" 
              "You do not have read/write permissions set"
@@ -149,7 +149,7 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   case Fail:
 #if 1
     vkPrint( "Fatal Configuration Error:\n"
-						 "Initialisation of vkConfig failed" );
+             "Initialisation of vkConfig failed" );
 #else
     vkFatal( 0, "Config Creation Failed",
       "Initialisation of Config failed" );
@@ -163,29 +163,33 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   if ( newConfigFile ) {
 
     wrEntry( VG_EXEC_PATH, "vg-exec",  "valkyrie" );
-    wrEntry( VG_SUPP_DIR,  "vg-supps", "valkyrie" );
+    wrEntry( VG_SUPP_PATH, "vg-supps-dir", "valkyrie" );
 
     /* find and store valgrind's suppressions files */
     QString def_supp   = "";
     QString supp_files = "";
-    QDir supp_dir( VG_SUPP_DIR );
+    QDir supp_dir( VG_SUPP_PATH );
     /* see if we have any *.supp files in here - if so, grab 'em while
        the going's good */
     QStringList supp_list = supp_dir.entryList( "*.supp", QDir::Files );
     for ( unsigned int i=0; i<supp_list.count(); i++ ) {
-      supp_files += supp_dir.absPath() + "/" + supp_list[i] + ",";
+      supp_files += supp_dir.absPath() + "/" + supp_list[i] + sep;
       /* the only selected one is the default suppression file */
-      if ( supp_list[i] == rdEntry( "suppressions", "memcheck" ) )
+      if ( supp_list[i] == rdEntry( "suppressions", "valgrind" ) )
         def_supp = supp_dir.absPath() + "/" + supp_list[i];
     }
-    /* chop off the last ',' */
+    /* chop off the trailing ';' */
     supp_files.truncate( supp_files.length() - 1 );
     /* write the list of found .supp files */
-    wrEntry( supp_files, "all-supps", "valkyrie" );
+    wrEntry( supp_files, "supps-all", "valgrind" );
+		/* and hold onto these values, 'cos they are the install defaults */
+    wrEntry( supp_files, "supps-def", "valgrind" );
     /* and write the default supp. file including path */
-    wrEntry( def_supp, "sel-supps", "valkyrie" );
-    wrEntry( def_supp, "suppressions", "memcheck" );
+    wrEntry( def_supp, "suppressions", "valgrind" );
 
+		/* write entries to disk immediately in case something bad
+       happens, as we won't get another chance to do this */
+		sync();
   }
 
 }
@@ -420,6 +424,23 @@ void VkConfig::wrEntry( const QString &pValue,
 }
 
 
+/* special version of wrEntry: adds values to the existing entry,
+   rather than replacing it */
+void VkConfig::addEntry( const QString &pValue, 
+                         const QString &pKey, const QString &pGroup )
+{
+  /* get hold of the current value(s) */
+  QString curr_values = rdEntry( pKey, pGroup );
+
+  /* concat curr_values with new value */
+  if ( !curr_values.isEmpty() )
+    curr_values += sep;
+  curr_values += pValue;
+
+  wrEntry( curr_values, pKey, pGroup );
+}
+
+
 void VkConfig::wrInt( const int pValue, const QString &pKey, 
                       const QString &pGroup )
 { wrEntry( QString::number( pValue ), pKey, pGroup ); }
@@ -462,10 +483,10 @@ VkConfig::RetVal VkConfig::parseFile()
   QFile rFile( rcFileName );
   if ( !rFile.open( IO_ReadOnly ) ) {
 #if 1
-		vkPrint( "Fatal Configuration Error:\n"
-						 "Failed to open the file %s for reading.\n"
-						 "%s cannot run without this file.", 
-						 rcFileName.latin1(), vkName() );
+    vkPrint( "Fatal Configuration Error:\n"
+             "Failed to open the file %s for reading.\n"
+             "%s cannot run without this file.", 
+             rcFileName.latin1(), vkName() );
 #else
     vkFatal( 0, "Parse Config File" 
             "Failed to open the file %s for reading.<br>"
@@ -647,13 +668,13 @@ VkConfig::RetVal VkConfig::checkAccess() const
   /* 4. if it already exists, can we read / write it? */
   ok = access( rcFileName, R_OK & W_OK );
 #if 1
-	if ( ok != 0 ) {
-		vkPrint( "Configuration:\n" 
-						 "The file %s seems to be corrupted, and "
-						 "%s cannot run without this file.\n"
-						 "Recreating it now...", rcFileName.latin1(), vk_Name.data() );
-		return BadRcFile;
-	}
+  if ( ok != 0 ) {
+    vkPrint( "Configuration:\n" 
+             "The file %s seems to be corrupted, and "
+             "%s cannot run without this file.\n"
+             "Recreating it now...", rcFileName.latin1(), vk_Name.data() );
+    return BadRcFile;
+  }
 #else
   if ( ok != 0 ) {
     ok = vkQuery( 0, 2, "Configuration" 
@@ -686,29 +707,6 @@ VkConfig::RetVal VkConfig::checkAccess() const
   }
 
   return Okay;
-}
-
-
-/* FIXME: this is horrible.
-   reads a comma-separated list of suppression files, each of
-   which starts with '[+]' or '[-]'.  Returns a comma-separated
-   subset of those files which start with '[+]' */
-QString VkConfig::selSuppFiles( const QString &pKey, const QString &pGroup )
-{
-  QString supp_str = rdEntry( pKey, pGroup );
-  QStringList supp_list = QStringList::split( ",", supp_str );
-
-  supp_str = "";
-  for ( uint i=0; i<supp_list.count(); i++ ) {
-    if ( supp_list[i].left(3) == "[+]" ) {
-      supp_list[i].remove( 0, 3 );
-      supp_str += supp_list[i] + ',';
-    }
-  }
-
-  /* remove trailing ',' */
-  supp_str.remove( supp_str.length()-1, 1 );
-  return supp_str;
 }
 
 
@@ -954,13 +952,13 @@ bool VkConfig::checkDirs()
 
 #if 1
   if ( !msg.isEmpty() ) {
-		vkPrint( "Configuration:\n"
-						 "Directory Error: %s", msg.ascii() );
-	}
+    vkPrint( "Configuration:\n"
+             "Directory Error: %s", msg.ascii() );
+  }
 #else
   if ( !msg.isEmpty() ) {
     vkError( 0, "Directory Error", msg.ascii() );
-	}
+  }
 #endif
 
   return success;

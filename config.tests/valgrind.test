@@ -3,18 +3,16 @@
 # param $1: cache file to write to
 # param $2: value of VG_EXEC_PATH, eg. /usr/bin/valgrind
 #           note: this is guaranteed to never be empty
-# param $3: value of VG_SUPP_DIR, possibly set by user on cmd-line
+# param $3: value of VG_SUPP_PATH, possibly set by user on cmd-line
 #
 
 CACHE_FILE=$1
 VG_EXEC_PATH=$2
-VG_SUPP_DIR=$3
+VG_SUPP_PATH=$3
 
 # minimum valgrind version we need
-#VG_VERSION=3.0.0
-#VG_VERSION_NUM=3
-VG_VERSION=2.0.0
-VG_VERSION_NUM=2
+VG_VERSION=3.0.0
+VG_VERSION_NUM=3
 
 # list of paths to search for valgrind executable
 EXEC_DIR_SEARCH="/usr/bin /usr/local/bin /opt/valgrind/bin"
@@ -96,12 +94,12 @@ echo $ECHO_N "checking valgrind's suppressions path... $ECHO_C" >&6
 # even if set on the cmd-line, make sure we can find it
 found=no
 result=no
-if [ ! -z "$VG_SUPP_DIR" ] ; then
+if [ ! -z "$VG_SUPP_PATH" ] ; then
   # strip any trailing slashes
-  VG_SUPP_DIR=`echo $VG_SUPP_DIR | sed -e "s,^\(.*\)\/$,\1,"`
+  VG_SUPP_PATH=`echo $VG_SUPP_PATH | sed -e "s,^\(.*\)\/$,\1,"`
   # quick 'n dirty check
-  if [ -f "$VG_SUPP_DIR/default.supp" ] ; then 
-    result="$VG_SUPP_DIR"
+  if [ -f "$VG_SUPP_PATH/default.supp" ] ; then 
+    result="$VG_SUPP_PATH"
     found=yes
   fi
 fi
@@ -109,8 +107,8 @@ fi
 if [ "$found" = "no" ] ; then
   for dir in $SUPP_DIR_SEARCH; do
     if [ -f "$dir/default.supp" ] ; then 
-      VG_SUPP_DIR="$dir"
-      result="$VG_SUPP_DIR"
+      VG_SUPP_PATH="$dir"
+      result="$VG_SUPP_PATH"
       found=yes
       break;
     fi
@@ -126,6 +124,6 @@ if [ "$found" = "no" ] ; then
 fi
 
 echo "VG_EXEC_PATH=$VG_EXEC_PATH" >> $CACHE_FILE
-echo "VG_SUPP_DIR=$VG_SUPP_DIR" >> $CACHE_FILE
+echo "VG_SUPP_PATH=$VG_SUPP_PATH" >> $CACHE_FILE
 
 exit 0

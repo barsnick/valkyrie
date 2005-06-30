@@ -31,12 +31,13 @@ signals:
 	//void closing( int );
 	void running( bool );
 	void message( QString );
-	void showFlags( QString );
+	//void showFlags( QString );
 
 public slots:
 	virtual void processExited() = 0;
 	/* called on startup, and via the options dialog */
 	void flagsChanged();
+  virtual void toggleToolbarLabels(bool) = 0;
 
 protected:
   bool isEdited();

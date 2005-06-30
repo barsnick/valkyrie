@@ -146,7 +146,7 @@ public:
   IntSpin( QWidget* parent, const char* name=0 );
   ~IntSpin();
   void addSection( int min, int max, int curr=0, 
-                   int step=1, QString sep_char=" " );
+                   int step=1, QString sep_char=" : " );
   void setValue( int v, int sec=0 );
   QSize sizeHint() const;
   QSize minimumSizeHint() const;

@@ -124,21 +124,18 @@ int main ( int argc, char* argv[] )
     printf("in non-gui mode now\n");
   } else {
 
-    /* Style -----------------------------------------------------------
-       TODO: allow user to specify an app-wide style */
+    /* Style ----------------------------------------------------------- */
     app->setStyle( QStyleFactory::create( "windows" ) );
 
-    /* Font ------------------------------------------------------------
-       allow user to specify an app-wide font setting */
-    if ( !vkConfig->rdBool( "use-system-font", "Prefs" ) ) {
-      QFont vkfnt = vkConfig->rdFont( "user-font", "Prefs" );
+    /* Font: allow user to specify an app-wide font setting ------------ */
+    if ( !vkConfig->rdBool( "use-system-font", "valkyrie" ) ) {
+      QFont vkfnt = vkConfig->rdFont( "user-font", "valkyrie" );
       app->setFont( vkfnt, true );
     }
 
-    /* palette ---------------------------------------------------------
-       allow user to choose between app. default palette and the
-       default palette assigned by their system. */
-    if ( vkConfig->rdBool( "use-vk-palette", "Prefs" ) ) {
+    /* Palette: allow user to choose between app. default palette
+       and the default palette assigned by their system ---------------- */
+    if ( vkConfig->rdBool( "use-vk-palette", "valkyrie" ) ) {
       app->setPalette( vkPalette(), true );
     }
 

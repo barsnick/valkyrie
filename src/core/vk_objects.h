@@ -105,7 +105,6 @@ public:
   Valkyrie();
   ~Valkyrie() { }
 
-  QString configEntries();
   QStringList modifiedFlags();
   int checkOptArg( int optid, const char* argval, bool gui=false );
 
@@ -114,26 +113,24 @@ public:
   RunMode runMode;
 
   enum vkOpts {
-    FIRST_CMD_OPT = 14,
+    FIRST_CMD_OPT = 11,
     HELP_OPT      = 1,
     TOOLTIP       = 2,
-    MENUBAR       = 3,
-    PALETTE       = 4,
-    ICONTXT       = 5,
-    FONT_SYSTEM   = 6,
-    FONT_USER     = 7,
-    SRC_EDITOR    = 8,
-    SRC_LINES     = 9,
-    VG_EXEC       = 10,      // /usr/bin/valgrind
-    VG_SUPPS      = 11,      // /usr/share/doc/packages/valgrind/
-    /* list of user suppressions _and_ default suppression, inc. path */
-    ALL_SUPPS     = 12,
-    /* just the currently selected suppressions */
-    SEL_SUPPS     = 13,
+    PALETTE       = 3,
+    ICONTXT       = 4,
+    FONT_SYSTEM   = 5,
+    FONT_USER     = 6,
+    SRC_EDITOR    = 7,
+    SRC_LINES     = 8,
+    /* path to valgrind executable (/usr/bin/valgrind) */
+    VG_EXEC       = 9,
+    /* path to supp. files dir [def = /usr/lib/valgrind/] */
+    VG_SUPPS_DIR  = 10,
     BINARY        = FIRST_CMD_OPT,
-    BIN_FLAGS     = 15,
-    VIEW_LOG      = 16,
-		USE_GUI       = 17,
+    BIN_FLAGS     = 12,
+    VIEW_LOG      = 13,
+    MERGE_LOGS    = 14,
+    USE_GUI       = 15,
     LAST_CMD_OPT  = USE_GUI
   };
 
@@ -147,20 +144,42 @@ public:
   Valgrind();
   ~Valgrind() { }
 
+  QStringList modifiedFlags();
   int checkOptArg( int optid, const char* argval, bool gui=false );
 
-  enum vgOpts {        /* no's 30 .. 49 reserved for valgrind */
+  enum vgOpts {
     FIRST_CMD_OPT = Valkyrie::LAST_CMD_OPT + 1,
-    TOOL          = FIRST_CMD_OPT, 
+    TOOL          = FIRST_CMD_OPT,
+    /* common options relevant to all tools */
     VERBOSITY,
+    XML_OUTPUT,     /* this may apply to more tools later */
     TRACE_CH,
     TRACK_FDS,
     TIME_STAMP,
+    /* uncommon options relevant to all tools */
     RUN_LIBC,
     WEIRD,
     PTR_CHECK,
+    ELAN_HACKS,
     EM_WARNS,
-    LAST_CMD_OPT = EM_WARNS
+    /* options relevant to error-reporting tools */
+    LOG_FD,
+    LOG_PID,
+    LOG_FILE,
+    LOG_SOCKET,
+    DEMANGLE,
+    NUM_CALLERS,
+    ERROR_LIMIT,
+    SHOW_BELOW,
+    SUPPS_SEL,    /* the currently selected suppression(s) */
+    SUPPS_ALL,    /* list of all supp. files ever found, inc. paths */
+		SUPPS_DEF,    /* as above, but never gets changed -> defaults */
+    GEN_SUPP,
+    DB_ATTACH,
+    DB_COMMAND,
+    INPUT_FD,
+    MAX_SFRAME,
+    LAST_CMD_OPT = MAX_SFRAME
   };
 
 };
@@ -176,28 +195,9 @@ public:
   QStringList modifiedFlags();
   int checkOptArg( int optid, const char* argval, bool gui=false );
 
-  enum mcOpts {        /* no's 50 .. 79 reserved for memcheck */
+  enum mcOpts { 
     FIRST_CMD_OPT = Valgrind::LAST_CMD_OPT + 1,
-
-    XML          = FIRST_CMD_OPT,  /* this may apply to more tools later */
-    /* this set of flags theoretically applies to memcheck, addrcheck
-       and helgrind, but since addrcheck + helgrind are feeling unwell
-       pro tem, we are assuming they are only relevant for memcheck */
-    LOG_FD,
-    LOG_PID,
-    LOG_FILE,
-    LOG_SOCKET,
-    DEMANGLE,
-    NUM_CALLERS,
-    ERROR_LIMIT,
-    SHOW_BELOW,
-    SUPPS,
-    GEN_SUPP,
-    DB_ATTACH,
-    DB_COMMAND,
-    INPUT_FD,
-    MAX_SFRAME,
-    PARTIAL,     /* <-- memcheck-specific flags start here */
+    PARTIAL       = FIRST_CMD_OPT,
     FREELIST,
     LEAK_CHECK,
     LEAK_RES,
@@ -205,7 +205,7 @@ public:
     GCC_296,
     ALIGNMENT,
     STRLEN,
-    LAST_CMD_OPT = STRLEN
+    LAST_CMD_OPT  = STRLEN
   };
 
 };

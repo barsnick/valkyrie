@@ -99,7 +99,8 @@ public:
 
   /* returns a string of selected comma-separated suppressions files
      with marker flag removed */
-  QString selSuppFiles( const QString &pKey, const QString &pGroup );
+  //RM: QString selSuppFiles( const QString &pKey, const QString &pGroup );
+  QChar sepChar() { return sep; }
 
   /* read fns ---------------------------------------------------------- */
   QString rdEntry( const QString &pKey, const QString &pGroup );
@@ -117,6 +118,10 @@ public:
                 const QString &pKey,   const QString &pGroup );
   void wrFont ( const QFont   &rFont,  const QString &pKey );
   void wrColor( const QColor  &pColor, const QString &pKey );
+  /* special version of wrEntry: adds values to the existing entry,
+     rather than replacing */
+  void addEntry( const QString &pValue, 
+                 const QString &pKey,   const QString &pGroup );
 
 private:
   enum RetVal { Okay=1, BadFilename, NoDir, NoPerms,
@@ -138,17 +143,17 @@ private:
   bool initVkObjects();
 
 private:
-  char sep;
+  QChar sep;
   bool mDirty;
   bool newConfigFile;
 
-	QCString vk_name;
-	QCString vk_Name;
-	QCString vk_version;
-	QCString vk_copyright;
-	QCString vk_author;
-	QCString vk_email;
-	QCString vg_copyright;
+  QCString vk_name;
+  QCString vk_Name;
+  QCString vk_version;
+  QCString vk_copyright;
+  QCString vk_author;
+  QCString vk_email;
+  QCString vg_copyright;
 
   QString mPackagePath;     /* valkyrie's install dir */
   QString vkdocPath;        /* path to valkyrie docs dir */

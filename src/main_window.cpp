@@ -53,7 +53,7 @@ MainWindow::~MainWindow()
 
 MainWindow::MainWindow() : QMainWindow( 0, "mainWindow" )
 {
-  optionsWin = 0;
+  //optionsWin = 0;
   activeView = 0;
   valkyrie   = (Valkyrie*)vkConfig->vkObject( "valkyrie" );
   vk_assert( valkyrie != 0 );
@@ -78,6 +78,13 @@ MainWindow::MainWindow() : QMainWindow( 0, "mainWindow" )
   /* create menubar, status bar + flags widget */
   mkMenuBar();
   mkStatusBar();
+
+	/* en/disable tooltips */
+	showToolTips = !vkConfig->rdBool("show-tooltips", "valkyrie");
+  toggleToolTips();
+
+	/* init the options dialog */
+	optionsWin = new OptionsWindow( this );
 
   /* startup with the last tool set in config */
   showToolView( vkConfig->defaultToolId() );
@@ -120,6 +127,11 @@ void MainWindow::showToolView( int tvid )
              this,       SLOT(updateButtons(bool)) );
     connect( activeView, SIGNAL(message(QString)),
              this,       SLOT(setStatus(QString)) );
+		connect( this,       SIGNAL(toolbarLabelsToggled(bool)),
+						 activeView, SLOT(toggleToolbarLabels(bool)) );
+		/* let a tool_view know when its flags have been modified */
+		connect( optionsWin, SIGNAL(flagsChanged()),
+						 activeView, SLOT(flagsChanged()) );
 
     /* if what-to-do was specified on the cmd-line, do it.
        otherwise, hang around and look boo'ful */
@@ -156,8 +168,8 @@ void MainWindow::run()
   /* valkyrie may have been started with no executable
      specified. if so, show prefsWindow + msgbox */
   if ( vkConfig->rdEntry("binary","valkyrie").isEmpty() ) {
-    printf("TODO: showOptionsWin( VkObject::VALKYRIE );\n");
-    vkInfo( this/*optionsWin*/, "Run Executable",
+    showOptionsWindow( VkObject::VALKYRIE );
+    vkInfo( optionsWin, "Run Executable",
             "Please enter the path to the executable "
             "you wish to run, together with any arguments");
     return;
@@ -166,19 +178,15 @@ void MainWindow::run()
   if ( !activeView->run() ) {
     vkError( this, "Run Executable",
              "Failed to start the executable running." );
-  } 
+  } else {
+		printf("TODO: toggle buttons to reflect running state\n");
+	}
 
 }
 
 
 void MainWindow::showOptionsWindow( int view_id )
-{
-  if ( optionsWin == NULL ) {
-    optionsWin = new OptionsWindow( this );
-  }
-  
-  optionsWin->showPage( view_id );
-}
+{ optionsWin->showPage( view_id ); }
 
 
 /* connected to a toolview's signal running( bool ) */
@@ -262,6 +270,15 @@ void MainWindow::showFlagsWidget( bool show )
   }
 }
 
+/* so optionsWin can tell MainWin that options and/or flags (may) have
+   been changed */
+void MainWindow::updateFlagsWidget()
+{
+	if ( flagsLabel->isVisible() ) {
+		showFlagsWidget( true );
+	}
+}
+
 
 /* HelpInfo + HandBook ----------------------------------------------- */
 void MainWindow::helpInfo( int id )
@@ -341,11 +358,31 @@ void MainWindow::closeToolView()
 }
 
 
+void MainWindow::toggleToolTips()
+{
+  showToolTips = !showToolTips;
+  QToolTip::setGloballyEnabled( showToolTips );
+}
+
+
+void MainWindow::toggleToolbarLabels()
+{
+  showToolbarLabels = !showToolbarLabels;
+	runButton->setUsesTextLabel( showToolbarLabels );
+	stopButton->setUsesTextLabel( showToolbarLabels );
+	helpButton->setUsesTextLabel( showToolbarLabels );
+	/* tell the toolviews to follow suit */
+	emit toolbarLabelsToggled( showToolbarLabels );
+}
+
+
 void MainWindow::mkMenuBar()
 {
+	/* show toolbutton text labels (or not) */
+  showToolbarLabels = vkConfig->rdBool("show-butt-text","valkyrie");
+
   QMenuBar* mainMenu = new QMenuBar( this, "main menubar" );
   mainMenu->setStyle( new QMotifStyle() );
-  bool show_text = vkConfig->rdBool( "show-butt-text", "Prefs" );
   int index = -1;
 
   /* file menu --------------------------------------------------------- */
@@ -366,7 +403,6 @@ void MainWindow::mkMenuBar()
 
   /* toolview menu ----------------------------------------------------- */
   index++;
-  //QIconSet bulletSet( QPixmap(black_bullet_xpm) );
   QPixmap bulletSet(black_bullet_xpm);
   toolsMenu = new QPopupMenu( this );
 
@@ -395,13 +431,19 @@ void MainWindow::mkMenuBar()
   mainMenu->setAccel( ALT+Key_P, id );
   ContextHelp::add( prefsMenu, urlValkyrie::Dummy );
 
+  /* spacer between popup menus and tool-buttons ----------------------- */
+  index++;
+	QLabel* lbl = new QLabel( this, "lbl_spacer" );
+	lbl->setText( "     " );
+  mainMenu->insertItem( lbl, -1, index );
+
   /* run button -------------------------------------------------------- */
   index++;
   runButton = new QToolButton( this, "tb_rerun" );
   runButton->setIconSet( QPixmap(run_xpm) );
   runButton->setTextLabel( "&Run" );
   runButton->setTextPosition( QToolButton::BesideIcon );
-  runButton->setUsesTextLabel( show_text );
+  runButton->setUsesTextLabel( showToolbarLabels );
   runButton->setAutoRaise( true );
   runButton->setAccel( CTRL+Key_R );
   connect( runButton, SIGNAL( clicked() ), 
@@ -416,7 +458,7 @@ void MainWindow::mkMenuBar()
   stopButton->setIconSet( QPixmap(stop_xpm) );
   stopButton->setTextLabel( "S&top" );
   stopButton->setTextPosition( QToolButton::BesideIcon );
-  stopButton->setUsesTextLabel( show_text );
+  stopButton->setUsesTextLabel( showToolbarLabels );
   stopButton->setAutoRaise( true );
   stopButton->setAccel( CTRL+Key_T );
   connect( stopButton, SIGNAL( clicked() ), this,
@@ -434,7 +476,7 @@ void MainWindow::mkMenuBar()
   helpButton->setIconSet( QPixmap(help_xpm) );
   helpButton->setTextLabel( "&Help" );
   helpButton->setTextPosition( QToolButton::BesideIcon );
-  helpButton->setUsesTextLabel( show_text );
+  helpButton->setUsesTextLabel( showToolbarLabels );
   helpButton->setAutoRaise( true );
   helpButton->setAccel( ALT+Key_H );
   QPopupMenu* helpMenu = new QPopupMenu( helpButton );

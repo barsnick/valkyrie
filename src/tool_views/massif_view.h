@@ -10,20 +10,21 @@
 
 class MassifView : public ToolView
 {
-	Q_OBJECT
+  Q_OBJECT
 public:
   MassifView( QWidget* parent, VkObject* obj );
   ~MassifView();
 
-	bool run() { return true; }
-	void stop() { }
-	void clear() { }
+  bool run() { return true; }
+  void stop() { }
+  void clear() { }
 
 public slots:
-		void processExited() { }
+  void processExited() { }
+  void toggleToolbarLabels(bool);
 
 protected:
-	//virtual void procFinished() { }
+  //virtual void procFinished() { }
 };
 
 

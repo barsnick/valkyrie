@@ -24,6 +24,31 @@ namespace urlVgCore {
 }
 
 
+/* Memcheck ------------------------------------------------------------ */
+namespace urlMemcheck { 
+	const char* Partial   = "mc-manual.flags.html#partial";
+	const char* Freelist  = "mc-manual.flags.html#freelist";
+	const char* Leakcheck = "mc-manual.flags.html#leakcheck";
+	const char* Leakres   = "mc-manual.flags.html#leakres";
+	const char* Showreach = "mc-manual.flags.html#showreach";
+	const char* gcc296    = "mc-manual.flags.html#gcc296";
+	const char* Strlen    = "mc-manual.flags.html#strlen";
+}
+
+
+/* Cachegrind ---------------------------------------------------------- */
+namespace urlCachegrind { 
+	const char* Cacheopts = "cg-manual.profile.html#cg-manual.cgopts";
+  const char* Pid       = "cg-manual.annopts.html#pid";
+  const char* Sort      = "cg-manual.annopts.html#sort";
+  const char* Show      = "cg-manual.annopts.html#show";
+  const char* Threshold = "cg-manual.annopts.html#threshold";
+  const char* Auto      = "cg-manual.annopts.html#auto";
+  const char* Context   = "cg-manual.annopts.html#context";
+  const char* Include   = "cg-manual.annopts.html#include";
+}
+
+
 /* Massif -------------------------------------------------------------- */
 namespace urlMassif { 
 	const char* Heap      = "ms-manual.options.html#heap";

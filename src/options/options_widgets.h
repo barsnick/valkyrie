@@ -26,7 +26,7 @@ class OptionWidget : public QObject
   Q_OBJECT
 public:
   OptionWidget( QWidget* parent, const char* name, 
-								Option* vkopt, bool mklabel );
+                Option* vkopt, bool mklabel );
   ~OptionWidget() { }
 
   int id();
@@ -36,7 +36,7 @@ public:
   QString initValue();
 
   virtual void reset() = 0;
-	virtual void resetDefault() = 0;
+  virtual void resetDefault() = 0;
   virtual void saveEdit( bool perm );
   virtual void cancelEdit();
   virtual QHBoxLayout* hlayout();
@@ -68,7 +68,7 @@ public:
 
   bool isOn();
   void reset();
-	void resetDefault();
+  void resetDefault();
   void setOn( bool on );
 
 signals:
@@ -95,7 +95,7 @@ public:
 
   bool isOn();
   void reset();
-	void resetDefault();
+  void resetDefault();
   void setOn( bool on );
 
 signals:
@@ -121,12 +121,13 @@ public:
   ~LeWidget();
 
   void reset();
-	void resetDefault();
+  void resetDefault();
   void setCurrValue(const QString &);
   void addCurrValue(const QString &);
-  void addButton(QWidget *parent, const QObject * receiver, 
-                 const char * slot, QString txt=QString::null,
-                 bool icon=true );
+  void addButton(QWidget* parent, const QObject* receiver, 
+                 const char* slot, QString txt=QString::null,
+                 bool icon=false );
+  void setReadOnly( bool );
   QPushButton* button();
   QHBoxLayout* hlayout();
 
@@ -150,7 +151,7 @@ public:
   ~CbWidget();
 
   void reset();
-	void resetDefault();
+  void resetDefault();
   QHBoxLayout* hlayout();
 
 private slots:
@@ -173,9 +174,9 @@ public:
   ~SpWidget();
 
   void reset();
-	void resetDefault();
+  void resetDefault();
   void addSection( int min, int max, int defval=0,
-                   int step=1, QString sep_char=" " );
+                   int step=1, QString sep_char=" : " );
   QHBoxLayout* hlayout();
 
 private slots:
@@ -188,53 +189,34 @@ private:
 
 
 
-/* class LbWidget: QListBox -------------------------------------------- */
+/* class LbWidget: QListBox -------------------------------------------- 
+	 This widget was specifically written to handle suppression files
+	 stuff and nothing else. */
 class LbWidget : public OptionWidget
 {
   Q_OBJECT
 public:
   LbWidget( QWidget* parent, Option* vkopt, bool mklabel );
   ~LbWidget();
-
   void reset();
-	void resetDefault();
-
+  void resetDefault();
+public slots:
+  void insertFile( const QString& );
+signals:
+  void fileSelected( const QString& );
 private slots:
-  void lbChanged(const QString&);
-  void popupMenu(QListBoxItem*, const QPoint & );
-
+  void lbChanged( const QString& );
+  void popupMenu( QListBoxItem*, const QPoint & );
+  void popupAll( QListBoxItem* );
+  void popupSel( QListBoxItem* );
 private:
   void load();
-
 private:
-  int numSelected;
-  int maxSelections;
-  QListBox *lbox;
-  QPixmap pmSel;
-  QPixmap pmUnsel;
+	/* either [valgrind:supps-all] or [valgrind:suppressions] */
+  enum Mode{ AllSupps=0, SelSupps=1 };
+  QListBox* lbox;
+  QChar sep;      // so we don't have to keep asking vkConfig
+  Mode mode;
 };
-
-
-
-/* class SuppFile ------------------------------------------------------ */
-class SuppFile : public QListBoxPixmap
-{
-public:
-  SuppFile( const QPixmap &pix, QString fname, QString mark )
-    : QListBoxPixmap( pix ), selMark(mark), fName(fname) {
-    /* expects an absolute filepath,
-       eg. /usr/local/bin/file.supp */
-    int posL = fname.find( '/', 2 );
-    int posR = fname.findRev( '/' );
-    QString tmp = fname.left( posL+1 ) 
-                + "..." + fname.right( fname.length() - posR );
-    setText( tmp );
-  }
-  QString fileName() { return fName; }
-  bool selected() { return selMark == "[+]"; }
-  QString selMark;
-  QString fName;
-};
-
 
 #endif

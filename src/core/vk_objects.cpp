@@ -18,9 +18,9 @@ addOpt(
   LEAK_CHECK,                            int opt_key
   Option::ARG_BOOL,                      Option::ArgType arg_type
   Option::CHECK,                         Option::WidgetType w_type
-  "memcheck",                            QString cfg_group
+  "memcheck",                            QString cfg_group     // cfgGroup()
   '\0',                                  QChar   short_flag
-  "leak-check",                          QString long_flag
+  "leak-check",                          QString long_flag     // cfgKey()
   "<no|summary|full>",                   QString flag_desc     // cmd-line
   "no|summary|full",                     QString poss_vals
   "summary",                             QString default_val
@@ -90,6 +90,10 @@ QString VkObject::configEntries()
 {
   QString cfgEntry = "\n[" + name() + "]\n";
   for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
+
+		/* skip these entirely */
+		if ( opt->key == Valkyrie::HELP_OPT ) continue;
+
     cfgEntry += opt->longFlag + "=" + opt->defaultValue + "\n";
   }
 
@@ -250,60 +254,46 @@ Valkyrie::Valkyrie()
           "",          "",                 "", 
           "",          "Show valgrind options too, and exit", urlNone );
   addOpt( TOOLTIP,     Option::NOT_POPT,   Option::CHECK, 
-          "Prefs",     '\0',               "show-tooltips", 
+          "valkyrie",  '\0',               "show-tooltips", 
           "",          "true|false",       "true", 
           "Show tooltips",      "",          urlNone );
-  addOpt( MENUBAR,     Option::NOT_POPT,   Option::CHECK, 
-          "Prefs",     '\0',               "show-menubar", 
-          "",          "true|false",       "true", 
-          "Show menubar",        "",       urlNone );
-  addOpt( PALETTE,     Option::NOT_POPT,   Option::NONE, 
-          "Prefs",     '\0',               "use-vk-palette", 
+  addOpt( PALETTE,     Option::NOT_POPT,   Option::CHECK, 
+          "valkyrie",  '\0',               "use-vk-palette", 
           "",          "true|false",       "true", 
           "Use valkyrie's palette",   "",  urlNone );
   addOpt( ICONTXT,     Option::NOT_POPT,   Option::CHECK, 
-          "Prefs",     '\0',               "show-butt-text", 
+          "valkyrie",  '\0',               "show-butt-text", 
           "",          "true|false",       "true", 
           "Show toolbar text labels",  "", urlNone );
-  addOpt( FONT_SYSTEM,  Option::NOT_POPT,   Option::NONE,
-          "Prefs",     '\0',               "use-system-font", 
+  addOpt( FONT_SYSTEM,  Option::NOT_POPT,   Option::CHECK,
+          "valkyrie",   '\0',               "use-system-font", 
           "",          "true|false",       "true", 
           "Use default system font",  "",  urlNone );
   addOpt( FONT_USER,   Option::NOT_POPT,   Option::LEDIT, 
-          "Prefs",     '\0',               "user-font", 
+          "valkyrie",  '\0',               "user-font", 
           "",          "",  "Helvetica [Cronyx],12,-1,5,50,0,0,0,0,0", 
           "",          "",                 urlNone );
   addOpt( SRC_EDITOR,  Option::NOT_POPT,   Option::LEDIT, 
-          "valkyrie",  '\0',               "editor", 
+          "valkyrie",  '\0',               "src-editor", 
           "",          "",                 "/usr/bin/emacs", 
-          "Source File Editor:",   "",     urlNone );
+          "Src Editor:",   "",     urlNone );
   addOpt( SRC_LINES,   Option::NOT_POPT,   Option::SPINBOX, 
-          "Prefs",     '\0',               "extra-src-lines",
-          "",          "2|10",             "2", 
-          "Extra lines shown above/below the target line", "",
+          "valkyrie",  '\0',               "src-lines",
+          "",          "1|10",             "2", 
+          "Extra lines shown above/below the target line:", "",
           urlNone );
-  /*--------------------------------------------------------------- */
-	/* path to valgrind executable (found by configure) */
+  /* path to valgrind executable (found by configure) */
   addOpt( VG_EXEC,     Option::NOT_POPT,   Option::LEDIT, 
           "valkyrie",  '\0',               "vg-exec",
           "",          "",                 "",
           "Valgrind:", "",                 urlNone );
-	/* path to valgrind's supp files dir (found by configure) */
-  addOpt( VG_SUPPS,    Option::NOT_POPT,   Option::LEDIT, 
-          "valkyrie",  '\0',               "vg-supps",
+  /* path to a supp files dir. this is initially found by configure,
+     but can be changed later via valkyrie's Option page to point to
+     another suppression files dir */
+  addOpt( VG_SUPPS_DIR,   Option::NOT_POPT,   Option::LEDIT, 
+          "valkyrie",  '\0',               "vg-supps-dir",
           "",          "",                 "",
-          "Supp'ns:",  "",                 urlNone );
-	/* this holds a list of *all* suppression files ever found */
-  addOpt( ALL_SUPPS,   Option::NOT_POPT,   Option::NONE, 
-          "valkyrie",  '\0',               "all-supps",
-          "",          "",                 "",
-          "",          "",                 urlNone );
-	/* this holds a list of supp files currently being used */
-  addOpt( SEL_SUPPS,   Option::NOT_POPT,   Option::NONE, 
-          "valkyrie",  '\0',               "sel-supps",
-          "",          "",                 "",
-          "",          "",                 urlNone );
-  /*--------------------------------------------------------------- */
+          "Supps.Dir:",  "",                 urlNone );
   addOpt( BINARY,      Option::NOT_POPT,   Option::LEDIT,
           "valkyrie",  '\0',               "binary", 
           "",          "",                 "", 
@@ -315,13 +305,18 @@ Valkyrie::Valkyrie()
   addOpt( VIEW_LOG,    Option::ARG_STRING, Option::LEDIT, 
           "valkyrie",  '\0',               "view-log", 
           "<file>",    "",                 "",
-          "View logfile:", "view a valgrind log-file (text or xml)",
+          "View logfile:", "parse and view a valgrind logfile (xml)",
+          urlNone );
+  addOpt( MERGE_LOGS,  Option::ARG_STRING, Option::NONE, 
+          "valkyrie",  '\0',               "merge", 
+          "<filelist>", "",                "",
+          "View logfiles:", "merge multiple logfiles, discarding duplicates",
           urlNone );
   addOpt( USE_GUI,     Option::ARG_BOOL,   Option::NONE,
           "valkyrie",  '\0',               "gui", 
           "<yes|no>",  "yes|no",           "yes",
           "xxxxxxx",
-					"use the graphical interface",
+          "use the graphical interface",
           urlNone );
 }
 
@@ -334,25 +329,27 @@ int Valkyrie::checkOptArg( int optid, const char* argval, bool gui )
 
   switch ( optid ) {
 
-  /* these options are _only_ set via the gui, and are limited to a
-     set of available values, so no need to re-check them. */
+  /* these options are _only_ set via the gui, and are either (a)
+     limited to a set of available values, or (b) have already been
+     checked, so no need to re-check them. */
     case TOOLTIP:
-    case MENUBAR:
     case PALETTE:
     case ICONTXT:
     case FONT_SYSTEM:
     case FONT_USER:
     case SRC_LINES:
+    case VG_SUPPS_DIR:
       return errval;
       break;
+
     case SRC_EDITOR:
     case VG_EXEC:
       argVal = opt->binaryCheck( &errval, argval );
       break;
 
-		case USE_GUI:
-			opt->isValidArg( &errval, argval );
-			break;
+    case USE_GUI:
+      opt->isValidArg( &errval, argval );
+      break;
 
     case VIEW_LOG:
       if ( runMode == PARSE_OUTPUT ) {
@@ -361,6 +358,14 @@ int Valkyrie::checkOptArg( int optid, const char* argval, bool gui )
         runMode = PARSE_LOG;
         argVal = opt->fileCheck( &errval, argval, true, false );
       } break;
+
+		case MERGE_LOGS:
+			if ( runMode == PARSE_OUTPUT ) {
+        errval = PERROR_BADOPERATION;
+      } else {
+        runMode = PARSE_LOG;
+				VK_DEBUG("TODO: fileCheck on all files");
+			} break;
 
     case BINARY:
       if ( runMode == PARSE_LOG ) {
@@ -388,7 +393,7 @@ int Valkyrie::checkOptArg( int optid, const char* argval, bool gui )
 
 /* ho hum - bit of a kludge.  Valkyrie contains some options which
    belong in different cfg groups (as opposed to 'valkyrie'), so we
-   have to work around this. */
+   have to work around this. 
 QString Valkyrie::configEntries()
 {
   QString prefGroup = "\n[Prefs]\n";
@@ -401,7 +406,6 @@ QString Valkyrie::configEntries()
         break;
 
       case TOOLTIP:
-      case MENUBAR:
       case PALETTE:
       case ICONTXT:
       case SRC_EDITOR:
@@ -411,8 +415,8 @@ QString Valkyrie::configEntries()
         prefGroup += opt->longFlag + "=" + opt->defaultValue + "\n";
         break;
 
-      /* This value is checked and possibly over-written by vkConfig
-         on first-time startup. */
+      // This value is checked and possibly over-written by vkConfig
+      // on first-time startup.
       case VG_EXEC:
       default:
         vkGroup += opt->longFlag + "=" + opt->defaultValue + "\n";
@@ -422,7 +426,7 @@ QString Valkyrie::configEntries()
 
   return prefGroup + vkGroup;
 }
-
+*/
 
 /* called from VkConfig::modFlags() 
    see if valkyrie was told what to do:
@@ -482,13 +486,19 @@ Valgrind::Valgrind()
           "Main tool:", 
           "use the Valgrind tool named <name>.  Available tools are: memcheck, cachegrind, massif", 
           urlNone );
+  /* common options relevant to all tools */
   addOpt( VERBOSITY,   Option::ARG_UINT,   Option::SPINBOX, 
           "valgrind",  '\0',               "verbosity", 
           "<0..4>",    "0|4",              "1",
           "Verbosity level:",
           "Be more verbose, include counts of errors", 
           urlNone );
-  addOpt( TRACE_CH,    Option::ARG_BOOL,   Option::RADIO,   
+  addOpt( XML_OUTPUT,  Option::ARG_BOOL,   Option::CHECK, 
+          "valgrind",  '\0',               "xml",
+          "<yes|no>",  "yes|no",           "yes",
+          "Output in xml format:", "all output is in XML", 
+          urlNone );
+  addOpt( TRACE_CH,    Option::ARG_BOOL,   Option::CHECK,   
           "valgrind",  '\0',               "trace-children",
           "<yes|no>",  "yes|no",           "no",
           "Trace child processes: ",
@@ -506,6 +516,7 @@ Valgrind::Valgrind()
           "Add timestamps to log messages:", 
           "add timestamps to log messages?",
           urlNone );
+  /* uncommon options relevant to all tools */
   addOpt( RUN_LIBC,    Option::ARG_BOOL,   Option::CHECK,      
           "valgrind",  '\0',               "run-libc-freeres",
           "<yes|no>",  "yes|no",           "yes",
@@ -530,6 +541,113 @@ Valgrind::Valgrind()
           "Show warnings about emulation limits:",
           "show warnings about emulation limits?",
           urlNone );
+  addOpt( ELAN_HACKS,  Option::ARG_BOOL,   Option::CHECK,
+          "valgrind",  '\0',               "support-elan3",
+          "<yes|no>",  "yes|no",           "no",
+          "Support Quadrics Elan3:",
+          "hacks for Quadrics Elan3 support",
+          urlNone );
+  /* options relevant to error-reporting tools */
+  addOpt( LOG_FD,      Option::ARG_UINT,   Option::SPINBOX, 
+          "valgrind",  '\0',               "log-fd", 
+          "<number>",  "0|1|2",            "2",
+          "Log to file descriptor:",
+          "log messages to file descriptor (0=stdin, 1=stdout, 2=stderr)",  
+          urlNone );
+  addOpt( LOG_PID,     Option::ARG_STRING, Option::LEDIT, 
+          "valgrind",  '\0',               "log-file", 
+          "<file>",    "",                 "",
+          "Log to <file>.pid:",
+          "Log messages to <file>.pid<pid>", 
+          urlNone );
+  addOpt( LOG_FILE,    Option::ARG_STRING, Option::LEDIT, 
+          "valgrind",  '\0',               "log-file-exactly", 
+          "<file>",    "",                 "",
+          "Log to file:",
+          "log messages to <file>", 
+          urlNone );
+  addOpt( LOG_SOCKET,  Option::ARG_STRING, Option::LEDIT, 
+          "valgrind",  '\0',               "log-socket", 
+          "<ipaddr:port>", "",             "",
+          "Log to socket:",
+          "log messages to socket ipaddr:port",
+          urlNone );
+  addOpt( DEMANGLE,    Option::ARG_BOOL,   Option::CHECK, 
+          "valgrind",  '\0',               "demangle", 
+          "<yes|no>",  "yes|no",           "yes",
+          "Automatically demangle C++ names",
+          "automatically demangle C++ names?",
+          urlNone );
+  addOpt( NUM_CALLERS, Option::ARG_UINT,   Option::SPINBOX, 
+          "valgrind",  '\0',               "num-callers", 
+          "<1..50>",   "1|50",             "12",
+          "Number of stack trace callers:", 
+          "show <num> callers in stack traces",
+          urlNone );
+  addOpt( ERROR_LIMIT, Option::ARG_BOOL,   Option::CHECK,   
+          "valgrind",  '\0',               "error-limit", 
+          "<yes|no>",  "yes|no",           "yes",
+          "Limit the number of errors shown",
+          "Stop showing new errors if too many?",
+          urlNone );
+  addOpt( SHOW_BELOW,  Option::ARG_BOOL,   Option::CHECK,   
+          "valgrind",  '\0',               "show-below-main", 
+          "<yes|no>",  "yes|no",           "no",
+          "Continue stack traces below main()",
+          "continue stack traces below main()", 
+          urlNone );
+  /*--------------------------------------------------------------- */
+  /* this holds a list of *all* suppression files ever found.
+     it is seeded with any suppression files found by configure */
+  addOpt( SUPPS_ALL,   Option::NOT_POPT,   Option::LISTBOX, 
+          "valgrind",  '\0',               "supps-all",
+          "",          "",                 "",
+          /*"default.supp;xfree-3.supp;xfree-4.supp;glibc-2.1.supp|glibc-2.2.supp;glibc-2.3.supp",*/
+          "Available error-suppression file(s):",
+          "",          urlNone );
+  /* need to keep a list of suppression files found by configure
+     which is never changed; only used to reset default values */
+  addOpt( SUPPS_DEF,   Option::NOT_POPT,   Option::NONE, 
+          "valgrind",  '\0',               "supps-def",
+          "",          "",                 "",
+          "",          "",                 urlNone );
+  addOpt( SUPPS_SEL,    Option::ARG_STRING, Option::LISTBOX,
+          "valgrind",   '\0',              "suppressions",
+          "<file1,...>", "",               "default.supp",
+          "Selected error-suppression file(s):",
+          "suppress errors described in suppressions file(s)", 
+          urlNone );
+  /*--------------------------------------------------------------- */
+  addOpt( GEN_SUPP,    Option::ARG_BOOL,   Option::CHECK, 
+          "valgrind",  '\0',               "gen-suppressions",
+          "<yes|no|all>",  "yes|no|all",   "no",
+          "Print suppressions for errors",
+          "print suppressions for errors?",
+          urlNone );
+  addOpt( DB_ATTACH,   Option::ARG_BOOL,   Option::CHECK, 
+          "valgrind",  '\0',               "db-attach", 
+          "<yes|no>",  "yes|no",           "no",
+          "Start debugger on error detection",
+          "start debugger when errors detected?",
+          urlNone );
+  addOpt( DB_COMMAND,  Option::ARG_STRING, Option::LEDIT, 
+          "valgrind",  '\0',               "db-command", 
+          "<command>", "",                 "/usr/bin/gdb -nw %f %p",
+          "Debugger:", 
+          "command to start debugger",
+          urlNone );
+  addOpt( INPUT_FD,    Option::ARG_UINT,   Option::SPINBOX, 
+          "valgrind",  '\0',               "input-fd",
+          "<number>",  "0|1|2",            "0",
+          "Input file descriptor:", 
+          "File descriptor for (db) input (0=stdin, 1=stdout, 2=stderr)",
+          urlNone );
+  addOpt( MAX_SFRAME,  Option::ARG_UINT,   Option::SPINBOX, 
+          "valgrind",  '\0',               "max-stackframe",
+          "<number>",  "0|2000000",        "2000000",
+          "Stack switch on SP changes at:", 
+          "assume stack switch for stack pointer changes larger than <number> bytes",
+          urlNone );
 }
 
 
@@ -544,199 +662,10 @@ int Valgrind::checkOptArg( int optid, const char* argval, bool gui )
   switch ( optid ) {
 
     case TOOL:
+    case XML_OUTPUT:
     case VERBOSITY:
     case WEIRD:
     case RUN_LIBC:
-      opt->isValidArg( &errval, argval );
-      break;
-
-    case TRACE_CH: {
-      if ( opt->isValidArg( &errval, argval ) ) {
-        if ( argVal == "yes" ) {
-          if ( vkConfig->rdBool( "gdb-attach", "memcheck" ) )
-            errval = PERROR_DB_CONFLICT;
-        }
-      }
-    } break;
-
-    case TRACK_FDS:
-    case TIME_STAMP:
-    case PTR_CHECK:
-    case EM_WARNS:
-      printf("TODO: check Valgrind opts\n");
-      break;
-
-  }
-
-  /* save the value if it has passed the check */
-  if ( errval == PARSED_OK && gui == false ) {
-    writeOptionToConfig( opt, argval );
-  }
-
-  return errval;
-}
-
-
-
-/* class Memcheck ------------------------------------------------------ */
-Memcheck::Memcheck() 
-  : VkObject( MEMCHECK, "Memcheck", "&Memcheck", Qt::SHIFT+Qt::Key_M ) 
-{ 
-  /* this set of flags is defined to be relevant to all error-checking
-     tools, but see notes in vk_objects.h for class Memcheck */
-  addOpt( XML,         Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",  '\0',               "xml",
-          "<yes|no>",  "yes|no",           "yes",
-          "Output in xml format:", "all output is in XML", 
-          urlNone );
-  addOpt( LOG_FD,      Option::ARG_UINT,   Option::SPINBOX, 
-          "memcheck",  '\0',               "log-fd", 
-          "<number>",  "0|1|2",            "2",
-          "Log messages to file descriptor:",
-          "log messages to file descriptor (0=stdin, 1=stdout, 2=stderr)",  
-          urlNone );
-  addOpt( LOG_PID,     Option::ARG_STRING, Option::LEDIT, 
-          "memcheck",  '\0',               "log-file", 
-          "<file>",    "",                 "",
-          "Log messages to <file>.pid:",
-          "Log messages to <file>.pid<pid>", 
-          urlNone );
-  addOpt( LOG_FILE,    Option::ARG_STRING, Option::LEDIT, 
-          "memcheck",  '\0',               "log-file-exactly", 
-          "<file>",    "",                 "",
-          "Log messages to file:",
-          "log messages to <file>", 
-          urlNone );
-  addOpt( LOG_SOCKET,  Option::ARG_STRING, Option::LEDIT, 
-          "memcheck",  '\0',               "log-socket", 
-          "<ipaddr:port>", "",             "",
-          "Log messages to socket:",
-          "log messages to socket ipaddr:port",
-          urlNone );
-  addOpt( DEMANGLE,    Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",  '\0',               "demangle", 
-          "<yes|no>",  "yes|no",           "yes",
-          "Auto. demangle C++ names",
-          "automatically demangle C++ names?",
-          urlNone );
-  addOpt( NUM_CALLERS, Option::ARG_UINT,   Option::SPINBOX, 
-          "memcheck",  '\0',               "num-callers", 
-          "<1..50>",   "1|50",             "12",
-          "No. stack trace callers:", 
-          "show <num> callers in stack traces",
-          urlNone );
-  addOpt( ERROR_LIMIT, Option::ARG_BOOL,   Option::CHECK,   
-          "memcheck",  '\0',               "error-limit", 
-          "<yes|no>",  "yes|no",           "yes",
-          "Limit the no. of errors shown:",
-          "Stop showing new errors if too many?",
-          urlNone );
-  addOpt( SHOW_BELOW,  Option::ARG_BOOL,   Option::CHECK,   
-          "memcheck",  '\0',               "show-below-main", 
-          "<yes|no>",  "yes|no",           "no",
-          "Continue stack traces below main():",
-          "continue stack traces below main()", 
-          urlNone );
-  /* this option is hi-jacked by valkyrie */
-  addOpt( SUPPS,        Option::ARG_STRING, Option::NONE,
-          "memcheck",   '\0',              "suppressions",
-          "<file1,...>",
-          //"default.supp|xfree-3.supp|xfree-4.supp|glibc-2.1.supp|glibc-2.2.supp|glibc-2.3.supp",
-          "",           "default.supp",
-          "Use error-suppresion file(s):",
-          "suppress errors described in suppressions file(s)", 
-          urlNone );
-  addOpt( GEN_SUPP,    Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",  '\0',               "gen-suppressions",
-          "<yes|no|all>",  "yes|no|all",   "no",
-          "Print error suppressions:",
-          "print suppressions for errors?",
-          urlNone );
-  addOpt( DB_ATTACH,   Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",  '\0',               "db-attach", 
-          "<yes|no>",  "yes|no",           "no",
-          "Start DB on error detection:",
-          "start debugger when errors detected?",
-          urlNone );
-  addOpt( DB_COMMAND,  Option::ARG_STRING, Option::LEDIT, 
-          "memcheck",  '\0',               "db-command", 
-          "<command>", "",                 "gdb -nw %f %p",
-          "Command to start debugger:", 
-          "command to start debugger",
-          urlNone );
-  addOpt( INPUT_FD,    Option::ARG_UINT,   Option::SPINBOX, 
-          "memcheck",  '\0',               "input-fd",
-          "<number>",  "0|1|2",            "0",
-          "Input file descriptor:", 
-          "File descriptor for (db) input (0=stdin, 1=stdout, 2=stderr)",
-          urlNone );
-  addOpt( MAX_SFRAME,  Option::ARG_UINT,   Option::SPINBOX, 
-          "memcheck",  '\0',               "max-stackframe",
-          "<number>",  "0|2000000",        "2000000",
-          "Stack switch on SP changes at:", 
-          "assume stack switch for stack pointer changes larger than <number> bytes",
-          urlNone );
-  /* memcheck-specific flags start here */
-  addOpt( PARTIAL,     Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",  '\0',               "partial-loads-ok",
-          "<yes|no>",  "yes|no",           "yes",
-          "Ignore errors on partially invalid addresses:",
-          "too hard to explain here; see manual",
-          urlNone );
-  addOpt( FREELIST,    Option::ARG_UINT,   Option::LEDIT, 
-          "memcheck",  '\0',               "freelist-vol",
-          "<number>",  "",                 "1000000",
-          "Volume of freed blocks queue:",
-          "volume of freed blocks queue",
-          urlNone );
-  addOpt( LEAK_CHECK,  Option::ARG_STRING, Option::CHECK, 
-          "memcheck",  '\0',               "leak-check",
-          "<no|summary|full>",  "no|summary|full",  "summary",
-          "Search for memory leaks at exit",
-          "search for memory leaks at exit?",
-          urlNone );
-  addOpt( LEAK_RES,    Option::ARG_STRING, Option::COMBO, 
-          "memcheck",  '\0',               "leak-resolution",
-          "<low|med|high>", "low|med|high", "low",
-          "Degree of backtrace merging:",
-          "how much backtrace merging in leak check", 
-          urlNone );
-  addOpt( SHOW_REACH,  Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",  '\0',               "show-reachable",
-          "<yes|no>",  "yes|no",           "no",
-          "Show reachable blocks in leak check:",
-          "show reachable blocks in leak check?",  
-          urlNone );
-  addOpt( GCC_296,     Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",  '\0',               "workaround-gcc296-bugs",
-          "<yes|no>",  "yes|no",           "no",
-          "Work around gcc-296 bugs:",
-          "self explanatory",  
-          urlNone );
-  addOpt(  ALIGNMENT,  Option::ARG_UINT,   Option::SPINBOX, 
-          "memcheck",  '\0',               "alignment", 
-           "<number>", "8|1048576",        "8",
-          "Minimum alignment of allocations:",
-          "set minimum alignment of allocations", 
-           urlVgCore::Alignment );
-  addOpt( STRLEN,       Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",   '\0',               "avoid-strlen-errors",
-          "<yes|no>",   "yes|no",           "yes",
-          "Suppress errors from inlined strlen",
-          "suppress errors from inlined strlen",  
-          urlNone );
-}
-
-
-int Memcheck::checkOptArg( int optid, const char* argval, bool gui )
-{
-  int errval = PARSED_OK;
-  QString argVal( argval );
-  Option* opt = findOption( optid );
-
-  switch ( optid ) {
-
-    case XML:
     case NUM_CALLERS:
     case ERROR_LIMIT:
     case GEN_SUPP:
@@ -745,15 +674,29 @@ int Memcheck::checkOptArg( int optid, const char* argval, bool gui )
     case SHOW_BELOW:
     case MAX_SFRAME:
     case LOG_FD:
-    case PARTIAL:    /* memcheck-specific flags start here */
-    case FREELIST:
-    case LEAK_CHECK:
-    case LEAK_RES:
-    case SHOW_REACH:
-    case GCC_296:
-    case STRLEN:
       opt->isValidArg( &errval, argval );
       break;
+
+    case TRACE_CH: {
+      if ( opt->isValidArg( &errval, argval ) ) {
+        if ( argVal == "yes" ) {
+          if ( vkConfig->rdBool( "gdb-attach", "valgrind" ) )
+            errval = PERROR_DB_CONFLICT;
+        }
+      }
+    } break;
+
+    case LOG_FILE:    /* let valgrind handle the checking here */
+    case LOG_PID:
+    case LOG_SOCKET:
+      if ( vkConfig->rdBool( "db-attach","valgrind" ) ) {
+        errval = PERROR_DB_OUTPUT;
+      } else {
+        // FIXME re this stuff 
+        //config->wrEntry( "false", "logfile-fd-use", "valgrind" );
+        //vkConfig->wrEntry( "true",  "logfile-use",    "valgrind" );
+        //config->wrEntry( "false", "logsocket-use",  "valgrind" );
+      } break;
 
     case DB_COMMAND: {   /* gdb -nw %f %p */
       int pos = argVal.find( ' ' );
@@ -776,25 +719,159 @@ int Memcheck::checkOptArg( int optid, const char* argval, bool gui )
           //  errval = PERROR_DB_OUTPUT;
         }
       } break;
+
+    case TRACK_FDS:
+    case TIME_STAMP:
+    case PTR_CHECK:
+    case EM_WARNS:
+    case SUPPS_SEL:
+      printf("TODO: check Valgrind opts\n");
+      break;
+
+  }
+
+  /* save the value if it has passed the check */
+  if ( errval == PARSED_OK && gui == false ) {
+    writeOptionToConfig( opt, argval );
+  }
+
+  return errval;
+}
+
+
+/* valkyrie hijacks any log-to-file flags; these are not passed to
+   valgrind, but are used after parsing has finished to save to.
+   FIXME: not sure yet how to handle LOG_FD and LOG_SOCKET */
+QStringList Valgrind::modifiedFlags()
+{
+  QStringList modFlags;
+  QString defVal, cfgVal;
+
+  for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
   
-    case LOG_FILE:    /* let valgrind handle the checking here */
-    case LOG_PID:
-    case LOG_SOCKET:
-      if ( vkConfig->rdBool( "db-attach","memcheck" ) ) {
-        errval = PERROR_DB_OUTPUT;
-      } else {
-        // FIXME re this stuff 
-        //config->wrEntry( "false", "logfile-fd-use", "valgrind" );
-        //vkConfig->wrEntry( "true",  "logfile-use",    "valgrind" );
-        //config->wrEntry( "false", "logsocket-use",  "valgrind" );
-      } break;
-      
+    switch ( opt->key ) {
+
+			/* we never want these included */
+      case SUPPS_ALL:
+			case SUPPS_DEF:
+				break;
+
+			/* we need '--suppressions=' before each and every filename */
+			case SUPPS_SEL: {
+				QStringList files = QStringList::split( ",", vkConfig->rdEntry( opt->cfgKey(), name() ) );
+				for ( unsigned int i=0; i<files.count(); i++ ) {
+					modFlags << "--" + opt->cfgKey() + "=" + files[i];
+				}
+			} break;
+
+      case LOG_PID:        // log to file.pid
+      case LOG_FILE:       // log to file.name
+      case LOG_FD:         // ?? log to file descriptor = 2
+      case LOG_SOCKET:     // ?? log to socket ipaddr:port
+        break;
+
+      case XML_OUTPUT:      // the sine qua non
+        //modFlags << "--" + opt->longFlag + "=" + vkConfig->rdEntry( opt->longFlag, name() );
+        modFlags << "--" + opt->cfgKey() + "=" 
+                         + vkConfig->rdEntry( opt->cfgKey(), name() );
+        break;
+
+      default:
+        defVal = opt->defaultValue;
+        //RM: cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
+        cfgVal = vkConfig->rdEntry( opt->cfgKey(), name() );
+        if ( defVal != cfgVal ) {
+          //modFlags << "--" + opt->longFlag + "=" + cfgVal;
+          modFlags << "--" + opt->cfgKey() + "=" + cfgVal;
+				}
+        break;
+    }
+  }
+
+  return modFlags;
+}
+
+
+
+
+/* class Memcheck ------------------------------------------------------ */
+Memcheck::Memcheck() 
+  : VkObject( MEMCHECK, "Memcheck", "&Memcheck", Qt::SHIFT+Qt::Key_M ) 
+{
+  addOpt( PARTIAL,     Option::ARG_BOOL,   Option::CHECK, 
+          "memcheck",  '\0',               "partial-loads-ok",
+          "<yes|no>",  "yes|no",           "yes",
+          "Ignore errors on partially invalid addresses",
+          "too hard to explain here; see manual",
+          urlMemcheck::Partial );
+  addOpt( FREELIST,    Option::ARG_UINT,   Option::LEDIT, 
+          "memcheck",  '\0',               "freelist-vol",
+          "<number>",  "",                 "1000000",
+          "Volume of freed blocks queue:",
+          "volume of freed blocks queue",
+          urlMemcheck::Freelist );
+  addOpt( LEAK_CHECK,  Option::ARG_STRING, Option::COMBO, 
+          "memcheck",  '\0',               "leak-check",
+          "<no|summary|full>",  "no|summary|full",  "summary",
+          "Search for memory leaks at exit:",
+          "search for memory leaks at exit?",
+          urlMemcheck::Leakcheck );
+  addOpt( LEAK_RES,    Option::ARG_STRING, Option::COMBO, 
+          "memcheck",  '\0',               "leak-resolution",
+          "<low|med|high>", "low|med|high", "low",
+          "Degree of backtrace merging:",
+          "how much backtrace merging in leak check", 
+          urlMemcheck::Leakres );
+  addOpt( SHOW_REACH,  Option::ARG_BOOL,   Option::CHECK, 
+          "memcheck",  '\0',               "show-reachable",
+          "<yes|no>",  "yes|no",           "no",
+          "Show reachable blocks in leak check",
+          "show reachable blocks in leak check?",  
+          urlMemcheck::Showreach );
+  addOpt( GCC_296,     Option::ARG_BOOL,   Option::CHECK, 
+          "memcheck",  '\0',               "workaround-gcc296-bugs",
+          "<yes|no>",  "yes|no",           "no",
+          "Work around gcc-296 bugs",
+          "self explanatory",  
+          urlMemcheck::gcc296 );
+  addOpt( ALIGNMENT,  Option::ARG_UINT,   Option::SPINBOX, 
+          "memcheck",  '\0',               "alignment", 
+           "<number>", "8|1048576",        "8",
+          "Minimum alignment of allocations",
+          "set minimum alignment of allocations", 
+           urlVgCore::Alignment );
+  addOpt( STRLEN,       Option::ARG_BOOL,   Option::CHECK, 
+          "memcheck",   '\0',               "avoid-strlen-errors",
+          "<yes|no>",   "yes|no",           "yes",
+          "Suppress errors from inlined strlen",
+          "suppress errors from inlined strlen",  
+          urlMemcheck::Strlen );
+}
+
+
+int Memcheck::checkOptArg( int optid, const char* argval, bool gui )
+{
+  int errval = PARSED_OK;
+  QString argVal( argval );
+  Option* opt = findOption( optid );
+
+  switch ( optid ) {
+
+    case PARTIAL:
+    case FREELIST:
+    case LEAK_CHECK:
+    case LEAK_RES:
+    case SHOW_REACH:
+    case GCC_296:
+    case STRLEN:
+      opt->isValidArg( &errval, argval );
+      break;
+
     case ALIGNMENT: /* check is really a number, then if is power of two */
       opt->isPowerOfTwo( &errval, argval ); 
       break;
 
   }
-
 
   /* save the value if it has passed the check */
   if ( errval == PARSED_OK && gui == false ) {
@@ -817,15 +894,6 @@ QStringList Memcheck::modifiedFlags()
   for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
   
     switch ( opt->key ) {
-      case LOG_PID:        // log to file.pid
-      case LOG_FILE:       // log to file.name
-      case LOG_FD:         // ?? log to file descriptor = 2
-      case LOG_SOCKET:     // ?? log to socket ipaddr:port
-        break;
-
-      case XML:             // the sine qua non
-        modFlags << "--" + opt->longFlag + "=" 
-                         + vkConfig->rdEntry( opt->longFlag, name() );
 
       default:
         defVal = opt->defaultValue;
@@ -851,62 +919,62 @@ Cachegrind::Cachegrind()
           "<size,assoc,line_size>", "",     "0,0,0",
           "I1 cache configuration:",
           "set I1 cache manually",
-          urlNone );
+          urlCachegrind::Cacheopts );
   addOpt( D1_CACHE,     Option::ARG_UINT,   Option::SPINBOX, 
           "cachegrind", '\0',               "D1", 
           "<size,assoc,line_size>", "",     "0,0,0",
           "D1 cache configuration:",        
           "Set D1 cache manually",
-          urlNone );
+          urlCachegrind::Cacheopts );
   addOpt( L2_CACHE,     Option::ARG_UINT,   Option::SPINBOX, 
           "cachegrind", '\0',               "L2",
-          "<size,assoc,line_size>", "", "0,0,0",
+          "<size,assoc,line_size>", "",     "0,0,0",
           "L2 cache configuration:",
           "set L2 cache manually",
-          urlNone );
+          urlCachegrind::Cacheopts );
   /* cachegrind annotate script flags */
   addOpt( PID_FILE,     Option::ARG_STRING, Option::LEDIT, 
           "cachegrind", '\0',               "pid", 
           "<file.pid>", "",                 "",
           "File to read:",
           "Which <cachegrind.out.pid> file to read (required)",
-          urlNone );
+          urlCachegrind::Pid );
   addOpt( SORT,         Option::ARG_STRING, Option::LEDIT, 
           "cachegrind", '\0',               "sort", 
           "<A,B,C>",    "",                 "event column order",
           "Sort columns by:",
           "sort columns by events A,B,C",
-          urlNone );
+          urlCachegrind::Sort );
   addOpt( SHOW,         Option::ARG_STRING, Option::LEDIT, 
           "cachegrind", '\0',               "show",
           "<A,B,C>",    "",                 "all",
           "Show figures for events:",
           "only show figures for events A,B,C",
-          urlNone );
+          urlCachegrind::Show );
   addOpt( THRESH,       Option::ARG_UINT,   Option::SPINBOX, 
           "cachegrind", '\0',               "threshold", 
           "<%>",        "0|100",            "99",
           "Threshold percentage:",
           "percentage of counts (of primary sort event) we are interested in",
-          urlNone );
+          urlCachegrind::Threshold );
   addOpt( AUTO,         Option::ARG_BOOL,   Option::CHECK, 
           "cachegrind", '\0',               "auto",
           "<yes|no>",   "yes|no",           "no",
-          "Annotate all relevant source files",
+          "Automatically annotate all relevant source files",
           "Annotate all source files containing functions that helped reach the event count threshold",
-          urlNone );
+          urlCachegrind::Auto );
   addOpt( CONTEXT,      Option::ARG_UINT,   Option::SPINBOX, 
           "cachegrind", '\0',               "context",
-          "<number>",   "0|10000",          "8",
-          "No. of context lines to print:",
+          "<number>",   "0|50",             "8",
+          "Number of context lines to print:",
           "print <number> lines of context before and after annotated lines",
-          urlNone );
+          urlCachegrind::Context );
   addOpt( INCLUDE,      Option::ARG_STRING, Option::LEDIT, 
           "cachegrind", 'I',                "include", 
           "<dir1,dir2>", "",                "",
           "Source dirs:",
           "List of directories to search for source files",
-          urlNone );
+          urlCachegrind::Include );
 }
 
 
@@ -1034,7 +1102,7 @@ Massif::Massif()
           "Format of textual output:",
           "format of textual output",
           urlMassif::Format );
-  addOpt(  ALIGNMENT,  Option::ARG_UINT,   Option::SPINBOX, 
+  addOpt( ALIGNMENT,  Option::ARG_UINT,   Option::SPINBOX, 
           "massif",    '\0',               "alignment", 
           "<number>",  "8|1048576",        "8",
           "Minimum alignment of allocations:",

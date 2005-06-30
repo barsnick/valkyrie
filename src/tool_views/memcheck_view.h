@@ -102,11 +102,13 @@ public:
 public slots:
   void parseXmlOutput();
   void processExited();
+  void toggleToolbarLabels(bool);
 
 private:
   enum ParseFormat{ INVALID=-1, NOT_SET=0, TEXT, XML };
   ParseFormat inputFormat;
   ParseFormat validateLogFile();
+  ParseFormat validateLogFile( const QString& );
   ParseFormat validateOutput();
 
 	void setRunning( bool b );
@@ -115,7 +117,8 @@ private:
   void mkMenuBar();
 
 private slots:
-  void openLogfile();
+	void openLogFile();       /* load and parse one log file */
+  void openLogFiles();      /* load and parse multiple log files */
   void getSaveFilename();   /* called by savelogButton */
   void showSuppEditor();
   void itemSelected();
@@ -126,20 +129,22 @@ private slots:
 
 private:
   QString inputData;
-
+	int lineNumber;
 	QString logFilename;
 	QFile logFile;
 	QTextStream logStream;
 
   QListView * lView;
   XMLParser * xmlParser;
-  QXmlSimpleReader reader;  //QXmlSimpleReader reader;
-  QXmlInputSource source;   //QXmlInputSource source;
+  QXmlSimpleReader reader;
+  QXmlInputSource source;
 
   Valkyrie* valkyrie;
 
   QToolButton* savelogButton;
   QToolButton* openlogButton;
+	QToolButton* suppedButton;
+
   QToolButton* openOneButton;
   QToolButton* openAllButton;
   QToolButton* srcPathButton;

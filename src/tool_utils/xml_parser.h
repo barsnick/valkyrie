@@ -11,6 +11,7 @@
 #define __VK_XML_PARSER_H
 
 #include <qmap.h>
+#include <qobject.h>
 #include <qptrstack.h>
 #include <qxml.h>
 
@@ -156,8 +157,9 @@ public:
 /* class XMLParser ----------------------------------------------------- */
 class MemcheckView;
 
-class XMLParser : public QXmlDefaultHandler
+class XMLParser : public QObject, public QXmlDefaultHandler
 {
+  Q_OBJECT
 public:
   XMLParser( MemcheckView* parent );
   ~XMLParser();
@@ -166,6 +168,9 @@ public:
   bool startElement( const QString&, const QString&, const QString& stag, const QXmlAttributes& );
   bool endElement( const QString&, const QString&, const QString& etag );
   bool characters( const QString& content );
+
+signals:
+  
 
 private:
   /* mapping of error::kind to 3-letter acronyms */

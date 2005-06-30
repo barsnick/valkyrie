@@ -255,12 +255,12 @@ void Error::print()
 
 
 
-
 /* class XMLParser ----------------------------------------------------- */
 XMLParser::~XMLParser() 
 { reset( false ); }
 
-XMLParser::XMLParser( MemcheckView * parent )
+XMLParser::XMLParser( MemcheckView * parent ) 
+	: QObject( parent, "xml_parser" )
 {
   memView = parent;
   info      = 0;

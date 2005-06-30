@@ -14,6 +14,7 @@
 #include "vk_config.h"
 #include "vk_msgbox.h"
 #include "context_help.h"
+#include "vk_popt_option.h"  /* for listbox fileCheck() */
 
 
 
@@ -68,8 +69,8 @@ void OptionWidget::cancelEdit()
 }
 
 
-/* horizontal layout for widgets with labels. comboboxes, spinboxes
-   and lineedits have their own way of doings things */
+/* default horizontal layout for widgets with labels.  comboboxes,
+   spinboxes and lineedits have their own way of doings things */
 QHBoxLayout * OptionWidget::hlayout()
 { 
   vk_assert( wLabel != 0 );
@@ -84,12 +85,12 @@ QHBoxLayout * OptionWidget::hlayout()
 
 QVBoxLayout* OptionWidget::vlayout()
 {
-	vk_assert( wLabel != 0 );
-	vBox = new QVBoxLayout( -1, "vBox" );
-	vBox->addWidget( wLabel );
-	vBox->addWidget( widg );
+  vk_assert( wLabel != 0 );
+  vBox = new QVBoxLayout( 6, "vBox" );
+  vBox->addWidget( wLabel );
+  vBox->addWidget( widg );
 
-	return vBox;
+  return vBox;
 }
 
 
@@ -115,8 +116,8 @@ CkWidget::CkWidget( QWidget* parent, Option* vkopt, bool mklabel )
   connect( cbox, SIGNAL(toggled(bool)), 
            this, SLOT(ckChanged(bool)) );
 
-	/* not added if the url is empty */
-	ContextHelp::add( widg, opt->url() );
+  /* not added if the url is empty */
+  ContextHelp::add( widg, opt->url() );
 }
 
 void CkWidget::ckChanged( bool on )
@@ -168,8 +169,8 @@ RbWidget::RbWidget( QWidget* parent, Option* vkopt, bool mklabel )
   connect( radio, SIGNAL(toggled(bool)), 
            this, SLOT(rbChanged(bool)) );
 
-	/* not added if the url is empty */
-	ContextHelp::add( widg, opt->url() );
+  /* not added if the url is empty */
+  ContextHelp::add( widg, opt->url() );
 }
 
 void RbWidget::rbChanged( bool on )
@@ -225,8 +226,8 @@ LeWidget::LeWidget( QWidget *parent, Option * vkopt, bool mklabel )
   connect( ledit, SIGNAL( textChanged(const QString &) ),
            this,  SLOT( leChanged(const QString &) ) );
 
-	/* not added if the url is empty */
-	ContextHelp::add( widg, opt->url() );
+  /* not added if the url is empty */
+  ContextHelp::add( widg, opt->url() );
 }
 
 void LeWidget::setCurrValue( const QString& txt ) 
@@ -262,11 +263,21 @@ void LeWidget::resetDefault()
 QPushButton * LeWidget::button()
 { return pb; }
 
-void LeWidget::addButton( QWidget *parent, const QObject * receiver, 
-                          const char * slot, 
-                          QString txt/*=QString::null*/,
-                          bool icon/*=true*/ )
+void LeWidget::setReadOnly( bool ro )
+{ ledit->setReadOnly( ro ); }
+
+void LeWidget::addButton( QWidget* parent, const QObject* receiver, 
+                          const char* slot, QString txt/*=QString::null*/, 
+                          bool /*icon=false*/ )
 {
+#if 1
+  QString label = !txt.isNull() ? txt : opt->shortHelp;
+  pb = new QPushButton( label, parent );
+
+  int pbht = ledit->height() - 8;
+  pb->setMaximumHeight( pbht );
+  connect( pb, SIGNAL(clicked()), receiver, slot );
+#else
   int pbht = ledit->height() - 8;
   if ( !icon ) {
     pb = new QPushButton( opt->shortHelp, parent );
@@ -279,6 +290,7 @@ void LeWidget::addButton( QWidget *parent, const QObject * receiver,
   }
   pb->setMaximumHeight( pbht );
   connect( pb, SIGNAL(clicked()), receiver, slot );
+#endif
 }
 
 
@@ -291,7 +303,7 @@ QHBoxLayout * LeWidget::hlayout()
     hBox->addWidget( pb );
   } else {
     hBox->addWidget( wLabel );
-	}
+  }
   hBox->addWidget( widg );
 
   return hBox; 
@@ -330,8 +342,8 @@ CbWidget::CbWidget( QWidget *parent, Option * vkopt, bool mklabel )
   connect( combo, SIGNAL( activated(const QString &) ),
            this,  SLOT( cbChanged(const QString &) ) );
 
-	/* not added if the url is empty */
-	ContextHelp::add( widg, opt->url() );
+  /* not added if the url is empty */
+  ContextHelp::add( widg, opt->url() );
 }
 
 void CbWidget::cbChanged( const QString& txt )
@@ -369,8 +381,8 @@ QHBoxLayout * CbWidget::hlayout()
   hBox = new QHBoxLayout( 6, "hBox" );
   hBox->addWidget( wLabel );
   hBox->addWidget( widg );
-	hBox->setStretchFactor( wLabel, 6 );
-	hBox->setStretchFactor( widg,   2 );
+  hBox->setStretchFactor( wLabel, 6 );
+  hBox->setStretchFactor( widg,   2 );
 
   return hBox; 
 }
@@ -387,7 +399,7 @@ SpWidget::~SpWidget()
 }
 
 SpWidget::SpWidget( QWidget* parent, Option* vkopt, 
-										bool mklabel, int num_sections )
+                    bool mklabel, int num_sections )
   : OptionWidget( parent, "sp_widget", vkopt, mklabel ) 
 {
   intspin = new IntSpin( parent, "int_spin" );
@@ -397,12 +409,12 @@ SpWidget::SpWidget( QWidget* parent, Option* vkopt,
   connect( intspin, SIGNAL(valueChanged(const QString&)), 
            this,    SLOT(spChanged(const QString&)) );
 
-	/* not added if the url is empty */
-	ContextHelp::add( widg, opt->url() );
+  /* not added if the url is empty */
+  ContextHelp::add( widg, opt->url() );
 }
 
 void SpWidget::addSection( int min, int max, int defval,
-                           int step, QString sep_char )
+                           int step, QString sep_char/*=" : "*/ )
 { intspin->addSection( min, max, defval, step, sep_char ); }
 
 void SpWidget::spChanged( const QString &val )
@@ -442,10 +454,11 @@ QHBoxLayout * SpWidget::hlayout()
 { 
   vk_assert( wLabel != 0 );
 
-  hBox = new QHBoxLayout( 6, "hBox" );
-  hBox->addWidget( wLabel, 20, Qt::AlignLeft );
-	//hBox->addStretch( 100 );
-  hBox->addWidget( widg,    1, Qt::AlignRight );
+  hBox = new QHBoxLayout( 6 );
+  hBox->addWidget( wLabel );
+  hBox->addWidget( widg );
+  hBox->setStretchFactor( wLabel, 10 );
+  hBox->setStretchFactor( widg,    1 );
 
   return hBox; 
 }
@@ -453,8 +466,8 @@ QHBoxLayout * SpWidget::hlayout()
 
 
 /* class LbWidget: QListBox -------------------------------------------- 
-   FIXME: don't overwrite the current supp files in valkyrierc, just
-   add the new ones onto the end of the list. */
+	 This widget was specifically written to handle suppression files
+	 stuff and nothing else. */
 
 static const char* sel_supp_xpm[] = {
 "11 11 8 1",
@@ -478,21 +491,6 @@ static const char* sel_supp_xpm[] = {
 "  . .+. .  ",
 "     .     "};
 
-static const char* unsel_supp_xpm[] = {
-"11 11 1 1",
-"   c None",
-"           ",
-"           ",
-"           ",
-"           ",
-"           ",
-"           ",
-"           ",
-"           ",
-"           ",
-"           ",
-"           "};
-
 LbWidget::~LbWidget()
 {
   if ( lbox ) {
@@ -504,55 +502,32 @@ LbWidget::~LbWidget()
 LbWidget::LbWidget( QWidget *parent, Option * vkopt, bool mklabel )
   : OptionWidget( parent, "lb_widget", vkopt, mklabel ) 
 {
-  maxSelections = 10;
-
   lbox = new QListBox( parent, "list_box" );
   widg = lbox;
-  lbox->setHScrollBarMode( QScrollView::AlwaysOff );
-  lbox->setSelectionMode ( QListBox::Single );
+  lbox->setSelectionMode( QListBox::Single );
 
-  pmSel   = QPixmap( sel_supp_xpm );
-  pmUnsel = QPixmap( unsel_supp_xpm );
+  sep  = vkConfig->sepChar();
+	mode = ( opt->cfgKey() == "supps-all" ) ? AllSupps : SelSupps;
+
   load();
   connect( lbox, SIGNAL(contextMenuRequested(QListBoxItem*, 
                                              const QPoint &)),
            this, SLOT(popupMenu(QListBoxItem*, const QPoint &)));
 
-	/* not added if the url is empty */
-	ContextHelp::add( widg, opt->url() );
+  /* not added if the url is empty */
+  ContextHelp::add( widg, opt->url() );
 }
 
-/* Split initialValue at the sep char ',', then strip the [+|-] prefix
-   from each string, and allocate the appropriate icon.  If > 10 files
-   are selected, unselect those.  */
+
+/* split values at the sep-char, and load all files into the listbox */
 void LbWidget::load()
 {
-  numSelected = 0;
-  QStringList files = QStringList::split( ",", initialValue );
-  QString fname;
-  QString marker;
-  QPixmap pm;
-  SuppFile *suppFile;
-  
-  for ( unsigned int i=0; i<files.count(); i++ ) {
-
-    if ( files[i].left(3) == "[+]" )
-      numSelected++;
-
-    vk_assert( numSelected < maxSelections );
-    marker = ( numSelected >= maxSelections ) 
-             ? "[-]" : files[i].left(3);
-
-    fname  = files[i];
-    fname.remove( 0, 3 );
-
-    pm = ( marker == "[+]" ) ? pmSel : pmUnsel;
-    suppFile = new SuppFile( pm, fname, marker );
-    lbox->insertItem( suppFile );
-  }
-
-  lbox->setCurrentItem( 0 );
+  QStringList sfiles = QStringList::split( sep, currentValue );
+  for ( unsigned int i=0; i<sfiles.count(); i++ ) {
+		lbox->insertItem( sfiles[i] );
+	}
 }
+
 
 void LbWidget::reset()
 {
@@ -562,101 +537,156 @@ void LbWidget::reset()
 
 void LbWidget::resetDefault()
 {
-  printf("LbWidget::resetDefault()\n");
+  lbox->clear();
+  switch( mode ) {
+		case AllSupps:
+			currentValue = vkConfig->rdEntry( "supps-def", "valgrind" );
+			break;
+		case SelSupps:
+			currentValue = opt->defValue();
+			break;
+		default:
+			vk_assert_never_reached();
+			break;
+	}
+
+  load();
 }
+
 
 /* compare the listbox item strings with initialValue strings */
 void LbWidget::lbChanged( const QString& )
 {
-  SuppFile *suppFile;
-
-  /* update currentValue */
-  currentValue = "";
+	currentValue = "";
   for ( unsigned int i=0; i<lbox->count(); i++ ) {
-    suppFile = (SuppFile*)lbox->item(i);
-    currentValue += suppFile->selMark + suppFile->fileName() + ",";
-  }
+		currentValue += lbox->item(i)->text() + sep;
+	}
   /* remove trailing ',' */
   currentValue.remove( currentValue.length()-1, 1 );
 
-  bool edited = currentValue != initialValue;
+	bool edited = currentValue != initialValue;
   emit valueChanged( edited, this );
 }
 
-void LbWidget::popupMenu( QListBoxItem *item, const QPoint& )
+/* this slot should only be called when the lbox is in SelSupps mode */
+void LbWidget::insertFile( const QString& fname ) 
 {
+	vk_assert( mode == SelSupps );
+	/* check this file isn't already in the lbox */
+	if ( 0 == lbox->findItem( fname, Qt::ExactMatch ) ) {
+		lbox->insertItem( fname );
+		lbChanged( QString::null );
+	} else {
+		vkInfo( lbox, "Duplicate File",
+						"<p>The file '%s' is already in the list.</p>", fname.latin1() );
+	}
+}
+
+
+/* different menus and stuff for the different modes */
+void LbWidget::popupMenu( QListBoxItem* lb_item, const QPoint& )
+{
+  switch( mode ) {
+		case AllSupps: popupAll( lb_item ); break;
+		case SelSupps: popupSel( lb_item ); break;
+		default: vk_assert_never_reached(); break;
+	}
+}
+
+void LbWidget::popupSel( QListBoxItem* lb_item )
+{
+  if ( !lb_item )  /* lbox is empty, so nothing to do */
+		return;
+
   QPopupMenu popMenu( lbox );
-  int SELECT   = popMenu.insertItem( "Select File" );
-  int UNSELECT = popMenu.insertItem( "Unselect File" );
-  popMenu.insertSeparator();
-  int REMOVE   = popMenu.insertItem( "Remove File" );
-  int ADD      = popMenu.insertItem( "Add a File" );
-
-  SuppFile *suppFile = 0;
-
-  if ( !item ) {   /* lbox is empty */
-    popMenu.setItemEnabled( SELECT, false );
-    popMenu.setItemEnabled( UNSELECT, false );
-    popMenu.setItemEnabled( REMOVE, false );
-  } else {
-    suppFile = (SuppFile*)item;
-    if ( suppFile->selected() || 
-         (numSelected == maxSelections) )
-      popMenu.setItemEnabled( SELECT, false );
-    else if ( !suppFile->selected() )
-      popMenu.setItemEnabled( UNSELECT, false );
-  }
+  int DESELECT = popMenu.insertItem( "Deselect File" );
+	if ( !(lb_item->isSelected() && lb_item->isCurrent()) )
+		popMenu.setItemEnabled( DESELECT, false );
 
   popMenu.setMouseTracking( true );
   int id = popMenu.exec( QCursor::pos() );
 
-  if ( id == -1 )
-    return;
+	if ( id == DESELECT ) {
+		int indx = lbox->index( lb_item );
+		lbox->removeItem( indx );
+		lbChanged( QString::null );
+	}
 
-  int indx = lbox->index( item );
-  QString fname;
-
-  if ( id == SELECT ) {
-    fname = suppFile->fileName();
-    suppFile = new SuppFile( pmSel, fname, "[+]" );
-    lbox->removeItem( indx );
-    lbox->insertItem( suppFile, indx );
-    numSelected++;
-  } else if ( id == UNSELECT ) {
-    fname = suppFile->fileName();
-    suppFile = new SuppFile( pmUnsel, fname, "[-]" );
-    lbox->removeItem( indx );
-    lbox->insertItem( suppFile, indx );
-    numSelected--;
-  } else if ( id == REMOVE ) {
-    if ( suppFile->selected() )
-      numSelected--;
-    lbox->takeItem( item );
-    indx = -1;
-  } else if ( id == ADD ) {
-    QString supp_fn 
-      = QFileDialog::getOpenFileName( QString::null, 
-                     "Supp-Files (*.supp);;All Files (*)", lbox );
-    if ( supp_fn.isEmpty() ) /* user clicked cancel */
-      return;
-    const char *argval = supp_fn.latin1();
-    int errval = 0;  /* PARSED_OK */
-    supp_fn = opt->fileCheck( &errval, argval, true, false );
-    if ( errval != 0 ) {
-      vkError( lbox, "Invalid Entry",
-              "Invalid suppressions file selected:\n"
-              "\"%s\"", argval );
-      return;
-    } else {
-      suppFile = new SuppFile( pmUnsel, supp_fn, "[-]" );
-      lbox->insertItem( suppFile );
-      indx = lbox->index( suppFile );
-    }
-  }
-
-  if ( indx != -1 )
-    lbox->setCurrentItem( indx );
-  /* check if listbox contents have been changed */
-  lbChanged( QString::null );
 }
+
+
+void LbWidget::popupAll( QListBoxItem* lb_item )
+{
+	enum { SELECT=10, REMOVE=11, ADD=12 };
+
+  QPopupMenu popMenu( lbox );
+  popMenu.insertItem( QPixmap(sel_supp_xpm), "Select File", SELECT );
+  popMenu.insertSeparator();
+  popMenu.insertItem( "Remove File", REMOVE );
+  popMenu.insertItem( "Add File(s)", ADD );
+
+  if ( !lb_item ) {   /* lbox is empty */
+    popMenu.setItemEnabled( SELECT, false );
+    popMenu.setItemEnabled( REMOVE, false );
+  } else if ( !lb_item->isSelected() ) {
+		popMenu.setItemEnabled( SELECT, false );
+	}
+
+	bool changed = false;
+	popMenu.setMouseTracking( true );
+  int id = popMenu.exec( QCursor::pos() );
+
+	switch( id ) {
+
+		case SELECT: {
+			QString file_name = lb_item->text();
+			emit fileSelected( lb_item->text() );
+		} break;
+
+		case REMOVE: {
+			int indx = lbox->index( lb_item );
+			lbox->removeItem( indx );
+			changed = true;
+		} break;
+
+		case ADD: {
+			QStringList supp_files = QFileDialog::getOpenFileNames( 
+                 "Suppression Files (*.supp);;All Files (*)", 
+                 "/home", lbox, "supp_dlg", "Select one or more files" );
+			/* if user clicked cancel */
+			if ( supp_files.isEmpty() )	return;
+
+			for ( unsigned int i=0; i<supp_files.count(); i++ ) {
+
+				/* check this file isn't already in the lbox */
+				if ( 0 != lbox->findItem( supp_files[i], Qt::ExactMatch ) ) {
+					vkInfo( lbox, "Duplicate File",
+									"<p>The file '%s' is already in the list.</p>", 
+									supp_files[i].latin1() );
+					continue;
+				}
+
+				int errval = PARSED_OK;
+				const char* argval = supp_files[i].latin1();
+				supp_files[i] = opt->fileCheck( &errval, argval, true, false );
+				if ( errval == PARSED_OK ) {
+					lbox->insertItem( supp_files[i] );
+					changed = true;
+				} else {
+					vkError( lbox, "Invalid Entry",
+									 "Invalid suppression file:\n \"%s\"", argval );
+				}
+			}
+		} break;
+
+		default:
+			break;
+	}
+
+	if ( changed ) {
+		lbChanged( QString::null );
+	}
+
+}
+
 
