@@ -79,20 +79,22 @@ MainWindow::MainWindow() : QMainWindow( 0, "mainWindow" )
   mkMenuBar();
   mkStatusBar();
 
-	/* en/disable tooltips */
-	showToolTips = !vkConfig->rdBool("show-tooltips", "valkyrie");
+  /* en/disable tooltips */
+  showToolTips = !vkConfig->rdBool("show-tooltips", "valkyrie");
   toggleToolTips();
 
-	/* init the options dialog */
-	optionsWin = new OptionsWindow( this );
+  /* init the options dialog */
+  optionsWin = new OptionsWindow( this );
 
-  /* startup with the last tool set in config */
-  showToolView( vkConfig->defaultToolId() );
+  /* startup with the tool set in config (either the default,
+     last-used, or was set on the cmd-line) */
+  showToolView( vkConfig->currentToolId() );
 }
 
 
 // FIXME: this should use VkObject::ObjectId
-void MainWindow::showToolView( int tvid )
+//RM: void MainWindow::showToolView( int tvid )
+void MainWindow::showToolView( VkObject::ObjectId tvid )
 {
   if ( activeView != 0 ) {
     /* already loaded and visible */
@@ -127,15 +129,15 @@ void MainWindow::showToolView( int tvid )
              this,       SLOT(updateButtons(bool)) );
     connect( activeView, SIGNAL(message(QString)),
              this,       SLOT(setStatus(QString)) );
-		connect( this,       SIGNAL(toolbarLabelsToggled(bool)),
-						 activeView, SLOT(toggleToolbarLabels(bool)) );
-		/* let a tool_view know when its flags have been modified */
-		connect( optionsWin, SIGNAL(flagsChanged()),
-						 activeView, SLOT(flagsChanged()) );
+    connect( this,       SIGNAL(toolbarLabelsToggled(bool)),
+             activeView, SLOT(toggleToolbarLabels(bool)) );
+    /* let a tool_view know when its flags have been modified */
+    connect( optionsWin, SIGNAL(flagsChanged()),
+             activeView, SLOT(flagsChanged()) );
 
     /* if what-to-do was specified on the cmd-line, do it.
        otherwise, hang around and look boo'ful */
-    if ( valkyrie->runMode != Valkyrie::NOT_SET && 
+    if ( valkyrie->runMode != Valkyrie::modeNotSet && 
          vkConfig->rdEntry("tool", "valgrind") == activeView->name() ) {
       activeView->run();
     }
@@ -179,8 +181,8 @@ void MainWindow::run()
     vkError( this, "Run Executable",
              "Failed to start the executable running." );
   } else {
-		printf("TODO: toggle buttons to reflect running state\n");
-	}
+    printf("TODO: toggle buttons to reflect running state\n");
+  }
 
 }
 
@@ -274,9 +276,9 @@ void MainWindow::showFlagsWidget( bool show )
    been changed */
 void MainWindow::updateFlagsWidget()
 {
-	if ( flagsLabel->isVisible() ) {
-		showFlagsWidget( true );
-	}
+  if ( flagsLabel->isVisible() ) {
+    showFlagsWidget( true );
+  }
 }
 
 
@@ -368,17 +370,17 @@ void MainWindow::toggleToolTips()
 void MainWindow::toggleToolbarLabels()
 {
   showToolbarLabels = !showToolbarLabels;
-	runButton->setUsesTextLabel( showToolbarLabels );
-	stopButton->setUsesTextLabel( showToolbarLabels );
-	helpButton->setUsesTextLabel( showToolbarLabels );
-	/* tell the toolviews to follow suit */
-	emit toolbarLabelsToggled( showToolbarLabels );
+  runButton->setUsesTextLabel( showToolbarLabels );
+  stopButton->setUsesTextLabel( showToolbarLabels );
+  helpButton->setUsesTextLabel( showToolbarLabels );
+  /* tell the toolviews to follow suit */
+  emit toolbarLabelsToggled( showToolbarLabels );
 }
 
 
 void MainWindow::mkMenuBar()
 {
-	/* show toolbutton text labels (or not) */
+  /* show toolbutton text labels (or not) */
   showToolbarLabels = vkConfig->rdBool("show-butt-text","valkyrie");
 
   QMenuBar* mainMenu = new QMenuBar( this, "main menubar" );
@@ -433,8 +435,8 @@ void MainWindow::mkMenuBar()
 
   /* spacer between popup menus and tool-buttons ----------------------- */
   index++;
-	QLabel* lbl = new QLabel( this, "lbl_spacer" );
-	lbl->setText( "     " );
+  QLabel* lbl = new QLabel( this, "lbl_spacer" );
+  lbl->setText( "     " );
   mainMenu->insertItem( lbl, -1, index );
 
   /* run button -------------------------------------------------------- */
@@ -588,3 +590,4 @@ void MainWindow::mkStatusBar()
   QToolTip::add( flagsButton, "Show non-default flags for current tool" );
   ContextHelp::add( flagsButton, urlValkyrie::FlagsButton );
 }
+

@@ -196,7 +196,8 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
 
 
 /* misc. make-life-easier stuff ---------------------------------------- */
-int VkConfig::defaultToolId()
+//RM: int VkConfig::currentToolId()
+VkObject::ObjectId VkConfig::currentToolId()
 {
   QString tool_name = rdEntry( "tool", "valgrind" );
 
@@ -205,7 +206,7 @@ int VkConfig::defaultToolId()
     if ( obj->isTool() && obj->name() == tool_name )
       return obj->id();
   }
-  return -1;
+  return VkObject::INVALID;
 }
 
 /* these fns return vars initialised from the #defines set in vk_include.h */
@@ -237,9 +238,6 @@ QPixmap VkConfig::pixmap( QString pix )
   QPixmap pm( imgPath + pix );
   return pm;
 }
-
-VkObjectList VkConfig::vkObjList()
-{ return vkObjectList; }
 
 
 
@@ -771,6 +769,9 @@ bool VkConfig::initVkObjects()
   return true; 
 }
 
+
+VkObjectList VkConfig::vkObjList()
+{ return vkObjectList; }
 
 /* returns an object based on its ObjectId */
 VkObject* VkConfig::vkObject( int tvid, bool tools_only/*=false*/ )

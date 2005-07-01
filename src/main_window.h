@@ -51,7 +51,8 @@ private slots:
 	void stop();
 
 	void clearStatus();
-  void showToolView( int id ); 
+  //RM: void showToolView( int id ); 
+  void showToolView( VkObject::ObjectId id ); 
   void showFlagsWidget( bool show );
 	void showOptionsWindow(int);
   void closeToolView();

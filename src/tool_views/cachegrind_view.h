@@ -20,7 +20,7 @@ public:
   void clear() { }
 
 public slots:
-  void processExited() { }
+  // void processExited() { }
   void toggleToolbarLabels(bool);
 
 protected:

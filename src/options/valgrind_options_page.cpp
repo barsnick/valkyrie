@@ -140,7 +140,6 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
                    optionWidget( Valgrind::INPUT_FD,    egroup1, true ) );
   itemList.insert( Valgrind::LOG_FD,                    /* spinbox  */
                    optionWidget( Valgrind::LOG_FD,      egroup1, true ) );
-
   itemList.insert( Valgrind::LOG_PID,                   /* ledit    */
                    optionWidget(Valgrind::LOG_PID,      egroup1, true ) );
   itemList.insert( Valgrind::LOG_FILE,                  /* ledit    */
@@ -164,13 +163,14 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
   QHBoxLayout* hBox = new QHBoxLayout( 6, "hBox" );
 	hBox->addLayout( itemList[Valgrind::INPUT_FD]->hlayout() );
 	hBox->addLayout( itemList[Valgrind::LOG_FD]->hlayout() );
-  //egrid1->addLayout( itemList[Valgrind::INPUT_FD   ]->hlayout(),  9, 0 );
-  //egrid1->addLayout( itemList[Valgrind::LOG_FD     ]->hlayout(), 10, 0 );
   egrid1->addLayout( hBox,                                       10, 0 );
 	//------------
   egrid1->addLayout( itemList[Valgrind::LOG_PID    ]->hlayout(), 11, 0 );
   egrid1->addLayout( itemList[Valgrind::LOG_FILE   ]->hlayout(), 12, 0 );
   egrid1->addLayout( itemList[Valgrind::LOG_SOCKET ]->hlayout(), 13, 0 );
+
+	/* FIXME: Disabled LOG_SOCKET pro tem */
+  itemList[Valgrind::LOG_SOCKET]->widget()->setEnabled( false );
 
   erep_vbox->addStretch( space );
 

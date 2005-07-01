@@ -62,9 +62,9 @@ void ToolView::closeEvent( QCloseEvent* ce )
 											"&Save;&Discard;&Cancel",
 											"<p>The current output is not saved."
 											"Do you want to save it ?</p>" );
-		if ( ok == MsgBox::vkYes ) {           // save
+		if ( ok == MsgBox::vkYes ) {           /* save */
 			printf("TODO: save();\n");
-		} else if ( ok == MsgBox::vkCancel ) { // procrastinate
+		} else if ( ok == MsgBox::vkCancel ) { /* procrastinate */
 			ce->ignore();
 			return;
 		}
@@ -74,17 +74,17 @@ void ToolView::closeEvent( QCloseEvent* ce )
      want to close */
 	if ( isRunning() ) {
 		int ok = vkQuery( this, "Process Running", "&Abort;&Cancel",
-											"<p>The current process is not yet finished."
-											"Do you want to abort it ?</p>?" );
-		if ( ok == MsgBox::vkYes ) {         // abort
-			stop();     // killProc();
+											"<p>The current process is not yet finished.</p>"
+											"<p>Do you want to abort it ?</p>" );
+		if ( ok == MsgBox::vkYes ) {         /* abort */
+			stop();
 		} else if ( ok == MsgBox::vkNo ) {
 			ce->ignore();
 			return;
 		}
 	}
 
-	//emit closing( id() );
+	emit message( "" );  /* clear the status bar */
   ce->accept();
 }
 

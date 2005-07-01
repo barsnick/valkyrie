@@ -49,6 +49,7 @@ public:
 	QString dirCheck( int* err_val, const char* fpath,
 										bool rd_perms, bool wr_perms );
 
+	bool xmlFormatCheck( int* errval, QString fpath );
   bool isValidArg( int* err_val, const char* argval );
   bool isPowerOfTwo( int* err_val, const char* argval );
 

@@ -107,202 +107,6 @@ QString checkFile( int* err_val, const char* fname )
   return absPath;
 }
 
-#if 1
-QString Option::dirCheck( int* err_val, const char* dir,
-													bool rd_perms, bool wr_perms )
-{
-  QString absPath = checkFile( err_val, dir );
-
-  QFileInfo fi( absPath );
-	if ( fi.exists() ) {
-
-		/* check it's really a directory */
-		if ( !fi.isDir() ) {
-			*err_val = PERROR_BADDIR;
-			goto bye;
-		}
-
-		/* check user has executable permission */
-		if ( rd_perms ) {
-			if ( !fi.isReadable() ) {
-				*err_val = PERROR_BADFILERD;
-			}
-		}
-
-		/* check user has write permission */
-		if ( wr_perms ) {
-			if ( !fi.isWritable() ) {
-				*err_val = PERROR_BADFILEWR;
-			}
-		}
-
-	}
-
- bye:
-	return absPath;
-}
-#else
-QString dirCheck( int *err_val, const char * fpath, bool ckwr )
-{
-  *err_val = PARSED_OK;
-  QString path;
-
-  QFileInfo fi( fpath );
-  if ( !fi.exists() || !fi.isDir() ) {
-    *err_val = PERROR_BADDIR;
-    goto bye;
-  }
-
-  /* check user has read permission */
-  if ( !fi.isReadable() ) {
-    *err_val = PERROR_BADFILERD;
-    goto bye;
-  }
-
-  /* check user has write permission */
-  if ( ckwr ) {
-    if ( !fi.isWritable() ) {
-      *err_val = PERROR_BADFILEWR;
-      goto bye;
-    }
-  }
-
-  /* get absolute path */
-  path = fi.absFilePath();
-
- bye:
-  return path;
-}
-#endif
-
-QString Option::fileCheck( int* err_val, const char* fpath, 
-													 bool rd_perms, bool wr_perms )
-{
-#if 1
-  QString absPath = checkFile( err_val, fpath );
-	
-  QFileInfo fi( absPath );
-	if ( fi.exists() ) {
-
-		/* check this is really a file */
-		if ( !fi.isFile() ) {
-			*err_val = PERROR_BADFILE;
-			goto bye;
-		}
-
-		/* check user has executable permission */
-		if ( rd_perms ) {
-			if ( !fi.isReadable() ) {
-				*err_val = PERROR_BADFILERD;
-			}
-		}
-
-		/* check user has write permission */
-		if ( wr_perms ) {
-			if ( !fi.isWritable() ) {
-				*err_val = PERROR_BADFILEWR;
-			}
-		}
-
-	}
-
- bye:
-	return absPath;
-#else
-  *err_val = PARSED_OK;
-  QString path;
-
-  QFileInfo fi( fpath );
-  if ( !fi.exists() || !fi.isFile() ) {
-    *err_val = PERROR_BADFILE;
-    goto bye;
-  }
-
-  /* check user has read / write permission */
-  if ( !fi.isReadable() ) {
-    *err_val = PERROR_BADFILERD;
-    goto bye;
-  }
-
-  if ( wr_perms ) {
-    if ( !fi.isWritable() ) {
-      *err_val = PERROR_BADFILEWR;
-      goto bye;
-    }
-  }
-
-  /* get absolute path inc. filename */
-  path = fi.absFilePath();
-
- bye:
-  return path;
-#endif
-}
-
-
-/* check the file exists; try to get the absolute path; if found,
-   check that the user has executable permissions */
-QString Option::binaryCheck( int* err_val, const char* exe_name )
-{
-#if 1
-  QString absPath = checkFile( err_val, exe_name );
-
-  QFileInfo fi( absPath );
-	if ( fi.exists() ) {
-		if ( !fi.isExecutable() ) {
-			*err_val = PERROR_BADEXEC;
-		}
-	}
-
-  return absPath;
-#else
-  *err_val = PARSED_OK;
-  QString exec = exe_name;
-
-  QString absPath = QString::null;
-
-  if ( exec[0] == '/' ) {
-    /* if 'exec' starts with a '/', it is already an absolute path */
-    absPath = exec;
-  } else if ( exec.find('/') != -1 ) {
-    /* if exec contains one or more slashes, it is a file path
-       relative to the current directory.  */
-    absPath = QDir::current().absFilePath( exec );
-  } else {
-    /* no '/' found, so the exec path needs to be determined using the
-       $PATH environment variable */
-    char* pEnv = getenv( "PATH" );
-    QStringList paths( QStringList::split(QChar(':'), pEnv) );
-		for ( QStringList::Iterator p = paths.begin(); p != paths.end(); ++p ) {
-			QDir dir( *p + "/" + exec );
-			QString candidate = dir.absPath();
-			if ( QFile::exists(candidate) ) {
-				absPath = candidate;
-				break;
-			}
-		}
-  }
-
-  absPath = QDir::cleanDirPath( absPath );
-  QFileInfo fi( absPath );
-  if ( !fi.exists() ) {
-    *err_val = PERROR_BADFILE;
-    goto bye;
-  }
-
-  /* check user has executable permission */
-  if ( !fi.isExecutable() ) {
-    *err_val = PERROR_BADEXEC;
-    goto bye;
-  }
-
- bye:
-  return absPath;
-#endif
-}
-
-
-
 
 /* [Ip address : port num], eg. --logsocket=192.168.0.1:12345 
    if port-num omitted, default of 1500 used.
@@ -409,8 +213,6 @@ unsigned int str2UInt( int *err_val, const char *str )
   */
   return (unsigned int)val;
 }
-
-
 
 
 
@@ -559,3 +361,121 @@ void Option::print()
   printf("\n");
 }
 
+
+QString Option::dirCheck( int* err_val, const char* dir,
+													bool rd_perms, bool wr_perms )
+{
+  QString absPath = checkFile( err_val, dir );
+
+  QFileInfo fi( absPath );
+	if ( fi.exists() ) {
+
+		/* check it's really a directory */
+		if ( !fi.isDir() ) {
+			*err_val = PERROR_BADDIR;
+			goto bye;
+		}
+
+		/* check user has executable permission */
+		if ( rd_perms ) {
+			if ( !fi.isReadable() ) {
+				*err_val = PERROR_BADFILERD;
+			}
+		}
+
+		/* check user has write permission */
+		if ( wr_perms ) {
+			if ( !fi.isWritable() ) {
+				*err_val = PERROR_BADFILEWR;
+			}
+		}
+
+	}
+
+ bye:
+	return absPath;
+}
+
+
+QString Option::fileCheck( int* err_val, const char* fpath, 
+													 bool rd_perms, bool wr_perms )
+{
+  QString absPath = checkFile( err_val, fpath );
+	
+  QFileInfo fi( absPath );
+	if ( fi.exists() ) {
+
+		/* check this is really a file */
+		if ( !fi.isFile() ) {
+			*err_val = PERROR_BADFILE;
+			goto bye;
+		}
+
+		/* check user has executable permission */
+		if ( rd_perms ) {
+			if ( !fi.isReadable() ) {
+				*err_val = PERROR_BADFILERD;
+			}
+		}
+
+		/* check user has write permission */
+		if ( wr_perms ) {
+			if ( !fi.isWritable() ) {
+				*err_val = PERROR_BADFILEWR;
+			}
+		}
+
+	}
+
+ bye:
+	return absPath;
+}
+
+
+/* Check the file exists; try to get the absolute path; if found,
+   check that the user has executable permissions */
+QString Option::binaryCheck( int* err_val, const char* exe_name )
+{
+  QString absPath = checkFile( err_val, exe_name );
+
+  QFileInfo fi( absPath );
+	if ( fi.exists() ) {
+		if ( !fi.isExecutable() ) {
+			*err_val = PERROR_BADEXEC;
+		}
+	}
+
+  return absPath;
+}
+
+
+
+/* Reads a few lines of text from the file to try to ascertain if the
+   file is in xml format */
+bool Option::xmlFormatCheck( int* err_val, QString fpath )
+{
+	bool ok = false;
+  QFile xmlFile( fpath );
+  if ( !xmlFile.open( IO_ReadOnly ) ) {
+		*err_val = PERROR_BADFILE;
+		goto bye;
+	} else {
+		QTextStream stream( &xmlFile );
+		int n = 0;
+		while ( !stream.atEnd() && n < 10 ) {
+			QString aline = stream.readLine().simplifyWhiteSpace();
+			if ( !aline.isEmpty() ) {      /* found something */
+				int pos = aline.find( "<valgrindoutput>", 0 );
+				if ( pos != -1 ) {
+					ok = true;
+					break;
+				}
+			}
+			n++;
+		}
+		xmlFile.close();
+	}
+
+ bye:
+  return ok;
+}

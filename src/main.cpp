@@ -116,12 +116,21 @@ int main ( int argc, char* argv[] )
 
   /* find out if we are in non-gui mode -------------------------------- */
   useGui = vkConfig->rdBool( "gui", "valkyrie" );
-  //printf("useGui = %d\n", useGui );
 
   /* start turning the engine over... ---------------------------------- */
   app = new QApplication( argc, argv, useGui );
   if ( !useGui ) {
-    printf("in non-gui mode now\n");
+		/* get hold of valkyrie */
+		Valkyrie* valkyrie = (Valkyrie*)vkConfig->vkObject( "valkyrie" );
+    /* get hold of the current tool */
+    QString tool_name = vkConfig->rdEntry( "tool", "valgrind" );
+		VkObject* vkObj = vkConfig->vkObject( tool_name );
+    vk_assert( vkObj != NULL );
+    //app->connect( vkObj, SIGNAL(something()), 
+    //              app,   SLOT(quit()) );
+		if ( valkyrie->runMode != Valkyrie::modeNotSet )
+			printf("TODO: vkObj->run();\n");
+
   } else {
 
     /* Style ----------------------------------------------------------- */
@@ -152,8 +161,7 @@ int main ( int argc, char* argv[] )
     vkWin->show();
   }
 
-
-  res = app->exec();
+	res = app->exec();
 
  cleanup_and_exit:
   if ( vkConfig ) { 

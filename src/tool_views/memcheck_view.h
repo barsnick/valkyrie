@@ -100,26 +100,24 @@ public:
   void updateErrors( Counts * counts );
 
 public slots:
-  void parseXmlOutput();
-  void processExited();
+  void parseOutput();
+  void saveParsedOutput();
   void toggleToolbarLabels(bool);
 
 private:
-  enum ParseFormat{ INVALID=-1, NOT_SET=0, TEXT, XML };
-  ParseFormat inputFormat;
-  ParseFormat validateLogFile();
-  ParseFormat validateLogFile( const QString& );
-  ParseFormat validateOutput();
-
-	void setRunning( bool b );
-  void parseXmlLog();
-  void saveLogfile( QString fname );
+  bool parseLog();
+  bool mergeLogs();         /* parse and merge multiple log files */
+  bool validateLogFile(  const QString& log_file );
+  bool initParseOutput();
+  bool setup();
+	void toggleRunning( bool b );
   void mkMenuBar();
 
 private slots:
 	void openLogFile();       /* load and parse one log file */
-  void openLogFiles();      /* load and parse multiple log files */
-  void getSaveFilename();   /* called by savelogButton */
+  void saveLogFile();       /* called by savelogButton */
+  void openMergeFile();     /* open and check a list of logfiles-to-merge */
+
   void showSuppEditor();
   void itemSelected();
   void openAllItems(bool);
@@ -128,8 +126,9 @@ private slots:
   void launchEditor(  QListViewItem*, const QPoint&, int );
 
 private:
+  int currentPid;
+
   QString inputData;
-	int lineNumber;
 	QString logFilename;
 	QFile logFile;
 	QTextStream logStream;

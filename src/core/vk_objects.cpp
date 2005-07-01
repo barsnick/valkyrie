@@ -91,8 +91,8 @@ QString VkObject::configEntries()
   QString cfgEntry = "\n[" + name() + "]\n";
   for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
 
-		/* skip these entirely */
-		if ( opt->key == Valkyrie::HELP_OPT ) continue;
+    /* skip these entirely */
+    if ( opt->key == Valkyrie::HELP_OPT ) continue;
 
     cfgEntry += opt->longFlag + "=" + opt->defaultValue + "\n";
   }
@@ -208,8 +208,8 @@ void VkObject::freePoptOpts( vkPoptOption * vkopts )
 }
 
 
-/* static fn */
-int VkObject::checkArg( int optid, const char* argval, bool gui )
+/* static fn, called from parseCmdArgs() in parse_cmd_args.cpp */
+int VkObject::checkArg(int optid, const char* argval, bool use_gui/*=false*/)
 {
   VkObject * vkObj = NULL;
   if ( optid >= Valkyrie::HELP_OPT && optid <= Valkyrie::LAST_CMD_OPT )
@@ -226,7 +226,7 @@ int VkObject::checkArg( int optid, const char* argval, bool gui )
     vk_assert_never_reached();
 
   vk_assert( vkObj != NULL );
-  return vkObj->checkOptArg( optid, argval, gui );
+  return vkObj->checkOptArg( optid, argval, use_gui );
 }
 
 
@@ -239,7 +239,7 @@ int VkObject::checkArg( int optid, const char* argval, bool gui )
 Valkyrie::Valkyrie()
   : VkObject( VALKYRIE, "Valkyrie", "Valkyrie", Qt::Key_unknown, false ) 
 {
-  runMode = NOT_SET;
+  runMode = modeNotSet;
 
   addOpt( HELP_OPT,    Option::ARG_NONE,   Option::NONE,
           "",          'h',                "help", 
@@ -302,31 +302,31 @@ Valkyrie::Valkyrie()
           "valkyrie",  '\0',               "binary-flags", 
           "",          "",                 "", 
           "Binary flags:", "",             urlNone );
-  addOpt( VIEW_LOG,    Option::ARG_STRING, Option::LEDIT, 
-          "valkyrie",  '\0',               "view-log", 
-          "<file>",    "",                 "",
-          "View logfile:", "parse and view a valgrind logfile (xml)",
-          urlNone );
-  addOpt( MERGE_LOGS,  Option::ARG_STRING, Option::NONE, 
-          "valkyrie",  '\0',               "merge", 
-          "<filelist>", "",                "",
-          "View logfiles:", "merge multiple logfiles, discarding duplicates",
-          urlNone );
   addOpt( USE_GUI,     Option::ARG_BOOL,   Option::NONE,
           "valkyrie",  '\0',               "gui", 
           "<yes|no>",  "yes|no",           "yes",
           "xxxxxxx",
           "use the graphical interface",
           urlNone );
+  addOpt( VIEW_LOG,    Option::ARG_STRING, Option::LEDIT, 
+          "valkyrie",  '\0',               "view-log", 
+          "<file>",    "",                 "",
+          "View logfile:", "parse and view a valgrind logfile",
+          urlNone );
+  addOpt( MERGE_LOGS,  Option::ARG_STRING, Option::NONE, 
+          "valkyrie",  '\0',               "merge", 
+          "<loglist>", "",                 "",
+          "View logfiles:", "merge multiple logfiles, discarding duplicate errors",
+          urlNone );
 }
 
 
-int Valkyrie::checkOptArg( int optid, const char* argval, bool gui )
+int Valkyrie::checkOptArg( int optid, const char* argval, 
+													 bool use_gui/*=false*/ )
 { 
   int errval = PARSED_OK;
   QString argVal( argval );
   Option* opt = findOption( optid );
-
   switch ( optid ) {
 
   /* these options are _only_ set via the gui, and are either (a)
@@ -352,27 +352,39 @@ int Valkyrie::checkOptArg( int optid, const char* argval, bool gui )
       break;
 
     case VIEW_LOG:
-      if ( runMode == PARSE_OUTPUT ) {
+      if ( runMode != modeNotSet ) {
         errval = PERROR_BADOPERATION;
       } else {
-        runMode = PARSE_LOG;
         argVal = opt->fileCheck( &errval, argval, true, false );
+				if ( errval == PARSED_OK ) {
+					/* check the file format is xml */
+					bool ok = opt->xmlFormatCheck( &errval, argVal );
+					if ( ok && errval == PARSED_OK ) {
+						runMode = modeParseLog;
+					}
+				}
       } break;
 
-		case MERGE_LOGS:
-			if ( runMode == PARSE_OUTPUT ) {
+    /* Expects a single file which contains a list of
+       logfiles-to-be-merged, each on a separate line, with a minimum
+       of two logfiles. Validating each file is done at merge-time, as
+       we will then skip any files which we can't read. */
+    case MERGE_LOGS:
+      if ( runMode != modeNotSet ) {
         errval = PERROR_BADOPERATION;
       } else {
-        runMode = PARSE_LOG;
-				VK_DEBUG("TODO: fileCheck on all files");
+				argVal = opt->fileCheck( &errval, argval, true, false );
+				if ( errval == PARSED_OK )
+					runMode = modeMergeLogs;
 			} break;
 
     case BINARY:
-      if ( runMode == PARSE_LOG ) {
+      if ( runMode != modeNotSet ) {
         errval = PERROR_BADOPERATION;
       } else {
-        runMode = PARSE_OUTPUT;
         argVal = opt->binaryCheck( &errval, argval );
+				if ( errval == PARSED_OK ) 
+					runMode = modeParseOutput;
       } break;
 
     case BIN_FLAGS:
@@ -380,53 +392,15 @@ int Valkyrie::checkOptArg( int optid, const char* argval, bool gui )
       break;
   }
 
-  /* if this options has been called from the cmd-line, save the value
-     if it has passed the check.  finds the config.key, and writes
-     argVal to config. */
-  if ( errval == PARSED_OK && gui == false ) {
+  /* if this option has been called from the cmd-line, save its value
+     in valkyrierc if it has passed the checks. */
+  if ( errval == PARSED_OK && use_gui == false ) {
     writeOptionToConfig( opt, argVal );
   }
 
   return errval; 
 }
 
-
-/* ho hum - bit of a kludge.  Valkyrie contains some options which
-   belong in different cfg groups (as opposed to 'valkyrie'), so we
-   have to work around this. 
-QString Valkyrie::configEntries()
-{
-  QString prefGroup = "\n[Prefs]\n";
-  QString vkGroup   = "\n[" + name() + "]\n";
-
-  for ( Option *opt = optList.first(); opt; opt = optList.next() ) {
-    
-    switch ( opt->key ) {
-      case HELP_OPT:
-        break;
-
-      case TOOLTIP:
-      case PALETTE:
-      case ICONTXT:
-      case SRC_EDITOR:
-      case FONT_SYSTEM:
-      case FONT_USER:
-      case SRC_LINES:
-        prefGroup += opt->longFlag + "=" + opt->defaultValue + "\n";
-        break;
-
-      // This value is checked and possibly over-written by vkConfig
-      // on first-time startup.
-      case VG_EXEC:
-      default:
-        vkGroup += opt->longFlag + "=" + opt->defaultValue + "\n";
-        break;
-    }
-  }
-
-  return prefGroup + vkGroup;
-}
-*/
 
 /* called from VkConfig::modFlags() 
    see if valkyrie was told what to do:
@@ -441,10 +415,10 @@ QStringList Valkyrie::modifiedFlags()
 
   switch ( runMode ) {
 
-    case NOT_SET:
+    case modeNotSet:
       break;
 
-    case PARSE_LOG: {
+    case modeParseLog: {
       opt    = findOption( VIEW_LOG );
       defVal = opt->defaultValue;
       cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
@@ -452,7 +426,7 @@ QStringList Valkyrie::modifiedFlags()
         modFlags << "--" + opt->longFlag + "=" + cfgVal;
     } break;
 
-    case PARSE_OUTPUT: {
+    case modeParseOutput: {
       opt    = findOption( BINARY );
       defVal = opt->defaultValue;
       cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
@@ -467,6 +441,13 @@ QStringList Valkyrie::modifiedFlags()
       }
     } break;
 
+		case modeMergeLogs:
+			opt    = findOption( MERGE_LOGS );
+			defVal = opt->defaultValue;
+			cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
+      if ( defVal != cfgVal )
+        modFlags << "--" + opt->longFlag + "=" + cfgVal;
+			break;
   }
 
   return modFlags;
@@ -550,9 +531,10 @@ Valgrind::Valgrind()
   /* options relevant to error-reporting tools */
   addOpt( LOG_FD,      Option::ARG_UINT,   Option::SPINBOX, 
           "valgrind",  '\0',               "log-fd", 
-          "<number>",  "0|1|2",            "2",
+          "<number>",  "1|2",              "2",
           "Log to file descriptor:",
-          "log messages to file descriptor (0=stdin, 1=stdout, 2=stderr)",  
+          "log messages to file descriptor (1=stdout, 2=stderr)",  
+					/* TODO: subclass QProcess so we can use fd > 2 */
           urlNone );
   addOpt( LOG_PID,     Option::ARG_STRING, Option::LEDIT, 
           "valgrind",  '\0',               "log-file", 
@@ -651,7 +633,8 @@ Valgrind::Valgrind()
 }
 
 
-int Valgrind::checkOptArg( int optid, const char* argval, bool gui )
+int Valgrind::checkOptArg( int optid, const char* argval, 
+													 bool use_gui/*=false*/ )
 {
   vk_assert( optid >= FIRST_CMD_OPT && optid <= LAST_CMD_OPT );
 
@@ -730,8 +713,9 @@ int Valgrind::checkOptArg( int optid, const char* argval, bool gui )
 
   }
 
-  /* save the value if it has passed the check */
-  if ( errval == PARSED_OK && gui == false ) {
+  /* if this option has been called from the cmd-line, save its value
+     in valkyrierc if it has passed the checks. */
+  if ( errval == PARSED_OK && use_gui == false ) {
     writeOptionToConfig( opt, argval );
   }
 
@@ -751,18 +735,18 @@ QStringList Valgrind::modifiedFlags()
   
     switch ( opt->key ) {
 
-			/* we never want these included */
+      /* we never want these included */
       case SUPPS_ALL:
-			case SUPPS_DEF:
-				break;
+      case SUPPS_DEF:
+        break;
 
-			/* we need '--suppressions=' before each and every filename */
-			case SUPPS_SEL: {
-				QStringList files = QStringList::split( ",", vkConfig->rdEntry( opt->cfgKey(), name() ) );
-				for ( unsigned int i=0; i<files.count(); i++ ) {
-					modFlags << "--" + opt->cfgKey() + "=" + files[i];
-				}
-			} break;
+      /* we need '--suppressions=' before each and every filename */
+      case SUPPS_SEL: {
+        QStringList files = QStringList::split( ",", vkConfig->rdEntry( opt->cfgKey(), name() ) );
+        for ( unsigned int i=0; i<files.count(); i++ ) {
+          modFlags << "--" + opt->cfgKey() + "=" + files[i];
+        }
+      } break;
 
       case LOG_PID:        // log to file.pid
       case LOG_FILE:       // log to file.name
@@ -783,7 +767,7 @@ QStringList Valgrind::modifiedFlags()
         if ( defVal != cfgVal ) {
           //modFlags << "--" + opt->longFlag + "=" + cfgVal;
           modFlags << "--" + opt->cfgKey() + "=" + cfgVal;
-				}
+        }
         break;
     }
   }
@@ -849,7 +833,8 @@ Memcheck::Memcheck()
 }
 
 
-int Memcheck::checkOptArg( int optid, const char* argval, bool gui )
+int Memcheck::checkOptArg( int optid, const char* argval, 
+													 bool use_gui/*=false*/ )
 {
   int errval = PARSED_OK;
   QString argVal( argval );
@@ -873,8 +858,9 @@ int Memcheck::checkOptArg( int optid, const char* argval, bool gui )
 
   }
 
-  /* save the value if it has passed the check */
-  if ( errval == PARSED_OK && gui == false ) {
+  /* if this option has been called from the cmd-line, save its value
+     in valkyrierc if it has passed the checks. */
+  if ( errval == PARSED_OK && use_gui == false ) {
     writeOptionToConfig( opt, argval );
   }
 
@@ -978,7 +964,8 @@ Cachegrind::Cachegrind()
 }
 
 
-int Cachegrind::checkOptArg( int optid, const char* argval, bool gui )
+int Cachegrind::checkOptArg( int optid, const char* argval, 
+														 bool use_gui/*=false*/ )
 { 
   vk_assert( optid >= FIRST_CMD_OPT && optid <= LAST_CMD_OPT );
 
@@ -1038,7 +1025,7 @@ int Cachegrind::checkOptArg( int optid, const char* argval, bool gui )
       if ( errval == PARSED_OK ) {
         aList[i] = srcdir;
       } else {
-        if ( !gui ) {
+        if ( !use_gui ) {
           vkPrint( "Parse error [--include=%s] : invalid dir path\n"
                    "The offending directory is '%s'", 
                    argVal.ascii(), tmp.ascii() );
@@ -1052,8 +1039,9 @@ int Cachegrind::checkOptArg( int optid, const char* argval, bool gui )
 
   }
 
-  /* save the value if it has passed the check */
-  if ( errval == PARSED_OK && gui == false ) {
+  /* if this option has been called from the cmd-line, save its value
+     in valkyrierc if it has passed the checks. */
+  if ( errval == PARSED_OK && use_gui == false ) {
     writeOptionToConfig( opt, argVal );
   }
 
@@ -1111,7 +1099,8 @@ Massif::Massif()
 }
 
 
-int Massif::checkOptArg( int optid, const char* argval, bool gui )
+int Massif::checkOptArg( int optid, const char* argval, 
+												 bool use_gui/*=false*/ )
 {
   vk_assert( optid >= FIRST_CMD_OPT && optid <= LAST_CMD_OPT );
 
@@ -1139,8 +1128,9 @@ int Massif::checkOptArg( int optid, const char* argval, bool gui )
 
   }
 
-  /* save the value if it has passed the check */
-  if ( errval == PARSED_OK && gui == false ) {
+  /* if this option has been called from the cmd-line, save its value
+     in valkyrierc if it has passed the checks. */
+  if ( errval == PARSED_OK && use_gui == false ) {
     writeOptionToConfig( opt, argval );
   }
 

@@ -5,25 +5,23 @@
  * ----------------------------------------------------------------------
  * This is the only place where the various options/flags for
  * valkyrie, valgrind and valgrind tools are stored.
- *
- * When adding / changing / removing flags, it is important to ensure
- * that the enum values in the various subclasses DO NOT OVERLAP.
  * 
  * To add a new valgrind tool:
  *
  * - add a new enum value to enum VkObject::ObjectId{ ... }.
  *
- * - create the subclass in this vkobjects.h and the vkobjects.cpp file,
+ * - create the subclass in the vk_objects.h and vk_objects.cpp files,
  *   adding new stuff to the various VkObject fns where necessary.
  *
  * - in vk_config.cpp, in bool VkConfig::initVkObjects(),
  *   add the new tool to the list of objects to be created at startup
  *
  * - Create a new options page for the Options dialog, and add this
- *   into VkObject::optionsPage() in vk_objects.cpp
+ *   into OptionsWindow::mkOptionsPage(int) in /options/options_window.cpp
  *
  * That's all, folks.
  */
+
 
 #ifndef __VALKYRIE_OBJECTS_H
 #define __VALKYRIE_OBJECTS_H
@@ -34,7 +32,6 @@
 
 #include "vk_option.h"          /* class Option */
 #include "vk_popt_option.h"
-//RM: #include "options_page.h"       /* */
 
 
 
@@ -42,17 +39,18 @@
    you change the ordering of the enum values, you must change the
    insertion order in VkConfig::initVkObjects() as well. */
 class VkObject : public QObject 
-{ 
-public: 
+{
+public:
   enum ObjectId { 
-    VALKYRIE=0, VALGRIND=1, MEMCHECK=2, CACHEGRIND=3, MASSIF=4 
+    INVALID=-1, VALKYRIE=0, VALGRIND=1, MEMCHECK=2, CACHEGRIND=3, MASSIF=4 
   };
 
   VkObject( ObjectId id, const QString& capt, const QString& txt,
             const QKeySequence& key, bool is_tool=true );
   ~VkObject();
 
-  int  id()               { return objectId;        }
+  //RM: int id()          { return objectId;        }
+  VkObject::ObjectId id() { return objectId;        }
   bool isTool()           { return is_Tool;         }
   QString name()          { return caption.lower(); }
   QString title()         { return caption;         }
@@ -106,10 +104,14 @@ public:
   ~Valkyrie() { }
 
   QStringList modifiedFlags();
-  int checkOptArg( int optid, const char* argval, bool gui=false );
+  int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
-  /* whether we are parsing a file, or output from valgrind */
-  enum RunMode{ NOT_SET=0, PARSE_LOG, PARSE_OUTPUT };
+  /* modeNotSet:      no cmd-line options given
+     modeParseLog:    read file from disk
+     modeMergeLogs:   read file-list from disk, and merge the contents
+     modeParseOutput: read output direct from valgrind 
+  */
+	enum RunMode { modeNotSet=0, modeParseLog, modeMergeLogs, modeParseOutput };
   RunMode runMode;
 
   enum vkOpts {
@@ -145,7 +147,7 @@ public:
   ~Valgrind() { }
 
   QStringList modifiedFlags();
-  int checkOptArg( int optid, const char* argval, bool gui=false );
+  int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
   enum vgOpts {
     FIRST_CMD_OPT = Valkyrie::LAST_CMD_OPT + 1,
@@ -193,7 +195,7 @@ public:
   ~Memcheck() { } 
 
   QStringList modifiedFlags();
-  int checkOptArg( int optid, const char* argval, bool gui=false );
+  int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
   enum mcOpts { 
     FIRST_CMD_OPT = Valgrind::LAST_CMD_OPT + 1,
@@ -218,7 +220,7 @@ public:
   Cachegrind();
   ~Cachegrind() { }
 
-  int checkOptArg( int optid, const char* argval, bool gui=false );
+  int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
   enum cgOpts {
     FIRST_CMD_OPT = Memcheck::LAST_CMD_OPT + 1,
@@ -245,7 +247,7 @@ public:
   Massif();
   ~Massif() { }
 
-  int checkOptArg( int optid, const char* argval, bool gui=false );
+  int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
   enum msOpts {
     FIRST_CMD_OPT = Cachegrind::LAST_CMD_OPT + 1,

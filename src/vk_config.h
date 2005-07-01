@@ -70,7 +70,8 @@ public:
   void dontSync();  /* don't write back to disk on exit */
 
   /* misc make-life-easier stuff --------------------------------------- */
-  int defaultToolId();
+  //RM: int currentToolId();
+  VkObject::ObjectId currentToolId();
   /* these fns merely return the values set in vk_include.h */
   const char* vkname();
   const char* vkName();
