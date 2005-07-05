@@ -1,6 +1,12 @@
-/* This is a seriously hacked version of the popt libraries.  
- * No credit to me, all thanks and many apologies to the Red Hat
- * team. 
+/* --------------------------------------------------------------------- 
+ * Definition of Popt functions                                vk_popt.h
+ * This is a seriously hacked version of the popt libraries.
+ * No credit to me, all thanks and many apologies to the Red Hat team
+ * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #ifndef __VK_POPT_H
@@ -39,40 +45,36 @@ typedef struct vkPoptContext_s * vkPoptContext;
 extern "C" {
 #endif
 
-/* Initialize popt context.
- * argc    no. of arguments
- * argv    argument array
- * options address of popt option table
- * returns initialized popt context */
+/* initialize popt context.
+   - argc    no. of arguments
+   - argv    argument array
+   - options address of popt option table
+   - returns initialized popt context */
 vkPoptContext vkPoptGetContext( int argc, const char ** argv,
                                 const vkPoptOption * options );
 
-/* Return value of next option found.
- * return next option val, -1 on last item, PERROR_* on error */
+/* return value of next option found, 
+   -1 on last item, PERROR_* on error */
 int vkPoptGetNextOpt( vkPoptContext con, char *akey );
 
-/* Return current option's argument.
- * return option argument, NULL if no more options are available */
+/* return current option's argument, 
+   or NULL if no more options are available */
 const char * vkPoptGetArg( vkPoptContext con );
 
-/* Return remaining arguments.
- * return argument array, terminated with NULL */
+/* return remaining argument array, terminated with NULL */
 const char ** vkPoptGetArgs( vkPoptContext con );
 
-/* Peek at current option's argument.
- * return option argument */
+/* peek at current option's argument */
 const char * vkPoptPeekArg( vkPoptContext con );
 
-/* Return the option which caused the most recent error.
- * return offending option */
+/* return the offending option which caused the most recent error */
 const char * vkPoptBadOption( vkPoptContext con );
 
-/* Destroy context.
- * return NULL always */
+/* destroy context. return NULL always */
 vkPoptContext vkPoptFreeContext( vkPoptContext con );
 
-/* Print detailed description of options.
- * fp    ouput file handle */
+/* print detailed description of options.
+   fp == ouput file handle */
 void vkPoptPrintHelp( vkPoptContext con, FILE * fp,
                       const char * tableName );
 
@@ -81,7 +83,7 @@ void vkPoptPrintHelp( vkPoptContext con, FILE * fp,
 #endif
 
 /*--------------------------------------------------*/
-/* Wrapper to free(3), hides const compilation noise,
+/* wrapper to free(3), hides const compilation noise,
    permit NULL, return NULL always */
 static inline void * _free( const void * p )
 {
@@ -113,8 +115,6 @@ struct vkPoptContext_s {
   int finalArgvCount;
   int finalArgvAlloced;
 };
-/*--------------------------------------------------*/
-
 
 
 #endif

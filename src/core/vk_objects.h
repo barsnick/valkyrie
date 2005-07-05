@@ -1,45 +1,41 @@
 /* ---------------------------------------------------------------------- 
- * Options / flags                                         vk_options.cpp
- * A 'VkObject' is merely a way of storing the various flags / options
- * relevant to valkyrie, valgrind and valgrind's tools.
- * ----------------------------------------------------------------------
- * This is the only place where the various options/flags for
- * valkyrie, valgrind and valgrind tools are stored.
+ * Definition of class VkObject and subclass ToolObject      vk_objects.h
  * 
- * To add a new valgrind tool:
- *
- * - add a new enum value to enum VkObject::ObjectId{ ... }.
- *
- * - create the subclass in the vk_objects.h and vk_objects.cpp files,
- *   adding new stuff to the various VkObject fns where necessary.
- *
- * - in vk_config.cpp, in bool VkConfig::initVkObjects(),
- *   add the new tool to the list of objects to be created at startup
- *
- * - Create a new options page for the Options dialog, and add this
- *   into OptionsWindow::mkOptionsPage(int) in /options/options_window.cpp
- *
- * That's all, folks.
+ * Essential functionality is contained within a VkObject / ToolObject.
+ * Each ToolObject has an associated ToolView for displaying output.
+ * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
+/* TODO: don't have enum values for the objOpts; instead, init an int
+   array in the constructor.  This means will have to implement addOpt
+   somewhat differently, as won't have enums available */
 
-#ifndef __VALKYRIE_OBJECTS_H
-#define __VALKYRIE_OBJECTS_H
+#ifndef __VK_OBJECTS_H
+#define __VK_OBJECTS_H
+
 
 #include <qkeysequence.h>
 #include <qobject.h>
+#include <qprocess.h>
 #include <qptrlist.h>
 
 #include "vk_option.h"          /* class Option */
 #include "vk_popt_option.h"
-
+#include "vk_utils.h"
 
 
 /* IMPORTANT: when adding new objects, keep in numerical sequence. If
    you change the ordering of the enum values, you must change the
    insertion order in VkConfig::initVkObjects() as well. */
+
+/* class VkObject ------------------------------------------------------ */
 class VkObject : public QObject 
 {
+ Q_OBJECT
 public:
   enum ObjectId { 
     INVALID=-1, VALKYRIE=0, VALGRIND=1, MEMCHECK=2, CACHEGRIND=3, MASSIF=4 
@@ -49,7 +45,6 @@ public:
             const QKeySequence& key, bool is_tool=true );
   ~VkObject();
 
-  //RM: int id()          { return objectId;        }
   VkObject::ObjectId id() { return objectId;        }
   bool isTool()           { return is_Tool;         }
   QString name()          { return caption.lower(); }
@@ -82,7 +77,9 @@ protected:
                QString shelp,      QString lhelp,      const char* url );
 
 protected:
+  bool usingGui;             /* whether in gui || non-gui mode */
   bool is_Tool;              /* not valkyrie or valgrind-core */
+
   ObjectId objectId;         /* eg. MEMCHECK */
   QString caption;           /* eg. Memcheck */
 
@@ -94,175 +91,46 @@ protected:
 
 
 
-/* class Valkyrie ------------------------------------------------------
-   Note: the very first option must be > 0, otherwise it conflicts
-   with arg_flags in popt. */
-class Valkyrie : public VkObject
+/* class ToolObject ---------------------------------------------------- */
+class ToolView;
+
+class ToolObject : public VkObject 
 {
+ Q_OBJECT
 public:
-  Valkyrie();
-  ~Valkyrie() { }
 
-  QStringList modifiedFlags();
-  int checkOptArg( int optid, const char* argval, bool use_gui=false );
+ ToolObject( ObjectId id, const QString& capt, const QString& txt,
+             const QKeySequence& key );
+  ~ToolObject();
 
-  /* modeNotSet:      no cmd-line options given
-     modeParseLog:    read file from disk
-     modeMergeLogs:   read file-list from disk, and merge the contents
-     modeParseOutput: read output direct from valgrind 
-  */
-	enum RunMode { modeNotSet=0, modeParseLog, modeMergeLogs, modeParseOutput };
-  RunMode runMode;
+  /* creates and returns the ToolView window for a tool object */
+  virtual ToolView* toolView( QWidget* parent ) = 0;
+  virtual bool closeView() = 0;
 
-  enum vkOpts {
-    FIRST_CMD_OPT = 11,
-    HELP_OPT      = 1,
-    TOOLTIP       = 2,
-    PALETTE       = 3,
-    ICONTXT       = 4,
-    FONT_SYSTEM   = 5,
-    FONT_USER     = 6,
-    SRC_EDITOR    = 7,
-    SRC_LINES     = 8,
-    /* path to valgrind executable (/usr/bin/valgrind) */
-    VG_EXEC       = 9,
-    /* path to supp. files dir [def = /usr/lib/valgrind/] */
-    VG_SUPPS_DIR  = 10,
-    BINARY        = FIRST_CMD_OPT,
-    BIN_FLAGS     = 12,
-    VIEW_LOG      = 13,
-    MERGE_LOGS    = 14,
-    USE_GUI       = 15,
-    LAST_CMD_OPT  = USE_GUI
-  };
+  virtual void stop() = 0;
+  virtual bool run( QStringList flags ) = 0;
 
+  bool isRunning();
+
+signals:
+  void running( bool );
+  void message( QString );
+  /* connected to valkyrie's quit() slot when in non-gui mode */
+  void finished();
+
+protected:
+  void killProc();
+  virtual void emitRunning( bool ) = 0;
+
+protected:
+  bool is_Running;
+  bool fileSaved;
+
+  QProcess* proc;
 };
 
-
-/* class Valgrind ------------------------------------------------------ */
-class Valgrind : public VkObject
-{
-public:
-  Valgrind();
-  ~Valgrind() { }
-
-  QStringList modifiedFlags();
-  int checkOptArg( int optid, const char* argval, bool use_gui=false );
-
-  enum vgOpts {
-    FIRST_CMD_OPT = Valkyrie::LAST_CMD_OPT + 1,
-    TOOL          = FIRST_CMD_OPT,
-    /* common options relevant to all tools */
-    VERBOSITY,
-    XML_OUTPUT,     /* this may apply to more tools later */
-    TRACE_CH,
-    TRACK_FDS,
-    TIME_STAMP,
-    /* uncommon options relevant to all tools */
-    RUN_LIBC,
-    WEIRD,
-    PTR_CHECK,
-    ELAN_HACKS,
-    EM_WARNS,
-    /* options relevant to error-reporting tools */
-    LOG_FD,
-    LOG_PID,
-    LOG_FILE,
-    LOG_SOCKET,
-    DEMANGLE,
-    NUM_CALLERS,
-    ERROR_LIMIT,
-    SHOW_BELOW,
-    SUPPS_SEL,    /* the currently selected suppression(s) */
-    SUPPS_ALL,    /* list of all supp. files ever found, inc. paths */
-		SUPPS_DEF,    /* as above, but never gets changed -> defaults */
-    GEN_SUPP,
-    DB_ATTACH,
-    DB_COMMAND,
-    INPUT_FD,
-    MAX_SFRAME,
-    LAST_CMD_OPT = MAX_SFRAME
-  };
-
-};
-
-
-/* class Memcheck ------------------------------------------------------ */
-class Memcheck : public VkObject
-{
-public:
-  Memcheck();
-  ~Memcheck() { } 
-
-  QStringList modifiedFlags();
-  int checkOptArg( int optid, const char* argval, bool use_gui=false );
-
-  enum mcOpts { 
-    FIRST_CMD_OPT = Valgrind::LAST_CMD_OPT + 1,
-    PARTIAL       = FIRST_CMD_OPT,
-    FREELIST,
-    LEAK_CHECK,
-    LEAK_RES,
-    SHOW_REACH,
-    GCC_296,
-    ALIGNMENT,
-    STRLEN,
-    LAST_CMD_OPT  = STRLEN
-  };
-
-};
-
-
-/* class Cachegrind ---------------------------------------------------- */
-class Cachegrind : public VkObject
-{
-public:
-  Cachegrind();
-  ~Cachegrind() { }
-
-  int checkOptArg( int optid, const char* argval, bool use_gui=false );
-
-  enum cgOpts {
-    FIRST_CMD_OPT = Memcheck::LAST_CMD_OPT + 1,
-    I1_CACHE      = FIRST_CMD_OPT, 
-    D1_CACHE,
-    L2_CACHE,
-    PID_FILE,
-    SHOW,
-    SORT,
-    THRESH,
-    AUTO,
-    CONTEXT,
-    INCLUDE,
-    LAST_CMD_OPT = INCLUDE 
-  };
-
-};
-
-
-/* class Massif -------------------------------------------------------- */
-class Massif : public VkObject
-{
-public:
-  Massif();
-  ~Massif() { }
-
-  int checkOptArg( int optid, const char* argval, bool use_gui=false );
-
-  enum msOpts {
-    FIRST_CMD_OPT = Cachegrind::LAST_CMD_OPT + 1,
-    HEAP          = FIRST_CMD_OPT, 
-    HEAP_ADMIN,
-    STACKS,
-    DEPTH,
-    ALLOC_FN,
-    FORMAT,
-    ALIGNMENT,
-    LAST_CMD_OPT  = ALIGNMENT
-  };
-
-};
 
 #endif
+
 
 

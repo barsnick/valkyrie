@@ -1,6 +1,10 @@
 /* ---------------------------------------------------------------------- 
  * Various utility functions                                 vk_utils.cpp
  * ----------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include "vk_utils.h"
@@ -71,24 +75,32 @@ void vk_print( const char* file, const char* fn, unsigned int line,
 }
 
 
-/* Create a unique filename -------------------------------------------- */
-QString vk_mkstemp( QString fname, QString path )
+/* Create a unique filename, with an optional extension ---------------- */
+QString vk_mkstemp( QString fname, QString path, 
+                    QString ext/*=QString::null*/ )
 {
-	int len = fname.length() + path.length() + 10;
-	char* filename = vk_str_malloc( len );
-	sprintf( filename, "%s%s-XXXXXX", path.ascii(), fname.ascii() );
-	int fd = mkstemp( filename );
-	if ( fd == -1 ) {
-		/* something went wrong */
-		VK_DEBUG("vk_mkstemp(): failed to create tmp file '%s'", filename );
-		return QString::null;
-	}
+  int len = fname.length() + path.length() + 10;
+  char* filename = vk_str_malloc( len );
+  sprintf( filename, "%s%s-XXXXXX", path.latin1(), fname.latin1() );
+  int fd = mkstemp( filename );
+  if ( fd == -1 ) {
+    /* something went wrong */
+    VK_DEBUG("vk_mkstemp(): failed to create tmp file '%s'", filename );
+    return QString::null;
+  }
 
-	QString retval( filename );
-	filename = vk_str_free( filename );
+  QString ret_fname( filename );
+  filename = vk_str_free( filename );
 
-	// VK_DEBUG( "fname = %s, path = %s, filename == %s\n", fname.ascii(), path.ascii(), retval.ascii() );
-	return retval;
+  /* add eg. '.xml' to filename */
+  if ( !ext.isNull() ) {
+    QFileInfo fi( ret_fname );
+    QDir dir( fi.dir() );
+    if ( dir.rename( fi.fileName(), ret_fname + ext ) )
+      ret_fname += ext;
+  }
+  
+  return ret_fname;
 }
 
 
@@ -117,10 +129,31 @@ int str2hex( QString ver_str )
 
 
 
+/* escape html entities
+   current list: '<', '>', '&' ----------------------------------------- */
+QString escapeEntities( const QString& content )
+{
+  QString ret_str = "";
+
+  for ( unsigned int i=0; i<content.length(); i++ ) {
+    switch ( content[i].latin1() ) {
+      case '<': ret_str += "&lt;";     break;
+      case '>': ret_str += "&gt;";     break;
+      case '&': ret_str += "&amp;";    break;
+      default:  ret_str += content[i]; break;
+    }
+  }
+  
+  return ret_str;
+}
+
+
+
+
 /* wrappers for various fns -------------------------------------------- */
 
-/* Wrappers to free(3) - hides const compilation noise, permit NULL,
-   return NULL always. */
+/* wrappers to free(3)
+   hides const compilation noise, permit NULL, return NULL always. */
 void * vk_free( const void* ptr )
 {
   if ( ptr != NULL ) {
@@ -169,11 +202,11 @@ bool vk_strcmp( const char* str1, const char* str2 )
              "str1 == %s, str2 == %s\n", str1, str2 );
     return false;
   }
-	if ( (strlen(str1) == 0) || (strlen(str2) == 0) ) {
-		VK_DEBUG("one of these two strings is empty:\n"
-						 "\tstr1: -->%s<--, str2: -->%s<--\n", str1, str2 );
-		return false;
-	}
+  if ( (strlen(str1) == 0) || (strlen(str2) == 0) ) {
+    VK_DEBUG("one of these two strings is empty:\n"
+             "\tstr1: -->%s<--, str2: -->%s<--\n", str1, str2 );
+    return false;
+  }
 
   return (strcmp( str1, str2 ) == 0) ? true : false;
 }

@@ -4,21 +4,27 @@
  * This file contains bits and pieces which both vk_popt.* and
  * vk_object.* need to be aware of.
  *
- * parseErrString() is defined in vk_option.cpp 
+ * parseErrString() is defined in vk_option.cpp
+ * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #ifndef __VK_POPT_OPTION_H
 #define __VK_POPT_OPTION_H
 
+
 typedef struct {
-  int  argType;            /* option type: ARG_***  */
-  char shortFlag;          /* '\0' || 'h'           */
-  const char* longFlag;    /* NULL || --help        */
+  int  argType;            /* option type: ARG_***       */
+  char shortFlag;          /* '\0' || 'h'                */
+  const char* longFlag;    /* NULL || --help             */
   void* arg;               /* 0 for Options, 
-                              'tablename' for  tables eg. 'vkOptions' */
+                              'tablename' for tables eg. 'vkOptions' */
   int val;                 /* 'h' || optid eg. VIEW-LOG  */
-  const char* helptxt;     /* help text             */
-  const char* helpdesc;    /* eg. <file>            */
+  const char* helptxt;     /* help text                  */
+  const char* helpdesc;    /* eg. <file>                 */
 } vkPoptOption;
 
 

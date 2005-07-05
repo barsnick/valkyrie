@@ -3,10 +3,15 @@
  * Context-sensitive help browser
  * TODO: add search + index facility
  * --------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #ifndef __VK_HAND_BOOK_H
 #define __VK_HAND_BOOK_H
+
 
 #include <qcombobox.h>
 #include <qmainwindow.h>
@@ -44,8 +49,6 @@ private:
 private:
   QString caption;
 
-  enum { BACKWARD=0, FORWARD=1, HOME=2 };
-
   QTextBrowser* browser;
   QComboBox* pathCombo;
 
@@ -53,10 +56,10 @@ private:
   QMap<int, QString> mapHistory;
   QMap<int, QString> mapBookmarks;
 
-  QPopupMenu* historyMenu;
-
+  enum { BACKWARD=0, FORWARD=1, HOME=2 };
   QMenuBar* mainMenu;
-  QPopupMenu* bookmkMenu;
+  QPopupMenu* bookmarkMenu;
+  QPopupMenu* historyMenu;
 };
 
 #endif

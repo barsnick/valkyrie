@@ -1,11 +1,15 @@
 /* ---------------------------------------------------------------------- 
  * Implementation of CachegrindOptionsPage    cachegrind_options_page.cpp
- * subclass of OptionsPage to hold cachegrind-specific options | flags.
+ * Subclass of OptionsPage to hold cachegrind-specific options | flags.
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include "cachegrind_options_page.h"
-#include "vk_objects.h"
+#include "cachegrind_object.h"
 #include "vk_utils.h"
 #include "vk_msgbox.h"
 
@@ -17,8 +21,6 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
   unsigned int numItems = 11;
   itemList.resize( numItems );
 
-  int space  = 5;  /* no. of pixels between cells */
-  int margin = 11; /* no. of pixels to edge of widget */
   /* top layout: margin = 10; spacing = 25 */
   QVBoxLayout* vbox = new QVBoxLayout( this, 10, 25, "vbox" );
 
@@ -30,7 +32,7 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
   Option* opt;
   SpWidget* spinw;
 
-  /* Specify I1 cache configuration */
+  /* specify I1 cache configuration */
   opt = vkObj->findOption( Cachegrind::I1_CACHE );
   spinw = new SpWidget( group1, opt, true, 3 );
   spinw->addSection( 0, 1048576, 0, 0 );  /* min, max, def, use_powers */
@@ -38,7 +40,7 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
   spinw->addSection( 0, 8192,    0, 0 );
   itemList.insert( Cachegrind::I1_CACHE, spinw );
 
-  /* Specify D1 cache configuration */
+  /* specify D1 cache configuration */
   opt = vkObj->findOption( Cachegrind::D1_CACHE );
   spinw = new SpWidget( group1, opt, true, 3 );
   spinw->addSection( 0, 1048576, 0, 0 );  /* min, max, def, use_powers */
@@ -46,7 +48,7 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
   spinw->addSection( 0, 8192,    0, 0 );
   itemList.insert( Cachegrind::D1_CACHE, spinw );
 
-  /* Specify L2 cache configuration */
+  /* specify L2 cache configuration */
   opt = vkObj->findOption( Cachegrind::L2_CACHE );
   spinw = new SpWidget( group1, opt, true, 3 );
   spinw->addSection( 0, 1048576, 0, 0 );  /* min, max, def, use_powers */
@@ -123,8 +125,8 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
 }
 
 
-/* Called when user clicks "Apply" or "Ok" button.  
-   Also called when Cancel button is clicked, to reset toggled values */
+/* called when user clicks "Apply" or "Ok" button.  
+   also called when Cancel button is clicked, to reset toggled values */
 bool CachegrindOptionsPage::applyOptions( int id, bool undo/*=false*/ )
 { 
   bool retval = true;

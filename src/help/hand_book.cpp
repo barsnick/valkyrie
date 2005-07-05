@@ -2,6 +2,10 @@
  * Implementation of HandBook                              hand_book.cpp
  * Context-sensitive help browser
  * --------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include "hand_book.h"
@@ -26,7 +30,7 @@ HandBook::~HandBook() { }
 HandBook::HandBook( QWidget* parent, const char* name )
   : QMainWindow( parent, name, WDestructiveClose )
 {
-	caption.sprintf( "%s HandBook", vkConfig->vkName() );
+  caption.sprintf( "%s HandBook", vkConfig->vkName() );
   setCaption( caption );
   setIcon( QPixmap(help_xpm) );
 
@@ -43,12 +47,12 @@ HandBook::HandBook( QWidget* parent, const char* name )
   browser->setTextFormat( Qt::RichText );
   browser->setLinkUnderline( true );
 
-	/* set the list of dirs to search when files are requested */
+  /* set the list of dirs to search when files are requested */
   QStringList paths;
-	paths << vkConfig->vkdocDir() << vkConfig->vgdocDir();
+  paths << vkConfig->vkdocDir() << vkConfig->vgdocDir();
   browser->mimeSourceFactory()->setFilePath( paths );
 
-	/* default startup is with the index page loaded */
+  /* default startup is with the index page loaded */
   browser->setSource( "index.html" );
 
   connect( browser, SIGNAL( textChanged() ),
@@ -93,11 +97,11 @@ void HandBook::bookmarkChosen( int i )
 
 void HandBook::addBookmark()
 { 
-  /* eg. /home/de/Programs/Valkyrie/docs/manual/licenses.html */
+  /* eg. /home/.../.../.../manual/licenses.html */
   QString url   = browser->context();
   QString title = browser->documentTitle();
   /* just show the page title in the menu */
-  int id = bookmkMenu->insertItem( title );
+  int id = bookmarkMenu->insertItem( title );
   /* stash title[url] in the map */
   mapBookmarks[id] = title + "[" + url + "]";
 }
@@ -299,9 +303,9 @@ void HandBook::mkMenuToolBars()
 
   /* bookmarks menu ---------------------------------------------------- */
   aList.clear();
-  bookmkMenu = new QPopupMenu( this );
-  bookmkMenu->insertItem( "Add Bookmark", this, SLOT( addBookmark() ) );
-  bookmkMenu->insertSeparator();
+  bookmarkMenu = new QPopupMenu( this );
+  bookmarkMenu->insertItem( "Add Bookmark", this, SLOT( addBookmark() ) );
+  bookmarkMenu->insertSeparator();
   /* load the bookmarks from file into the list */
   aFile.setName( vkConfig->rcDir() + "help.bookmarks" );
   if ( aFile.open( IO_ReadOnly ) ) {
@@ -316,13 +320,13 @@ void HandBook::mkMenuToolBars()
     QString url_title = aList[id];
     int pos = url_title.find('[', 0, false );
     QString title = url_title.left( pos );
-    bookmkMenu->insertItem( title, id );
+    bookmarkMenu->insertItem( title, id );
     mapBookmarks[id] = url_title;
   }
   aList.clear();
-  connect( bookmkMenu, SIGNAL( activated(int) ),
-           this,       SLOT( bookmarkChosen(int) ) );
-  mainMenu->insertItem( "Bookmarks", bookmkMenu );
+  connect( bookmarkMenu, SIGNAL( activated(int) ),
+           this,         SLOT( bookmarkChosen(int) ) );
+  mainMenu->insertItem( "Bookmarks", bookmarkMenu );
 
 
   mainMenu->setItemEnabled( FORWARD,  false);

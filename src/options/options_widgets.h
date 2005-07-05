@@ -2,10 +2,15 @@
  * Definition of class OptionWidget                     options_widgets.h
  * Various widgets used on the 'pages' to control user input
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #ifndef __VK_OPTION_WIDGETS_H
 #define __VK_OPTION_WIDGETS_H
+
 
 #include <qcheckbox.h>
 #include <qcombobox.h>
@@ -190,8 +195,8 @@ private:
 
 
 /* class LbWidget: QListBox -------------------------------------------- 
-	 This widget was specifically written to handle suppression files
-	 stuff and nothing else. */
+   this widget was specifically written to handle suppression files
+   stuff and nothing else. */
 class LbWidget : public OptionWidget
 {
   Q_OBJECT
@@ -212,10 +217,10 @@ private slots:
 private:
   void load();
 private:
-	/* either [valgrind:supps-all] or [valgrind:suppressions] */
+  /* either [valgrind:supps-all] or [valgrind:suppressions] */
   enum Mode{ AllSupps=0, SelSupps=1 };
   QListBox* lbox;
-  QChar sep;      // so we don't have to keep asking vkConfig
+  QChar sep;      /* so we don't have to keep asking vkConfig */
   Mode mode;
 };
 

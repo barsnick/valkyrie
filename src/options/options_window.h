@@ -1,8 +1,12 @@
 /* ---------------------------------------------------------------------- 
- * Definition of OptionsWindow                           options_window.h
- * A small container class for each tool's options / flags 'pane'.
+ * Definition of class OptionsWindow                     options_window.h
+ * A container class for each tool's options / flags 'pane'.
  * Not modal, so user can keep it open and change flags as they work.
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #ifndef __VK_OPTIONS_WINDOW_H
@@ -21,11 +25,11 @@
 class Categories : public QListBox
 {
 public:
-	Categories( QWidget *parent );
-	int categHeight();
+  Categories( QWidget *parent );
+  int categHeight();
 
 private:
-	int categht;
+  int categht;
 };
 
 
@@ -35,7 +39,7 @@ class CategItem : public QListBoxItem
 {
 public:
   CategItem( QListBox * parent, OptionsPage * op,
-						 const QString &text, int id );
+             const QString &text, int id );
   virtual int height( const QListBox * ) const;
   int catId() const;
   void setWidget( OptionsPage * op );
@@ -58,7 +62,7 @@ class OptionsWindow : public QMainWindow
 public:
   OptionsWindow( QWidget* parent=0 );
   ~OptionsWindow();
-	void showPage( int catid );
+  void showPage( int catid );
 
 signals:
   void flagsChanged();
@@ -72,20 +76,21 @@ private slots:
   void reject();
   void apply();
   void modified();
-	void resetDefaults();
+  void resetDefaults();
   void categoryClicked( QListBoxItem * );
 
 private:
-	void adjustPosition();
+  void adjustPosition();
   void setCategory( int catid );
   void addCategory( int cid, QString text );
   OptionsPage * mkOptionsPage( int catid );
 
 private:
-	int xpos, ypos;	  /* remember where user put the window */
+  /* remember where user put the window */
+  int xpos, ypos;
 
   QString capt;
-	QPushButton* applyButton;
+  QPushButton* applyButton;
 
   /* so we can iterate over the vkOptions widgets */
   QPtrList<OptionsPage> optPages;

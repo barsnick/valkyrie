@@ -1,27 +1,32 @@
 /* ---------------------------------------------------------------------
- * Definition of HelpInfo                                    help_info.h
- * small tab dialog showing various information re licence etc.
- * --------------------------------------------------------------------- */
+ * Definition of HelpAbout                                  help_about.h
+ * Small tabbed dialog showing misc. info re licence etc.
+ * --------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
+ */
 
-#ifndef __VK_HELP_INFO_H
-#define __VK_HELP_INFO_H
+#ifndef __VK_HELP_ABOUT_H
+#define __VK_HELP_ABOUT_H
 
 #include <qdialog.h>
 #include <qtabwidget.h>
 #include <qtextedit.h>
 
 
-/* class HelpInfo ------------------------------------------------------ */
+/* class HelpAbout ----------------------------------------------------- */
 class TextEdit;
 
-class HelpInfo : public QDialog
+class HelpAbout : public QDialog
 {
   Q_OBJECT
 public:
-	enum TabId { ABOUT_VK=0, ABOUT_QT, LICENCE, SUPPORT };
+  enum TabId { ABOUT_VK=0, ABOUT_QT, LICENCE, SUPPORT };
 
-  HelpInfo( QWidget* parent, TabId tabid );
-  ~HelpInfo();
+  HelpAbout( QWidget* parent, TabId tabid );
+  ~HelpAbout();
 
 private slots:
   void showTab( QWidget* );
@@ -29,11 +34,11 @@ private slots:
 private:
   QString title;
 
-	QTabWidget* tabParent;
+  QTabWidget* tabParent;
   TextEdit* aboutVk;
-	TextEdit* aboutQt;
-	TextEdit* licence;
-	TextEdit* support;
+  TextEdit* aboutQt;
+  TextEdit* licence;
+  TextEdit* support;
 };
 
 
@@ -41,14 +46,14 @@ private:
 class TextEdit : public QTextEdit
 { 
 public:
-  TextEdit( QWidget* parent, HelpInfo::TabId tabid, const char* name );
+  TextEdit( QWidget* parent, HelpAbout::TabId tabid, const char* name );
   ~TextEdit();
   bool load();
 
 private:
-	bool loaded;
+  bool loaded;
   QString html_file;
-	HelpInfo::TabId tabId;
+  HelpAbout::TabId tabId;
 };
 
 

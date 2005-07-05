@@ -2,16 +2,17 @@
  * Implementation of ContextHelp                        context_help.cpp
  * Context-sensitive help 
  * --------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include "context_help.h"
 #include "hand_book.h"
 #include "vk_utils.h"              // VK_DEBUG
 
-
 #include <qapplication.h>
-//#include <qcursor.h>
-
 
 
 static const char * const context_help_xpm[] = {
@@ -138,8 +139,8 @@ ContextHelp::~ContextHelp()
 }
 
 
-/* Removes the Context help associated with the widget.
-  This happens automatically if the widget is destroyed. */
+/* removes the Context help associated with the widget.
+   this happens automatically if the widget is destroyed. */
 void ContextHelp::remove( QWidget * widget )
 {
   setUp();
@@ -163,7 +164,7 @@ bool ContextHelp::eventFilter( QObject * obj, QEvent * ev )
            obj->isWidgetType() ) {
         QWidget * w = (QWidget *) obj;
         if ( ( (QMouseEvent*)ev)->button() == RightButton )
-          return false; // ignore RMB
+          return false;   /* ignore RMB */
         ContextHelp::UrlItem * item = 0;
         QMouseEvent* me = (QMouseEvent*) ev;
         QPoint p = me->pos();
@@ -181,7 +182,7 @@ bool ContextHelp::eventFilter( QObject * obj, QEvent * ev )
         return true;
       } else if ( ev->type() == QEvent::MouseButtonRelease ) {
         if ( ( (QMouseEvent*)ev)->button() == RightButton )
-          return false; /* ignore RMB */
+          return false;   /* ignore RMB */
         return !obj->isWidgetType();
       } else if ( ev->type() == QEvent::MouseMove ) {
         return !obj->isWidgetType();
@@ -193,7 +194,7 @@ bool ContextHelp::eventFilter( QObject * obj, QEvent * ev )
         } else if ( kev->key() == Key_Menu ||
                     ( kev->key() == Key_F10 &&
                       kev->state() == ShiftButton ) ) {
-          /* don't react to these keys - they are used for context
+          /* don't react to these keys: they are used for context
              menus */
           return false;
         } else if ( kev->state() == kev->stateAfter() &&
@@ -204,7 +205,7 @@ bool ContextHelp::eventFilter( QObject * obj, QEvent * ev )
       } else if ( ev->type() == QEvent::MouseButtonDblClick ) {
         return true;
       }
-    } /*FIXME: break;*/
+    } /* break; */
 
     case Inactive:
       break;
@@ -219,9 +220,9 @@ void ContextHelp::setUp()
   if ( !ctxt ) {
     ctxt = new ContextHelp();
 
-    /* It is necessary to use a post routine, because the destructor
-     deletes pixmaps and other stuff that needs a working X connection
-     under X11. */
+    /* it is necessary to use a post routine, because the destructor
+       deletes pixmaps and other stuff that needs a working X
+       connection under X11. */
     qAddPostRoutine( qContextHelpCleanup );
   }
 }
@@ -267,7 +268,7 @@ void ContextHelp::say( QWidget* widget, const QString &text )
 
     hbook->move( x, pos.y() );
     hbook->show();
-	}
+  }
 
   hbook->raise();
   hbook->openUrl( text );
@@ -277,7 +278,7 @@ void ContextHelp::say( QWidget* widget, const QString &text )
 void ContextHelp::cleanupWidget() 
 {
   const QObject* obj = sender();
-  if ( obj->isWidgetType() ) { // sanity
+  if ( obj->isWidgetType() ) {   /* sanity check */
     remove( (QWidget*)obj );
   }
 }
@@ -304,9 +305,9 @@ void ContextHelp::newItem( QWidget* widget, const QString& url )
 }
 
 
-/* Adds url as context help for this widget.  
-   The text is destroyed if the widget is later destroyed, 
-   so it need not be explicitly removed. */
+/* adds url as context help for this widget.  
+   the text is destroyed if the widget is later destroyed, so it need
+   not be explicitly removed. */
 void ContextHelp::add( QWidget* widget, const QString& url )
 {
   vk_assert( widget != NULL );

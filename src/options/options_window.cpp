@@ -1,8 +1,12 @@
 /* ---------------------------------------------------------------------- 
- * Implementation of OptionsWindow                     options_window.cpp
- * A small container class for each tool's options / flags 'pane'.
+ * Implementation of class OptionsWindow               options_window.cpp
+ * A container class for each tool's options / flags 'pane'.
  * Not modal, so user can keep it open and change flags as they work.
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include <qapplication.h>
@@ -16,7 +20,6 @@
 #include "vk_utils.h"
 #include "vk_objects.h"
 #include "vk_config.h"
-#include "main_window.h"
 
 #include "valkyrie_options_page.h"
 #include "valgrind_options_page.h"
@@ -94,25 +97,25 @@ OptionsWindow::OptionsWindow( QWidget* parent )
   statusBar()->addWidget( statusFrame, 10, true );
   QHBoxLayout* buttLayout = new QHBoxLayout(statusFrame, 5, -1 );
 
-  /* reset: reset default options */
+  /* reset button: reset default options */
   QPushButton* pb = new QPushButton( "Reset Defaults", statusFrame );
   connect( pb, SIGNAL(clicked() ), this, SLOT(resetDefaults()));
   buttLayout->addWidget( pb );
   buttLayout->addStretch( 10 );
 
   int w = fontMetrics().width( "X&CancelX" );
-  /* okay: apply and quit in one go */
+  /* okay button: apply and quit in one go */
   pb = new QPushButton( "&Ok", statusFrame );
   pb->setFixedWidth( w );
   pb->setDefault( true );
   buttLayout->addWidget( pb );
   connect( pb, SIGNAL(clicked() ), this, SLOT(accept()) );
-  /* cancel: forget everything I just said, and quit */
+  /* cancel button: forget everything I just said, and quit */
   pb = new QPushButton( "&Cancel", statusFrame );
   pb->setFixedWidth( w );
   buttLayout->addWidget( pb );
   connect( pb, SIGNAL(clicked() ), this, SLOT(reject()));
-  /* apply: do what I said, but let me change my mind */
+  /* apply button: do what I said, but let me change my mind */
   applyButton = new QPushButton( "&Apply", statusFrame );
   applyButton->setFixedWidth( w );
   buttLayout->addWidget( applyButton );
@@ -131,7 +134,7 @@ OptionsWindow::OptionsWindow( QWidget* parent )
   wStack = new QWidgetStack( splitter );
 
   /* we create the containers, but don't actually initialise them
-     unless the user wants to view a page.*/
+     until the user wants to view a page.*/
   VkObjectList objList = vkConfig->vkObjList();
   VkObject* obj;
   for ( obj = objList.first(); obj; obj = objList.next() ) {
@@ -167,14 +170,13 @@ void OptionsWindow::categoryClicked( QListBoxItem *item )
 {
   if ( item ) {
     CategItem* cit = (CategItem*)item;
-    //capt.sprintf("%s Options: %s", vkName(), item->text().latin1() );
     setCaption( capt + item->text() );
 
     /* first time this item has been selected */
     if ( !cit->page() ) {
       OptionsPage* page = mkOptionsPage( cit->catId() );
       if ( !page ) {
-        VK_DEBUG("cit->text = %s", cit->text().ascii() );
+        VK_DEBUG("cit->text = %s", cit->text().latin1() );
         return;
       } else {
         cit->setWidget( page );
@@ -263,7 +265,7 @@ void OptionsWindow::adjustPosition()
   
   int extraw = w->geometry().x() - w->x();
   int extrah = w->geometry().y() - w->y();
-  /* sanity check for decoration frames. With embedding, we might get
+  /* sanity check for decoration frames.  with embedding, we might get
      extraordinary values */
   if ( extraw == 0 || extrah == 0 || extraw >= 10 || extrah >= 40 ) {
     extrah = 40;
@@ -271,7 +273,7 @@ void OptionsWindow::adjustPosition()
   }
 
   QPoint p( 0, 0 );
-  /* Use mapToGlobal rather than geometry() in case w might be
+  /* use mapToGlobal rather than geometry() in case w might be
      embedded in another application */
   QPoint pp = w->mapToGlobal( QPoint(0,0) );
   p = QPoint( pp.x() + w->width()/2,
@@ -306,13 +308,8 @@ void OptionsWindow::accept()
       return;  /* don't close window */
     }
   }
-
-	/* let the toolviews know that the flags (may) have changed */
+  /* let the toolviews know that the flags (may) have changed */
   emit flagsChanged();
-	/* then tell MainWin to (possibly) reload the flagsWidget */
-	MainWindow* vkWin = (MainWindow*)qApp->mainWidget();
-	vkWin->updateFlagsWidget();
-
   close();
 }
 
@@ -325,7 +322,8 @@ void OptionsWindow::reject()
       VK_DEBUG("Failed to reject edits");
     }
   }
-
+  /* let the toolviews know that the flags (may) have changed */
+  emit flagsChanged();
   close(); 
 }
 
@@ -338,6 +336,8 @@ void OptionsWindow::apply()
       VK_DEBUG("Failed to apply edits");
     }
   }
+  /* let the toolviews know that the flags (may) have changed */
+  emit flagsChanged();
 }
 
 

@@ -1,7 +1,11 @@
 /* ---------------------------------------------------------------------- 
  * Implementation of ValkyrieOptionsPage        valkyrie_options_page.cpp
- * subclass of OptionsPage to hold valkyrie-specific options | flags.
+ * Subclass of OptionsPage to hold valkyrie-specific options | flags.
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include <qfontdialog.h>
@@ -17,20 +21,17 @@
 ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
   : OptionsPage( parent, obj, "valkyrie_options_page" )
 { 
-#if 1
   /* init the QIntDict list, resizing if necessary */
   unsigned int numItems = 11;
   itemList.resize( numItems );
 
-  int space  = 5;    /* no. of pixels between cells */
-  int margin = 10;   /* no. of pixels to edge of widget */
   QVBoxLayout* vbox = new QVBoxLayout( this, margin, -1, "vbox" );
 
   /* general prefs */
   QGroupBox* group1 = new QGroupBox( " Valkyrie Options ", this, "group1");
   vbox->addWidget( group1, space );
 
-	/* vbox layout for group1; margin = 10; spacing = 25 */
+  /* vbox layout for group1; margin = 10; spacing = 25 */
   QVBoxLayout* gvbox = new QVBoxLayout( group1, margin, 25, "gvbox" );
 
   /* group1: preferences */
@@ -68,9 +69,7 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
   grid1->addMultiCellLayout( 
                 itemList[Valkyrie::FONT_USER]->hlayout(), 3,3, 0,2 );
 
-
   gvbox->addWidget( sep(group1,"sep1"), 10 );
-
 
   itemList.insert( Valkyrie::SRC_LINES,       /* intspin */
                    optionWidget( Valkyrie::SRC_LINES, group1, true ) );
@@ -127,127 +126,13 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
     connect(it.current(), SIGNAL(valueChanged( bool, OptionWidget * )),
             this,         SLOT(updateEditList( bool, OptionWidget * )));
   }
-#else
-  /* init the QIntDict list, resizing if necessary */
-  unsigned int numItems = 11;
-  itemList.resize( numItems );
 
-  int space  = 5;    /* no. of pixels between cells */
-  int margin = 11;   /* no. of pixels to edge of widget */
-  /* top layout: margin = 10; spacing = 25 */
-  QVBoxLayout* vbox = new QVBoxLayout( this, 10, 25, "vbox" );
-
-  /* general prefs */
-  QGroupBox* group1 = new QGroupBox( " Preferences ", this, "group1");
-  vbox->addWidget( group1, space );
-
-  /* group1: preferences */
-  itemList.insert( Valkyrie::TOOLTIP,                  /* checkbox */
-                   optionWidget( Valkyrie::TOOLTIP, group1, false ) );
-  itemList.insert( Valkyrie::ICONTXT,                  /* checkbox */
-                   optionWidget( Valkyrie::ICONTXT, group1, false ) );
-  itemList.insert( Valkyrie::PALETTE,                  /* checkbox */
-                   optionWidget( Valkyrie::PALETTE, group1, false ) );
-
-  itemList.insert( Valkyrie::FONT_SYSTEM,              /* checkbox */
-                   optionWidget( Valkyrie::FONT_SYSTEM, group1, false ));
-  connect( itemList[Valkyrie::FONT_SYSTEM], SIGNAL(changed(bool)),
-           this,   SLOT(fontClicked(bool)) );
-  itemList.insert( Valkyrie::FONT_USER,                /* line edit */
-                   optionWidget( Valkyrie::FONT_USER, group1, false ) );
-  LeWidget* fontLedit = ((LeWidget*)itemList[Valkyrie::FONT_USER]);
-  fontLedit->addButton( group1, this, SLOT(chooseFont()), "Choose:" );
-  fontLedit->setReadOnly( true );     /* don't allow direct editing */
-  /* start up in correct state */
-  bool enable = vkConfig->rdBool("use-system-font", "valkyrie");
-  fontLedit->button()->setEnabled( !enable );
-  itemList[Valkyrie::FONT_USER]->widget()->setEnabled( !enable );
-
-  /* grid layout for group1 */
-  int rows = 5;
-  int cols = 3;
-  QGridLayout* grid1 = new QGridLayout( group1, rows, cols, margin, space );
-  grid1->setRowSpacing( 0, topSpace );   /* blank top row */
-
-  grid1->addWidget( itemList[Valkyrie::TOOLTIP]->widget(), 1, 0 );
-  grid1->addWidget( itemList[Valkyrie::ICONTXT]->widget(), 1, 2 );
-  grid1->addWidget( itemList[Valkyrie::PALETTE]->widget(), 2, 0 );
-
-  grid1->setRowSpacing( 3, topSpace );
-  grid1->addMultiCellWidget( 
-                itemList[Valkyrie::FONT_SYSTEM ]->widget(), 4,4, 0,2 );
-  grid1->addMultiCellLayout( 
-                itemList[Valkyrie::FONT_USER]->hlayout(), 5,5, 0,2 );
-
-
-  /* group2: more preferences */
-  QGroupBox* group2 = new QGroupBox( " Options ", this, "group2");
-  vbox->addWidget( group2, space );
-
-  /* grid layout for group2 */
-  rows = 6;
-  cols = 2;
-  QGridLayout* grid2 = new QGridLayout( group2, rows, cols, margin, space );
-  grid2->setRowSpacing( 0, topSpace );        /* blank top row */
-
-  itemList.insert( Valkyrie::SRC_LINES,       /* intspin */
-                   optionWidget( Valkyrie::SRC_LINES, group2, true ) );
-  itemList.insert( Valkyrie::SRC_EDITOR,      /* ledit + button */
-                   optionWidget(Valkyrie::SRC_EDITOR, group2, false ) );
-  LeWidget* editLedit = ((LeWidget*)itemList[Valkyrie::SRC_EDITOR]);
-  editLedit->addButton( group2, this, SLOT(checkEditor()) );
-  editLedit->setReadOnly( true );  /* don't allow direct editing */
-
-  itemList.insert( Valkyrie::BINARY, 
-                   optionWidget( Valkyrie::BINARY, group2, false ) );
-  LeWidget* binLedit = ((LeWidget*)itemList[Valkyrie::BINARY]);
-  binLedit->addButton( group2, this, SLOT(getBinary()) );
-  itemList.insert( Valkyrie::BIN_FLAGS, 
-                   optionWidget( Valkyrie::BIN_FLAGS, group2, true ) );
-
-  itemList.insert( Valkyrie::VG_EXEC,         /* ledit + button */
-                   optionWidget(Valkyrie::VG_EXEC, group2, false ) );
-  LeWidget* vgbinLedit = ((LeWidget*)itemList[Valkyrie::VG_EXEC]);
-  vgbinLedit->addButton( group2, this, SLOT(getVgExec()) );
-  vgbinLedit->setReadOnly( true );   /* don't allow direct editing */
-  itemList.insert( Valkyrie::VG_SUPPS_DIR,        /* ledit + button */
-                   optionWidget(Valkyrie::VG_SUPPS_DIR, group2, false ) );
-  LeWidget* vgsupLedit = ((LeWidget*)itemList[Valkyrie::VG_SUPPS_DIR]);
-  vgsupLedit->addButton( group2, this, SLOT(getSuppDir()) );
-  vgsupLedit->setReadOnly( true );   /* don't allow direct editing */
-
-  grid2->addMultiCellLayout( 
-                    itemList[Valkyrie::SRC_LINES]->hlayout(), 1,1, 0,1 );
-  grid2->addWidget( editLedit->button(),                      2, 0 );
-  grid2->addWidget( editLedit->widget(),                      2, 1 );
-
-  grid2->setRowSpacing( 3, topSpace );
-  grid2->addWidget( binLedit->button(),                       4, 0 );
-  grid2->addWidget( binLedit->widget(),                       4, 1 );
-  grid2->addWidget( itemList[Valkyrie::BIN_FLAGS]->label(),   5, 0 );
-  grid2->addWidget( itemList[Valkyrie::BIN_FLAGS]->widget(),  5, 1 );
-
-  grid2->setRowSpacing( 6, topSpace );
-  grid2->addWidget( vgbinLedit->button(),                     7, 0 );
-  grid2->addWidget( vgbinLedit->widget(),                     7, 1 );
-  grid2->addWidget( vgsupLedit->button(),                     8, 0 );
-  grid2->addWidget( vgsupLedit->widget(),                     8, 1 );
-
-  vbox->addStretch( space );
-  vk_assert( itemList.count() <= numItems );
-
-  QIntDictIterator<OptionWidget> it( itemList );
-  for ( ;  it.current(); ++it ) {
-    connect(it.current(), SIGNAL(valueChanged( bool, OptionWidget * )),
-            this,         SLOT(updateEditList( bool, OptionWidget * )));
-  }
-#endif
 }
 
 
 
-/* Called when user clicks "Apply" or "Ok" button.  
-   Also called when Cancel button is clicked, to reset toggled values */
+/* called when user clicks "Apply" or "Ok" button.  
+   also called when Cancel button is clicked, to reset toggled values */
 bool ValkyrieOptionsPage::applyOptions( int id, bool undo/*=false*/ )
 { 
   bool retval = true;
@@ -344,15 +229,7 @@ void ValkyrieOptionsPage::checkEditor()
 /* allows user to select executable-to-debug */
 void ValkyrieOptionsPage::getBinary()
 {
-  /* try and start up somewhere sensible */
-  QString exe_dir = "/home";
-  QString exe_file = itemList[Valkyrie::BINARY]->currValue();
-  if ( !exe_file.isEmpty() ) {
-    QFileInfo fi( exe_file );
-    exe_dir = fi.dirPath();
-  }
-
-  QString binfile = QFileDialog::getOpenFileName( exe_dir, 
+  QString binfile = QFileDialog::getOpenFileName( QString::null,
           "All Files (*)", this, "fdlg", "Select Executable" );
   if ( !binfile.isEmpty() ) { /* user might have clicked Cancel */
     ((LeWidget*)itemList[Valkyrie::BINARY])->setCurrValue(binfile);
@@ -363,7 +240,7 @@ void ValkyrieOptionsPage::getBinary()
 
 void ValkyrieOptionsPage::getSuppDir()
 {
-  /* VG_EXEC is guaranteed to never be empty, so startup the file
+  /* VG_EXEC is guaranteed to never be empty, so start up the file
      dialog with that dir as the default place to start looking */
   QString vgpath = itemList[Valkyrie::VG_EXEC]->currValue();
   QFileInfo fi( vgpath );
@@ -426,16 +303,16 @@ void ValkyrieOptionsPage::getVgExec()
   QString cmd, vg_version, tmp_fname;
   tmp_fname = vk_mkstemp( "vg-version", vkConfig->rcDir() );
   cmd.sprintf( "%s --version | sed \"s/valgrind-//g\" > %s", 
-               vg_exec_path.ascii(), tmp_fname.ascii() );
-  system( cmd.ascii() );
+               vg_exec_path.latin1(), tmp_fname.latin1() );
+  system( cmd.latin1() );
   QFile file( tmp_fname );
   if ( file.open( IO_ReadOnly ) ) {
     file.readLine( vg_version, 100 );
   }
-  /* close and delete the temporary file */
-  file.remove();
-  vg_version = vg_version.simplifyWhiteSpace();
+  file.remove();   /* close and delete the temporary file */
+
   /* do some fancy stuff */
+  vg_version = vg_version.simplifyWhiteSpace();
   int found = str2hex( vg_version );
   int reqd  = str2hex( "3.0.0" );
   if ( found < reqd ) {

@@ -1,10 +1,15 @@
-/*---------------------------------------------------------------------- 
-  Configuration file parser                                  vk_config.h
-  ----------------------------------------------------------------------
-*/
+/* --------------------------------------------------------------------- 
+ * Definition of VkConfig                                    vk_config.h
+ * Configuration file parser
+ * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
+ */
 
-#ifndef __VALKYRIE_CONFIG_H
-#define __VALKYRIE_CONFIG_H
+#ifndef __VK_CONFIG_H
+#define __VK_CONFIG_H
 
 #include <qfile.h>
 #include <qmap.h>
@@ -30,9 +35,9 @@ struct EntryKey
   EntryKey( const QString &group=QString::null, 
             const QString &key=QString::null )
     : mGroup(group), mKey(key), cKey( key.data() ) { }
-  QString mGroup;    /* group to which this EntryKey belongs */
-  QString mKey;      /* key of the entry in question         */
-  const char *cKey;  /* testing equality with operator <     */
+  QString mGroup;     /* group to which this EntryKey belongs */
+  QString mKey;       /* key of the entry in question         */
+  const char *cKey;   /* testing equality with operator <     */
 };
 
 /* compares two EntryKeys (needed for QMap) */
@@ -69,10 +74,7 @@ public:
 
   void dontSync();  /* don't write back to disk on exit */
 
-  /* misc make-life-easier stuff --------------------------------------- */
-  //RM: int currentToolId();
-  VkObject::ObjectId currentToolId();
-  /* these fns merely return the values set in vk_include.h */
+  /* these fns return the values set in vk_include.h ------------------- */
   const char* vkname();
   const char* vkName();
   const char* vkVersion();
@@ -80,7 +82,8 @@ public:
   const char* vkAuthor();
   const char* vkEmail();
   const char* vgCopyright();
-  /* these fns return values held in private vars */
+
+  /* these fns return values held in private vars ---------------------- */
   QString vgdocDir();
   QString vkdocDir();
   QString imgDir();
@@ -89,19 +92,24 @@ public:
   QString dbaseDir();
   QString suppDir();
   QPixmap pixmap( QString pixfile );
+  QChar sepChar() { return sep; }
 
-  QStringList modFlags( VkObject* obj );
+  /* Returns a ptr to the tool currently set in [valgrind:tool] */
+  ToolObject* currentTool();
+  /* Returns the name of the current tool in [valgrind:tool] */
+  QString currentToolName();
+  /* Returns the tool id of [valgrind:tool] */
+  VkObject::ObjectId currentToolId();
 
+  /* Returns a list of all VkObjects, irrespective of whether they are
+     tools or otherwise */
   VkObjectList vkObjList();
   /* returns a vkObject based on its name */
   VkObject* vkObject( const QString& obj_name );
   /* returns a vkObject based on its ObjectId */
   VkObject* vkObject( int tvid, bool tools_only=false );
-
-  /* returns a string of selected comma-separated suppressions files
-     with marker flag removed */
-  //RM: QString selSuppFiles( const QString &pKey, const QString &pGroup );
-  QChar sepChar() { return sep; }
+  /* returns a vkObject tool, based on its ObjectId */
+  ToolObject* vkToolObj( int tvid );
 
   /* read fns ---------------------------------------------------------- */
   QString rdEntry( const QString &pKey, const QString &pGroup );

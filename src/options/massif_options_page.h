@@ -1,20 +1,24 @@
 /* ---------------------------------------------------------------------- 
- * Definition of MassifOptionsPage                  massif_options_page.h
- * subclass of OptionsPage to hold massif-specific options | flags.
+ * Definition of class MassifOptionsPage            massif_options_page.h
+ * Subclass of OptionsPage to hold massif-specific options | flags.
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
-#ifndef MASSIF_OPTIONS_PAGE_H
-#define MASSIF_OPTIONS_PAGE_H
+#ifndef __MASSIF_OPTIONS_PAGE_H
+#define __MASSIF_OPTIONS_PAGE_H
 
 #include "options_page.h"
 
 
 class MassifOptionsPage : public OptionsPage
 {
-	Q_OBJECT
+  Q_OBJECT
 public:
-	MassifOptionsPage( QWidget* parent, VkObject* obj );
+  MassifOptionsPage( QWidget* parent, VkObject* obj );
   bool applyOptions( int id, bool undo=false );
 };
 

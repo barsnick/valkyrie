@@ -1,12 +1,23 @@
-/* ---------------------------------------------------------------------- 
- * Configuration file Parser                                vk_config.cpp
- * ----------------------------------------------------------------------
+/* --------------------------------------------------------------------- 
+ * Implementation of VkConfig                              vk_config.cpp
+ * Configuration file parser
+ * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include "vk_config.h"
 #include "vk_include.h"
 #include "vk_utils.h"       /* VK_DEBUG */
 #include "vk_msgbox.h"
+
+#include "valkyrie_object.h"
+#include "valgrind_object.h"
+#include "memcheck_object.h"
+#include "cachegrind_object.h"
+#include "massif_object.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -23,7 +34,6 @@ VkConfig::~VkConfig()
   sync();
   vkObjectList.setAutoDelete( true );
   vkObjectList.clear();
-  vkObjectList.setAutoDelete( false );
 }
 
 
@@ -66,8 +76,8 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   vg_copyright = VG_COPYRIGHT;
 
   rcPath.sprintf( "%s/.%s-%s", 
-                  QDir::homeDirPath().ascii(), vkname(), vkVersion() );
-  rcFileName.sprintf( "%s/%src", rcPath.ascii(), vkname() );
+                  QDir::homeDirPath().latin1(), vkname(), vkVersion() );
+  rcFileName.sprintf( "%s/%src", rcPath.latin1(), vkname() );
   dbasePath = rcPath + VK_DBASE_DIR;
   logsPath  = rcPath + VK_LOGS_DIR;
   suppPath  = rcPath + VK_SUPPS_DIR;
@@ -98,62 +108,38 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
     } break;
 
   case BadRcVersion:
-#if 1
-    vkPrint( "Configuration:\n"
-             "The configuration file '%s' version is invalid.\n"
-             "Removing and re-creating it now...", rcFileName.latin1() );
-#else
     vkInfo( 0, "Configuration",
-            "The configuration file '%s' version is invalid.<br> "
-            "Removing and re-creating it now ... ... ", 
+            "<p>The configuration file '%s' version is invalid.</p> "
+            "<p>Removing and re-creating it now ... ... </p>", 
             rcFileName.latin1() );
-#endif
     mkConfigFile( true );
     num_tries++;
     goto retry;      /* try again */
     break;
 
   case CreateRcFile:
-#if 1
-    vkPrint( "Configuration:\n"
-             "The configuration file '%s' does not exist, "
-             "and %s cannot run without this file.\n"
-             "Creating it now...", rcFileName.latin1(), vkName() );
-#else
     vkInfo( 0, "Configuration",
-            "The configuration file '%s' does not exist, "
+            "<p>The configuration file '%s' does not exist, "
             "and %s cannot run without this file.<br>"
-            "Creating it now ... ... ", 
+            "Creating it now ... ... </p>", 
             rcFileName.latin1(), vkName() );
-#endif
     mkConfigFile();
     num_tries++;
     goto retry;      /* try again */
     break;
 
   case NoPerms:
-#if 1
-    vkPrint( "Fatal Configuration Error:\n"
-             "You do not have read/write permissions set"
-             "on the directory %s", rcPath.latin1() );
-#else
-    vkFatal( 0, "Configuration" 
-             "You do not have read/write permissions set"
-             "on the directory %s", rcPath.latin1() );
-#endif
+    vkFatal( 0, "Configuration",
+             "<p>You do not have read/write permissions set"
+             "on the directory %s</p>", rcPath.latin1() );
     break;
 
   case BadFilename:
   case NoDir:
   case BadRcFile:
   case Fail:
-#if 1
-    vkPrint( "Fatal Configuration Error:\n"
-             "Initialisation of vkConfig failed" );
-#else
     vkFatal( 0, "Config Creation Failed",
-      "Initialisation of Config failed" );
-#endif
+             "<p>Initialisation of Config failed.</p>" );
     break;
   }
 
@@ -182,32 +168,20 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
     supp_files.truncate( supp_files.length() - 1 );
     /* write the list of found .supp files */
     wrEntry( supp_files, "supps-all", "valgrind" );
-		/* and hold onto these values, 'cos they are the install defaults */
+    /* and hold onto these values, 'cos they are the install defaults */
     wrEntry( supp_files, "supps-def", "valgrind" );
     /* and write the default supp. file including path */
     wrEntry( def_supp, "suppressions", "valgrind" );
 
-		/* write entries to disk immediately in case something bad
+    /* write entries to disk immediately in case something bad
        happens, as we won't get another chance to do this */
-		sync();
+    sync();
   }
 
 }
 
 
 /* misc. make-life-easier stuff ---------------------------------------- */
-//RM: int VkConfig::currentToolId()
-VkObject::ObjectId VkConfig::currentToolId()
-{
-  QString tool_name = rdEntry( "tool", "valgrind" );
-
-  VkObject* obj;
-  for ( obj = vkObjectList.first(); obj; obj = vkObjectList.next() ) {
-    if ( obj->isTool() && obj->name() == tool_name )
-      return obj->id();
-  }
-  return VkObject::INVALID;
-}
 
 /* these fns return vars initialised from the #defines set in vk_include.h */
 const char* VkConfig::vkname()      { return vk_name.data();      }
@@ -222,15 +196,15 @@ const char* VkConfig::vgCopyright() { return vg_copyright.data(); }
 QString VkConfig::vkdocDir()  { return vkdocPath; }
 
 QString VkConfig::vgdocDir()  { return vgdocPath; }
-//  /valkyrie-inst-dir/icons/
-QString VkConfig::imgDir()    { return imgPath; }
-// ~/.valkyrie-X.X.X/
-QString VkConfig::rcDir()     { return rcPath;  }
-// ~/.valkyrie-X.X.X/dbase/
+/*  /valkyrie-inst-dir/icons/ */
+QString VkConfig::imgDir()    { return imgPath;   }
+/* ~/.valkyrie-X.X.X/ */
+QString VkConfig::rcDir()     { return rcPath;    }
+/* ~/.valkyrie-X.X.X/dbase/ */
 QString VkConfig::dbaseDir()  { return dbasePath; }
-// ~/.valkyrie-X.X.X/logs/
-QString VkConfig::logsDir()   { return logsPath; }
-// ~/.valkyrie-X.X.X/suppressions/
+/* ~/.valkyrie-X.X.X/logs/ */
+QString VkConfig::logsDir()   { return logsPath;  }
+/* ~/.valkyrie-X.X.X/suppressions/ */
 QString VkConfig::suppDir()   { return suppPath;  }
 
 QPixmap VkConfig::pixmap( QString pix )
@@ -241,7 +215,7 @@ QPixmap VkConfig::pixmap( QString pix )
 
 
 
-/* read fns ------------------------------------------------------------ */
+/* read functions ------------------------------------------------------ */
 QString VkConfig::rdEntry( const QString &pKey, 
                            const QString &pGroup )
 {
@@ -291,7 +265,7 @@ bool VkConfig::rdBool( const QString &pKey, const QString &pGroup )
 }
 
 
-/* Guaranteed to return a valid font.  If an invalid font is
+/* guaranteed to return a valid font.  if an invalid font is
    found, the application's default font is used. */
 QFont VkConfig::rdFont( const QString &pKey, 
                         const QString &pGroup/*=QString::null*/ )
@@ -397,8 +371,8 @@ QColor VkConfig::rdColor( const QString &pKey )
 
 
 
-/* write fns ----------------------------------------------------------- 
-   the Config object is dirty now */
+/* write functions ----------------------------------------------------- 
+   the vkConfig object is dirty now */
 void VkConfig::wrEntry( const QString &pValue,
                         const QString &pKey, const QString &pGroup )
 {
@@ -480,17 +454,10 @@ VkConfig::RetVal VkConfig::parseFile()
 {
   QFile rFile( rcFileName );
   if ( !rFile.open( IO_ReadOnly ) ) {
-#if 1
-    vkPrint( "Fatal Configuration Error:\n"
-             "Failed to open the file %s for reading.\n"
-             "%s cannot run without this file.", 
+    vkFatal( 0, "Parse Config File",
+             "<p>Failed to open the file %s for reading.<br>"
+             "%s cannot run without this file.</p>", 
              rcFileName.latin1(), vkName() );
-#else
-    vkFatal( 0, "Parse Config File" 
-            "Failed to open the file %s for reading.<br>"
-             "%s cannot run without this file.", 
-             rcFileName.latin1(), vkName() );
-#endif
     return Fail;
   } else {
     /* beam me up, scotty */
@@ -518,21 +485,21 @@ void VkConfig::parseConfigFile( QFile &rFile, EntryMap *writeBackMap )
   while ( !stream.atEnd() ) {
 
     line = stream.readLine();
-    if ( line.isEmpty() ) {       // empty line... skip it
+    if ( line.isEmpty() ) {         /* empty line... skip it   */
       continue;
     }
-    if ( line[0] == QChar('#') ) { // comment line... skip it
+    if ( line[0] == QChar('#') ) {  /* comment line... skip it */
       continue;
     }
     
     int len = line.length();
     if ( line[0] == QChar('[') && line[len-1] == QChar(']') ) {
       /* found a group */
-      line.setLength( len-1 );    /* chop off the ']' */
-      aGroup = line.remove(0, 1); /* ditto re the '[' */
+      line.setLength( len-1 );      /* chop off the ']' */
+      aGroup = line.remove(0, 1);   /* ditto re the '[' */
     }
     else {
-      /* key --> value pair */
+      /* found a key --> value pair */
       int pos = line.find('=');
       QString key   = line.left( pos );
       QString value = line.right( len-pos-1 );
@@ -557,7 +524,7 @@ void VkConfig::writebackConfig()
 {
   EntryMap tmpMap;
 
-  /* Read config file from disk, and fill the temporary structure 
+  /* read config file from disk, and fill the temporary structure 
      with entries from the file */
   QFile rcFile( rcFileName );
   if ( !rcFile.open(IO_ReadOnly) ) {
@@ -592,6 +559,10 @@ void VkConfig::writebackConfig()
     close(fd);
     return;
   }
+
+  /* ### evil hack: this is the one flag we never want changed on a
+     permanent basis: user must specify 'no' each run. */
+  wrEntry( "yes", "gui", "valkyrie" );
 
   bool firstEntry = true;
   QString currGroup;
@@ -630,8 +601,6 @@ void VkConfig::writebackConfig()
 
 VkConfig::RetVal VkConfig::checkAccess() const
 {
-  int ok;
-
   /* 0. first things first .... */
   if ( rcFileName.isEmpty() ) {
     VK_DEBUG( "checkAccess( %s )\n"
@@ -640,52 +609,35 @@ VkConfig::RetVal VkConfig::checkAccess() const
   }
 
   /* 1. check the /rc/ directory actually exists */
-  ok = access( rcPath, F_OK );
-  if ( ok != 0 ) {
+  if ( 0 != access( rcPath, F_OK ) ) {
     VK_DEBUG("checkAccess( %s )\n" 
             "The directory '%s' does not exist", 
             VK_STRLOC, rcPath.latin1() );
     return NoDir;
   }
 
-  /* 2. ... and that the user has read/write permissions set
-     Can we allow the write? We can, if the program does not run
-     SUID. But if it runs SUID, we must check if the user would
-     be allowed to write if it wasn't SUID. */
-  ok = access( rcPath, R_OK & W_OK );
-  if ( ok != 0 ) {
+  /* 2. ... and that the user has read/write permissions set.  
+     can we allow the write?  we can, if the program does not run
+     SUID.  but if it runs SUID, we must check if the user would be
+     allowed to write if it wasn't SUID. */
+  if ( 0 != access( rcPath, R_OK & W_OK ) ) {
     return NoPerms;
   }
 
   /* 3. check the rcfile actually exists. If not, create it now */
-  ok = access( rcFileName, F_OK );
-  if ( ok != 0 ) {
+  if ( 0 != access( rcFileName, F_OK ) ) {
     return CreateRcFile;
   }
 
   /* 4. if it already exists, can we read / write it? */
-  ok = access( rcFileName, R_OK & W_OK );
-#if 1
-  if ( ok != 0 ) {
-    vkPrint( "Configuration:\n" 
-             "The file %s seems to be corrupted, and "
-             "%s cannot run without this file.\n"
-             "Recreating it now...", rcFileName.latin1(), vk_Name.data() );
-    return BadRcFile;
+  if ( 0 != access( rcFileName, R_OK & W_OK ) ) {
+    vkInfo( 0, "Configuration",
+            "<p>The file %s seems to be corrupted, and "
+            "valkyrie cannot run without this file.</p>"
+            "<p>Re-creating it now ... .. </p>", 
+            rcFileName.latin1() );
+    return CreateRcFile;
   }
-#else
-  if ( ok != 0 ) {
-    ok = vkQuery( 0, 2, "Configuration" 
-                  "The file %s seems to be corrupted, and\n"
-                  "%s cannot run without this file."
-                  "Shall I recreate it now?", 
-                  rcFileName.latin1(), vkName() );
-    if ( ok == MsgBox::vkNo )
-      return BadRcFile;
-    else
-      return CreateRcFile;
-  }
-#endif
 
   // 5. and finally, check the version no. for compatibility
   QFile rcFile( rcFileName );
@@ -708,53 +660,7 @@ VkConfig::RetVal VkConfig::checkAccess() const
 }
 
 
-/* Returns a list of strings containing the user-specified options;
-   these might be modified on the cmd-line, or via the OptionsWindow.
-   Returns eg. valgrind --tool=memcheck, --leak-check=yes, ... */
-QStringList VkConfig::modFlags( VkObject* vkobj )
-{
-  QStringList flags;
-
-  /* make sure we get the right valgrind */
-  flags << rdEntry( "vg-exec","valkyrie");
-
-  /* set the tool we are using */
-  flags << "--tool=" + vkobj->name();
-
- QStringList alist;
-  /* check if any valgrind core opts have been modified.  
-     'modified' means 'set to anything other than default' */
-  VkObject* obj;
-  for ( obj = vkObjectList.first(); obj; obj = vkObjectList.next() ) {
-    if ( obj->name() == "valgrind" ) {
-      alist = obj->modifiedFlags();
-      for ( uint i=0; i<alist.count(); i++ )
-        flags << alist[i];
-      break;
-    }
-  }
-
-  /* get flags which have been specified|modified for this tool _only_ */
-  alist.clear();
-  alist = vkobj->modifiedFlags();
-  for ( uint i=0; i<alist.count(); i++ )
-    flags << alist[i];
-
-  /* finally, check for valkyrie-specific flags */
-  for ( obj = vkObjectList.first(); obj; obj = vkObjectList.next() ) {
-    if ( obj->name() == "valkyrie" ) {
-      alist = obj->modifiedFlags();
-      for ( uint i=0; i<alist.count(); i++ )
-        flags << alist[i];
-      break;
-    }
-  }
-
-  return flags;
-}
-
-
-/* Objects MUST be inserted into this list in the exact order in which
+/* objects MUST be inserted into this list in the exact order in which
    their id appears in VkObject::ObjectId (/src/options/vk_objects.h):
    VALKYRIE=0, VALGRIND=1, MEMCHECK=2, CACHEGRIND=3, MASSIF=4 
    so that we can index into the list with ObjectId */
@@ -769,9 +675,38 @@ bool VkConfig::initVkObjects()
   return true; 
 }
 
-
 VkObjectList VkConfig::vkObjList()
 { return vkObjectList; }
+
+/* Returns a ptr to be tool currently set in [valgrind:tool] */
+ToolObject* VkConfig::currentTool()
+{
+  QString name = rdEntry("tool", "valgrind");
+  for ( VkObject* obj=vkObjectList.first(); obj; obj=vkObjectList.next() ) {
+    if ( obj->name() == name )
+      return (ToolObject*)obj;
+  }
+
+  vk_assert_never_reached();
+  return NULL;
+}
+
+/* returns the name of the current tool in [valgrind:tool] */
+QString VkConfig::currentToolName()
+{ return rdEntry("tool", "valgrind"); }
+
+/* returns the tool id of [valgrind:tool] */
+VkObject::ObjectId VkConfig::currentToolId()
+{
+  QString tool_name = rdEntry( "tool", "valgrind" );
+
+  for ( VkObject* obj=vkObjectList.first(); obj; obj=vkObjectList.next() ) {
+    if ( obj->isTool() && obj->name() == tool_name )
+      return obj->id();
+  }
+  vk_assert_never_reached();
+  return VkObject::INVALID;
+}
 
 /* returns an object based on its ObjectId */
 VkObject* VkConfig::vkObject( int tvid, bool tools_only/*=false*/ )
@@ -785,6 +720,14 @@ VkObject* VkConfig::vkObject( int tvid, bool tools_only/*=false*/ )
   return obj;
 }
 
+/* returns a ToolObject, based on its ObjectId */
+ToolObject* VkConfig::vkToolObj( int tvid )
+{
+  VkObject* obj = vkObjectList.at( tvid );
+  vk_assert( obj != 0 && obj->id() == tvid && obj->isTool() );
+  return (ToolObject*)obj;
+}
+
 /* returns a vkObject based on its name */
 VkObject* VkConfig::vkObject( const QString& obj_name )
 {
@@ -793,6 +736,8 @@ VkObject* VkConfig::vkObject( const QString& obj_name )
     if ( obj->name() == obj_name )
       return obj;
   }
+
+  vk_assert_never_reached();
   return NULL;
 }
 
@@ -889,7 +834,7 @@ bool VkConfig::checkDirs()
 
     switch ( state ) {
 
-      /* normal startup checks - --------------------------------------- */
+      /* normal startup checks ----------------------------------------- */
       case CHECK_DIR:        /* does ~/.PACKAGE-X.X.X/ exist ? */
         state = vk_dir.exists() ? CHECK_SUB_DIRS : MK_TOP_DIR;
         break;
@@ -941,7 +886,7 @@ bool VkConfig::checkDirs()
         msg.sprintf( "<p>There is a problem with '%s'.<br>"
                      "Either some files or sub-directories do not exist, "
                      "or the permissions are not set correctly."
-                     "<p>Please check and retry.</p>", rcPath.ascii() );
+                     "<p>Please check and retry.</p>", rcPath.latin1() );
         break;
 
       case DONE:
@@ -951,16 +896,9 @@ bool VkConfig::checkDirs()
     }  /* end switch ( state ) */
   }    /* end while (1) */
 
-#if 1
   if ( !msg.isEmpty() ) {
-    vkPrint( "Configuration:\n"
-             "Directory Error: %s", msg.ascii() );
+    vkError( 0, "Directory Error", msg.latin1() );
   }
-#else
-  if ( !msg.isEmpty() ) {
-    vkError( 0, "Directory Error", msg.ascii() );
-  }
-#endif
 
   return success;
 }

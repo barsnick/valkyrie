@@ -1,6 +1,10 @@
 /* ---------------------------------------------------------------------
  * Various utility functions                                  vk_utils.h
  * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #ifndef __VK_UTILS_H
@@ -42,8 +46,8 @@ extern void vk_assert_never_reached_fail( const char* file,
 
 /* print debugging msg with file+line info ----------------------------- */
 extern void vk_print( const char* file, const char* fn,
-											unsigned int line, const char* prefix, 
-											const char* msg, ... );
+                      unsigned int line, const char* prefix, 
+                      const char* msg, ... );
 #define VK_DEBUG(msg, args...) {            \
   vk_print( __FILE__, __PRETTY_FUNCTION__,  \
   __LINE__, "DEBUG", msg, ## args);       \
@@ -54,16 +58,19 @@ extern void vk_print( const char* file, const char* fn,
 extern void vkPrint( const char *, ... )
      __attribute__ ((format (printf, 1, 2)));
 
-/* Create a unique filename -------------------------------------------- */
-QString vk_mkstemp( QString fname, QString path );
+/* create a unique filename -------------------------------------------- */
+QString vk_mkstemp( QString fname, QString path, QString ext=QString::null );
 
 /* 3.0.5 --> 0x030005 -------------------------------------------------- */
 int str2hex( QString ver_str );
 
-/* Command-line args parsing ------------------------------------------- 
-	 implemented in /src/options/parse_cmd_args.cpp */
+/* command-line args parsing ------------------------------------------- 
+   implemented in /src/options/parse_cmd_args.cpp */
 extern int parseCmdArgs( int argc, char** argv );
 
+/* escape html entities
+ * current list: '<', '>', '&' ----------------------------------------- */
+QString escapeEntities( const QString& str );
 
 
 /* malloc and free fns ------------------------------------------------- */

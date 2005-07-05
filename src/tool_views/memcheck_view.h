@@ -1,10 +1,16 @@
 /* ---------------------------------------------------------------------
- * definition of MemcheckView                            memcheck_view.h
+ * Definition of MemcheckView                            memcheck_view.h
+ * Memcheck's personal window
  * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
-#ifndef __VK_MEMCHECK_VIEW_H
-#define __VK_MEMCHECK_VIEW_H
+#ifndef __MEMCHECK_VIEW_H
+#define __MEMCHECK_VIEW_H
+
 
 #include "tool_view.h"
 #include "xml_parser.h"
@@ -16,7 +22,7 @@
 class XmlOutputItem : public QListViewItem
 {
 public:
-  XmlOutputItem( QListView * parent );
+  XmlOutputItem( QListView* parent );
   XmlOutputItem( QListViewItem* parent );
   XmlOutputItem( QListViewItem* parent, QListViewItem* after );
 
@@ -24,12 +30,12 @@ public:
   void setText( QString str );
   virtual XmlOutput::ItemType itemType() = 0;
   /* some make-life-simpler stuff */
-  XmlOutputItem * firstChild();
-  XmlOutputItem * nextSibling();
-  XmlOutputItem * parent();
+  XmlOutputItem* firstChild();
+  XmlOutputItem* nextSibling();
+  XmlOutputItem* parent();
 public:
   bool isReadable, isWriteable;
-  XmlOutput * xmlOutput;
+  XmlOutput* xmlOutput;
 };
 
 
@@ -41,11 +47,11 @@ class OutputItem : public XmlOutputItem
 {
 public:
   /* top-level status item */
-  OutputItem( QListView* parent, XmlOutput * output );
+  OutputItem( QListView* parent, XmlOutput* output );
   /* used for: preamble:line, info:argv + args, supp counts */
   OutputItem( OutputItem* parent, OutputItem* after, QString txt );
   /* everybody else */
-  OutputItem( OutputItem* parent, OutputItem* after, XmlOutput * output );
+  OutputItem( OutputItem* parent, OutputItem* after, XmlOutput* output );
 
   XmlOutput::ItemType itemType();
   void setOpen( bool open );
@@ -53,9 +59,9 @@ public:
                   int col, int width, int align );
 
   /* some make-life-simpler stuff */
-  OutputItem * firstChild();
-  OutputItem * nextSibling();
-  OutputItem * parent();
+  OutputItem* firstChild();
+  OutputItem* nextSibling();
+  OutputItem* parent();
 };
 
 
@@ -78,47 +84,42 @@ public:
   void setReadWrite( bool read, bool write );
 
 private:
-   QPixmap * pix;
+   QPixmap* pix;
 };
 
 
 /* class MemcheckView -------------------------------------------------- */
+class Memcheck;
 class MemcheckView : public ToolView
 {
   Q_OBJECT
 public:
-  MemcheckView( QWidget* parent, VkObject* obj );
+  MemcheckView( QWidget* parent, Memcheck* mc );
   ~MemcheckView();
 
-  bool run();
-  void stop();
+  /* called by memcheck: set state for buttons; set cursor state */
+  void setState( bool run );
+  /* clear and reset the listview for a new run */
   void clear();
+
+public slots:
+  void toggleToolbarLabels( bool );
 
   /* updates the top status item in the listview */
   void updateStatus();
-  void loadItem( XmlOutput * output );
-  void updateErrors( Counts * counts );
-
-public slots:
-  void parseOutput();
-  void saveParsedOutput();
-  void toggleToolbarLabels(bool);
+  void loadItem( XmlOutput* output );
+  void updateErrors( ErrCounts* ecounts );
 
 private:
-  bool parseLog();
-  bool mergeLogs();         /* parse and merge multiple log files */
-  bool validateLogFile(  const QString& log_file );
-  bool initParseOutput();
-  bool setup();
-	void toggleRunning( bool b );
   void mkMenuBar();
 
 private slots:
-	void openLogFile();       /* load and parse one log file */
-  void saveLogFile();       /* called by savelogButton */
+  void openLogFile();       /* load and parse one log file */
   void openMergeFile();     /* open and check a list of logfiles-to-merge */
+  void saveLogFile();       /* called by savelogButton */
 
   void showSuppEditor();
+
   void itemSelected();
   void openAllItems(bool);
   void openOneItem();
@@ -126,23 +127,16 @@ private slots:
   void launchEditor(  QListViewItem*, const QPoint&, int );
 
 private:
-  int currentPid;
+  QString logFilename;
 
-  QString inputData;
-	QString logFilename;
-	QFile logFile;
-	QTextStream logStream;
+  /* keep a ptr to parent tool so we can ask it to do stuff */
+  Memcheck* memcheck;
 
-  QListView * lView;
-  XMLParser * xmlParser;
-  QXmlSimpleReader reader;
-  QXmlInputSource source;
-
-  Valkyrie* valkyrie;
+  QListView* lView;
 
   QToolButton* savelogButton;
   QToolButton* openlogButton;
-	QToolButton* suppedButton;
+  QToolButton* suppedButton;
 
   QToolButton* openOneButton;
   QToolButton* openAllButton;

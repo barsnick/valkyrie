@@ -1,6 +1,10 @@
 /* ---------------------------------------------------------------------- 
  * Implemention of class SpinWidget                        intspinbox.cpp
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include <qapplication.h>
@@ -761,11 +765,11 @@ QSize IntSpin::sizeHint() const
     tw += w;
   }
   tw += controls->UpRect().width();
-  /* When we only have one section, the controls come out smaller, and
-     we need just a bit more width for the number. ho hum. */
+  /* when we only have one section, the controls come out smaller,
+     and we need just a bit more width for the number. ho hum. */
   if ( sections.count() == 1 ) {
     tw += fm.width("   ");
-	}
+  }
 
   return style().sizeFromContents( QStyle::CT_LineEdit, this,
      QSize(tw,h).expandedTo( QApplication::globalStrut() ));
@@ -901,8 +905,8 @@ void IntSpin::timerEvent( QTimerEvent * )
   overwrite = true; 
 }
 
-/* user might have typed a number. at this point, ed->focusSection()
-   hasn't yet changed. */
+/* user might have typed a number. 
+   at this point, ed->focusSection() hasn't yet changed. */
 void IntSpin::validate()
 {
   if ( !typing )

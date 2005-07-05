@@ -1,14 +1,19 @@
 /* ---------------------------------------------------------------------- 
- * Definition of OptionsPage                               options_page.h
+ * Definition of class OptionsPage                         options_page.h
  * 
- * Each vkObject has different options | flags | prefs, and creates
- * its own 'page', which is inherited from this base class.  The
- * 'page' is contained within the top-level Options Window.
+ * Each vkObject has different options | flags | prefs, and 
+ * creates its own 'page', which is inherited from this base class. 
+ * The 'page' is contained within the top-level Options Window.
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #ifndef __VK_OPTIONS_PAGE_H
 #define __VK_OPTIONS_PAGE_H
+
 
 #include <qapplication.h>
 #include <qgroupbox.h>
@@ -18,7 +23,6 @@
 #include <qradiobutton.h>
 
 #include "options_widgets.h"
-
 
 
 
@@ -53,10 +57,11 @@ protected:
 protected:
   bool mod; 
   int topSpace;
+	int space, margin;
 
   VkObject * vkObj;
 
-  /* Prime Numbers: 5, 7, 11, 13, 17, 19, 23, 29 */
+  /* prime numbers: 5, 7, 11, 13, 17, 19, 23, 29 */
   QIntDict<OptionWidget> itemList;
   QPtrList<OptionWidget> editList;
   QPtrList<OptionWidget> undoList;

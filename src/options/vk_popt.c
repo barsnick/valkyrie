@@ -1,5 +1,15 @@
+/* --------------------------------------------------------------------- 
+ * Implementation of Popt functions                            vk_popt.c
+ * This is a seriously hacked version of the popt libraries.
+ * No credit to me, all thanks and many apologies to the Red Hat team
+ * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
+ */
+
 #include "vk_popt.h"
-// #include "vk_utils.h"
 
 
 const char * vkPoptPeekArg( vkPoptContext con )
@@ -73,7 +83,7 @@ static const vkPoptOption * vkFindOption( const vkPoptOption * opt,
                                           char shortFlag, 
                                           int singleDash )
 {
-  /* This happens when a single - is given */
+  /* this happens when a single - is given */
   if ( singleDash && !shortFlag && (longFlag && *longFlag == '\0') )
     shortFlag = '-';
 
@@ -82,14 +92,14 @@ static const vkPoptOption * vkFindOption( const vkPoptOption * opt,
     if ( (opt->argType & ARG_MASK) == ARG_INC_TABLE ) {
       const vkPoptOption * opt2;
       
-      /* Recurse on included sub-tables. */
+      /* recurse on included sub-tables. */
       if ( opt->arg == NULL ) 
         continue;
       opt2 = vkFindOption( opt->arg, longFlag, 
                            shortFlag, singleDash );
       if ( opt2 == NULL )
         continue;
-      /* Sub-table data will be inherited if no data yet. */
+      /* sub-table data will be inherited if no data yet. */
       return opt2;
     } else if ( longFlag && opt->longFlag && !singleDash &&
                 !strcmp( longFlag, opt->longFlag ) ) {
@@ -152,7 +162,7 @@ int vkPoptGetNextOpt( vkPoptContext con, char *arg_val )
       return -1;
     }
 
-    /* Process next long option */
+    /* process next long option */
     if ( !con->os->nextCharArg ) {
       char * localOptString, * optString;
       int thisopt;
@@ -176,7 +186,7 @@ int vkPoptGetNextOpt( vkPoptContext con, char *arg_val )
         continue;
       }
 
-      /* Make a copy we can hack at */
+      /* make a copy we can hack at */
       localOptString = optString =
         strcpy(alloca(strlen(origOptString) + 1), origOptString);
 
@@ -207,15 +217,15 @@ int vkPoptGetNextOpt( vkPoptContext con, char *arg_val )
           longArg = origOptString + (oe - localOptString);
           /* FIX: catch cases where --longarg=<no-arg> */
           if ( strlen(longArg) == 0 ) {
-						printf("1: returning PERROR_NOARG\n");
+            //printf("1: returning PERROR_NOARG\n");
             return PERROR_NOARG;
-					}
+          }
         } 
 #if 0
-				else if ( singleDash == 0 ) {
+        else if ( singleDash == 0 ) {
           /* FIX: catch cases where we didn't find an '=', 
              and this is a --longarg option */
-					printf("2: returning PERROR_NOARG\n");
+          //printf("2: returning PERROR_NOARG\n");
           return PERROR_NOARG;
         } 
 #endif
@@ -223,7 +233,7 @@ int vkPoptGetNextOpt( vkPoptContext con, char *arg_val )
         opt = vkFindOption( con->options, optString, 
                             '\0', singleDash );
         if ( !opt && !singleDash ) {
-					printf("returning PERROR_BADOPT\n");
+          //printf("returning PERROR_BADOPT\n");
           return PERROR_BADOPT;
         }
       }
@@ -235,7 +245,7 @@ int vkPoptGetNextOpt( vkPoptContext con, char *arg_val )
       }
     }
 
-    /* Process next short option */
+    /* process next short option */
     if ( con->os->nextCharArg ) {
       origOptString = con->os->nextCharArg;
       con->os->nextCharArg = NULL;
@@ -383,8 +393,7 @@ static const char * vkGetHelpDesc( const vkPoptOption * opt )
 }
 
 
-/* called from singleTableHelp() when only one table is being
-   output */
+/* called from singleTableHelp() when only one table is being output */
 static void vkSingleOptionHelp( FILE * fp, 
                                 const vkPoptOption * opt )
 {
@@ -397,7 +406,7 @@ static void vkSingleOptionHelp( FILE * fp,
   char * left;
   int nb = leftColWidth + 1;
 
-  /* Make sure there's more than enough room in target buffer. */
+  /* make sure there's more than enough room in target buffer. */
   if ( opt->longFlag )  
     nb += strlen( opt->longFlag );
   if ( helpdesc )  
@@ -486,7 +495,7 @@ static int vkMaxArgWidth( const vkPoptOption * opt )
         if ( opt->arg )
           len = vkMaxArgWidth( opt->arg );
         if ( len > max ) 
-					max = len;
+          max = len;
       } else {
         len = sizeof("  ") - 1;
         if ( opt->shortFlag != '\0' )
@@ -512,7 +521,7 @@ static int vkMaxArgWidth( const vkPoptOption * opt )
 }
 
 
-/* This version prints nested tables first. swap 'em over if this
+/* this version prints nested tables first. swap 'em over if this
    isn't the behaviour you want. */
 static void vkSingleTableHelp( FILE * fp, const vkPoptOption * table )
 {
@@ -549,7 +558,6 @@ static void vkSingleTableHelp( FILE * fp, const vkPoptOption * table )
 void vkPoptPrintHelp( vkPoptContext con, FILE * fp,
                       const char * tableName )
 {
-	// printf("\nvkPoptPrintHelp() tableName = %s\n", tableName);
   const char * fn;
 
   fprintf( fp, "\nUsage:" );
@@ -566,13 +574,11 @@ void vkPoptPrintHelp( vkPoptContext con, FILE * fp,
   leftColWidth = vkMaxArgWidth( con->options );
 
   if ( tableName == NULL ) {
-		// printf("\ttableName == NULL\n");
     vkSingleTableHelp( fp, con->options );
   } else {
     /* trawl through con->options till we find the right table */
     const vkPoptOption * opt;
     for ( opt = con->options; opt != NULL; opt++ ) {
-			// printf("\topt->helptxt = %s\n", opt->helptxt );
       if ( strcmp( opt->helptxt, tableName ) == 0 ) {
         break;
       }

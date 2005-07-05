@@ -1,7 +1,12 @@
 /* ---------------------------------------------------------------------
- * Implementation of HelpInfo                              help_info.cpp
+ * Implementation of HelpAbout                            help_about.cpp
  * small tab dialog showing various information re licence etc.
- * --------------------------------------------------------------------- */
+ * --------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
+ */
 
 #include "help_about.h"
 #include "vk_config.h"
@@ -14,14 +19,15 @@
 /* class TextEdit ------------------------------------------------------ */
 TextEdit::~TextEdit() { }
 
-TextEdit::TextEdit( QWidget* parent, HelpInfo::TabId tabid, const char* name )
+TextEdit::TextEdit( QWidget* parent, HelpAbout::TabId tabid, 
+                    const char* name ) 
   : QTextEdit( parent, name )
 {
-	tabId = tabid;
+  tabId = tabid;
   loaded = false;
-  html_file.sprintf("%s%s.html", vkConfig->vkdocDir().ascii(), name );
+  html_file.sprintf("%s%s.html", vkConfig->vkdocDir().latin1(), name );
   setReadOnly( true );
-	setTextFormat( Qt::RichText );
+  setTextFormat( Qt::RichText );
 }
 
 bool TextEdit::load()
@@ -39,34 +45,35 @@ bool TextEdit::load()
   setUpdatesEnabled( false );
 
   QTextStream ts( &file );
-	switch( tabId ) {
-		case HelpInfo::ABOUT_VK:
-		case HelpInfo::SUPPORT:
-			/* FIXME: remove this after xml-ing the valkyrie docs */
+  switch( tabId ) {
+    case HelpAbout::ABOUT_VK:
+    case HelpAbout::SUPPORT:
+      /* TODO: remove this after xml-ing the valkyrie docs */
       setText( ts.read().arg(vkConfig->vkCopyright())
-							          .arg(vkConfig->vkAuthor()) );
-			break;
-		case HelpInfo::ABOUT_QT:
-			setText( ts.read().arg(qVersion()) );
-			break;
-		case HelpInfo::LICENCE:
-			setText( ts.read() );
-			break;
-	}
+                        .arg(vkConfig->vkAuthor()) );
+      break;
+    case HelpAbout::ABOUT_QT:
+      setText( ts.read().arg(qVersion()) );
+      break;
+    case HelpAbout::LICENCE:
+      setText( ts.read() );
+      break;
+  }
 
   setUpdatesEnabled( true );
+  loaded = true;
 
   return true;
 }
 
 
-/* class HelpInfo ------------------------------------------------------ */
-HelpInfo::~HelpInfo() { }
+/* class HelpAbout ----------------------------------------------------- */
+HelpAbout::~HelpAbout() { }
 
-HelpInfo::HelpInfo(  QWidget* parent, TabId tabid )  
+HelpAbout::HelpAbout(  QWidget* parent, TabId tabid )  
   : QDialog( parent, "help_about", true )
 {
-	title.sprintf( "%s Information", vkConfig->vkName() );
+  title.sprintf( "%s Information", vkConfig->vkName() );
   setCaption( title );
 
   /* top layout */
@@ -84,8 +91,8 @@ HelpInfo::HelpInfo(  QWidget* parent, TabId tabid )
   /* app info */
   QString str; 
   QLabel* appName = new QLabel( this );
-	str.sprintf( "%s %s", vkConfig->vkName(), vkConfig->vkVersion() );
-	appName->setText( str );
+  str.sprintf( "%s %s", vkConfig->vkName(), vkConfig->vkVersion() );
+  appName->setText( str );
   appName->setFont(QFont( "Times", 18, QFont::Bold) );
   appName->setFixedSize( appName->sizeHint() );
   hbox->addWidget( appName );
@@ -102,7 +109,7 @@ HelpInfo::HelpInfo(  QWidget* parent, TabId tabid )
     
   /* about_vk tab */
   aboutVk = new TextEdit( tabParent, ABOUT_VK, "about_vk" );
-	str.sprintf( "About %s", vkConfig->vkName() );
+  str.sprintf( "About %s", vkConfig->vkName() );
   tabParent->insertTab( aboutVk, str, ABOUT_VK );
 
   /* about qt tab */
@@ -130,7 +137,7 @@ HelpInfo::HelpInfo(  QWidget* parent, TabId tabid )
   resize( 420, 350 );
 }
 
-void HelpInfo::showTab( QWidget* tab )
+void HelpAbout::showTab( QWidget* tab )
 {
   TabId tabid = (TabId)tabParent->indexOf( tab );
 

@@ -1,4 +1,16 @@
+/* --------------------------------------------------------------------- 
+ * Parse command-line options                         parse_cmd_args.cpp
+ * Called from main()
+ * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
+ */
+
 #include "vk_objects.h"
+#include "valkyrie_object.h"  /* for obj->checkOptArg(...); */
+
 #include "vk_utils.h"
 #include "vk_popt.h"
 #include "vk_config.h"
@@ -20,17 +32,17 @@ int showHelp( vkPoptContext con, int key )
   case 'h':
     vkPoptPrintHelp( con, stdout, "Valkyrie options:" );
     printf( "\n%s is copyright %s %s\n"
-						"and licensed under the GNU General Public License, version 2.\n"
-						"Bug reports, feedback, praise, abuse, etc, to <%s>\n\n",
-						vkConfig->vkName(), vkConfig->vkCopyright(), 
-						vkConfig->vkAuthor(), vkConfig->vkEmail() );
+            "and licensed under the GNU General Public License, version 2.\n"
+            "Bug reports, feedback, praise, abuse, etc, to <%s>\n\n",
+            vkConfig->vkName(), vkConfig->vkCopyright(), 
+            vkConfig->vkAuthor(), vkConfig->vkEmail() );
     break;
 
   case 'V':
     vkPoptPrintHelp( con, stdout, NULL );
     printf("\n%s is copyright %s %s\n", 
-					 vkConfig->vkName(), 
-					 vkConfig->vkCopyright(), vkConfig->vkAuthor() );
+           vkConfig->vkName(), 
+           vkConfig->vkCopyright(), vkConfig->vkAuthor() );
     printf("Valgrind is copyright %s\n\n", vkConfig->vgCopyright() );
     break;
 
@@ -62,47 +74,47 @@ int parseCmdArgs( int argc, char** argv )
   char argVal[512];       // store argument values for checking
 
   VkObjectList objList = vkConfig->vkObjList();
-	int num_objs = objList.count();
+  int num_objs = objList.count();
   vkPoptOption allOptions[num_objs+1];
 
-	int i = 0;
-	QString name_str;
+  int i = 0;
+  QString name_str;
   VkObject* obj;
-	for ( obj = objList.first(); obj; obj = objList.next() ) {
+  for ( obj = objList.first(); obj; obj = objList.next() ) {
 
-		name_str.sprintf( "%s options:", obj->title().ascii() ); 
-		allOptions[i].argType   = ARG_INC_TABLE;
-		allOptions[i].shortFlag = '\0';
-		allOptions[i].longFlag  = NULL;
-		allOptions[i].arg       = obj->poptOpts();
-	  allOptions[i].val       = 0;
-		allOptions[i].helptxt   = vk_strdup( name_str.ascii() );
-		allOptions[i].helpdesc  = NULL;
+    name_str.sprintf( "%s options:", obj->title().latin1() ); 
+    allOptions[i].argType   = ARG_INC_TABLE;
+    allOptions[i].shortFlag = '\0';
+    allOptions[i].longFlag  = NULL;
+    allOptions[i].arg       = obj->poptOpts();
+    allOptions[i].val       = 0;
+    allOptions[i].helptxt   = vk_strdup( name_str.latin1() );
+    allOptions[i].helpdesc  = NULL;
 
-		i++;
-	}
+    i++;
+  }
 
-	/* null entry terminator */
-	allOptions[i].argType   = 0;
-	allOptions[i].shortFlag = '\0';
-	allOptions[i].longFlag  = NULL;
-	allOptions[i].arg       = 0;
-	allOptions[i].val       = 0;
-	allOptions[i].helptxt   = NULL;
-	allOptions[i].helpdesc  = NULL;
+  /* null entry terminator */
+  allOptions[i].argType   = 0;
+  allOptions[i].shortFlag = '\0';
+  allOptions[i].longFlag  = NULL;
+  allOptions[i].arg       = 0;
+  allOptions[i].val       = 0;
+  allOptions[i].helptxt   = NULL;
+  allOptions[i].helpdesc  = NULL;
 
-	/* context for parsing cmd-line opts */
+  /* context for parsing cmd-line opts */
   vkPoptContext optCon = vkPoptGetContext( argc, (const char**)argv, 
-																					 allOptions ); 
+                                           allOptions ); 
 
   /* process the options */ 
   while ( (rc = vkPoptGetNextOpt( optCon, argVal ) ) >= 0 ) {
 
-		if ( rc == 'h' || rc == 'v' || rc == 'V' ) {
-			return showHelp( optCon, rc );
-		} else {
-			errVal = VkObject::checkArg( rc, argVal );
-		}
+    if ( rc == 'h' || rc == 'v' || rc == 'V' ) {
+      return showHelp( optCon, rc );
+    } else {
+      errVal = VkObject::checkArg( rc, argVal );
+    }
 
     if ( errVal != PARSED_OK ) {
       return parseError( optCon, errVal );
@@ -115,13 +127,13 @@ int parseCmdArgs( int argc, char** argv )
     return parseError( optCon, rc );
   }
 
-  /* Get the leftovers: should only be 'myprog --myflags'.  Check we
-		 really do have the right prog-to-debug here.  If yes, then all
-		 flags that follow it on the cmd line are assumed to belong to it. */
+  /* get the leftovers: should only be 'myprog --myflags'.  check we
+     really do have the right prog-to-debug here.  if yes, then all
+     flags that follow it on the cmd line are assumed to belong to it. */
   if ( vkPoptPeekArg(optCon) != NULL ) {
-		obj    = vkConfig->vkObject( "valkyrie" );
+    obj    = vkConfig->vkObject( "valkyrie" );
     errVal = obj->checkOptArg( Valkyrie::BINARY, vkPoptGetArg(optCon) );
-    if ( errVal != 0 )
+    if ( errVal != PARSED_OK )
       return parseError( optCon, errVal );
   }
 
@@ -135,19 +147,19 @@ int parseCmdArgs( int argc, char** argv )
       i++;
     }
     QString flags = aList.join( " " );
-		obj    = vkConfig->vkObject( "valkyrie" );
+    obj    = vkConfig->vkObject( "valkyrie" );
     errVal = obj->checkOptArg( Valkyrie::BIN_FLAGS, flags.latin1() );
-    if ( errVal != 0 )
+    if ( errVal != PARSED_OK )
       return parseError( optCon, errVal );
   }
 
 
-	i = 0;
-	for ( obj = objList.first(); obj; obj = objList.next() ) {
-		vkPoptOption * args = (vkPoptOption*)allOptions[i].arg;
-		obj->freePoptOpts( args );
-		i++;
-	}
+  i = 0;
+  for ( obj = objList.first(); obj; obj = objList.next() ) {
+    vkPoptOption * args = (vkPoptOption*)allOptions[i].arg;
+    obj->freePoptOpts( args );
+    i++;
+  }
 
   vkPoptFreeContext( optCon ); 
 

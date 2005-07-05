@@ -1,34 +1,38 @@
 /* ---------------------------------------------------------------------
-   Implementation of WorkSpace                             workspace.cpp
-   ---------------------------------------------------------------------
-*/
+ * Implementation of WorkSpace                             workspace.cpp
+ * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
+ */
 
 #include "workspace.h"
 
 #include <qwindowsstyle.h>
 
+
 /* subclass of QStyle so that QWorkspace doesn't show the window
    controls when windows are maximised (sigh) */
-// if (!style().styleHint(QStyle::SH_Workspace_FillSpaceOnMaximize, this))
 class VkStyle : public QWindowsStyle
 {
 public:
-	VkStyle() { }
+  VkStyle() { }
   ~VkStyle() { }
   int styleHint( StyleHint sh, const QWidget* w, 
-								 const QStyleOption & opt = QStyleOption::Default,
-								 QStyleHintReturn* ret = 0 ) const;
+                 const QStyleOption & opt = QStyleOption::Default,
+                 QStyleHintReturn* ret = 0 ) const;
 };
 
-int VkStyle::styleHint( StyleHint hint,	const QWidget *w,
-												const QStyleOption &opt,
-												QStyleHintReturn *ret ) const
+int VkStyle::styleHint( StyleHint hint,  const QWidget *w,
+                        const QStyleOption &opt,
+                        QStyleHintReturn *ret ) const
 {
-	if ( hint == QStyle::SH_Workspace_FillSpaceOnMaximize ) {
-		return 1;
-	} else {
-		return QWindowsStyle::styleHint( hint, w, opt, ret );
-	}
+  if ( hint == QStyle::SH_Workspace_FillSpaceOnMaximize ) {
+    return 1;
+  } else {
+    return QWindowsStyle::styleHint( hint, w, opt, ret );
+  }
 }
 
 
@@ -40,8 +44,8 @@ WorkSpace::~WorkSpace() { }
 WorkSpace::WorkSpace( QWidget* parent, const char* name )
   : QWorkspace( parent, name )
 {
-	VkStyle * vs = new VkStyle();
-	setStyle( vs );
+  VkStyle * vs = new VkStyle();
+  setStyle( vs );
   /* can't just connect signals, because different arg types */
   connect( this, SIGNAL(windowActivated(QWidget*)),
            this, SLOT(slotWindowActivated(QWidget*)) );
@@ -81,7 +85,8 @@ QPtrList<ToolView> WorkSpace::viewList() const
   return view_list;
 }
 
-/* find toolview based on viewId. if none exists, returns 0 */
+/* find a toolview based on its object's ObjectId. 
+   if none exists, returns 0 */
 ToolView* WorkSpace::findView( int view_id ) const
 {
   QPtrList<ToolView> views = viewList();

@@ -1,6 +1,10 @@
 /* ---------------------------------------------------------------------
- * definition of WorkSpace                                   workspace.h
+ * Definition of class WorkSpace                             workspace.h
  * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #ifndef __VK_WORKSPACE_H
@@ -12,7 +16,7 @@
 #include "tool_view.h"
 
 
-/* Simple subclass of QWorkspace to remove constant casting in
+/* simple subclass of QWorkspace to remove constant casting in
    MainWindow.  Better way to do this? */
 class WorkSpace : public QWorkspace
 {

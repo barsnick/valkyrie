@@ -1,11 +1,15 @@
 /* ---------------------------------------------------------------------- 
  * Implementation of MassifOptionsPage            massif_options_page.cpp
- * subclass of OptionsPage to hold massif-specific options | flags.
+ * Subclass of OptionsPage to hold massif-specific options | flags.
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include "massif_options_page.h"
-#include "vk_objects.h"
+#include "massif_object.h"
 #include "vk_utils.h"
 
 
@@ -16,8 +20,6 @@ MassifOptionsPage::MassifOptionsPage( QWidget* parent, VkObject* obj )
   unsigned int numItems = 7;
   itemList.resize( numItems );
 
-  int space  = 5;  /* no. of pixels between cells */
-  int margin = 11; /* no. of pixels to edge of widget */
   /* top layout: margin = 10; spacing = 25 */
   QVBoxLayout* vbox = new QVBoxLayout( this, 10, 25, "vbox" );
 
@@ -83,49 +85,8 @@ MassifOptionsPage::MassifOptionsPage( QWidget* parent, VkObject* obj )
    Also called when Cancel button is clicked, to reset toggled values */
 bool MassifOptionsPage::applyOptions( int, bool )
 { 
-	VK_DEBUG( "nothing implemented in here yet" );
-	return true;
+  VK_DEBUG( "nothing implemented in here yet" );
+  return true;
 }
 
 
-
-/*
-HEAP,                   Option::ARG_BOOL,       Option::CHECK,
-"massif",               '\0',                   "heap",
-"<yes|no>",             "yes|no",               "yes",
-"Profile heap blocks",  "profile heap blocks",   urlMassifHeap );
-
-HEAP_ADMIN,             Option::ARG_UINT,        Option::SPINBOX, 
-"massif",               '\0',                    "heap-admin", 
-"<number>",             "4|15",                  "8",
-"Average admin bytes per heap block:",
-"average admin bytes per heap block",            urlMassifHeapAdmin );
-
-STACKS,                 Option::ARG_BOOL,        Option::CHECK,
-"massif",               '\0',                    "stacks",
-"<yes|no>",             "yes|no",                "yes",
-"Profile stack(s)",     "profile stack(s)",      urlMassifStacks );
-
-DEPTH,                  Option::ARG_UINT,        Option::SPINBOX, 
-"massif",               '\0',                    "depth", 
-"<number>",             "1|20",                  "3",
-"Depth of contexts:",   "depth of contexts",     urlMassifDepth );
-
-ALLOC_FN,               Option::ARG_STRING,      Option::LEDIT, 
-"massif",               '\0',                    "alloc-fn", 
-"<name>",               "",                      "empty",
-"Specify <fn> as an alloc function:",
-"specify <fn> as an alloc function",             urlMassifAllocFn );
-
-FORMAT,                 Option::ARG_STRING,      Option::COMBO,  
-"massif",               '\0',                   "format",
-"<text|html|xml>",      "text|html|xml",        "text",
-"Format of textual output:",
-"format of textual output",                     urlMassifFormat );
-
-ALIGNMENT,              Option::ARG_UINT,       Option::SPINBOX, 
-"massif",               '\0',                   "alignment", 
-"<number>",             "8|1048576",            "8",
-"Minimum alignment of allocations:",
-"set minimum alignment of allocations",         urlCoreAlignment );
-*/

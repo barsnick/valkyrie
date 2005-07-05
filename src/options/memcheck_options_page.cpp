@@ -1,11 +1,15 @@
 /* ---------------------------------------------------------------------- 
  * Implementation of MemcheckOptionsPage        memcheck_options_page.cpp
- * subclass of OptionsPage to hold memcheck-specific options | flags.
+ * Subclass of OptionsPage to hold memcheck-specific options | flags.
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include "memcheck_options_page.h"
-#include "vk_objects.h"
+#include "memcheck_object.h"
 #include "vk_utils.h"
 #include "vk_msgbox.h"
 
@@ -18,8 +22,6 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
   unsigned int numItems = 11;
   itemList.resize( numItems );
 
-  int space  = 5;  /* no. of pixels between cells */
-  int margin = 11; /* no. of pixels to edge of widget */
   /* top layout: margin = 10; spacing = 25 */
   QVBoxLayout* vbox = new QVBoxLayout( this, 10, 25, "vbox" );
 
@@ -82,8 +84,8 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
 }
 
 
-/* Called when user clicks "Apply" or "Ok" button.  
-   Also called when Cancel button is clicked, to reset toggled values */
+/* called when user clicks "Apply" or "Ok" button.  
+   also called when Cancel button is clicked, to reset toggled values */
 bool MemcheckOptionsPage::applyOptions( int id, bool/*=false*/ )
 { 
   bool retval = true;
@@ -103,8 +105,7 @@ bool MemcheckOptionsPage::applyOptions( int id, bool/*=false*/ )
 
     default:
       break;
-
-	}
+  }
 
   return retval;
 }

@@ -1,14 +1,22 @@
 /* ---------------------------------------------------------------------
- * implementation of MemcheckView                      memcheck_view.cpp
+ * Implementation of MemcheckView                      memcheck_view.cpp
+ * Memcheck's personal window
  * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include "memcheck_view.h"
+#include "memcheck_object.h"
+
 #include "vk_config.h"
 #include "tb_memcheck_icons.h"
-#include "vk_utils.h"
 #include "async_process.h"
 #include "vk_msgbox.h"
+#include "context_help.h"
+#include "html_urls.h"
 
 #include <qcursor.h>
 #include <qfiledialog.h>
@@ -29,24 +37,13 @@ MemcheckView::~MemcheckView()
 { 
   delete lView;
   lView = 0;
-
-  if ( xmlParser ) {
-    delete xmlParser;
-    xmlParser = 0;
-  }
-  if ( proc ) {
-    killProc();
-    //delete proc;
-    //proc = 0;
-  }
 }
 
 
-
-MemcheckView::MemcheckView( QWidget* parent, VkObject* obj )
-  : ToolView( parent, obj )
+MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
+  : ToolView( parent, mc->name(), mc->id() )
 {
-  valkyrie = (Valkyrie*)vkConfig->vkObject( "valkyrie" );
+  memcheck = mc;
 
   mkMenuBar();
 
@@ -65,17 +62,10 @@ MemcheckView::MemcheckView( QWidget* parent, VkObject* obj )
   setFocusProxy( lView );
   setCentralWidget( lView );
 
-	/* create the xml parser */
-	xmlParser = new XMLParser( this );
-	reader.setContentHandler( xmlParser );
-	reader.setErrorHandler( xmlParser );
-
   savelogButton->setEnabled( false );
   openOneButton->setEnabled( false );
   openAllButton->setEnabled( false );
   srcPathButton->setEnabled( false );
-
-	toggleRunning( false );
 
   /* enable | disable show*Item buttons */
   connect( lView, SIGNAL(selectionChanged()),
@@ -86,31 +76,30 @@ MemcheckView::MemcheckView( QWidget* parent, VkObject* obj )
 }
 
 
+/* clear and reset the listview for a new run */
 void MemcheckView::clear()
-{ lView->clear(); }
-
-
-void MemcheckView::stop() 
-{ killProc(); }
-
-
-/* set state for MainWin's run, restart, stop buttons, as well as our own */
-void MemcheckView::toggleRunning( bool run )
-{
-	is_Running = run;
-  emit running( is_Running );
-	openlogButton->setEnabled( !is_Running );
-	savelogButton->setEnabled( !is_Running );
-
-  if ( is_Running ) {  /* startup */
-		setCursor( QCursor(Qt::WaitCursor) );
-	} else {             /* finished */
-		unsetCursor();
-	}
+{ 
+  lView->clear(); 
 }
 
 
-/* Called by MainWin when user toggles 'show-butt-text' via Options page */
+/* called by memcheck: set state for buttons; set cursor state */
+void MemcheckView::setState( bool run )
+{
+  openlogButton->setEnabled( !run );
+  //TODO: suppedButton->setEnabled( !run );
+  if ( run ) {       /* startup */
+    savelogButton->setEnabled( false );
+    setCursor( QCursor(Qt::WaitCursor) );
+  } else {           /* finished */
+    unsetCursor();
+    savelogButton->setEnabled( lView->childCount() != 0 );
+  }
+}
+
+
+/* slot: connected to MainWindow::toggleToolbarLabels(). 
+   called when user toggles 'show-butt-text' in Options page */
 void MemcheckView::toggleToolbarLabels( bool state )
 {
   openlogButton->setUsesTextLabel( state );
@@ -119,361 +108,80 @@ void MemcheckView::toggleToolbarLabels( bool state )
 }
 
 
-/* Choices of what we are supposed to be doing are:
-   o Valkyrie::RunMode == modeParseLog:
-     - user specified --view-log on the cmd-line: MainWin calls run()
-     - user clicked openLogFile menu:             openLogFile() calls run()
-   o Valkyrie::RunMode == modeMergeLogs:
-     - user specified --merge on the cmd-line:    MainWin calls run()
-     - user clicked mergeLogFile menu:            openMergeFile() calls run()
-   o Valkyrie::RunMode == modeParseOutput:
-     - just run valgrind with all args, incl. --xml=yes
-*/
-bool MemcheckView::run()
-{
-  /* already doing stuff */
-  if ( is_Running ) {
-    vkInfo( this, "Memcheck Run", 
-            "<p>Currently engaged. Try again later.</p>" );
-    return is_Running;
-  }
-
-	/* start setting things up */
-	bool ok = true;
-	currentPid  = -1;
-	toggleRunning( true );
-
-	/* reset, clear and initialise the parser and the input source */
-	xmlParser->reset();
-	source.reset();
-
-	switch ( valkyrie->runMode ) {
-
-		/* what-to-do wasn't specified on the cmd-line, so find out */
-		case Valkyrie::modeNotSet: {
-			ok = setup();
-		} break;
-
-		case Valkyrie::modeParseLog: {
-			ok = parseLog();
-		} break;
-
-		case Valkyrie::modeMergeLogs: {
-			ok = mergeLogs();
-		} break;
-
-		case Valkyrie::modeParseOutput: {
-			ok = initParseOutput();
-		} break;
-
-	}   /* end switch ( valkyrie->runMode ) */
-
-	toggleRunning( false );
-	return is_Running;
-}
-
-
-/* what-to-do wasn't specified on the cmd-line, so find out, or make
-   some arbitrary decision :) */
-bool MemcheckView::setup()
-{
-	printf("TODO: setup()\n");
-	return false;
-}
-
-
-/* Called from run().  Either a logfile was specified on the cmd-line,
-   or has been set via the open-file-dialog.  Either way, the value in
-   [valkyrie:view-log] is what we need to know. */
-bool MemcheckView::parseLog()
-{
-	bool ok = false;
-  logFilename = vkConfig->rdEntry( "view-log", "valkyrie" );
-  logFile.setName( logFilename );
-  if ( !logFile.open( IO_ReadOnly ) ) {
-    vkError( this, "Open File Error", 
-             "<p>Unable to open logfile '%s'</p>", logFilename.ascii() );
-    return ok;
-  }
-	QFileInfo fi( logFilename );
-	emit message( "Parsing: " + fi.fileName() );
-
-  int lineNumber = 1;
-  QTextStream stream( &logFile );
-  stream.setEncoding( QTextStream::UnicodeUTF8 );
-  inputData = stream.readLine();
-  source.setData( inputData );
-  ok = reader.parse( &source, true );
-
-  while ( !stream.atEnd() ) {
-    lineNumber++;
-    inputData = stream.readLine();
-    source.setData( inputData );
-    ok = reader.parseContinue();
-    if ( !ok ) {
-      vkError( this, "Parse Error", 
-               "<p>Parsing failed on line no %d: '%s'</p>", 
-               lineNumber, inputData.ascii() );
-      break;
-    }
-  }
-
-	logFile.close();
-	if ( !ok )
-		emit message( "Failed: " + fi.fileName() );
-	else
-		emit message( "Finished: " + fi.fileName() );
-	return ok;
-}
-
-
-/* Called from run().  Initialises the auto-save filename and stream,
-   resets the parser and its reader, connects proc to a specified fd */
-bool MemcheckView::initParseOutput()
-{
-	bool ok = false;
-
-	/* double-check the --xml flag hasn't been set to no */
-  if ( !vkConfig->rdBool( "xml", "valgrind" ) ) {
-		vkInfo( this, "Invalid Format", 
-						"<p>valkyrie cannot parse text output.</p>"
-						"<p>Reset the flag to --xml=yes.</p>" );
-		return ok;
-	}
-
-	/* setup auto-save valgrind's xml output to file */
-	logFilename = vk_mkstemp( "output-log", vkConfig->logsDir() );
-	logFile.setName( logFilename );
-	if ( ! logFile.open( IO_WriteOnly ) ) { 
-		VK_DEBUG("failed to open logfile '%s' for writing", 
-						 logFilename.ascii() );
-		ok = false;
-	} else {
-		logStream.setDevice( &logFile );
-		inputData = "";
-		source.setData( inputData );
-		/* tell the parser we are parsing incrementally */
-		reader.parse( &source, true );
-
-		/* fork a new process in non-blocking mode */
-		if ( proc == 0 ) proc = new QProcess( this );
-		/* stuff the cmd-line flags/non-default opts into the process */
-		proc->setArguments( flags );
-
-		/* connect the pipe to this toolview on stdout || stderr */
-		int fd_out = vkConfig->rdInt( "log-fd", "valgrind" );
-		if ( fd_out == 1 ) {           /* stdout */
-			connect( proc, SIGNAL( readyReadStdout() ),
-							 this, SLOT( parseOutput() ) );
-		} else if ( fd_out == 2 ) {    /* stderr */
-			connect( proc, SIGNAL( readyReadStderr() ),
-							 this, SLOT( parseOutput() ) );
-		} else {
-			vk_assert_never_reached();
-		}
-
-		/* tell MainWin when valgrind has exited */
-		connect( proc, SIGNAL( processExited() ),
-						 this, SLOT( saveParsedOutput() ) );
-		ok = proc->start();
-	}
-
-	return ok;
-}
-
-
-/* Slot, connected to proc's signal readyReadStd***().
-   Read and process the data, which might be output in chunks.
-   Xml output is auto-saveed to a logfile in ~/.valkyrie-X.X.X/logs/ */
-void MemcheckView::parseOutput()
-{
-  bool ok;
-  while ( proc->canReadLineStderr() ) {
-    inputData = proc->readLineStderr();
-    /* auto-save output to a tmp unique logfile */
-    logStream << inputData << "\n";
-    source.setData( inputData );
-    ok = reader.parseContinue();
-    if ( !ok ) {
-      vkError( this, "Parse Error", 
-               "<p>Parsing failed on line: '%s'</p>", inputData.ascii() );
-      break;
-    }
-  }
-}
-
-
-/* Slot, connected to proc's signal processExited().
-   Parsing of valgrind's output is finished, successfully or otherwise.
-   If the user passed either 'log-file' or 'log-file-exactly' on the
-   cmd-line, save the output immediately to whatever they specified.
-   log-file == file.pid || log-file-exactly == file.name */
-void MemcheckView::saveParsedOutput()
-{ 
-	is_Edited = true;
-	/* un-setup auto-save log stuff */
-  logFile.close();
-  logStream.unsetDevice();
-
-  /* try for --log-file-exactly first */
-  QString save_fname = vkConfig->rdEntry( "log-file-exactly","memcheck" );
-  if ( save_fname.isEmpty() ) {
-    /* try with --log-file */
-    save_fname = vkConfig->rdEntry( "log-file","memcheck" );
-    if ( !save_fname.isEmpty() && currentPid != -1 ) {
-      /* tack the pid on the end */
-			save_fname += "." + QString::number( currentPid );
-		}
-	}
-
-	/* there's nothing else we can do; let the user decide */
-  if ( save_fname.isEmpty() ) {
-		return;
-	}
-
-	QFileInfo fi( save_fname );
-	if ( fi.dirPath() == "." ) {
-		/* no filepath given, so save in default dir */
-		save_fname = vkConfig->logsDir() + save_fname;
-	} else {
-		/* found a path: make sure it's the absolute version */
-		save_fname = fi.dirPath( true ) + "/" + fi.fileName();
-	}
-	fi.setFile( save_fname );
-	/* if this filename already exists, check if we should over-write it */
-	if ( fi.exists() ) {
-		int ok = vkQuery( this, 2, "Overwrite File",
-											"<p>Over-write existing file '%s' ?</p>", 
-											save_fname.ascii() );
-		if ( ok == MsgBox::vkNo ) {
-			return;
-		}
-	}
-
-	/* move (rename, actually) the auto-named log-file */
-	fi.setFile( logFilename );
-	QDir dir( fi.dir() );
-	if ( dir.rename( fi.fileName(), save_fname ) ) {
-		logFilename = save_fname;
-		is_Edited = false;
-	} else {
-		VK_DEBUG("Failed to rename logfile '%s'", save_fname.ascii() );
-	}
-
-}
-
-
-/* Slot: called from logMenu. Parse and load a single logfile.
-	 Setting the open-file-dialog's 'start-with' dir to null causes it
-	 to start up in whatever the user's current dir happens to be. */
+/* slot: called from logMenu. Parse and load a single logfile.
+   Setting the open-file-dialog's 'start-with' dir to null causes it
+   to start up in whatever the user's current dir happens to be. */
 void MemcheckView::openLogFile()
 { 
-	QString log_file;
-	log_file = QFileDialog::getOpenFileName( QString::null,
+  QString log_file;
+  log_file = QFileDialog::getOpenFileName( QString::null,
                 "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)", 
                 this, "fdlg", "Select Log File" );
   /* user might have clicked Cancel */
   if ( log_file.isEmpty() )
     return;
 
-	valkyrie->runMode = Valkyrie::modeNotSet;
-	if ( validateLogFile( log_file ) ) {
-		run();
-  }
-
+  vkConfig->wrEntry( log_file, "view-log", "valkyrie" );
+  memcheck->parseLogFile( false );
 }
 
 
-/* Slot: called from savelogButton. Opens a dialog so user can choose
-   a filename to save the currently loaded logfile to. */
-void MemcheckView::saveLogFile()
-{
-	QString fname;
-  fname = QFileDialog::getSaveFileName( QString::null, 
-                "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)", 
-                this, "fdlg", "Save Log File" );
-  if ( fname.isEmpty() ) 
-    return;
-
-	printf("TODO: save currently loaded output to file\n" );
-}
-
-
-/* Checks logfile 'log_file' re existence, user perms, xml format.
-	 Uses vkObject::checkOptArg(); if checks are passed, sets
-	 Valkyrie::RunMode to VIEW_LOG */
-bool MemcheckView::validateLogFile( const QString& log_file )
-{
-	const char* argval = log_file.latin1();
-	int errval = valkyrie->checkOptArg( Valkyrie::VIEW_LOG, argval );
-	if ( errval != PARSED_OK ) {
-		vkError( this, "Invalid File", "%s:\n\"%s\"", 
-						 parseErrString(errval), argval );
-		return false;
-	}
-
-  return true;
-}
-
-
-/* Called from run().  Either --merge=file-list was specified on the
-   cmd-line, or has been set via the open-file-dialog.  Either way,
-   the value in [valkyrie:merge] is what we need to know */
-bool MemcheckView::mergeLogs()
-{
-	bool ok = false;
-
-  logFilename = vkConfig->rdEntry( "merge", "valkyrie" );
-  logFile.setName( logFilename );
-  if ( !logFile.open( IO_ReadOnly ) ) {
-    vkError( this, "Open File Error", 
-             "<p>Unable to open logfile '%s'</p>", logFilename.ascii() );
-    return ok;
-  }
-
-	QTextStream stream( &logFile );
-	QStringList files;
-	while ( !stream.atEnd() ) {
-		QString tmp = stream.readLine().simplifyWhiteSpace();
-		if ( !tmp.isEmpty() ) 
-			files << tmp;
-	}
-	logFile.close();
-	/* check there is a minimum of two files-to-merge */
-	if ( files.count() < 2 ) {
-		vkError( this, "Merge LogFiles Error", 
-						 "<p>The minimum number of files required is 2;"
-						 " the file '%s' contains only %d.</p>", 
-						 logFilename.ascii(), files.count() );
-		return ok;
-	}
-
-	/* as we iterate through the list, check each file format */
-  for ( unsigned int i=0; i<files.count(); i++ ) {
-		printf("--> ok = validateLogFile( files[i];\n");
-	}
-
-	return ok;
-}
-
-
-/* Slot: called from logMenu.  Open a file which contains a list of
-	 logfiles-to-be-merged, each on a separate line, with a minimum of
-	 two logfiles. All filechecks are done by mergeLogs(), as we will
-	 then merely skip any files which can't be read for some reason. */
+/* slot: called from logMenu.  Open a file which contains a list of
+   logfiles-to-be-merged, each on a separate line, with a minimum of
+   two logfiles. */
 void MemcheckView::openMergeFile()
 {
-	QString merge_file;
-	merge_file = QFileDialog::getOpenFileName( QString::null,
+  QString merge_file;
+  merge_file = QFileDialog::getOpenFileName( QString::null,
                 "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)", 
                 this, "fdlg", "Select Log File" );
   /* user might have clicked Cancel */
   if ( merge_file.isEmpty() )
     return;
 
-	valkyrie->runMode = Valkyrie::modeMergeLogs;
   vkConfig->wrEntry( merge_file, "merge", "valkyrie" );
-	run();
+  /* returns the filename the merge has been saved to */
+  memcheck->mergeLogFiles();
+}
+
+
+/* slot: called from savelogButton. Opens a dialog so user can choose
+   a (different) filename to save the currently loaded logfile to. 
+   FIXME: this functionality is already in memcheck, so just get it to
+   do this. */
+void MemcheckView::saveLogFile()
+{
+  logFilename = vkConfig->rdEntry( "view-log", "valkyrie" );
+  QFileInfo fi( logFilename );
+  QString fname = QFileDialog::getSaveFileName( fi.dirPath(), 
+                  "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)", 
+                  this, "fdlg", "Save Log File As" );
+  if ( fname.isEmpty() ) 
+    return;
+
+  /* don't do anything if user has chosen the same file to save to */
+  if ( logFilename == fname ) {
+    vkInfo( this, "Save File As",
+            "<p>You've chosen the same file to save to, "
+            "so there's nothing for me to do.</p." );
+    return;
+  }
+
+  /* all we have to do is rename the current logfile, because either:
+     - we've just displayed a currently existing logfile;
+     - we've just parsed output directly from valgrind, which was
+       auto-saved at parse-time to vkConfig->logsDir(). */
+  fi.setFile( logFilename );
+  QDir dir( fi.dir( true ) );
+  /* save (rename, actually) the log-file */
+  if ( dir.rename( fi.fileName(), fname ) ) {
+    logFilename = fname;
+    memcheck->statusMsg( "Saved", logFilename );
+  } else {
+    vkInfo( this, "Save Failed", "<p>Failed to save file to '%s'",
+            fname.latin1() );
+  }
+
 }
 
 
@@ -492,9 +200,10 @@ void MemcheckView::mkMenuBar()
   openAllButton->setToggleButton( true );
   connect( openAllButton, SIGNAL( toggled(bool) ), 
            this,          SLOT( openAllItems(bool) ) );
+  mcMenu->insertItem( openAllButton, -1, index );
   QToolTip::add( openAllButton, 
                  "Open / Close all errors (and their call chains)" );
-  mcMenu->insertItem( openAllButton, -1, index );
+  ContextHelp::add( openAllButton, urlValkyrie::Dummy );
 
   /* open-one item button ---------------------------------------------- */
   index++;
@@ -503,9 +212,10 @@ void MemcheckView::mkMenuBar()
   openOneButton->setAutoRaise( true );
   connect( openOneButton, SIGNAL( clicked() ), 
            this,          SLOT( openOneItem() ) );
-  QToolTip::add( openOneButton, 
-                 "Open / Close the selected error" );
   mcMenu->insertItem( openOneButton, -1, index );
+  QToolTip::add( openOneButton, 
+                 "Open / Close the selected item" );
+  ContextHelp::add( openOneButton, urlValkyrie::Dummy );
 
   /* show src path button ---------------------------------------------- */
   index++;
@@ -514,9 +224,10 @@ void MemcheckView::mkMenuBar()
   srcPathButton->setAutoRaise( true );
   connect( srcPathButton, SIGNAL( clicked() ), 
            this,          SLOT( showSrcPath() ) );
-  QToolTip::add( srcPathButton, 
-                 "Show file paths (for current stack)" );
   mcMenu->insertItem( srcPathButton, -1, index );
+  QToolTip::add( srcPathButton, 
+                 "Show file paths (for current frame)" );
+  ContextHelp::add( srcPathButton, urlValkyrie::Dummy );
 
   /* separator --------------------------------------------------------- */
   index++;
@@ -535,8 +246,9 @@ void MemcheckView::mkMenuBar()
   logMenu->insertItem( "Merge Multiple", this, SLOT(openMergeFile()) );
   openlogButton->setPopup( logMenu );
   openlogButton->setPopupDelay( 1 );
-  QToolTip::add( openlogButton, "Parse and view log file(s)" );
   mcMenu->insertItem( openlogButton, -1, index );
+  QToolTip::add( openlogButton, "Parse and view log file(s)" );
+  ContextHelp::add( openlogButton, urlValkyrie::Dummy );
 
   /* save-log button --------------------------------------------------- */
   index++;
@@ -548,8 +260,9 @@ void MemcheckView::mkMenuBar()
   savelogButton->setAutoRaise( true );
   connect( savelogButton, SIGNAL( clicked() ), 
            this,          SLOT( saveLogFile() ) );
-  QToolTip::add( savelogButton, "Save output to a log file" );
   mcMenu->insertItem( savelogButton, -1, index );
+  QToolTip::add( savelogButton, "Save output to a log file" );
+  ContextHelp::add( savelogButton, urlValkyrie::Dummy );
 
   /* suppressions editor button ---------------------------------------- */
   index++;
@@ -561,18 +274,20 @@ void MemcheckView::mkMenuBar()
   suppedButton->setAutoRaise( true );
   connect( suppedButton, SIGNAL( clicked() ), 
            this,         SLOT( showSuppEditor() ) );
-  QToolTip::add( suppedButton, "Open the Suppressions Editor" );
   mcMenu->insertItem( suppedButton, -1, index );
+  QToolTip::add( suppedButton, "Open the Suppressions Editor" );
+  ContextHelp::add( suppedButton, urlValkyrie::Dummy );
+  suppedButton->setEnabled( false );
+  // TODO: implement suppressionsEditor
 }
 
 
 
 /* ---------------------------------------------------------------------
- * All functions below this line are directly related to interacting 
- * with the listView
+ * All functions below are related to interacting with the listView
  * --------------------------------------------------------------------- */
 
-/* Checks if itemType() == SRC.  If true, and item isReadable ||
+/* checks if itemType() == SRC.  if true, and item isReadable or
    isWriteable, launches an editor with the source file loaded */
 void MemcheckView::launchEditor( QListViewItem* lv_item, const QPoint&, int )
 {
@@ -603,8 +318,8 @@ void MemcheckView::launchEditor( QListViewItem* lv_item, const QPoint&, int )
 }
 
 
-/* Opens all error items plus their children. 
-   Ignores the status, preamble, et al. items. */
+/* opens all error items plus their children. 
+   ignores the status, preamble, et al. items. */
 void MemcheckView::openAllItems( bool state )
 { 
   XmlOutputItem* op_item = (XmlOutputItem*)lView->firstChild()->firstChild();
@@ -669,7 +384,8 @@ void MemcheckView::showSrcPath()
   else if ( op_item->itemType() == XmlOutput::SRC )
     op_item = op_item->parent()->parent()->parent();
   vk_assert( op_item != 0 );
-  vk_assert( op_item->itemType() == XmlOutput::ERROR );
+  vk_assert( op_item->itemType() == XmlOutput::ERROR ||
+             op_item->itemType() == XmlOutput::LEAK_ERROR );
 
   /* iterate over all the frames in this error,
      stopping when we get to the error below */
@@ -696,13 +412,14 @@ void MemcheckView::showSrcPath()
 
 void MemcheckView::itemSelected()
 {
-QListViewItem* lv_item = lView->currentItem();
+  QListViewItem* lv_item = lView->currentItem();
   if ( !lv_item ) 
     openOneButton->setEnabled( false );
   else {
     XmlOutputItem* op_item = (XmlOutputItem*)lv_item;
-    bool state = ( op_item->itemType() == XmlOutput::ERROR || 
-                   op_item->itemType() == XmlOutput::STACK ||
+    bool state = ( op_item->itemType() == XmlOutput::ERROR      || 
+                   op_item->itemType() == XmlOutput::LEAK_ERROR ||
+                   op_item->itemType() == XmlOutput::STACK      ||
                    op_item->itemType() == XmlOutput::FRAME );
     openOneButton->setEnabled( state );
 
@@ -722,16 +439,34 @@ void MemcheckView::updateStatus()
 {
   OutputItem* top_item = (OutputItem*)lView->firstChild();
   TopStatus* top_status = (TopStatus*)top_item->xmlOutput;
-  top_status->print();
+  top_status->printDisplay();
   top_item->setText( top_status->displayString() );
 }
 
 
 void MemcheckView::loadItem( XmlOutput * output )
 {
+  /* xmlParser emits loadItem() for ErrCounts: used when merging
+     to file, but not when displaying stuff in the listview. */
+  if ( output->itemType == XmlOutput::ERR_COUNTS )
+    return;
+
   OutputItem* new_item;
   OutputItem* last_child;
   static OutputItem* parent = 0;
+
+  /* ensure we've got something to display */
+  switch ( output->itemType ) {
+    case XmlOutput::INFO:
+    case XmlOutput::STATUS:
+    case XmlOutput::SUPP_COUNTS:
+    case XmlOutput::ERROR:
+    case XmlOutput::LEAK_ERROR:
+    case XmlOutput::FRAME:
+      output->printDisplay();
+      break;
+    default: break;
+  }
 
   if ( lView->firstChild() == 0 ) {
     new_item = new OutputItem( lView, output );
@@ -748,34 +483,35 @@ void MemcheckView::loadItem( XmlOutput * output )
     new_item->setOpen( false );
   }
 
+  /* grab current pid while the going is good (used for creating
+     filename.pid when required); set relevant items expandable */
   switch ( output->itemType ) {
     case XmlOutput::INFO:
-			currentPid = ((Info*)output)->pid;
     case XmlOutput::PREAMBLE:
     case XmlOutput::ERROR:
-    case XmlOutput::COUNTS:
+    case XmlOutput::LEAK_ERROR:
+    case XmlOutput::SUPP_COUNTS:
       new_item->setExpandable( true );
       break;
-    default:
-      break;
+    default: break;
   }
 
 }
 
 
-/* Traverse all errors in the listview.  If we find an error:unique in
-   the counts->map, update the error's num_times value */
-void MemcheckView::updateErrors( Counts * counts )
+/* iterate over all errors in the listview, looking for a match on
+   error->unique with ecounts->pairList->unique.  if we find a match,
+   update the error's num_times value */
+void MemcheckView::updateErrors( ErrCounts * ecounts )
 {
   OutputItem* myChild = (OutputItem*)lView->firstChild()->firstChild();
   while ( myChild ) {
     if ( myChild->itemType() == XmlOutput::ERROR ) {
       Error* error = (Error*)myChild->xmlOutput;
-      QString id = error->unique;
-      bool ok = counts->contains( id );
-      if ( ok ) {   /* found this unique id in the map */
-        error->num_times = counts->find( id );
-        error->print();
+      int num = ecounts->findUnique( error->unique );
+      if ( num != -1 ) {  /* found this unique id in the list */
+        error->num_times = num;
+        error->printDisplay();
         myChild->setText( error->displayString() );
       }
     }
@@ -785,7 +521,7 @@ void MemcheckView::updateErrors( Counts * counts )
 
 
 /* base class for SrcItem and OutputItem ------------------------------- */
-XmlOutputItem::XmlOutputItem( QListView * parent ) 
+XmlOutputItem::XmlOutputItem( QListView* parent ) 
   : QListViewItem( parent ) 
 { initialise(); }
 
@@ -851,7 +587,7 @@ void SrcItem::setPixmap( QString pix_file )
 }
 
 XmlOutput::ItemType SrcItem::itemType()
-{  return XmlOutput::SRC; }
+{ return XmlOutput::SRC; }
 
 const QPixmap* SrcItem::pixmap( int i ) const 
 { return ( i ) ? 0 : pix; }
@@ -871,7 +607,7 @@ void SrcItem::setReadWrite( bool read, bool write )
 /* class OutputItem ---------------------------------------------------- */
 
 /* top-level status item */
-OutputItem::OutputItem( QListView * parent, XmlOutput * output ) 
+OutputItem::OutputItem( QListView* parent, XmlOutput* output ) 
   : XmlOutputItem( parent ) 
 {
   xmlOutput = output;
@@ -956,7 +692,7 @@ void OutputItem::setOpen( bool open )
         argv_item->setOpen( true );
       } break;
 
-      /* 'j is the biz' stuff */
+      /* 'J is the biz' stuff */
       case XmlOutput::PREAMBLE: {
         Preamble* preamble = (Preamble*)xmlOutput;
         OutputItem* child_item = 0;
@@ -965,19 +701,20 @@ void OutputItem::setOpen( bool open )
         } 
       } break;
 
-      case XmlOutput::ERROR: {
+      case XmlOutput::ERROR:
+      case XmlOutput::LEAK_ERROR: {
         OutputItem* after = this;
         Error* error = (Error*)xmlOutput;
-        Stack* stack1 = error->stack1;
+        Stack* stack1 = error->stackList.first();
         OutputItem* stack_item1 = new OutputItem( this, after, stack1 );
         stack_item1->setText( "stack" );
         after = stack_item1;
-        if ( !error->auxwhat.isEmpty() ) {
+        if ( error->haveAux ) {
           OutputItem* aux_item = new OutputItem( this, after,
                                                  error->auxwhat );
           after = aux_item;
         }
-        Stack* stack2 = error->stack2;
+        Stack* stack2 = error->stackList.next();
         if ( stack2 != 0 ) {
           OutputItem* stack_item2 = new OutputItem( this, after, stack2 );
           stack_item2->setText( "stack" );
@@ -989,12 +726,15 @@ void OutputItem::setOpen( bool open )
         Frame* frame;
         for ( frame=stack1->frameList.first(); 
               frame; frame=stack1->frameList.next() ) {
+          frame->printDisplay();
           frame_item = new OutputItem( stack_item1, after, frame );
           frame_item->setText( frame->displayString() );
           frame_item->setExpandable( frame->readable || frame->writeable );
           after = frame_item;
         }
         stack_item1->setOpen( true );
+        /* J sez there may be more than two stacks in the future .. */
+        vk_assert( error->stackList.count() <= 2 );
       } break;
 
       case XmlOutput::STACK: {
@@ -1004,6 +744,7 @@ void OutputItem::setOpen( bool open )
         Frame* frame;
         for ( frame=stack2->frameList.first(); 
               frame; frame=stack2->frameList.next() ) {
+          frame->printDisplay();
           frame_item = new OutputItem( this, after, frame );
           frame_item->setText( frame->displayString() );
           frame_item->setExpandable( frame->readable || frame->writeable );
@@ -1036,9 +777,8 @@ void OutputItem::setOpen( bool open )
         while ( !stream.atEnd() && ( current_line <= bot_line ) ) {
           aline = stream.readLine();
           if ( current_line >= top_line && current_line <= bot_line ) {
-            /* replace all tabs with 2 spaces to look pretty */
-            aline = aline.replace( '\t', "  ", false );
-            src_lines << aline;
+            /* add a couple of spaces to look pretty */
+            src_lines << "  " + aline;
           }
           current_line++;
         }
@@ -1053,11 +793,11 @@ void OutputItem::setOpen( bool open )
 
 
       /* suppression count */
-      case XmlOutput::COUNTS: {
-        Counts* counts = (Counts*)xmlOutput;
+      case XmlOutput::SUPP_COUNTS: {
+        SuppCounts* scounts = (SuppCounts*)xmlOutput;
         OutputItem* child_item = 0;
-        for ( uint i=0; i<counts->supps.count(); i++ ) {
-          child_item = new OutputItem(this, child_item, counts->supps[i]);
+        for ( uint i=0; i<scounts->supps.count(); i++ ) {
+          child_item = new OutputItem(this, child_item, scounts->supps[i]);
         }
       } break;
  

@@ -1,10 +1,14 @@
 /* ---------------------------------------------------------------------- 
- * Implementation of OptionsPage                         options_page.cpp
+ * Implementation of class OptionsPage                   options_page.cpp
  * 
- * Each vkObject has different options | flags | prefs, and creates
- * its own 'page', which is inherited from this base class.  The
- * 'page' is contained within the top-level Options Window.
+ * Each vkObject has different options | flags | prefs, and 
+ * creates its own 'page', which is inherited from this base class.  
+ * The 'page' is contained within the top-level Options Window.
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include <qpopupmenu.h>
@@ -12,7 +16,8 @@
 #include <qfiledialog.h>
 
 #include "options_page.h"
-#include "vk_objects.h"
+#include "memcheck_object.h"
+#include "massif_object.h"
 #include "vk_utils.h"
 #include "vk_config.h"
 #include "context_help.h"
@@ -35,6 +40,8 @@ OptionsPage::OptionsPage( QWidget* parent, VkObject* obj, const char* name )
   vkObj = obj;
   mod   = false;
   topSpace = fontMetrics().height();
+	space  = 5;
+  margin = 10;
 }
 
 
@@ -114,20 +121,20 @@ bool OptionsPage::acceptEdits()
 
 void OptionsPage::resetDefaults()
 {
-	int ok = vkQuery( this, 2, "Reset Defaults", 
-										"<p>This will reset <b>all</b> options for %s "
-										"to the installation defaults.</p>"
-										"<p>Continue ?</p>", vkObj->title().latin1() );
+  int ok = vkQuery( this, 2, "Reset Defaults", 
+                    "<p>This will reset <b>all</b> options for %s "
+                    "to the installation defaults.</p>"
+                    "<p>Continue ?</p>", vkObj->title().latin1() );
   if ( ok == MsgBox::vkYes ) { 
-		QIntDictIterator<OptionWidget> it( itemList );
-		for ( ;  it.current(); ++it ) {
-			it.current()->resetDefault();
-		}
-	}
+    QIntDictIterator<OptionWidget> it( itemList );
+    for ( ;  it.current(); ++it ) {
+      it.current()->resetDefault();
+    }
+  }
 }
 
 
-/* Cancel button clicked */
+/* cancel button clicked */
 bool OptionsPage::rejectEdits()
 {
   /* user clicked Cancel after clicking Apply */
@@ -177,8 +184,8 @@ bool OptionsPage::applyEdits()
     undoList.append( optw );
     applyOptions( optw->id() );
   }
-  /* now remove all the saved opt widgets from editList, but keep a
-     ptr to them in undoList */
+  /* remove all the saved opt widgets from editList, 
+     but keep a ptr to them in undoList */
   for ( optw=undoList.first(); optw; optw=undoList.next() )
     updateEditList( false, optw );
 
@@ -214,9 +221,9 @@ OptionWidget* OptionsPage::optionWidget( int optid, QWidget* parent,
       optWidget = (OptionWidget*)new LbWidget( parent, opt, mklabel );
       break;
     case Option::SPINBOX: {
-			/* 0 == use_powers_of_two, 1 == do not */
-			int use_powers = ( opt->key == Memcheck::ALIGNMENT || 
-												 opt->key == Massif::ALIGNMENT ) ? 0 : 1;
+      /* 0 == use_powers_of_two, 1 == do not */
+      int use_powers = ( opt->key == Memcheck::ALIGNMENT || 
+                         opt->key == Massif::ALIGNMENT ) ? 0 : 1;
       SpWidget* spinw = new SpWidget( parent, opt, mklabel, 1 );
       QString ival = vkConfig->rdEntry( opt->cfgKey(), opt->cfgGroup() );
       spinw->addSection( opt->possValues[0].toInt(),  /* min */
@@ -224,7 +231,7 @@ OptionWidget* OptionsPage::optionWidget( int optid, QWidget* parent,
                          ival.toInt(),                /* def */
                          use_powers );
       optWidget = (OptionWidget*)spinw;
-		} break;
+    } break;
 
   }
 

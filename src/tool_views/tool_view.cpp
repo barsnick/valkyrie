@@ -1,108 +1,36 @@
 /* ---------------------------------------------------------------------
- * implementation of class ToolView                        tool_view.cpp
- * base class for all tool views
+ * Implementation of class ToolView                        tool_view.cpp
+ * Base class for all tool views
  * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
-#include <qlayout.h>
-#include <qtimer.h>
-
 #include "tool_view.h"
-#include "vk_config.h"
-#include "vk_msgbox.h"
+
+#include <qlayout.h>
 
 
 ToolView::~ToolView() { }
 
-ToolView::ToolView( QWidget* parent, VkObject* obj )
-  : QMainWindow( parent, obj->name(), WDestructiveClose )
+ToolView::ToolView( QWidget* parent, QString name, VkObject::ObjectId id )
+  : QMainWindow( parent, name, WDestructiveClose )
 {
-  proc       = 0;
-  vkObj      = obj;
-  is_Running = false;
-	is_Edited  = false;
-  setCaption( vkObj->title() );
+  objId = id;
+
+  name[0] = name[0].upper();
+  setCaption( name );
 
   QWidget* central = new QWidget( this );
   setCentralWidget( central );
   QVBoxLayout* topLayout = new QVBoxLayout( central, 5, 5 );
   topLayout->setResizeMode( QLayout::FreeResize );
-  flagsChanged(); 
 }
 
 
-int ToolView::id()
-{ return vkObj->id(); }
-
-
-bool ToolView::isRunning()
-{ return is_Running; }
-
-bool ToolView::isEdited()
-{ return is_Edited; }
-
-
-/* called when MainWin's showFlags button is set on so user can see
-   exactly what is being fed to valgrind on the command-line */
-QString ToolView::currFlags()
-{ return flags.join( "\n" ); }
-
-
-/* a toolview always holds a list of non-default flags relevant only
-   to itself */
-void ToolView::flagsChanged()
-{ flags = vkConfig->modFlags( vkObj ); }
-
-
-void ToolView::closeEvent( QCloseEvent* ce )
-{
-	/* current output might not have been saved to file */
-	if ( isEdited() ) {
-		int ok = vkQuery( this, "Unsaved File", 
-											"&Save;&Discard;&Cancel",
-											"<p>The current output is not saved."
-											"Do you want to save it ?</p>" );
-		if ( ok == MsgBox::vkYes ) {           /* save */
-			printf("TODO: save();\n");
-		} else if ( ok == MsgBox::vkCancel ) { /* procrastinate */
-			ce->ignore();
-			return;
-		}
-	}
-
-  /* if current process is not yet finished, ask user if they really
-     want to close */
-	if ( isRunning() ) {
-		int ok = vkQuery( this, "Process Running", "&Abort;&Cancel",
-											"<p>The current process is not yet finished.</p>"
-											"<p>Do you want to abort it ?</p>" );
-		if ( ok == MsgBox::vkYes ) {         /* abort */
-			stop();
-		} else if ( ok == MsgBox::vkNo ) {
-			ce->ignore();
-			return;
-		}
-	}
-
-	emit message( "" );  /* clear the status bar */
-  ce->accept();
-}
-
-
-/* kill proc if it is running */
-void ToolView::killProc()
-{
-  if ( proc != 0 ) {
-    if ( proc->isRunning() ) {
-      /* if this view is closed, don't leave the process running */
-      proc->tryTerminate();
-      QTimer::singleShot( 5000, proc, SLOT( kill() ) );
-    }
-    delete proc;
-    proc = 0;
-  }
-
-  /* set state for MainWin's run, restart, stop buttons */
-  emit running( false );
-}
+/* used by Workspace::findView(), and  by MainWin::closeToolView() */
+VkObject::ObjectId ToolView::id()
+{ return objId; }
 

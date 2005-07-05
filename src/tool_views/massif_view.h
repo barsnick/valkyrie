@@ -1,30 +1,38 @@
 /* ---------------------------------------------------------------------
- * definition of MassifView                                massif_view.h
+ * Definition of MassifView                                massif_view.h
+ * Massif's personal window
  * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
-#ifndef __VK_VIEW_MASSIF_H
-#define __VK_VIEW_MASSIF_H
+#ifndef __MASSIF_VIEW_H
+#define __MASSIF_VIEW_H
+
 
 #include "tool_view.h"
 
+/* class MassifView ---------------------------------------------------- */
+class Massif;
 class MassifView : public ToolView
 {
   Q_OBJECT
 public:
-  MassifView( QWidget* parent, VkObject* obj );
+  MassifView( QWidget* parent, Massif* ms );
   ~MassifView();
 
-  bool run() { return true; }
-  void stop() { }
-  void clear() { }
+  /* called by massif: set state for buttons; set cursor state */
+  void setState( bool run );
 
 public slots:
-  //void processExited() { }
-  void toggleToolbarLabels(bool);
+  void toggleToolbarLabels( bool );
 
 protected:
-  //virtual void procFinished() { }
+
+private:
+  Massif* massif;
 };
 
 

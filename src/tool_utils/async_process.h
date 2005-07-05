@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------
- * definition of AsyncProcess                            async_process.h
+ * Definition of class AsyncProcess                      async_process.h
  *
  * Contains various bits and pieces ripped off from all over the
  * place.  No credit to me, all credit to the various authors.
@@ -12,7 +12,12 @@
  * program to execute. By default, the name of the program must be a
  * full path; the PATH shell variable will only be searched if you
  * pass the SEARCH_PATH flag.
- * --------------------------------------------------------------------- */
+ * --------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
+ */
 
 #ifndef __VK_ASYNC_PROCESS_H
 #define __VK_ASYNC_PROCESS_H

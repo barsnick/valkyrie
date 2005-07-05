@@ -1,22 +1,23 @@
 /* ---------------------------------------------------------------------
- * implementation of XMLParser                            xml_parser.cpp
- * ---------------------------------------------------------------------
+ * Definition of XMLParser                                xml_parser.cpp
  * Subclass of QXmlDefaultHandler for parsing memcheck-specific xml output.
  *
  * Also contains various small classes encapsulating the different
- * types of xml output.
+ * chunks of xml output.
+ * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include "xml_parser.h"
-#include "memcheck_view.h"
 #include "vk_utils.h"
 
 #include <qfileinfo.h>
 
 
 /* class XmlOutput ----------------------------------------------------- */
-XmlOutput::~XmlOutput() { }
-
 XmlOutput::XmlOutput( ItemType itype ) 
 { 
   itemType = itype;
@@ -44,7 +45,8 @@ TopStatus::TopStatus() : XmlOutput( STATUS )
   num_blocks = 0;
 }
 
-void TopStatus::print() 
+/* format output for displaying in listview */
+void TopStatus::printDisplay() 
 {
   display = QString("Valgrind: %1 '%2'   Errors: %3   Leaked bytes: %4 in %5 blocks")
     .arg( status )
@@ -58,60 +60,202 @@ void TopStatus::print()
 /* class Info ---------------------------------------------------------- */
 Info::Info() : XmlOutput( INFO )
 {
-  pid = -1;
+  pid  = -1;
   ppid = -1;
   tool = "";
+  startStatus = "";
+  endStatus   = "";
+  protocolVersion = -1;
 }
 
-void Info::print() 
+/* format output for displaying in listview */
+void Info::printDisplay() 
 {
   tool[0] = tool[0].upper();
   display.sprintf("%s output for process id ==%d== (parent pid ==%d==)",
-                  tool.ascii(), pid, ppid );
+                  tool.latin1(), pid, ppid );
 }
 
 
-/* class Counts -------------------------------------------------------- */
-Counts::~Counts() { }
+/* class ErrCounts ----------------------------------------------------- */
+ErrCounts::~ErrCounts() 
+{ pairList.clear(); }
 
-Counts::Counts() : XmlOutput( COUNTS ) 
-{
-  key = "";
-  value = -1;
-  total_errors = 0; 
-  countsMap.clear(); 
-}
-
-bool Counts::isEmpty() 
-{ return total_errors == 0; }
-
-void Counts::update() 
+ErrCounts::ErrCounts() : XmlOutput( ERR_COUNTS ) 
 { 
-  countsMap[key] = value;
-  total_errors += value;
+  num = -1;
+  totalErrors = 0;
 }
 
-int Counts::find( QString id ) 
-{
-  CountsMap::Iterator it = countsMap.find( id );
-  return ( it == countsMap.end() ) ? -1 : it.data();
+bool ErrCounts::isEmpty() 
+{ return totalErrors == 0; }
+
+void ErrCounts::appendPair( QString str )
+{ 
+  pairList.append( Pair( num, str ) ); 
+  totalErrors += num;
 }
 
-int Counts::count() 
-{ return countsMap.count(); }
+void ErrCounts::appendPair( int val, QString str )
+{ 
+  num = val;
+  appendPair( str );
+}
 
-bool Counts::contains( QString id ) 
-{  return countsMap.contains( id ); }
-
-void Counts::print() 
+/* Iterate over ec->pairList, appending each pair to this pairList */
+void ErrCounts::appendList( ErrCounts* ec )
 {
-  CountsMap::Iterator it;
-  for ( it = countsMap.begin(); it != countsMap.end(); ++it ) {
-    display.sprintf("%4d:  %s", it.data(), it.key().ascii() );
+  PairList::iterator it;
+  for ( it = ec->pairList.begin(); it != ec->pairList.end(); ++it ) {
+    pairList.append( Pair( (*it).number, (*it).data ) ); 
+  }
+}
+
+/* returns the 'count' value associated with the 'uniq' string */
+int ErrCounts::findUnique( QString uniq )
+{
+  int count = -1;
+  PairList::iterator it;
+  for ( it = pairList.begin(); it != pairList.end(); ++it ) {
+    if ( uniq == (*it).data ) {
+      count = (*it).number;
+      break;
+    }
+  }
+
+  return count;
+}
+
+/* If 'count' and 'uniq' match, remove the pair from the list */
+void ErrCounts::remove( int count, QString uniq )
+{
+  PairList::iterator it;
+  for ( it = pairList.begin(); it != pairList.end(); ++it ) {
+    if ( count == (*it).number && uniq == (*it).data ) {
+       pairList.remove( it );
+      break;
+    }
+  }
+}
+
+/* Searches the pairList for a match on 'uniq'. 
+   If found, updates the count value */
+bool ErrCounts::updateCount( int count, QString uniq )
+{
+  bool ok = false;
+  PairList::iterator it;
+  for ( it = pairList.begin(); it != pairList.end(); ++it ) {
+    if ( uniq == (*it).data ) {
+      int& val = (*it).number;
+      val += count;
+      ok = true;
+    }
+  }
+
+  return ok;
+}
+
+/* format output for printing to file */
+void ErrCounts::print2File( QTextStream& stream )
+{
+  stream << "<errorcounts>\n";
+  PairList::iterator it;
+  for ( it = pairList.begin(); it != pairList.end(); ++it ) {
+    stream << "  <pair> <count>" << (*it).number << "</count> <unique>" 
+           << (*it).data << "</unique> </pair>\n";
+  }
+  stream << "</errorcounts>\n\n";
+}
+
+
+/* class SuppCounts ---------------------------------------------------- */
+SuppCounts::~SuppCounts() { }
+
+SuppCounts::SuppCounts() : XmlOutput( SUPP_COUNTS ) 
+{ num = -1; }
+
+void SuppCounts::appendPair( QString str )
+{ pairList.append( Pair( num, str ) ); }
+
+void SuppCounts::appendPair( int val, QString str )
+{ 
+  num = val;
+  appendPair( str );
+}
+
+int SuppCounts::findName( QString name )
+{
+  int count = -1;
+  PairList::iterator it;
+  for ( it = pairList.begin(); it != pairList.end(); ++it ) {
+    if ( name == (*it).data ) {
+      count = (*it).number;
+      break;
+    }
+  }
+
+  return count;
+}
+
+/* searches the pairList for a match on 'name'. 
+   if found, updates the count value */
+bool SuppCounts::updateCount( int count, QString name )
+{
+  bool ok = false;
+  PairList::iterator it;
+  for ( it = pairList.begin(); it != pairList.end(); ++it ) {
+    if ( name == (*it).data ) {
+      int& val = (*it).number;
+      val += count;
+      ok = true;
+    }
+  }
+
+  return ok;
+}
+
+/* iterate over 'sc->pairList'; if we find a match on 'name',
+   increment our 'count' value; otherwise, add the not-found pair onto
+   our pairList. */
+void SuppCounts::updateList( SuppCounts* sc )
+{
+  int count;
+  QString name;
+  PairList::iterator it;
+  for ( it = sc->pairList.begin(); it != sc->pairList.end(); ++it ) {
+    count = (*it).number;
+    name  = (*it).data;
+    if ( findName( name ) != -1 ) {
+      updateCount( count, name );
+    } else {
+      appendPair( count, name );
+    }
+  }
+}
+
+/* format output for displaying in listview */
+void SuppCounts::printDisplay() 
+{
+  PairList::iterator it;
+  for ( it = pairList.begin(); it != pairList.end(); ++it ) {
+    display.sprintf("%4d:  %s", (*it).number, (*it).data.latin1() );
     supps << display;
   }
   display = "Suppressions";
 }
+
+/* format output for printing to file */
+void SuppCounts::print2File( QTextStream& stream )
+{
+  stream << "<suppcounts>\n";
+  PairList::iterator it;
+  for ( it = pairList.begin(); it != pairList.end(); ++it ) {
+    stream << "  <pair> <count>" << (*it).number << "</count> <name>"
+           << (*it).data << "</name> </pair>\n";
+  }
+  stream << "</suppcounts>\n\n";
+}
+
 
 
 /* class Frame --------------------------------------------------------- */
@@ -123,18 +267,34 @@ Frame::Frame( bool top_frame ) : XmlOutput( FRAME )
   lineno  = -1;
   display = ip = obj = fn = srcfile = srcdir = filepath = "";
   pathPrinted = readable = writeable = false;
+  haveLine = haveFile = haveDir = haveFunc = haveObj = false;
 }
+
+void Frame::setObj( QString str )
+{ obj = str; haveObj  = true; }
+
+void Frame::setFun( QString str )
+{ fn = str; haveFunc = true; }
+
+void Frame::setDir( QString str )
+{ srcdir = str; haveDir  = true; }
+
+void Frame::setFile( QString str )
+{ srcfile = str; haveFile = true; }
+
+void Frame::setLine( int no )
+{ lineno = no;  haveLine = true; }
 
 void Frame::printPath()
 {
-  if ( pathPrinted )  /* been there, done that ... */
+  if ( pathPrinted )     /* been there, done that ... */
     return;
 
   if ( !filepath.isEmpty() ) {
     int spos = display.find( srcfile );
     vk_assert( spos != -1 );
     int epos = display.findRev( ':' );
-    if ( epos == -1 ) /* no lineno found */
+    if ( epos == -1 )    /* no lineno found */
       epos = display.length();
 
     display = display.replace( spos, epos-spos, filepath );
@@ -142,16 +302,24 @@ void Frame::printPath()
   }
 }
 
-void Frame::print() 
+/* format output for printing to file */
+void Frame::print2File( QTextStream& stream )
 {
-  bool have_line = lineno != -1;
-  bool have_file = !srcfile.isEmpty();
-  bool have_path = !srcdir.isEmpty();
-  bool have_fn   = !fn.isEmpty();
-  bool have_obj  = !obj.isEmpty();
+                  stream << "    <frame>\n"
+                         << "      <ip>"   << ip      << "</ip>\n";
+  if ( haveObj  ) stream << "      <obj>"  << obj     << "</obj>\n";
+  if ( haveFunc ) stream << "      <fn>"   << fn      << "</fn>\n";
+  if ( haveDir  ) stream << "      <dir>"  << srcdir  << "</dir>\n";
+  if ( haveFile ) stream << "      <file>" << srcfile << "</file>\n";
+  if ( haveLine ) stream << "      <line>" << lineno  << "</line>\n";
+                  stream << "    </frame>\n";
+}
 
+/* format output for displaying in listview */
+void Frame::printDisplay() 
+{
   /* check what perms the user has w.r.t. this file */
-  if ( have_path && have_file ) {
+  if ( haveDir && haveFile ) {
     filepath = srcdir + "/" + srcfile;
     QFileInfo fi( filepath );
     if ( fi.exists() && fi.isFile() && !fi.isSymLink() ) {
@@ -162,27 +330,27 @@ void Frame::print()
     }
   }
 
-  if ( have_fn && have_path && have_file && have_line ) {
+  if ( haveFunc && haveDir && haveFile && haveLine ) {
     display.sprintf( "%s %s in %s:%d", 
-                     at_by.ascii(), fn.ascii(), srcfile.ascii(), lineno );
-  } else if ( have_fn && have_path && have_file ) {
+                     at_by.latin1(), fn.latin1(), srcfile.latin1(), lineno );
+  } else if ( haveFunc && haveDir && haveFile ) {
     display.sprintf( "%s %s in %s", 
-                     at_by.ascii(), fn.ascii(), srcfile.ascii() );
-  } else if ( have_fn && have_file && have_line ) {
+                     at_by.latin1(), fn.latin1(), srcfile.latin1() );
+  } else if ( haveFunc && haveFile && haveLine ) {
     display.sprintf( "%s %s in %s:%d", 
-                     at_by.ascii(), fn.ascii(), srcfile.ascii(), lineno );
-  } else if ( have_fn && have_file ) {
+                     at_by.latin1(), fn.latin1(), srcfile.latin1(), lineno );
+  } else if ( haveFunc && haveFile ) {
     display.sprintf( "%s %s in %s", 
-                     at_by.ascii(), fn.ascii(), srcfile.ascii() );
-  } else if ( have_fn && have_obj ) {
+                     at_by.latin1(), fn.latin1(), srcfile.latin1() );
+  } else if ( haveFunc && haveObj ) {
     display.sprintf( "%s %s in %s", 
-                     at_by.ascii(), fn.ascii(), obj.ascii() );
-  } else if ( have_fn ) {
-    display.sprintf( "Address %s by %s", ip.ascii(), fn.ascii() );
-  } else if ( have_obj ) {
-    display.sprintf( "Address %s in %s", ip.ascii(), obj.ascii() );
+                     at_by.latin1(), fn.latin1(), obj.latin1() );
+  } else if ( haveFunc ) {
+    display.sprintf( "Address %s by %s", ip.latin1(), fn.latin1() );
+  } else if ( haveObj ) {
+    display.sprintf( "Address %s in %s", ip.latin1(), obj.latin1() );
   } else {
-    display.sprintf( "Address %s", ip.ascii() );
+    display.sprintf( "Address %s", ip.latin1() );
   }
 
 }
@@ -192,7 +360,6 @@ void Frame::print()
 /* class Stack --------------------------------------------------------- */
 Stack::~Stack() 
 { 
-  //display = "stack";
   currFrame = 0;
   frameList.setAutoDelete( true );
   frameList.clear();
@@ -212,62 +379,106 @@ void Stack::mkFrame()
   frameList.append( currFrame );
 }
 
+/* format output for printing to file */
+void Stack::print2File( QTextStream& stream )
+{
+  stream << "  <stack>\n";
+  for (Frame* frame = frameList.first(); frame; frame = frameList.next() )
+    frame->print2File( stream );
+  stream << "  </stack>\n";
+}
+
 
 /* class Error --------------------------------------------------------- */
 Error::~Error() 
-{ 
-  if ( stack1 )
-    delete stack1;
-  if ( stack2 )
-    delete stack2;
-}
+{ stackList.clear(); }
 
 Error::Error() : XmlOutput( ERROR ) 
 {
-  stack1 = 0;
-  stack2 = 0;
   auxwhat = unique = kind = what = acnym = "";
-  tid = leakedbytes = leakedblocks = -1;
+  tid = leakedBytes = leakedBlocks = -1;
   num_times = 1;
+  haveAux = false;
 }
 
 void Error::mkStack() 
 { 
-  if ( stack1 == 0 ) {
-    stack1 = new Stack( true );
-    currStack = stack1;
-  }  else { 
-    stack2 = new Stack( false );
-    currStack = stack2;
-  }
+  bool first = ( stackList.isEmpty() ) ? true : false;
+  currStack = new Stack( first );
+  stackList.append( currStack );
 }
 
-void Error::print() 
+void Error::setAux( QString str ) 
+{ auxwhat = str; haveAux = true; }
+
+/* if leakedbytes or leakedblocks is set, then 
+   this is a leak error as opposed to a 'normal' error */
+void Error::setLeakedBytes( int bytes )
+{ leakedBytes  = bytes;  itemType = LEAK_ERROR; }
+
+void Error::setLeakedBlocks( int blocks )
+{ leakedBlocks = blocks; itemType = LEAK_ERROR; }
+
+/* format output for displaying in listview */
+void Error::printDisplay() 
 {
   if ( acnym == "LDL" || acnym == "LSR" || 
        acnym == "LIL" || acnym == "LPL" ) {
-    display.sprintf("%s: %s", acnym.ascii(), what.ascii() );
+    display.sprintf("%s: %s", acnym.latin1(), what.latin1() );
   } else {
-    display.sprintf("%s [%d]: %s", acnym.ascii(), num_times, what.ascii() );
+    display.sprintf("%s [%d]: %s", acnym.latin1(), num_times, what.latin1() );
   }
 }
 
+/* format output for printing to file */
+void Error::print2File( QTextStream& stream )
+{
+  stream << "<error>\n"
+         << "  <unique>" << unique << "</unique>\n"
+         << "  <tid>"    << tid    << "</tid>\n"
+         << "  <kind>"   << kind   << "</kind>\n"
+         << "  <what>"   << what   << "</what>\n";
+
+  if ( itemType == LEAK_ERROR ) {
+    stream << "  <leakedbytes>"  << leakedBytes  << "</leakedbytes>\n"
+           << "  <leakedblocks>" << leakedBlocks << "</leakedblocks>\n";
+  }
+
+  for (Stack* stack = stackList.first(); stack; stack = stackList.next() ) {
+    stack->print2File( stream );
+    /* 'auxwhat' comes between stacks, and There Can Be Only One */
+    if ( haveAux ) {
+      stream << "  <auxwhat>" << auxwhat << "</auxwhat>\n";
+      haveAux = false;
+    }
+  }
+
+  stream << "</error>\n\n";
+}
 
 
 
 /* class XMLParser ----------------------------------------------------- */
-XMLParser::~XMLParser() 
-{ reset( false ); }
+/* Beware leaks: the parser *never* deletes any XmlOutput items; 
+   this is the sole responsibility of the caller */
 
-XMLParser::XMLParser( MemcheckView * parent ) 
-	: QObject( parent, "xml_parser" )
+XMLParser::~XMLParser() 
+{ 
+  tagtypeMap.clear();
+  acronymMap.clear();
+}
+
+
+XMLParser::XMLParser( QObject* parent, bool esc_ents/*=false*/  ) 
+  : QObject( parent, "xml_parser" )
 {
-  memView = parent;
-  info      = 0;
-  verror    = 0;
-  counts    = 0;
-  preamble  = 0;
-  topStatus = 0;
+  info        = 0;
+  verror      = 0;
+  suppCounts  = 0;
+  errCounts   = 0;
+  preamble    = 0;
+  topStatus   = 0;
+  escEntities = esc_ents;
 
   /* init our pretend-namespace */
   tagtypeMap["valgrindoutput"]  = VGOUTPUT;
@@ -323,12 +534,6 @@ XMLParser::XMLParser( MemcheckView * parent )
 
 void XMLParser::reset( bool reinit/*=true*/ )
 {
-  if ( info )      { delete info;      info      = 0; }
-  if ( verror )    { delete verror;    verror     = 0; }
-  if ( counts )    { delete counts;    counts    = 0; }
-  if ( preamble )  { delete preamble;  preamble  = 0; }
-  if ( topStatus ) { delete topStatus; topStatus = 0; }
-
   inError = false;
   inStack = false;
   inFrame = false;
@@ -338,16 +543,14 @@ void XMLParser::reset( bool reinit/*=true*/ )
   inSuppCounts  = false;
   inPair        = false;
 
-  errorList.clear();
-
-  if ( reinit ) {
+   if ( reinit ) {
     info      = new Info();
     topStatus = new TopStatus();
   }
 }
 
 
-/* Returns the tag type corresponding to the given tag */
+/* returns the tag type corresponding to the given tag */
 QString XMLParser::acronym( QString kind )
 {
   AcronymMap::Iterator it = acronymMap.find( kind );
@@ -358,7 +561,7 @@ QString XMLParser::acronym( QString kind )
 }
 
 
-/* Returns the tag type corresponding to the given tag */
+/* returns the tag type corresponding to the given tag */
 XMLParser::TagType XMLParser::tagType( QString tag )
 {
   TagTypeMap::Iterator it = tagtypeMap.find( tag );
@@ -369,22 +572,31 @@ XMLParser::TagType XMLParser::tagType( QString tag )
 }
 
 
+/* if the output is being displayed in a listview, then don't bother
+   to parse 'content' for '<', '>' and '&'.  but if we are going to
+   print to file, or if we are comparing 'content' with a view to
+   merging errors, then do bother (sigh) */
 bool XMLParser::characters( const QString& str )
 {
   QString chars = str.simplifyWhiteSpace();
   if ( !chars.isEmpty() ) {
     content = chars;
+
+    if ( escEntities ) {
+      content = escapeEntities( content );
+    }
+
   }
+
   return true;
 }
 
 
 bool XMLParser::startElement( const QString&, const QString&, 
-                              const QString& stag, const QXmlAttributes& )
+                              const QString& startTag, const QXmlAttributes& )
 {
-  startTag = stag;
-
   TagType ttype = tagType( startTag );
+
   switch ( ttype ) {
     case PREAMBLE: 
       inPreamble = true;
@@ -393,7 +605,6 @@ bool XMLParser::startElement( const QString&, const QString&,
     case ERROR:
       inError = true;
       verror = new Error();
-      errorList.append( verror );
       break;
     case STACK:
       if ( inError ) {
@@ -407,7 +618,7 @@ bool XMLParser::startElement( const QString&, const QString&,
       } break;
     case ERRORCOUNTS:
       inErrorCounts = true;
-      counts = new Counts();
+      errCounts = new ErrCounts();
       break;
     case PAIR:
       if ( inErrorCounts || inSuppCounts ) {
@@ -415,7 +626,7 @@ bool XMLParser::startElement( const QString&, const QString&,
       } break;
     case SUPPCOUNTS:
       inSuppCounts = true;
-      counts = new Counts();
+      suppCounts = new SuppCounts();
       break;
     default:
       break;
@@ -426,18 +637,17 @@ bool XMLParser::startElement( const QString&, const QString&,
 
 
 bool XMLParser::endElement( const QString&, const QString&, 
-                            const QString& etag )
+                            const QString& endTag )
 {
-  endTag = etag;
-
   TagType ttype = tagType( endTag );
-  switch ( ttype ) {
 
+  switch ( ttype ) {
     case VGOUTPUT:   /* ignore */
       break;
     case PROTOCOL:
       if ( content != "1" ) 
         printf("Fatal Error: wrong protocol version\n");
+      info->protocolVersion = content.toInt();
       break;
     case PREAMBLE:
       inPreamble = false;
@@ -451,7 +661,6 @@ bool XMLParser::endElement( const QString&, const QString&,
       break;
     case TOOL:
       info->tool = content;
-      info->print();
       break;
     case ARG:
       info->infoList << content;
@@ -459,7 +668,6 @@ bool XMLParser::endElement( const QString&, const QString&,
     case ARGV:
       stack.push( info );
       break;
-
     case EXE: {
       /* get the name of the executable */
       QString tmp;
@@ -470,64 +678,54 @@ bool XMLParser::endElement( const QString&, const QString&,
         tmp = content.right( content.length() - pos-1 );
       }
       topStatus->object = tmp;
+      info->exe = content;
       info->infoList << content; 
     } break;
-
     case STATUS:
+      topStatus->status = content;
       if ( statusPopped ) {
-        topStatus->status = content;
-        memView->updateStatus();
+        info->endStatus = content;
+        emit updateStatus();
       } else {
-        topStatus->status = content;
-        topStatus->print();
-        memView->loadItem( topStatus );
+        info->startStatus = content;
+        emit loadItem( topStatus );
         statusPopped = true;
         /* pop the others now as well */
-        memView->loadItem( stack.pop() );   /* Info */
-        memView->loadItem( stack.pop() );   /* Preamble */
+        emit loadItem( stack.pop() );   /* Info */
+        emit loadItem( stack.pop() );   /* Preamble */
       } break;
-
     case ERROR:
       inError = false;
-      memView->loadItem( verror );
+      emit loadItem( verror );
       break;
-
     case UNIQUE:
       if ( inError ) {
         verror->unique = content;
       } else if ( inErrorCounts && inPair ) {
-        counts->key = content;
-        counts->update();
+        errCounts->appendPair( content );
       } break;
-
     case TID:
       if ( inError ) {
         verror->tid = content.toInt();
-      }
-      break;
+      } break;
     case KIND:
       if ( inError ) {
-        verror->kind = content;
+        verror->kind  = content;
         verror->acnym = acronym( content );
-      }
-      break;
+      } break;
     case WHAT:
       if ( inError ) {
         verror->what = content;
-        verror->print();
-      }
-      break;
+      } break;
     case AUXWHAT:
       if ( inError ) {
-        verror->auxwhat = content;
-      }
-      break;
+        verror->setAux( content );
+      } break;
     case STACK:
       inStack = false;
       break;
     case FRAME:
       if ( inError && inStack && inFrame ) {
-        verror->currStack->currFrame->print();
         inFrame = false;
       } break;
     case IP:
@@ -536,69 +734,64 @@ bool XMLParser::endElement( const QString&, const QString&,
       } break;
     case OBJ:
       if ( inError && inStack && inFrame ) {
-        verror->currStack->currFrame->obj = content;
+        verror->currStack->currFrame->setObj( content );
       } break;
     case FN:
       if ( inError && inStack && inFrame ) {
-        verror->currStack->currFrame->fn = content;
+        verror->currStack->currFrame->setFun( content );
       } break;
     case SRCDIR:
       if ( inError && inStack && inFrame ) {
-        verror->currStack->currFrame->srcdir = content;
+        verror->currStack->currFrame->setDir( content );
       } break;
     case SRCFILE:
       if ( inError && inStack && inFrame ) {
-        verror->currStack->currFrame->srcfile = content;
+        verror->currStack->currFrame->setFile( content );
       } break;
     case LINE:
       if ( inPreamble ) {
         preamble->lines << content; 
       } else if ( inError && inStack && inFrame ) {
-        verror->currStack->currFrame->lineno = content.toInt();
+        verror->currStack->currFrame->setLine( content.toInt() );
       }  break;
-
     case ERRORCOUNTS:
       inErrorCounts = false;
-      if ( !counts->isEmpty() ) {
-        topStatus->num_errs = counts->total_errors;
-        memView->updateStatus();
-        memView->updateErrors( counts );
-      }
-      delete counts;
-      counts = 0;
-      break;
+      emit loadItem( errCounts );
+      if ( !errCounts->isEmpty() ) {
+        topStatus->num_errs = errCounts->totalErrors;
+        emit updateStatus();
+        emit updateErrors( errCounts );
+      } break;
     case PAIR:
       if ( inErrorCounts || inSuppCounts ) {
         inPair = false;
       } break;
     case COUNT:
       if ( inErrorCounts && inPair ) {
-        counts->value = content.toInt();
+        errCounts->num = content.toInt();
       } else if ( inSuppCounts && inPair ) {
-        counts->value = content.toInt();
+        suppCounts->num = content.toInt();
       } break;
     case NAME:
       if ( inSuppCounts && inPair ) {
-        counts->key = content;
-        counts->update();
+        suppCounts->appendPair( content );
       } break;
     case SUPPCOUNTS:
       inSuppCounts = false;
-      counts->print();
-      memView->loadItem( counts );
+      emit loadItem( suppCounts );
       break;
     case LEAKEDBYTES:
-      verror->leakedbytes = content.toInt();
+      verror->setLeakedBytes( content.toInt() );
       topStatus->num_leaks += content.toInt();
-      memView->updateStatus();
+      emit updateStatus();
       break;
     case LEAKEDBLOCKS:
-      verror->leakedblocks = content.toInt();
+      verror->setLeakedBlocks( content.toInt() );
       topStatus->num_blocks += content.toInt();
-      memView->updateStatus();
+      emit updateStatus();
       break;
     case NONE:
-      printf("no such tag '%s'\n", endTag.ascii());
+      VK_DEBUG( "no such tag '%s'", endTag.latin1() );
       vk_assert_never_reached();
       break;
   }

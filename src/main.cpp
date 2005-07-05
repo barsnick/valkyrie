@@ -1,6 +1,10 @@
 /* --------------------------------------------------------------------- 
- * Startup: the main program file                               main.cpp
+ * startup: the main program entry point                        main.cpp
  * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include <qapplication.h>
@@ -10,8 +14,11 @@
 #include "vk_utils.h"              // vk_assert(), parseCmdArgs()
 #include "vk_config.h"             // VkConfig
 #include "vk_msgbox.h"             // vkFatal()
-#include "vk_objects.h"            // VkObjects()
 #include "main_window.h"           // MainWindow
+
+#include "vk_objects.h"            // VkObjects()
+#include "valkyrie_object.h"
+
 
 
 /* declare and init globally available objects ------------------------- */
@@ -78,10 +85,11 @@ QPalette vkPalette()
 
 int main ( int argc, char* argv[] )
 {
-  bool useGui;
+  bool usingGui;
   int res = EXIT_SUCCESS;
-  MainWindow* vkWin = 0;
-  QApplication* app = 0;
+  QApplication* app  = 0;
+  Valkyrie* valkyrie = 0;
+  MainWindow* vkWin  = 0;
 
   /* vkConfig ---------------------------------------------------------- 
      Check the configuration dir+file ~/.PACKAGE/PACKAGErc is present,
@@ -96,16 +104,16 @@ int main ( int argc, char* argv[] )
   }
   vk_assert( vkConfig != 0 );
 
-  /* Command-line parsing ---------------------------------------------- 
-     If no command-line flags are present, skip parsing.  Assume that
+  /* command-line parsing ---------------------------------------------- 
+     if no command-line flags are present, skip parsing.  assume that
      either the user wishes to set things up from inside valkryie, or
      this is a re-run which uses the settings stored in vkConfig. */
   if ( argc > 1 ) {
-    /* Parse the command-line args, and overwrite vkConfig's current
-       options with any options we see there.  But if the user typed
-       --help || --version || -V, or there were parsing errors, do the
-       right thing, then exit immediately. 
-       Return values: error = -1, show-help-and-exit = 0, ok = 1 */
+    /* parse the command-line args, and overwrite vkConfig's current
+       options with any options we see there.  but if the user typed
+       --help || --version || --valgrind-opts, or there were parsing
+       errors, do the right thing, then exit immediately.
+       return values: error = -1, show-help-and-exit = 0, ok = 1 */
     int retval = parseCmdArgs( argc, argv );
     if ( retval <= 0 ) {
       vkConfig->dontSync();
@@ -114,42 +122,38 @@ int main ( int argc, char* argv[] )
     }
   }
 
-  /* find out if we are in non-gui mode -------------------------------- */
-  useGui = vkConfig->rdBool( "gui", "valkyrie" );
+  /* find out if we are in gui || non-gui mode ------------------------- */
+  usingGui = vkConfig->rdBool( "gui", "valkyrie" );
+  /* get hold of valkyrie */
+  valkyrie = (Valkyrie*)vkConfig->vkObject( "valkyrie" );
+  /* set usingGui + get ptrs to all tools */
+  valkyrie->init();
 
   /* start turning the engine over... ---------------------------------- */
-  app = new QApplication( argc, argv, useGui );
-  if ( !useGui ) {
-		/* get hold of valkyrie */
-		Valkyrie* valkyrie = (Valkyrie*)vkConfig->vkObject( "valkyrie" );
-    /* get hold of the current tool */
-    QString tool_name = vkConfig->rdEntry( "tool", "valgrind" );
-		VkObject* vkObj = vkConfig->vkObject( tool_name );
-    vk_assert( vkObj != NULL );
-    //app->connect( vkObj, SIGNAL(something()), 
-    //              app,   SLOT(quit()) );
-		if ( valkyrie->runMode != Valkyrie::modeNotSet )
-			printf("TODO: vkObj->run();\n");
+  app = new QApplication( argc, argv, usingGui );
 
+  if ( !usingGui ) {
+    /* strut your stuff, girl */
+    valkyrie->runTool();
   } else {
 
-    /* Style ----------------------------------------------------------- */
+    /* style ----------------------------------------------------------- */
     app->setStyle( QStyleFactory::create( "windows" ) );
 
-    /* Font: allow user to specify an app-wide font setting ------------ */
+    /* font: allow user to specify an app-wide font setting ------------ */
     if ( !vkConfig->rdBool( "use-system-font", "valkyrie" ) ) {
       QFont vkfnt = vkConfig->rdFont( "user-font", "valkyrie" );
       app->setFont( vkfnt, true );
     }
 
-    /* Palette: allow user to choose between app. default palette
+    /* palette: allow user to choose between app. default palette
        and the default palette assigned by their system ---------------- */
     if ( vkConfig->rdBool( "use-vk-palette", "valkyrie" ) ) {
       app->setPalette( vkPalette(), true );
     }
 
-    /* we have lift-off -- start up the gui ---------------------------- */
-    vkWin = new MainWindow();
+    /* we have lift-off: start up the gui ------------------------------ */
+    vkWin = new MainWindow( valkyrie );
     app->setMainWidget( vkWin );
     app->connect( app, SIGNAL(lastWindowClosed()), 
                   app, SLOT(quit()) );
@@ -159,9 +163,12 @@ int main ( int argc, char* argv[] )
     vkWin->move( vkConfig->rdInt("x-pos", "MainWin"),
                  vkConfig->rdInt("y-pos", "MainWin") );
     vkWin->show();
+    /* start up with the tool currently set in vkConfig (either the
+       default, the last-used, or whatever was set on the cmd-line) */
+    vkWin->showToolView( vkConfig->currentToolId() );
   }
 
-	res = app->exec();
+  res = app->exec();
 
  cleanup_and_exit:
   if ( vkConfig ) { 

@@ -1,6 +1,11 @@
 /* ---------------------------------------------------------------------
- * implementation of MainWindow                          main_window.cpp
+ * Implementation of MainWindow                          main_window.cpp
+ * Application's top-level window
  * ---------------------------------------------------------------------
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include <qapplication.h>
@@ -20,24 +25,19 @@
 #include "context_help.h"
 #include "html_urls.h"
 
-#include "memcheck_view.h"
-#include "cachegrind_view.h"
-#include "massif_view.h"
-
-
 /*
-  &File:    ALT+Key_F
-  O&ptions: ALT+Key_P
-  &Tools:   ALT+Key_T
-  &Help:    ALT+Key_H
-  handBook: Key_F1
+  &File:      ALT+Key_F
+  O&ptions:   ALT+Key_P
+  &Tools:     ALT+Key_T
+  &Help:      ALT+Key_H
+  handBook:   Key_F1
 
-  R&estart: CTRL+Key_E
-  &Run:     CTRL+Key_R
-  &Save:    CTRL+Key_S
-  S&top:    CTRL+Key_T
-  &Close:   CTRL+Key_W
-  E&xit:    CTRL+Key_X
+  R&estart:   CTRL+Key_E
+  &Run:       CTRL+Key_R
+  &Save:      CTRL+Key_S
+  S&top:      CTRL+Key_T
+  &Close:     CTRL+Key_W
+  E&xit:      CTRL+Key_X
 
   Memcheck    SHIFT+Key_M
   Cachegrind: SHIFT+Key_C 
@@ -48,15 +48,15 @@
 
 /* class MainWindow ---------------------------------------------------- */
 MainWindow::~MainWindow() 
-{  }
+{ /* handBook + optionsWin are deleted in closeEvent() */ }
 
 
-MainWindow::MainWindow() : QMainWindow( 0, "mainWindow" )
+MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
 {
-  //optionsWin = 0;
+  valkyrie = valk;
+
   activeView = 0;
-  valkyrie   = (Valkyrie*)vkConfig->vkObject( "valkyrie" );
-  vk_assert( valkyrie != 0 );
+  activeTool = 0;
 
   setCaption( vkConfig->vkName() );
   setIcon( vkConfig->pixmap( "valkyrie.xpm" ) );
@@ -85,16 +85,13 @@ MainWindow::MainWindow() : QMainWindow( 0, "mainWindow" )
 
   /* init the options dialog */
   optionsWin = new OptionsWindow( this );
-
-  /* startup with the tool set in config (either the default,
-     last-used, or was set on the cmd-line) */
-  showToolView( vkConfig->currentToolId() );
+  /* let the flags widget know that flags may have been modified */
+  connect( optionsWin, SIGNAL(flagsChanged()),
+           this,       SLOT(updateFlagsWidget()) );
 }
 
 
-// FIXME: this should use VkObject::ObjectId
-//RM: void MainWindow::showToolView( int tvid )
-void MainWindow::showToolView( VkObject::ObjectId tvid )
+void MainWindow::showToolView( int tvid )
 {
   if ( activeView != 0 ) {
     /* already loaded and visible */
@@ -103,49 +100,41 @@ void MainWindow::showToolView( VkObject::ObjectId tvid )
     } 
   }
 
+  bool set_running = false;
   activeView = wSpace->findView( tvid );
+  activeTool = vkConfig->vkToolObj( tvid );
 
   if ( activeView == 0 ) {
 
     // tools: MEMCHECK, CACHEGRIND, MASSIF
-    VkObject* obj = vkConfig->vkObject( tvid, true );
-    switch ( tvid ) {
-      case VkObject::MEMCHECK:
-        activeView = new MemcheckView( wSpace, obj );
-        break;
-      case VkObject::CACHEGRIND:
-        activeView = new CachegrindView( wSpace, obj );
-        break;
-      case VkObject::MASSIF:
-        activeView = new MassifView( wSpace, obj );
-        break;
-      default:
-        vk_assert_never_reached();
-        break;
+    activeTool = vkConfig->vkToolObj( tvid );
+    activeView = activeTool->toolView( wSpace );
 
-    }
-
-    connect( activeView, SIGNAL(running(bool)), 
+    connect( activeTool, SIGNAL(running(bool)), 
              this,       SLOT(updateButtons(bool)) );
-    connect( activeView, SIGNAL(message(QString)),
+    connect( activeTool, SIGNAL(message(QString)),
              this,       SLOT(setStatus(QString)) );
     connect( this,       SIGNAL(toolbarLabelsToggled(bool)),
              activeView, SLOT(toggleToolbarLabels(bool)) );
-    /* let a tool_view know when its flags have been modified */
-    connect( optionsWin, SIGNAL(flagsChanged()),
-             activeView, SLOT(flagsChanged()) );
 
     /* if what-to-do was specified on the cmd-line, do it.
        otherwise, hang around and look boo'ful */
-    if ( valkyrie->runMode != Valkyrie::modeNotSet && 
-         vkConfig->rdEntry("tool", "valgrind") == activeView->name() ) {
-      activeView->run();
+    if ( vkConfig->currentToolName() == activeView->name() ) {
+      set_running = true;
     }
 
   }
 
   activeView->showMaximized();
   activeView->setFocus();
+
+  /* ensure the toolview is visible before we start doing stuff */
+  if ( set_running ) {
+    qApp->processEvents();
+    /* don't do anything if runMode == modeNotSet */
+    valkyrie->runTool( activeTool );
+  }
+
   setToggles( tvid );
 }
 
@@ -156,11 +145,11 @@ void MainWindow::stop()
   if ( wSpace->numViews() == 0 )
     return;
 
-  activeView->stop();
+  valkyrie->stopTool( activeTool );
 }
 
 
-/* run executable, after clearing previous output */
+/* run valgrind --tool=<current_tool> + flags + executable */
 void MainWindow::run()
 {
   /* don't come in here if there's no current view */
@@ -171,19 +160,29 @@ void MainWindow::run()
      specified. if so, show prefsWindow + msgbox */
   if ( vkConfig->rdEntry("binary","valkyrie").isEmpty() ) {
     showOptionsWindow( VkObject::VALKYRIE );
-    vkInfo( optionsWin, "Run Executable",
+    vkInfo( optionsWin, "Run Valgrind",
             "Please enter the path to the executable "
             "you wish to run, together with any arguments");
     return;
   }
 
-  if ( !activeView->run() ) {
-    vkError( this, "Run Executable",
-             "Failed to start the executable running." );
-  } else {
+  valkyrie->setRunMode( Valkyrie::modeParseOutput );
+  if ( valkyrie->runTool( activeTool ) ) {
     printf("TODO: toggle buttons to reflect running state\n");
+  } else {
+    vkError( this, "Run Valgrind",
+             "Failed to start the executable running." );
   }
 
+}
+
+
+void MainWindow::showAboutInfo( int id )
+{
+  HelpAbout::TabId tabid = (HelpAbout::TabId)id;
+  HelpAbout * dlg = new HelpAbout( this, tabid );
+  dlg->exec();
+  delete dlg;
 }
 
 
@@ -191,11 +190,11 @@ void MainWindow::showOptionsWindow( int view_id )
 { optionsWin->showPage( view_id ); }
 
 
-/* connected to a toolview's signal running( bool ) */
-void MainWindow::updateButtons( bool tv_running )
+/* slot, connected to a tool object's signal running(bool) */
+void MainWindow::updateButtons( bool running )
 {
-  runButton->setEnabled( !tv_running );
-  stopButton->setEnabled( tv_running );
+  runButton->setEnabled( !running );
+  stopButton->setEnabled( running );
 }
 
 
@@ -206,7 +205,8 @@ void MainWindow::setToggles( int tview_id )
     obj_id = toolsMenu->idAt( index );
     /* set the view menu item on || off */
     toolsMenu->setItemEnabled( obj_id, obj_id != tview_id );
-   }
+  }
+
   QToolButton* tbutt;
   if ( tview_id == -1 ) {
     tbutt = (QToolButton*)viewButtGroup->selected();
@@ -218,9 +218,9 @@ void MainWindow::setToggles( int tview_id )
 
   if ( tview_id == -1 ) {
     /* no more tool views */
-    fileMenu->setItemEnabled( FILE_RUN,     false );
-    fileMenu->setItemEnabled( FILE_STOP,    false );
-    fileMenu->setItemEnabled( FILE_CLOSE,   false );
+    fileMenu->setItemEnabled( FILE_RUN,   false );
+    fileMenu->setItemEnabled( FILE_STOP,  false );
+    fileMenu->setItemEnabled( FILE_CLOSE, false );
 
     runButton->setEnabled( false );
     stopButton->setEnabled( false );
@@ -233,9 +233,9 @@ void MainWindow::setToggles( int tview_id )
   } else {
     /* someone is hanging around ... */
     fileMenu->setItemEnabled( FILE_CLOSE,   true );
-    bool is_running = (activeView == 0) ? false : activeView->isRunning();
-    fileMenu->setItemEnabled( FILE_RUN,     !is_running );
-    fileMenu->setItemEnabled( FILE_STOP,    is_running );
+    bool is_running = (activeView == 0) ? false : activeTool->isRunning();
+    fileMenu->setItemEnabled( FILE_RUN,  !is_running );
+    fileMenu->setItemEnabled( FILE_STOP, is_running );
 
     runButton->setEnabled( !is_running );
     stopButton->setEnabled( is_running );
@@ -249,21 +249,20 @@ void MainWindow::setToggles( int tview_id )
 }
 
 
-void MainWindow::clearStatus()
-{ statusMsg->setText( "" );  }
+/* slot: connected to a tool object's signal message(QString) */
 void MainWindow::setStatus( QString msg )
 { statusMsg->setText( msg ); }
 
 
-/* shows|hides the label which contains the flags relevant to the
-   current toolview */
+/* shows / hides the label which contains the flags relevant to 
+   the current toolview */
 void MainWindow::showFlagsWidget( bool show )
 {
   if ( !show ) {
     flagsLabel->hide();
   } else {
     if ( activeView != 0 ) {
-      QString flags = activeView->currFlags();
+      QString flags = valkyrie->currentFlags( activeTool );
       flagsLabel->setText( flags );
       if ( !flagsLabel->isVisible() ) {
         flagsLabel->show();
@@ -272,8 +271,8 @@ void MainWindow::showFlagsWidget( bool show )
   }
 }
 
-/* so optionsWin can tell MainWin that options and/or flags (may) have
-   been changed */
+
+/* slot: connected to optionsWin signal flagsChanged() */
 void MainWindow::updateFlagsWidget()
 {
   if ( flagsLabel->isVisible() ) {
@@ -282,20 +281,10 @@ void MainWindow::updateFlagsWidget()
 }
 
 
-/* HelpInfo + HandBook ----------------------------------------------- */
-void MainWindow::helpInfo( int id )
-{
-  HelpInfo::TabId tabid = (HelpInfo::TabId)id;
-  HelpInfo * dlg = new HelpInfo( this, tabid );
-  dlg->exec();
-  delete dlg;
-}
-
-
 void MainWindow::resizeEvent( QResizeEvent *re )
 {
   QWidget::resizeEvent( re );
-#if 1
+#if 0
   QSize sz = size();
   vkConfig->wrInt( sz.width(),  "width",  "MainWin" );
   vkConfig->wrInt( sz.height(), "height", "MainWin" );
@@ -308,7 +297,7 @@ void MainWindow::resizeEvent( QResizeEvent *re )
 
 void MainWindow::moveEvent( QMoveEvent* )
 { 
-#if 1
+#if 0
   QPoint pt = pos();
   vkConfig->wrInt( pt.x(), "x-pos", "MainWin" );
   vkConfig->wrInt( pt.y(), "y-pos", "MainWin" );
@@ -329,16 +318,13 @@ void MainWindow::closeEvent( QCloseEvent *ce )
     }
   }
 
-  if ( optionsWin != 0 ) {
-    delete optionsWin;
-    optionsWin = 0;
-  }
+  delete optionsWin;
+  optionsWin = 0;
 
-  if ( handBook != 0 ) { 
-    handBook->save();
-    delete handBook;
-    handBook = 0;
-  }
+  /* save history + bookmarks */
+  handBook->save();
+  delete handBook;
+  handBook = 0;
 
   QMainWindow::closeEvent( ce );
 }
@@ -350,12 +336,16 @@ void MainWindow::closeToolView()
   if ( activeView == 0 ) return;
 
   /* try to deliver the coup de grace */
-  if ( !activeView->close() ) return;
+  if ( !activeTool->closeView() ) return;
 
-  /* find out who is now the active window */
+  /* find out who is now the active tool / window */
   activeView = wSpace->activeView();
+  if ( activeView == 0 )
+    activeTool = 0;
+  else 
+    activeTool = vkConfig->vkToolObj( activeView->id() );
 
-  int id = ( activeView == 0 ) ? -1 : activeView->id();
+  int id = ( activeView == 0 ) ? -1 : activeTool->id();
   setToggles( id );
 }
 
@@ -407,16 +397,13 @@ void MainWindow::mkMenuBar()
   index++;
   QPixmap bulletSet(black_bullet_xpm);
   toolsMenu = new QPopupMenu( this );
-
-  VkObjectList objList = vkConfig->vkObjList();
-  VkObject* obj;
-  for ( obj = objList.first(); obj; obj = objList.next() ) {
-    if ( obj->isTool() ) {
-      toolsMenu->insertItem( bulletSet, obj->accelTitle(), 
-                             this, SLOT( showToolView(int) ), 
-                             obj->accelKey(), obj->id() );
-    }
+  ToolList tools = valkyrie->toolList();
+  for ( ToolObject* tool = tools.first(); tool; tool = tools.next() ) {
+    toolsMenu->insertItem( bulletSet, tool->accelTitle(), 
+                           this, SLOT( showToolView(int) ),
+                           tool->accelKey(), tool->id() );
   }
+  tools.clear();
   id = mainMenu->insertItem( "&Tools", toolsMenu, -1, index );
   mainMenu->setAccel( ALT+Key_T, id );
   ContextHelp::add( toolsMenu, urlValkyrie::Dummy );
@@ -424,8 +411,8 @@ void MainWindow::mkMenuBar()
   /* options / preferences et al --------------------------------------- */
   index++;
   QPopupMenu* prefsMenu = new QPopupMenu( this );
-
-  for ( obj = objList.first(); obj; obj = objList.next() ) {
+  VkObjectList objList = vkConfig->vkObjList();
+  for ( VkObject* obj = objList.first(); obj; obj = objList.next() ) {
     prefsMenu->insertItem( obj->title(), this, 
                            SLOT(showOptionsWindow(int)), 0, obj->id() );
   }
@@ -450,7 +437,7 @@ void MainWindow::mkMenuBar()
   runButton->setAccel( CTRL+Key_R );
   connect( runButton, SIGNAL( clicked() ), 
            this,      SLOT( run() ) );
-  QToolTip::add( runButton, "Run executable, after clearing output" );
+  QToolTip::add( runButton, "Run valgrind with specified executable" );
   mainMenu->insertItem( runButton, -1, index );
   ContextHelp::add( runButton, urlValkyrie::Dummy );
 
@@ -485,14 +472,14 @@ void MainWindow::mkMenuBar()
   helpMenu->insertItem( "Handbook", handBook, SLOT(show()), Key_F1 );
   helpMenu->insertSeparator();
   helpMenu->insertItem( "About Valkyrie", this, 
-                        SLOT(helpInfo(int)), 0, HelpInfo::ABOUT_VK );
+                        SLOT(showAboutInfo(int)), 0, HelpAbout::ABOUT_VK );
   helpMenu->insertItem( "About Qt", this, 
-                        SLOT(helpInfo(int)), 0, HelpInfo::ABOUT_QT );
+                        SLOT(showAboutInfo(int)), 0, HelpAbout::ABOUT_QT );
   helpMenu->insertSeparator();
   helpMenu->insertItem( "Licence", this, 
-                        SLOT(helpInfo(int)), 0, HelpInfo::LICENCE );
+                        SLOT(showAboutInfo(int)), 0, HelpAbout::LICENCE );
   helpMenu->insertItem( "Support", this, 
-                        SLOT(helpInfo(int)), 0, HelpInfo::SUPPORT );
+                        SLOT(showAboutInfo(int)), 0, HelpAbout::SUPPORT );
   helpButton->setPopup( helpMenu );
   helpButton->setPopupDelay( 1 );
   QToolTip::add( helpButton, "Show help manual / information" );
@@ -502,7 +489,7 @@ void MainWindow::mkMenuBar()
   index++;
   QToolButton* ctxtButton = new ContextHelpButton( this, handBook );
   QToolTip::add( ctxtButton, "This is a <b>Context Help</b> button. "
-                 "It enables the user to ask for help on the screen.");
+           "Clicking on a widget will open the relevant manual help page");
   mainMenu->insertItem( ctxtButton, -1, index );
 }
 
@@ -544,28 +531,25 @@ void MainWindow::mkStatusBar()
 
   /* set the buttons to all be the same width */
   int butt_width = fontMetrics().width( "XMemcheckX" );
-  VkObjectList objList = vkConfig->vkObjList();
-  VkObject* obj;
-  for ( obj = objList.first(); obj; obj = objList.next() ) {
-    if ( obj->isTool() ) {
-      int len = obj->accelTitle().length();
-      butt_width = ( len > butt_width ) ? len : butt_width;
-    }
+  ToolList tools = valkyrie->toolList();
+  ToolObject* tool;
+  for ( tool = tools.first(); tool; tool = tools.next() ) {
+    int len = tool->accelTitle().length();
+    butt_width = ( len > butt_width ) ? len : butt_width;
   }
 
   QToolButton* tvButton;
-  for ( obj = objList.first(); obj; obj = objList.next() ) {
-    if ( obj->isTool() ) {
-      tvButton = new QToolButton( statusFrame );
-      tvButton->setToggleButton( true );
-      tvButton->setEnabled( true );
-      tvButton->setText( obj->accelTitle() );
-      tvButton->setAccel( obj->accelKey() );
-      tvButton->setMinimumWidth( butt_width );
-      viewButtGroup->insert( tvButton, obj->id() );
-      bot_row->addWidget( tvButton );
-    }
+  for ( tool = tools.first(); tool; tool = tools.next() ) {
+    tvButton = new QToolButton( statusFrame );
+    tvButton->setToggleButton( true );
+    tvButton->setEnabled( true );
+    tvButton->setText( tool->accelTitle() );
+    tvButton->setAccel( tool->accelKey() );
+    tvButton->setMinimumWidth( butt_width );
+    viewButtGroup->insert( tvButton, tool->id() );
+    bot_row->addWidget( tvButton );
   }
+  tools.clear();
 
   /* frame+layout for messages */
   QFrame* msgFrame = new QFrame( statusFrame );
@@ -573,13 +557,12 @@ void MainWindow::mkStatusBar()
   bot_row->addWidget( msgFrame, 20 );
   QBoxLayout* msgLayout = new QHBoxLayout( msgFrame, 5 );
   statusMsg = new QLabel( "", msgFrame );
-  //statusMsg->setPaletteBackgroundColor( Qt::white );
   statusMsg->setAlignment( AlignLeft );
   statusMsg->setTextFormat( Qt::PlainText );
   msgLayout->addWidget( statusMsg );
   ContextHelp::add( statusMsg, urlValkyrie::Dummy );
 
-  /* frame+layout for the view valgrind flags icon */
+  /* frame+layout for the view-flags icon */
   flagsButton = new QToolButton( statusFrame );
   bot_row->addWidget( flagsButton );
   flagsButton->setToggleButton( true );

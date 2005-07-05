@@ -1,22 +1,28 @@
 /* ---------------------------------------------------------------------- 
  * Implementation of ValgrindOptionsPage        valgrind_options_page.cpp
- * subclass of OptionsPage to hold valgrind-specific options | flags.
+ * Subclass of OptionsPage to hold valgrind-specific options | flags.
  * ---------------------------------------------------------------------- 
+ * This file is part of Valkyrie, a front-end for Valgrind
+ * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * This program is released under the terms of the GNU GPL v.2
+ * See the file LICENSE.GPL for the full license details.
  */
 
 #include <qtabwidget.h>
 
 #include "valgrind_options_page.h"
-#include "vk_objects.h"
+#include "valgrind_object.h"
 #include "vk_config.h"
 #include "vk_utils.h"
 #include "vk_msgbox.h"
 
 
-/* This page is different from the others in that it uses tabs because
-   there are just too many options to put on one page.  The tabs
-   contain (a) general options, and (b) suppression-related options */
-
+/* this page is different from the others in that it uses three tabs
+   because there are just too many options to put on one page.
+   (a) general core options, 
+   (b) error-reporting options, and 
+   (c) suppression-related options 
+*/
 ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
   : OptionsPage( parent, obj, "valgrind_options_page" )
 { 
@@ -24,8 +30,6 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
   unsigned int numItems = 29;
   itemList.resize( numItems );
 
-  int space  = 5;  /* no. of pixels between cells */
-  int margin = 11; /* no. of pixels to edge of widget */
   /* top layout: margin = 10; spacing = 25 */
   QVBoxLayout* vbox = new QVBoxLayout( this, 10, 25, "vbox" );
 
@@ -159,17 +163,17 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
 
   egrid1->addMultiCellWidget( sep(egroup1,"sep1"), 9,9, 0,1 );
   egrid1->setRowSpacing( 9, topSpace );   /* add a bit more space here */
-	//----------
+  //----------
   QHBoxLayout* hBox = new QHBoxLayout( 6, "hBox" );
-	hBox->addLayout( itemList[Valgrind::INPUT_FD]->hlayout() );
-	hBox->addLayout( itemList[Valgrind::LOG_FD]->hlayout() );
+  hBox->addLayout( itemList[Valgrind::INPUT_FD]->hlayout() );
+  hBox->addLayout( itemList[Valgrind::LOG_FD]->hlayout() );
   egrid1->addLayout( hBox,                                       10, 0 );
-	//------------
+  //------------
   egrid1->addLayout( itemList[Valgrind::LOG_PID    ]->hlayout(), 11, 0 );
   egrid1->addLayout( itemList[Valgrind::LOG_FILE   ]->hlayout(), 12, 0 );
   egrid1->addLayout( itemList[Valgrind::LOG_SOCKET ]->hlayout(), 13, 0 );
 
-	/* FIXME: Disabled LOG_SOCKET pro tem */
+  /* FIXME: Disabled LOG_SOCKET pro tem */
   itemList[Valgrind::LOG_SOCKET]->widget()->setEnabled( false );
 
   erep_vbox->addStretch( space );
@@ -188,10 +192,10 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
   itemList.insert( Valgrind::SUPPS_ALL,                 /* listbox */
                    optionWidget( Valgrind::SUPPS_ALL, tabSupps, true ) );
 
-	LbWidget* lbSel = ((LbWidget*)itemList[Valgrind::SUPPS_SEL]);
-	LbWidget* lbAll = ((LbWidget*)itemList[Valgrind::SUPPS_ALL]);
+  LbWidget* lbSel = ((LbWidget*)itemList[Valgrind::SUPPS_SEL]);
+  LbWidget* lbAll = ((LbWidget*)itemList[Valgrind::SUPPS_ALL]);
   connect( lbAll, SIGNAL(fileSelected(const QString&)), 
-					 lbSel, SLOT(insertFile(const QString&)) );
+           lbSel, SLOT(insertFile(const QString&)) );
 
   supp_vbox->addLayout( itemList[Valgrind::SUPPS_SEL]->vlayout(), 10 );
   supp_vbox->addSpacing( 30 );
@@ -220,5 +224,5 @@ bool ValgrindOptionsPage::applyOptions( int /*id*/, bool/*=false*/ )
 
 
 void ValgrindOptionsPage::dummy()
-{ printf("slot dummy()\n"); }
+{ VK_DEBUG("slot dummy()\n"); }
 
