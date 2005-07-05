@@ -15,7 +15,7 @@
 #include "massif_object.h"
 
 #include "vk_config.h"
-#include "vk_msgbox.h"
+#include "vk_messages.h"
 #include "vk_utils.h"          // vk_assert(), vk_strcmp(), vkPrint()
 #include "html_urls.h"
 

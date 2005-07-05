@@ -12,7 +12,7 @@
 #include "vk_config.h"
 #include "vk_utils.h"
 #include "html_urls.h"
-#include "vk_msgbox.h"
+#include "vk_messages.h"
 
 
 /* class Cachegrind ---------------------------------------------------- */

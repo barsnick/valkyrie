@@ -8,7 +8,7 @@
  * See the file LICENSE.GPL for the full license details.
  */
 
-#include "vk_msgbox.h"
+#include "vk_messages.h"
 #include "vk_config.h"
 #include "msgbox_icons.h"
 

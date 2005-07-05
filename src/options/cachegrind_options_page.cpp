@@ -11,7 +11,7 @@
 #include "cachegrind_options_page.h"
 #include "cachegrind_object.h"
 #include "vk_utils.h"
-#include "vk_msgbox.h"
+#include "vk_messages.h"
 
 
 CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )

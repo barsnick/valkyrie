@@ -10,94 +10,153 @@
 #ifndef __VK_FILE_DIALOG_H
 #define __VK_FILE_DIALOG_H
 
+#include <qdialog.h>
+#include <qlistview.h>
+#include <qlistbox.h>
+#include <qlineedit.h>
+#include <qsplitter.h>
+#include <qwidgetstack.h>
+#include <qpushbutton.h>
+#include <qcombobox.h>
+#include <qlabel.h>
+#include <qbuttongroup.h>
+#include <qtoolbutton.h>
 
 
+class FileListBox;
+class FileDialogFileListView;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//#include <qscrollview.h>
-//#include <qfiledialog.h>
-//#include <qwidgetstack.h>
-//#include <qvbox.h>
-//#include <qurl.h>
-//#include <qpixmap.h>
-//#include <qstringlist.h>
-
-
-/* custom file/dir dialog 
-class VkFileDialog : public QDialog
+class FileDialog : public QDialog
 {
   Q_OBJECT
 public:
-  VkFileDialog();
-  ~VkFileDialog();
+  FileDialog( QWidget* parent=0, const char* name=0 );
+  ~FileDialog();
+
+
+
+
+private:
+  bool geometryDirty;
+
+  QLineEdit* nameEdit;   /* name/filter editor */
+  QSplitter* splitter;
+	QWidgetStack* stack;
+  FileDialogFileListView* files;
+  FileListBox* moreFiles;
+  QComboBox *paths;
+  QComboBox *types;
+  QPushButton* okB;
+  QPushButton* cancelB;
+  QLabel * pathL;
+  QLabel * fileL;
+  QLabel * typeL;
+	QToolButton *goBack, *cdToParent ;
+  QButtonGroup* modeButtons;
+
+};
+
+
+/* class FileListBox --------------------------------------------------- */
+class FileListBox : public QListBox
+{
+  friend class FileDialog;
+  Q_OBJECT
+private:
+  FileListBox( QWidget *parent, FileDialog* d );
+
+  void clear();
+  void show();
+  //void startRename( bool check = TRUE );
+  void viewportMousePressEvent( QMouseEvent *e );
+  void viewportMouseReleaseEvent( QMouseEvent *e );
+  void viewportMouseDoubleClickEvent( QMouseEvent *e );
+  void viewportMouseMoveEvent( QMouseEvent *e );
+  //void viewportDragEnterEvent( QDragEnterEvent *e );
+  //void viewportDragMoveEvent( QDragMoveEvent *e );
+  //void viewportDragLeaveEvent( QDragLeaveEvent *e );
+  //void viewportDropEvent( QDropEvent *e );
+  //bool acceptDrop( const QPoint &pnt, QWidget *source );
+  //void setCurrentDropItem( const QPoint &pnt );
+  void keyPressEvent( QKeyEvent *e );
+
 private slots:
-	void goHome();
-  void showHiddenFiles();
-private:
-  QFileDialog::Mode mode;
-  QString start;
-  QString filter;
-  QString caption;
-};
-*/
+	//void rename();
+	//void cancelRename();
+  void doubleClickTimeout();
+  //void changeDirDuringDrag();
+  //void dragObjDestroyed();
+  //void contentsMoved( int, int );
 
-/* shows an image in the preview widget 
-class PixmapView : public QScrollView
+private:
+  //QRenameEdit *lined;
+  FileDialog* filedialog;
+  //bool renaming;
+  //QTimer* renameTimer;
+  //QListBoxItem *renameItem, *dragItem;
+  QPoint pressPos/*, oldDragPos*/;
+  bool mousePressed;
+  int urls;
+  //QString startDragDir;
+  //QListBoxItem *currDropItem;
+  QTimer* changeDirTimer;
+  bool firstMousePressEvent;
+  //QUrlOperator startDragUrl;
+};
+
+
+/* class FileDialogFileListView ---------------------------------------- */
+class FileDialogFileListView : public QListView
 {
   Q_OBJECT
 public:
-  PixmapView( QWidget* parent );
-  void setPixmap( const QPixmap& pix );
-  void drawContents( QPainter* p, int, int, int, int );
-private:
-  QPixmap pixmap;
-};
-*/
+  FileDialogFileListView( QWidget *parent, FileDialog* d );
 
-/* stack of widgets: each one previews a different type of file
-class Preview : public QWidgetStack
-{
-  Q_OBJECT
-public:
-  Preview( QWidget* parent );
-  void showPreview( const QUrl& u, int size );
-private:
-  QMultiLineEdit* normalText;
-  QTextView* html;
-  PixmapView* pixmap;
-};
-*/
+  void clear();
+  //void startRename( bool check = TRUE );
+  void setSorting( int column, bool increasing = TRUE );
 
-/* container for the preview widget stack
-class PreviewWidget : public QVBox, public QFilePreview
-{
-  Q_OBJECT
-public:
-  PreviewWidget( QWidget *parent );
-  void previewUrl( const QUrl &url );
+  //QRenameEdit *lined;
+  //bool renaming;
+  //QListViewItem *renameItem;
+
 private:
-  //QSpinBox *sizeSpinBox;
-  Preview* preview;
+  void viewportMousePressEvent( QMouseEvent *e );
+  void viewportMouseDoubleClickEvent( QMouseEvent *e );
+  void keyPressEvent( QKeyEvent *e );
+  void viewportMouseReleaseEvent( QMouseEvent *e );
+  void viewportMouseMoveEvent( QMouseEvent *e );
+  //void viewportDragEnterEvent( QDragEnterEvent *e );
+  //void viewportDragMoveEvent( QDragMoveEvent *e );
+  //void viewportDragLeaveEvent( QDragLeaveEvent *e );
+  //void viewportDropEvent( QDropEvent *e );
+  //bool acceptDrop( const QPoint &pnt, QWidget *source );
+  //void setCurrentDropItem( const QPoint &pnt );
+
+private slots:
+  //void rename();
+  //void cancelRename();
+  void changeSortColumn2( int column );
+  void doubleClickTimeout();
+  //void changeDirDuringDrag();
+  //void dragObjDestroyed();
+  //void contentsMoved( int, int );
+
+private:
+  FileDialog* filedialog;
+  //QTimer* renameTimer;
+  QPoint pressPos, oldDragPos;
+  bool mousePressed;
+  int urls;
+  //QString startDragDir;
+  //QListViewItem *currDropItem, *dragItem;
+  QTimer* changeDirTimer;
+  bool firstMousePressEvent;
+  bool ascending;
+  int sortcolumn;
+  //QUrlOperator startDragUrl;
 };
-*/
+
+
 
 #endif

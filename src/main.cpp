@@ -13,7 +13,7 @@
 
 #include "vk_utils.h"              // vk_assert(), parseCmdArgs()
 #include "vk_config.h"             // VkConfig
-#include "vk_msgbox.h"             // vkFatal()
+#include "vk_messages.h"           // vkFatal()
 #include "main_window.h"           // MainWindow
 
 #include "vk_objects.h"            // VkObjects()

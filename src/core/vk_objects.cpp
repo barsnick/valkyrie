@@ -25,7 +25,7 @@
 #include "vk_objects.h"
 #include "vk_config.h"
 #include "vk_popt_option.h"    // PERROR* and friends 
-#include "vk_msgbox.h"         // vkInfo() and friends
+#include "vk_messages.h"       // vkInfo() and friends
 #include "html_urls.h"
 
 #include "valkyrie_object.h"   // for configEntries() && checkArg()

@@ -7,211 +7,135 @@
  * See the file LICENSE.GPL for the full license details.
  */
 
-#include "vk_dialogs.h"
+#include "vk_file_dialog.h"
+#include "filedlg_icons.h"
 
-static const char* home[] = {
- "16 15 4 1",
- "# c #000000",
- "a c #ffffff",
- "b c #c0c0c0",
- ". c None",
- ".......##.......",
- "..#...####......",
- "..#..#aabb#.....",
- "..#.#aaaabb#....",
- "..##aaaaaabb#...",
- "..#aaaaaaaabb#..",
- ".#aaaaaaaaabbb#.",
- "###aaaaaaaabb###",
- "..#aaaaaaaabb#..",
- "..#aaa###aabb#..",
- "..#aaa#.#aabb#..",
- "..#aaa#.#aabb#..",
- "..#aaa#.#aabb#..",
- "..#aaa#.#aabb#..",
- "..#####.######.."
-};
+#include <qheader.h>
+#include <qtooltip.h>
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-hand_book.cpp:
-QString fn = QFileDialog::getOpenFileName( vkConfig->vkdocDir(),
-memcheck_view.cpp:
-QString log_file = QFileDialog::getOpenFileName( QString::null,
-memcheck_view.cpp
-QString merge_file = QFileDialog::getOpenFileName( QString::null,
-QString fname = QFileDialog::getSaveFileName( fi.dirPath(),
-options_widgets.cpp:
-QStringList supp_files = QFileDialog::getOpenFileNames(
-cachegrind_options_page.cpp:
-QString pidfile = QFileDialog::getOpenFileName( QString::null,
-QString incdir = QFileDialog::getExistingDirectory( QString::null,
-valkyrie_options_page.cpp:
-QString ed_path = QFileDialog::getOpenFileName( fi.dirPath(),
-QString binfile = QFileDialog::getOpenFileName( QString::null,
-QString supp_dir = QFileDialog::getExistingDirectory( dir.absPath(),
-QString vg_exec_path = QFileDialog::getOpenFileName( "/home",
-*/
-
-#if 0
-/* class VkFileDialog -------------------------------------------------- */
-VkFileDialog::~VkFileDialog()
-{ }
-
-VkFileDialog::VkFileDialog() : QFileDialog( 0, 0, true )
-{
-  QToolButton* tb = new QToolButton( this );
-  tb->setPixmap( QPixmap( home ) );
-  connect( tb, SIGNAL( clicked() ), this, SLOT( goHome() ) );
-  addToolButton( tb );
-  QToolTip::add( tb, "Go Home!" );
-
-  tb = new QToolButton( this );
-  tb->setPixmap( QPixmap( home ) );
-  connect( tb, SIGNAL( clicked() ), this, SLOT( showHiddenFiles() ) );
-  addToolButton( tb );
-  QToolTip::add( tb, "Show hidden files" );
-
-	/* ExistingFile, AnyFile, Directory */
-	mode    = QFileDialog::ExistingFile;
-  start   = QDir::currentDirPath();
-  filter  = QString::null;
-  caption = "Choose file...";
-
-	//QFileDialog fd( QString::null, filter, 0, 0, true );
-	setMode( mode );
-	setCaption( caption );
-	setSelection( start );
-
-	PreviewWidget* pw = new PreviewWidget( &fd );
-	setContentsPreviewEnabled( true );
-	setContentsPreview( pw, pw );
-	/* List:   multi-col list of icons+names; 
-		 Detail: single-col list of icons+names+size+type+date+attribs */
-	setViewMode( QFileDialog::List );
-	setPreviewMode( QFileDialog::Contents );
-}
-
-void VkFileDialog::goHome()
-{
-  if ( getenv( "HOME" ) )
-    setDir( getenv( "HOME" ) );
-  else
-    setDir( "/" );
-}
-
-void VkFileDialog::showHiddenFiles()
-{
-  setShowHiddenFiles( !showHiddenFiles() )
-}
-
-/* class PixmapView ---------------------------------------------------- */
-PixmapView::PixmapView( QWidget *parent )
-	: QScrollView( parent )
-{ viewport()->setBackgroundMode( PaletteBase ); }
-
-void PixmapView::setPixmap( const QPixmap &pix )
-{
-  pixmap = pix;
-  resizeContents( pixmap.size().width(), pixmap.size().height() );
-  viewport()->repaint( FALSE );
-}
-
-void PixmapView::drawContents( QPainter *p, int cx, int cy, 
-                               int cw, int ch )
-{
-  p->fillRect( cx, cy, cw, ch, colorGroup().brush( QColorGroup::Base ) );
-  p->drawPixmap( 0, 0, pixmap );
+FileDialog::~FileDialog() 
+{ 
+	// #2822
+  
 }
 
 
-/* class Preview ------------------------------------------------------- */
-Preview::Preview( QWidget* parent )
-	: QWidgetStack( parent )
+FileDialog::FileDialog( QWidget* parent, const char* name )
+	: QDialog( parent, name, true, WStyle_Customize | WStyle_DialogBorder | WStyle_Title | WStyle_SysMenu )
 {
-  normalText = new QMultiLineEdit( this );
-  normalText->setReadOnly( true );
-  html   = new QTextView( this );
-  pixmap = new PixmapView( this );
-  raiseWidget( normalText );
-}
+  setSizeGripEnabled( true );
+  geometryDirty = true;
+  
+  /* layout stuff */
+  nameEdit = new QLineEdit( this, "name/filter editor" );
+  nameEdit->setMaxLength( 255 );  /*_POSIX_MAX_PATH */
+	// connect #2427
+  //nameEdit->installEventFilter( this );
+  
+  splitter = new QSplitter( this, "splitter" );
+	stack    = new QWidgetStack( splitter, "files and more files" );
+  splitter->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, 
+																				QSizePolicy::Expanding ) );
 
-void Preview::showPreview( const QUrl& u, int size )
-{
-  if ( ! u.isLocalFile() ) {
-    normalText->setText( "I only show local files!" );
-    raiseWidget( normalText );
-		return;
-	} 
-
-	QString path = u.path();
-	QFileInfo fi( path );
-	if ( fi.isFile() && (int)fi.size() > size * 1000 ) {
-		normalText->setText( tr( "The File\n%1\nis too large, so I don't show it!" ).arg( path ) );
-		raiseWidget( normalText );
-		return;
-	}
+  files = new FileDialogFileListView( stack, this );
+  QFontMetrics fm = fontMetrics();
+  files->addColumn( "Name" );
+  files->addColumn( "Size" );
+  files->setColumnAlignment( 1, AlignRight );
+  files->addColumn( "Type" );
+  files->addColumn( "Date" );
+  files->addColumn( "Attributes" );
+  files->header()->setStretchEnabled( true, 0 );
+  files->setMinimumSize( 50, 25 + 2*fm.lineSpacing() );
+  //files->installEventFilter( this );
+  //files->viewport()->installEventFilter( this );
+	// connect #2449
+  
+  moreFiles = new FileListBox( stack, this );
+  moreFiles->setRowMode( QListBox::FitToHeight );
+  moreFiles->setVariableWidth( true );
+	// connect #2469
+  //moreFiles->installEventFilter( this );
+  //moreFiles->viewport()->installEventFilter( this );
 	
-	QPixmap pix( path );
-	if ( !pix.isNull () {
-		pixmap->setPixmap( pix );
-		raiseWidget( pixmap );
-	} else {
-		if ( fi.isFile() ) {
-			QFile f( path );
-			if ( f.open( IO_ReadOnly ) ) {
-				QTextStream ts( &f );
-				QString text = ts.read();
-				f.close();
-				if ( fi.extension().lower().contains( "htm" ) ) {
-					QString url = html->mimeSourceFactory()->makeAbsolute( path, html->context() );
-					html->setText( text, url );   
-					raiseWidget( html );
-					return;
-				} else {
-					normalText->setText( text );   
-					raiseWidget( normalText );
-					return;
-				}
-			}
-		}
-		normalText->setText( QString::null );
-		raiseWidget( normalText );
-	} 
+  okB = new QPushButton( "&OK", this, "OK" ); 
+	// or "Save (see other "OK")
+  okB->setDefault( true );
+  okB->setEnabled( false );
+  //connect( okB, SIGNAL(clicked()), this, SLOT(okClicked()) );
+  cancelB = new QPushButton( "Cancel" , this, "Cancel" );
+  //connect( cancelB, SIGNAL(clicked()), this, SLOT(cancelClicked()) );
 
+  paths = new QComboBox( true, this, "directory history/editor" );
+  paths->setDuplicatesEnabled( false );
+  paths->setInsertionPolicy( QComboBox::NoInsertion );
+  // QFileInfoList ... #2491
+  //paths->installEventFilter( this );
+
+	types = new QComboBox( true, this, "file types" );
+  types->setDuplicatesEnabled( false );
+  types->setEditable( false );
+	// connect #2519
+
+  pathL = new QLabel( paths,    "Look &in:",   this, "lookin_lbl" );
+  fileL = new QLabel( nameEdit, "File &name:", this, "filename_lbl" );
+  typeL = new QLabel( types,    "File &type:", this, "filetype_lbl" );
+  
+  goBack = new QToolButton( this, "go back" );
+  goBack->setEnabled( false );
+  goBack->setFocusPolicy( TabFocus );
+  //connect( goBack, SIGNAL( clicked() ), this, SLOT( goBack() ) );
+  //RM: goBack->setIconSet( *goBackIcon );
+  goBack->setPixmap( QPixmap(back_xpm) );
+  goBack->setAutoRaise( true );
+  QToolTip::add( goBack, "Back" );
+
+  cdToParent = new QToolButton( this, "cd to parent" );
+  cdToParent->setFocusPolicy( TabFocus );
+  //RM: cdToParent->setIconSet( *cdToParentIcon );
+  cdToParent->setPixmap( QPixmap(cdtoparent_xpm) );
+  cdToParent->setAutoRaise( true );
+  QToolTip::add( cdToParent, "One directory up" );
+	// connect #2543
+
+  modeButtons = new QButtonGroup( 0, "invisible group" );
+  connect( modeButtons, SIGNAL(destroyed()),
+           this,        SLOT(modeButtonsDestroyed()) );
+  modeButtons->setExclusive( true );
+	// connect #2559
+
+  mcView = new QToolButton( this, "mclistbox view" );
+  mcView->setFocusPolicy( TabFocus );
+  //RM: mcView->setIconSet( *multiColumnListViewIcon );
+  mcView->setPixmap( QPixmap(mclistview_xpm) );
+  mcView->setToggleButton( true );
+  mcView->setAutoRaise( true );
+  mcView->setOn( true );
+  QToolTip::add( mcView, "List View" );
+  stack->addWidget( moreFiles, modeButtons->insert( mcView ) );
+
+  detailView = new QToolButton( this, "list view" );
+  detailView->setFocusPolicy( TabFocus );
+  //RM: detailView->setIconSet( *detailViewIcon );
+  detailView->setPixmap( QPixmap(detailedview_xpm) );
+  detailView->setToggleButton( true );
+  detailView->setAutoRaise( true );
+  QToolTip::add( detailView, "Detail View" );
+  stack->addWidget( files, modeButtons->insert( detailView ) );
+
+  previewContents = new QToolButton( this, "preview info view" );
+  previewContents->setFocusPolicy( TabFocus );
+  previewContents->setAutoRaise( true );
+  //RM: previewContents->setIconSet( *previewContentsViewIcon );
+  previewContents->setPixmap( QPixmap(previewcontentsview_xpm) );
+  previewContents->setToggleButton( true );
+  QToolTip::add( previewContents, "Preview File Contents" );
+  modeButtons->insert( previewContents );
+
+  stack->raiseWidget( moreFiles );
+
+	// at #2625
 }
 
-/* class PreviewWidget ------------------------------------------------- */
-PreviewWidget::PreviewWidget( QWidget *parent )
-	: QVBox( parent ), QFilePreview()
-{
-	setSpacing( 5 );
-	setMargin( 5 );
-	//QHBox *row = new QHBox( this );
-	//row->setSpacing( 5 );
-	//(void)new QLabel( tr( "Only show files smaller than: " ), row );
-	//sizeSpinBox = new QSpinBox( 1, 10000, 1, row );
-	//sizeSpinBox->setSuffix( " KB" );
-	//sizeSpinBox->setValue( 64 );
-	//row->setFixedHeight( 10 + sizeSpinBox->sizeHint().height() );
-	preview = new Preview( this );
-}
-
-void PreviewWidget::previewUrl( const QUrl& url )
-{ preview->showPreview( url/*, 1000sizeSpinBox->value()*/ ); }
-#endif

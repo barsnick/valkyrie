@@ -12,7 +12,7 @@
 
 #include "logfile.h"
 #include "vk_utils.h"
-#include "vk_msgbox.h"
+#include "vk_messages.h"
 
 #include <qfileinfo.h>
 

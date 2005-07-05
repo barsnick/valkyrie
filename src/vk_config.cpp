@@ -11,7 +11,7 @@
 #include "vk_config.h"
 #include "vk_include.h"
 #include "vk_utils.h"       /* VK_DEBUG */
-#include "vk_msgbox.h"
+#include "vk_messages.h"
 
 #include "valkyrie_object.h"
 #include "valgrind_object.h"

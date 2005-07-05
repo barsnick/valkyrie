@@ -15,7 +15,7 @@
 #include "vk_config.h"
 #include "vk_utils.h"
 #include "main_window.h"
-#include "vk_msgbox.h"
+#include "vk_messages.h"
 
 
 ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )

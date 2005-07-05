@@ -16,7 +16,7 @@
 #include "vk_option.h"
 #include "vk_utils.h"
 #include "vk_config.h"
-#include "vk_msgbox.h"
+#include "vk_messages.h"
 #include "context_help.h"
 #include "vk_popt_option.h"  /* for listbox fileCheck() */
 

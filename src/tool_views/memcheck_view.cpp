@@ -14,7 +14,8 @@
 #include "vk_config.h"
 #include "tb_memcheck_icons.h"
 #include "async_process.h"
-#include "vk_msgbox.h"
+#include "vk_messages.h"
+#include "vk_file_dialog.h"  //FIXME: rename to vk_file_utils.*
 #include "context_help.h"
 #include "html_urls.h"
 
@@ -113,6 +114,13 @@ void MemcheckView::toggleToolbarLabels( bool state )
    to start up in whatever the user's current dir happens to be. */
 void MemcheckView::openLogFile()
 { 
+#if 1
+	/* testing new file dialog stuff */
+  QString fname = "";  
+	FileDialog* fd = new FileDialog( this, "log_file_fd" );
+	fd.exec();
+#endif
+
   QString log_file;
   log_file = QFileDialog::getOpenFileName( QString::null,
                 "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)", 

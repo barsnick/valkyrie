@@ -11,7 +11,7 @@
 #include "memcheck_object.h"
 #include "vk_config.h"
 #include "html_urls.h"
-#include "vk_msgbox.h"
+#include "vk_messages.h"
 #include "logfile.h"
 
 #include <qapplication.h>

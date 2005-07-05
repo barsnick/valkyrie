@@ -13,8 +13,8 @@
 #include "valgrind_options_page.h"
 #include "valgrind_object.h"
 #include "vk_config.h"
+#include "vk_messages.h"
 #include "vk_utils.h"
-#include "vk_msgbox.h"
 
 
 /* this page is different from the others in that it uses three tabs

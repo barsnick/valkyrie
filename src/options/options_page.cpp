@@ -21,7 +21,7 @@
 #include "vk_utils.h"
 #include "vk_config.h"
 #include "context_help.h"
-#include "vk_msgbox.h"
+#include "vk_messages.h"
 
 
 /* class OptionsPage --------------------------------------------------- */

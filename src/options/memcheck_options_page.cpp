@@ -10,8 +10,8 @@
 
 #include "memcheck_options_page.h"
 #include "memcheck_object.h"
+#include "vk_messages.h"
 #include "vk_utils.h"
-#include "vk_msgbox.h"
 
 
 
