@@ -397,6 +397,23 @@ int printStrippedMsg( QString hdr, QString msg, bool ask_user )
 
 
 /* show information message */
+#if 1
+void vkInfo( QWidget* w, QString hdr, const char* msg, ... ) 
+{
+  char buf[VK_BUFLEN];
+  va_list ap;
+  va_start( ap, msg );
+  vsnprintf( buf, VK_BUFLEN, msg, ap );
+  va_end( ap );
+	/* vkConfig might not yet exist */
+	bool use_gui = (vkConfig == 0) 
+		             ? false : vkConfig->rdBool( "gui", "valkyrie" );
+	if ( use_gui )
+		MsgBox::info( w, hdr, buf );
+	else
+		printStrippedMsg( hdr, buf, false );
+}
+#else
 void vkInfo( QWidget* w, QString hdr, const char* msg, ... ) 
 {
   char buf[VK_BUFLEN];
@@ -410,6 +427,7 @@ void vkInfo( QWidget* w, QString hdr, const char* msg, ... )
     printStrippedMsg( hdr, buf, false );
   }
 }
+#endif
 
 /* ask user a question */
 int vkQuery( QWidget* w, int nbutts, QString hdr, 
