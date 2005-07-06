@@ -1,5 +1,129 @@
 /* XPM */
-static const char * view_flags_xpm[] = {
+static const char* view_flags_xpm[] = {
+"20 20 98 2",
+"  	c None",
+". 	c #71A192",
+"+ 	c #006F52",
+"@ 	c #679D8D",
+"# 	c #5C9482",
+"$ 	c #64A292",
+"% 	c #9BB9AD",
+"& 	c #76A494",
+"* 	c #0E7058",
+"= 	c #006F55",
+"- 	c #0A7256",
+"; 	c #62998A",
+"> 	c #8EB4A8",
+", 	c #3B836F",
+"' 	c #317E67",
+") 	c #2B7A60",
+"! 	c #79AA9C",
+"~ 	c #75A897",
+"{ 	c #2E7E65",
+"] 	c #539380",
+"^ 	c #91B7A9",
+"/ 	c #17755E",
+"( 	c #3E866F",
+"_ 	c #0E6F56",
+": 	c #E0E9E7",
+"< 	c #90B7A7",
+"[ 	c #307A61",
+"} 	c #357E66",
+"| 	c #98B3A6",
+"1 	c #3A7E68",
+"2 	c #40806B",
+"3 	c #87B0A3",
+"4 	c #609886",
+"5 	c #397D61",
+"6 	c #397E68",
+"7 	c #639282",
+"8 	c #759D8E",
+"9 	c #528B78",
+"0 	c #6A9A89",
+"a 	c #3B836E",
+"b 	c #0B7257",
+"c 	c #3C7F6B",
+"d 	c #659683",
+"e 	c #B4C3BB",
+"f 	c #2D8068",
+"g 	c #3B7F64",
+"h 	c #407F68",
+"i 	c #9BB5A8",
+"j 	c #2E826A",
+"k 	c #3C7F67",
+"l 	c #40806A",
+"m 	c #2F826A",
+"n 	c #47866F",
+"o 	c #75A291",
+"p 	c #006E52",
+"q 	c #006F56",
+"r 	c #097256",
+"s 	c #5A927D",
+"t 	c #347C64",
+"u 	c #3E846D",
+"v 	c #237760",
+"w 	c #267760",
+"x 	c #2D806A",
+"y 	c #4D9884",
+"z 	c #237B64",
+"A 	c #297960",
+"B 	c #247D67",
+"C 	c #6F9E8D",
+"D 	c #448772",
+"E 	c #65A090",
+"F 	c #29795E",
+"G 	c #BCCDC8",
+"H 	c #2D8169",
+"I 	c #3A8167",
+"J 	c #24806A",
+"K 	c #207963",
+"L 	c #52917F",
+"M 	c #2E8169",
+"N 	c #38866F",
+"O 	c #72A79A",
+"P 	c #9BB8AD",
+"Q 	c #257A61",
+"R 	c #72A090",
+"S 	c #147358",
+"T 	c #428871",
+"U 	c #469580",
+"V 	c #509884",
+"W 	c #478772",
+"X 	c #197255",
+"Y 	c #599281",
+"Z 	c #3C7F68",
+"` 	c #3C836C",
+" .	c #006F57",
+"..	c #027058",
+"+.	c #3F8572",
+"@.	c #3C7F65",
+"#.	c #9EC0B3",
+"$.	c #4E8977",
+"    . + @                               ",
+"    # + $ % & * = - ;                   ",
+"    > + , ' ) !   ~ { ]                 ",
+"    ^ + / (           _ :               ",
+"    < + [             } |               ",
+"    < + 1             2 |       3 4     ",
+"    < + 5             6 7 8 9 0 a b     ",
+"    < + 1             c d       e f     ",
+"    ^ + g             h i         j     ",
+"    ^ + k             l i         m     ",
+"    ^ + n   o p q r s t i         j     ",
+"    ^ + u v w x y z A p i         m     ",
+"    < + B C       D E F G         H     ",
+"    < + I         J K L           M     ",
+"    < + 1         N O           P Q     ",
+"    < + 5         R S T U + V W X Y     ",
+"    ^ + Z             `  .+ ..+.        ",
+"    ^ + @.                              ",
+"    ^ + @.                              ",
+"    #.+ $.                              "};
+
+
+
+/* XPM 
+static const char* view_flags_xpm[] = {
 "17 17 5 1",
 " 	c None",
 ".	c #000000",
@@ -23,10 +147,11 @@ static const char * view_flags_xpm[] = {
 "       .#.       ",
 "        .        ",
 "                 "};
+*/
 
 
 /* XPM */
-static const char * black_bullet_xpm[] = {
+static const char* black_bullet_xpm[] = {
 "11 11 5 1",
 " 	g None",
 ".	g #4C4C4C",
@@ -47,7 +172,7 @@ static const char * black_bullet_xpm[] = {
 
 
 /* XPM */
-static const char * stop_xpm[] = {
+static const char* stop_xpm[] = {
 "16 16 140 2",
 "  	c None",
 ". 	c #9F8D83",
@@ -211,7 +336,7 @@ static const char * stop_xpm[] = {
 
 
 /* XPM */
-static const char * run_xpm[] = {
+static const char* run_xpm[] = {
 "17 18 130 2",
 "  	c None",
 ". 	c #CED0DC",
@@ -364,7 +489,7 @@ static const char * run_xpm[] = {
 
 
 /* XPM */
-static const char * help_xpm[] = {
+static const char* help_xpm[] = {
 "22 22 69 1",
 " 	c None",
 ".	c #802580",
