@@ -99,7 +99,7 @@ QString vk_mkstemp( QString fname, QString path,
     if ( dir.rename( fi.fileName(), ret_fname + ext ) )
       ret_fname += ext;
   }
-  
+
   return ret_fname;
 }
 

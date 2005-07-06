@@ -24,8 +24,8 @@ public:
                  QStyleHintReturn* ret = 0 ) const;
 };
 
-int VkStyle::styleHint( StyleHint hint,  const QWidget *w,
-                        const QStyleOption &opt,
+int VkStyle::styleHint( StyleHint hint, const QWidget* w,
+                        const QStyleOption& opt,
                         QStyleHintReturn *ret ) const
 {
   if ( hint == QStyle::SH_Workspace_FillSpaceOnMaximize ) {
