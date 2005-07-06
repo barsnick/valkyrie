@@ -239,8 +239,8 @@ public:
 		Detail = 0, /* name, size, type, date, attribs */
 		List   = 1  /* files + dirs */
 	};
-  void setViewMode( ViewMode m );
-  ViewMode viewMode() const;
+	//RM:  void setViewMode( ViewMode m );
+	//RM:  ViewMode viewMode() const;
 
 //RM: ??
 	enum StackId {

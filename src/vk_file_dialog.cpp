@@ -2629,27 +2629,26 @@ void FileDialog::done( int i )
 }
 
 
-FileDialog::ViewMode FileDialog::viewMode() const
-{
-  if ( detailViewMode )
-    return Detail;
-  else
-    return List;
-}
+//RM:FileDialog::ViewMode FileDialog::viewMode() const
+//RM:{
+//RM:  if ( detailViewMode )
+//RM:    return Detail;
+//RM:  else
+//RM:    return List;
+//RM:}
 
-
-void FileDialog::setViewMode( ViewMode m )
-{
-  if ( m == Detail ) {
-    detailViewMode = true;
-    d->stack->raiseWidget( files );
-    d->mcol_detailView->setOn( true );
-  } else if ( m == List ) {
-    detailViewMode = false;
-    d->stack->raiseWidget( moreFiles );
-    d->mcol_detailView->setOn( false );
-  }
-}
+//RM:void FileDialog::setViewMode( ViewMode m )
+//RM:{
+//RM:  if ( m == Detail ) {
+//RM:    detailViewMode = true;
+//RM:    d->stack->raiseWidget( files );
+//RM:    d->mcol_detailView->setOn( true );
+//RM:  } else if ( m == List ) {
+//RM:    detailViewMode = false;
+//RM:    d->stack->raiseWidget( moreFiles );
+//RM:    d->mcol_detailView->setOn( false );
+//RM:  }
+//RM:}
 
 
 void FileDialog::keyPressEvent( QKeyEvent* ke )
