@@ -118,9 +118,8 @@ void MemcheckView::openLogFile()
 	/* testing new file dialog stuff */
   QString fname = "";  
 	FileDialog* fd = new FileDialog( this, "log_file_fd" );
-	fd.exec();
-#endif
-
+	fd->exec();
+#else
   QString log_file;
   log_file = QFileDialog::getOpenFileName( QString::null,
                 "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)", 
@@ -131,6 +130,7 @@ void MemcheckView::openLogFile()
 
   vkConfig->wrEntry( log_file, "view-log", "valkyrie" );
   memcheck->parseLogFile( false );
+#endif
 }
 
 

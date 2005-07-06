@@ -1,7 +1,5 @@
-/* memcheck | addrcheck toolbar icons */
-
 /* XPM */
-static const char * supp_editor_xpm[] = {
+static const char* supp_editor_xpm[] = {
 "16 16 61 1",
 " 	c None",
 ".	c #858585",
@@ -83,7 +81,7 @@ static const char * supp_editor_xpm[] = {
 
 
 /* XPM */
-static const char * open_log_xpm[] = {
+static const char* open_log_xpm[] = {
 "18 18 139 2",
 "  	c None",
 ". 	c #585858",
@@ -246,7 +244,7 @@ static const char * open_log_xpm[] = {
 
 
 /* XPM */
-static const char * save_log_xpm[] = {
+static const char* save_log_xpm[] = {
 "18 18 125 2",
 "  	c None",
 ". 	c #1C1C1C",
@@ -393,7 +391,7 @@ static const char * save_log_xpm[] = {
 "                                    "};
 
 /* XPM */
-static const char * open_one_item_xpm[] = {
+static const char* open_one_item_xpm[] = {
 "22 22 6 1",
 " 	c None",
 ".	c #000000",
@@ -426,7 +424,7 @@ static const char * open_one_item_xpm[] = {
 
 
 /* XPM */
-static const char * open_all_items_xpm[] = {
+static const char* open_all_items_xpm[] = {
 "22 22 6 1",
 " 	c None",
 ".	c #000000",
@@ -458,7 +456,7 @@ static const char * open_all_items_xpm[] = {
 "                      "};
 
 /* XPM */
-static const char * src_path_xpm[] = {
+static const char* src_path_xpm[] = {
 "22 22 5 1",
 " 	c None",
 ".	c #000000",

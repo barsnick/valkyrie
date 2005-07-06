@@ -1,4 +1,21 @@
-/* file dialog icons */
+/* XPM */
+static const char* back_xpm[] = {
+"13 11 3 1",
+"a c #00ffff",
+"# c #000000",
+". c None",
+".....#.......",
+"....##.......",
+"...#a#.......",
+"..#aa########",
+".#aaaaaaaaaa#",
+"#aaaaaaaaaaa#",
+".#aaaaaaaaaa#",
+"..#aa########",
+"...#a#.......",
+"....##.......",
+".....#......."};
+
 
 
 /* XPM */
@@ -115,6 +132,8 @@ static const char* link_dir_xpm[] = {
 ".dddddddddddddd.",
 "................"};
 
+
+
 /* XPM */
 static const char* link_file_xpm[] = {
 "16 16 10 1",
@@ -146,6 +165,7 @@ static const char* link_file_xpm[] = {
 "ccccccccccccc###"};
 
 
+
 /* XPM */
 static const char* file_xpm[] = {
 "16 16 5 1",
@@ -170,6 +190,7 @@ static const char* file_xpm[] = {
 ".aaaaaaaaaabc###",
 ".bbbbbbbbbbbc###",
 "ccccccccccccc###"};
+
 
 
 /* XPM */
@@ -199,6 +220,7 @@ static const char* closed_xpm[] = {
 "................"};
 
 
+
 /* XPM */
 static const char* cdtoparent_xpm[] = {
 "15 13 3 1",
@@ -220,7 +242,7 @@ static const char* cdtoparent_xpm[] = {
 "***************"};
 
 
-/* XPM */
+/* XPM 
 static const char* newfolder_xpm[] = {
 "15 14 4 1",
 "  c None",
@@ -241,6 +263,32 @@ static const char* newfolder_xpm[] = {
 ".@+@+@+@+@.    ",
 ".+@+@+@+@+.    ",
 "...........    "};
+*/
+/* XPM */
+static const char* go_home_xpm[] = {
+"16 15 4 1",
+"# c #000000",
+"a  c #FFFF00",
+"b c #c0c0c0",
+". c None",
+".......##.......",
+"..#...####......",
+"..#..#aabb#.....",
+"..#.#aaaabb#....",
+"..##aaaaaabb#...",
+"..#aaaaaaaabb#..",
+".#aaaaaaaaabbb#.",
+"###aaaaaaaabb###",
+"..#aaaaaaaabb#..",
+"..#aaa###aabb#..",
+"..#aaa#.#aabb#..",
+"..#aaa#.#aabb#..",
+"..#aaa#.#aabb#..",
+"..#aaa#.#aabb#..",
+"..#####.######.."
+};
+
+
 
 
 /* XPM */
@@ -262,7 +310,7 @@ static const char* detailedview_xpm[] = {
 ".****.***.***."};
 
 
-/* XPM */
+/* XPM 
 static const char* previewinfoview_xpm[] = {
 "13 13 4 1",
 ". c #00007f",
@@ -282,7 +330,7 @@ static const char* previewinfoview_xpm[] = {
 "..#####a#bbb#",
 ".#.#bb#a#####",
 "...####aaaaaa"};
-
+*/
 
 /* XPM */
 static const char* previewcontentsview_xpm[] = {
@@ -325,23 +373,4 @@ static const char* mclistview_xpm[] = {
 "...*****...****",
 ".a.*bbb*.a.*bbb",
 "...*****...****"};
-
-
-/* XPM */
-static const char* back_xpm[] = {
-"13 11 3 1",
-"a c #00ffff",
-"# c #000000",
-". c None",
-".....#.......",
-"....##.......",
-"...#a#.......",
-"..#aa########",
-".#aaaaaaaaaa#",
-"#aaaaaaaaaaa#",
-".#aaaaaaaaaa#",
-"..#aa########",
-"...#a#.......",
-"....##.......",
-".....#......."};
 

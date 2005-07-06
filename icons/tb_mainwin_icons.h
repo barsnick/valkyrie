@@ -1,26 +1,3 @@
-/* toolbar icons */
-
-/* XPM */
-static const char * black_bullet_xpm[] = {
-"11 11 5 1",
-" 	g None",
-".	g #4C4C4C",
-"+	g #262626",
-"@	g #FFFFFF",
-"#	g #808080",
-"           ",
-"           ",
-"           ",
-"    ..+    ",
-"   .@+.+#  ",
-"   .+.++#  ",
-"   +.+++#  ",
-"    +++#   ",
-"    ###    ",
-"           ",
-"           "};
-
-
 /* XPM */
 static const char * view_flags_xpm[] = {
 "17 17 5 1",
@@ -46,6 +23,27 @@ static const char * view_flags_xpm[] = {
 "       .#.       ",
 "        .        ",
 "                 "};
+
+
+/* XPM */
+static const char * black_bullet_xpm[] = {
+"11 11 5 1",
+" 	g None",
+".	g #4C4C4C",
+"+	g #262626",
+"@	g #FFFFFF",
+"#	g #808080",
+"           ",
+"           ",
+"           ",
+"    ..+    ",
+"   .@+.+#  ",
+"   .+.++#  ",
+"   +.+++#  ",
+"    +++#   ",
+"    ###    ",
+"           ",
+"           "};
 
 
 /* XPM */

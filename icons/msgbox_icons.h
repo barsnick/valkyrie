@@ -1,9 +1,5 @@
-/* We need these in here so we can find them in the event of
-   having to generate a MsgBox prior to Config being initialised,
-   eg. in main() */
-
 /* XPM */
-static const char *msg_query_xpm[] = {
+static const char* msg_query_xpm[] = {
 "24 24 22 1",
 "   c None",
 ".  c #666699",
@@ -55,7 +51,7 @@ static const char *msg_query_xpm[] = {
 
 
 /* XPM */
-static const char *msg_fatal_xpm[] = {
+static const char* msg_fatal_xpm[] = {
 "22 22 3 1",
 "   c None",
 ".  c #000000",
@@ -88,7 +84,7 @@ static const char *msg_fatal_xpm[] = {
 
 
 /* XPM */
-static const char *msg_warn_xpm[] = {
+static const char* msg_warn_xpm[] = {
 "21 20 45 1",
 "   c None",
 ".  c #484648",
@@ -159,7 +155,7 @@ static const char *msg_warn_xpm[] = {
 
 
 /* XPM */
-static const char *msg_info_xpm[] = {
+static const char* msg_info_xpm[] = {
 "20 21 233 2",
 "    c None",
 ".   c #385467",
@@ -418,7 +414,7 @@ static const char *msg_info_xpm[] = {
 
 
 /* XPM */
-static const char * msg_error_xpm[] = {
+static const char* msg_error_xpm[] = {
 "22 22 3 1",
 "   c None",
 ".  c #000000",

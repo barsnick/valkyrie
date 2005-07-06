@@ -46,6 +46,7 @@ MsgBox::MsgBox( QWidget* parent, Icon icon, QString msg,
   switch ( icon ) {
   case Query:   
     caption = "Query";
+		defButton = 1;  /* No */
     pm_file = QPixmap( msg_query_xpm ); 
     break;
   case Info:
@@ -54,6 +55,7 @@ MsgBox::MsgBox( QWidget* parent, Icon icon, QString msg,
     break;
   case Warning:
     caption = "Warning";
+		defButton = 1;  /* No */
     pm_file = QPixmap( msg_warn_xpm ); 
     break;
   case Error:
@@ -75,7 +77,7 @@ MsgBox::MsgBox( QWidget* parent, Icon icon, QString msg,
   minWidth += pm_file.width();
 
   button[defButton] |= MsgBox::Default;
-  switch( numButtons ) {
+  switch ( numButtons ) {
   case 1:        // ok button
     escButton = -1;
     break;
