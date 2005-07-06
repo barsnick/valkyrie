@@ -2628,29 +2628,6 @@ void FileDialog::done( int i )
   QDialog::done( i );
 }
 
-
-//RM:FileDialog::ViewMode FileDialog::viewMode() const
-//RM:{
-//RM:  if ( detailViewMode )
-//RM:    return Detail;
-//RM:  else
-//RM:    return List;
-//RM:}
-
-//RM:void FileDialog::setViewMode( ViewMode m )
-//RM:{
-//RM:  if ( m == Detail ) {
-//RM:    detailViewMode = true;
-//RM:    d->stack->raiseWidget( files );
-//RM:    d->mcol_detailView->setOn( true );
-//RM:  } else if ( m == List ) {
-//RM:    detailViewMode = false;
-//RM:    d->stack->raiseWidget( moreFiles );
-//RM:    d->mcol_detailView->setOn( false );
-//RM:  }
-//RM:}
-
-
 void FileDialog::keyPressEvent( QKeyEvent* ke )
 {
   if ( !d->ignoreNextKeyPress && ke && ( ke->key() == Key_Enter ||
