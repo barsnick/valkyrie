@@ -46,7 +46,7 @@ MsgBox::MsgBox( QWidget* parent, Icon icon, QString msg,
   switch ( icon ) {
   case Query:   
     caption = "Query";
-		defButton = 1;  /* No */
+    defButton = 1;  /* No */
     pm_file = QPixmap( msg_query_xpm ); 
     break;
   case Info:
@@ -55,7 +55,7 @@ MsgBox::MsgBox( QWidget* parent, Icon icon, QString msg,
     break;
   case Warning:
     caption = "Warning";
-		defButton = 1;  /* No */
+    defButton = 1;  /* No */
     pm_file = QPixmap( msg_warn_xpm ); 
     break;
   case Error:
@@ -404,13 +404,13 @@ void vkInfo( QWidget* w, QString hdr, const char* msg, ... )
   va_start( ap, msg );
   vsnprintf( buf, VK_BUFLEN, msg, ap );
   va_end( ap );
-	bool use_gui = (vkConfig == 0) 	/* vkConfig might not yet exist */
-		             ? false : vkConfig->rdBool( "gui", "valkyrie" );
-	if ( use_gui ) {
-		MsgBox::info( w, hdr, buf );
-	} else {
-		printStrippedMsg( hdr, buf, false );
-	}
+  bool use_gui = (vkConfig == 0)   /* vkConfig might not yet exist */
+                 ? false : vkConfig->rdBool( "gui", "valkyrie" );
+  if ( use_gui ) {
+    MsgBox::info( w, hdr, buf );
+  } else {
+    printStrippedMsg( hdr, buf, false );
+  }
 }
 
 
@@ -423,9 +423,9 @@ int vkQuery( QWidget* w, int nbutts, QString hdr,
   va_start( ap, msg );
   vsnprintf( buf, VK_BUFLEN, msg, ap );
   va_end( ap );
-	bool use_gui = (vkConfig == 0)  	/* vkConfig might not yet exist */
-		             ? false : vkConfig->rdBool( "gui", "valkyrie" );
-	if ( use_gui )
+  bool use_gui = (vkConfig == 0)    /* vkConfig might not yet exist */
+                 ? false : vkConfig->rdBool( "gui", "valkyrie" );
+  if ( use_gui ) {
     return MsgBox::query( w, hdr, buf, nbutts );
   } else {
     return printStrippedMsg( hdr, buf, true );
@@ -441,9 +441,9 @@ int vkQuery( QWidget* w, QString hdr,
   va_start( ap, msg );
   vsnprintf( buf, VK_BUFLEN, msg, ap );
   va_end( ap );
-	bool use_gui = (vkConfig == 0) 	/* vkConfig might not yet exist */
-		             ? false : vkConfig->rdBool( "gui", "valkyrie" );
-	if ( use_gui ) {
+  bool use_gui = (vkConfig == 0)   /* vkConfig might not yet exist */
+                 ? false : vkConfig->rdBool( "gui", "valkyrie" );
+  if ( use_gui ) {
     return MsgBox::query( w, hdr, buf, labels );
   } else {
     return printStrippedMsg( hdr, buf, true );
@@ -458,9 +458,9 @@ int vkWarn( QWidget* w, QString hdr, const char* msg, ... )
   va_start( ap, msg );
   vsnprintf( buf, VK_BUFLEN, msg, ap );
   va_end( ap );
-	bool use_gui = (vkConfig == 0) 	/* vkConfig might not yet exist */
-		             ? false : vkConfig->rdBool( "gui", "valkyrie" );
-	if ( use_gui ) {
+  bool use_gui = (vkConfig == 0)   /* vkConfig might not yet exist */
+                 ? false : vkConfig->rdBool( "gui", "valkyrie" );
+  if ( use_gui ) {
     return MsgBox::warning( w, hdr, buf );
   } else {
     return printStrippedMsg( hdr, buf, true );
@@ -475,9 +475,9 @@ bool vkError( QWidget* w, QString hdr, const char* msg, ... )
   va_start( ap, msg );
   vsnprintf( buf, VK_BUFLEN, msg, ap );
   va_end( ap );
-	bool use_gui = (vkConfig == 0) 	/* vkConfig might not yet exist */
-		             ? false : vkConfig->rdBool( "gui", "valkyrie" );
-	if ( use_gui ) {
+  bool use_gui = (vkConfig == 0)   /* vkConfig might not yet exist */
+                 ? false : vkConfig->rdBool( "gui", "valkyrie" );
+  if ( use_gui ) {
     return MsgBox::error( w, hdr, buf );
   } else {
     printStrippedMsg( hdr, buf, false );
@@ -493,9 +493,9 @@ int vkFatal( QWidget* w, QString hdr, const char* msg, ... )
   va_start( ap, msg );
   vsnprintf( buf, VK_BUFLEN, msg, ap );
   va_end( ap );
-	bool use_gui = (vkConfig == 0) 	/* vkConfig might not yet exist */
-		             ? false : vkConfig->rdBool( "gui", "valkyrie" );
-	if ( use_gui ) {
+  bool use_gui = (vkConfig == 0)   /* vkConfig might not yet exist */
+                 ? false : vkConfig->rdBool( "gui", "valkyrie" );
+  if ( use_gui ) {
     MsgBox::fatal( w, hdr, buf );
     return EXIT_FAILURE;     /* goodbye, cruel world */
   } else {
