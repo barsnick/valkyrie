@@ -231,7 +231,6 @@ void OptionsWindow::showPage( int catid )
   if ( isMinimized() ) {
     setCategory( catid );
     showNormal();
-    raise();
     return;
   }  
 

@@ -187,7 +187,10 @@ void MainWindow::showAboutInfo( int id )
 
 
 void MainWindow::showOptionsWindow( int view_id )
-{ optionsWin->showPage( view_id ); }
+{ 
+	optionsWin->showPage( view_id ); 
+	optionsWin->raise();
+}
 
 
 /* slot, connected to a tool object's signal running(bool) */
