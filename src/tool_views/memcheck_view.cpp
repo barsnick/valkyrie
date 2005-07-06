@@ -114,7 +114,7 @@ void MemcheckView::toggleToolbarLabels( bool state )
    to start up in whatever the user's current dir happens to be. */
 void MemcheckView::openLogFile()
 { 
-#if 1
+#if 0
 	/* testing new file dialog stuff */
   QString fname = "";  
 	FileDialog* fd = new FileDialog( this, "log_file_fd" );
