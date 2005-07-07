@@ -34,6 +34,7 @@ Memcheck::Memcheck()
   /* init vars */
   memcheckView = 0;
 
+	logStream.setEncoding( QTextStream::UnicodeUTF8 );
   xmlParser = new XMLParser( this, true );
   reader.setContentHandler( xmlParser );
   reader.setErrorHandler( xmlParser );
@@ -495,8 +496,8 @@ bool Memcheck::mergeLogFiles()
 
 
 /* if --vg-opt=<arg> was specified on the cmd-line, called by
-   valkyrie->runTool(); if set via the run-button in the gui, called
-   by MainWindow::run()valkyrie->runTool().  */
+   valkyrie->runTool(); if set via the run-button in the gui, 
+   then MainWindow::run() calls valkyrie->runTool().  */
 bool Memcheck::run( QStringList flags )
 {
   if ( usingGui ) {
@@ -515,11 +516,13 @@ bool Memcheck::run( QStringList flags )
   /* init the auto-save filename and stream */
   save_fname = vk_mkstemp( "mc_output", vkConfig->logsDir(), ".xml" );
   logFile.setName( save_fname );
-  printf("save_fname = %s\n", save_fname.latin1() );
-  logStream.setEncoding( QTextStream::UnicodeUTF8 );
-  logStream.setDevice( &logFile );
-  if ( !logFile.open( IO_WriteOnly ) ) {
+  //printf("save_fname = %s\n", save_fname.latin1() );
+  //logStream.setEncoding( QTextStream::UnicodeUTF8 );
+  //logStream.setDevice( &logFile );
+  //if ( !logFile.open( IO_WriteOnly ) ) {
+	if ( ! setupFileStream( true ) ) {
     emitRunning( false );
+		setupFileStream( false );
     return vkError( memcheckView, "Open File Error", 
                     "<p>Unable to open file '%s' for writing.</p>", 
                     save_fname.latin1() );
@@ -535,6 +538,7 @@ bool Memcheck::run( QStringList flags )
   if ( ! proc->start() ) {
     setupProc( false );
     setupParser( false );
+    setupFileStream( false );
     return vkError( memcheckView, "Error", 
                     "<p>Process failed to start</p>" );
   }
@@ -552,9 +556,11 @@ void Memcheck::parseOutput()
 
   bool ok;
   QString data;
+	int lineNumber = 0;
 
   if ( log_fd == 1 ) {                    /* stdout */
     while ( proc->canReadLineStdout() ) {
+			lineNumber++;
       data = proc->readLineStdout();
       // printf("data: -->%s<--\n", data.latin1() );
       logStream << data << "\n";
@@ -566,6 +572,7 @@ void Memcheck::parseOutput()
     }
   } else if ( log_fd == 2 ) {             /* stderr */
     while ( proc->canReadLineStderr() ) {
+			lineNumber++;
       data = proc->readLineStderr();
       // printf("data: -->%s<--\n", data.latin1() );
       logStream << data << "\n";
@@ -576,10 +583,12 @@ void Memcheck::parseOutput()
       if ( !ok ) break;
     }
   }
-
+#if 1
   if ( !ok ) {
     vkError( memcheckView, "Parse Error", 
-             "<p>Parsing failed on line: '%s'</p>", data.latin1() );
+             "<p>Parsing failed on line #%d: '%s'</p>", 
+						 lineNumber, data.latin1() );
+#endif
   }
 
 }
@@ -600,12 +609,11 @@ void Memcheck::saveParsedOutput()
   /* grab the process id in case we need it later */
   long currentPid = proc->processIdentifier();
 
-  /* close down auto-save log stuff */
-  logFile.close();
-  logStream.unsetDevice();
-
-  setupParser( false ); /* disconnect the parser */
-  setupProc( false );   /* disconnect and delete the proc */
+  //logFile.close();
+  //logStream.unsetDevice();
+	setupFileStream( false );  /* close down auto-save log stuff */
+  setupParser( false );      /* disconnect the parser */
+  setupProc( false );        /* disconnect and delete the proc */
 
   /* try for --log-file-exactly first */
   QString fname = vkConfig->rdEntry( "log-file-exactly","valgrind" );
@@ -727,4 +735,20 @@ void Memcheck::setupParser( bool init )
                 memcheckView, SLOT(updateStatus()) );
   }
 
+}
+
+
+bool Memcheck::setupFileStream( bool init )
+{
+	bool ok = true;
+
+	if ( init ) {
+		ok = logFile.open( IO_WriteOnly );
+		logStream.setDevice( &logFile );
+	} else {
+		logFile.close();
+		logStream.unsetDevice();
+	}
+
+	return ok;
 }

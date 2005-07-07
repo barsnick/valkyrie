@@ -49,14 +49,14 @@ Massif::Massif()
            urlMassif::Depth );
   addOpt( ALLOC_FN,    Option::ARG_STRING, Option::LEDIT, 
           "massif",    '\0',               "alloc-fn", 
-          "<name>",    "",               "empty",
+          "<name>",    "",                 "",
           "Specify <fn> as an alloc function:",
           "specify <fn> as an alloc function", 
           urlMassif::AllocFn );
   addOpt( FORMAT,      Option::ARG_STRING,   Option::COMBO,  
           "massif",    '\0',                 "format",
           "<text|html|xml>", "text|html|xml", "text",
-          "Format of textual output:",
+          "Output Format:",
           "format of textual output",
           urlMassif::Format );
   addOpt( ALIGNMENT,  Option::ARG_UINT,   Option::SPINBOX, 

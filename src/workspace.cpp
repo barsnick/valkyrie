@@ -11,6 +11,9 @@
 
 #include <qwindowsstyle.h>
 
+/* - http://doc.trolltech.com/qq/qq09-q-and-a.html
+   - 
+*/
 
 /* subclass of QStyle so that QWorkspace doesn't show the window
    controls when windows are maximised (sigh) */

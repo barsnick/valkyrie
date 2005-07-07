@@ -293,8 +293,10 @@ QStringList Valkyrie::modifiedFlags()
 }
 
 
-/* called by MainWindow::showFlagsWidget() so user can see exactly
-   what is being fed to valgrind on the cmd-line; and by Valkyrie::runTool().
+/* called by:
+   (a) MainWindow::showFlagsWidget() so user can see 
+       exactly what is being fed to valgrind on the cmd-line;
+   (b) by Valkyrie::runTool().  
    returns a '\n' separated list of current relevant flags */
 QString Valkyrie::currentFlags( ToolObject* tool_obj )
 {
@@ -327,7 +329,21 @@ QString Valkyrie::currentFlags( ToolObject* tool_obj )
       break;
   }
 
-  return flags.join( "\n" ); 
+	/* ## hack alert: unfortunately, we have to pass each arg to
+		 QProcess as a separate string, and this includes any binary
+		 flags; but for display purposes in the flagWidget, concat the
+		 binary together with its flags 'cos its prettier. */
+	QString flags2 = "";
+	int num_flags = flags.count();
+	for ( int i=0; i<num_flags-2; i++ )
+		flags2 += flags[i] +  "\n";
+	if ( !vkConfig->rdEntry("binary-flags", "valkyrie").isEmpty() ) {
+		flags2 += flags[num_flags-2] + " " + flags[num_flags-1];
+	} else {
+		flags2 += flags[num_flags-1];
+	}
+
+	return flags2;
 }
 
 

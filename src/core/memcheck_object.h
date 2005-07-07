@@ -66,6 +66,7 @@ private:
 
   void setupProc( bool init );
   void setupParser( bool init );
+	bool setupFileStream( bool init );
 
 private:
   MemcheckView* memcheckView;    /* the toolview window */
