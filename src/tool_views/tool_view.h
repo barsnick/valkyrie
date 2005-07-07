@@ -11,28 +11,33 @@
 #define __VK_TOOL_VIEW_H
 
 
-#include <qmainwindow.h>
+#include <qwidget.h>
 
 #include "vk_objects.h"
 
 
-class ToolView : public QMainWindow
+class ToolView : public QWidget
 {
   Q_OBJECT
 public:
   ToolView( QWidget* parent, QString title, VkObject::ObjectId id );
   ~ToolView();
 
-  /* used by Workspace::findView(), and by MainWin::closeToolView() */
-  VkObject::ObjectId id();
+  /* used by MainWin::closeToolView() */
+  VkObject::ObjectId id() { return objId; }
+
   /* called by the view's object */
   virtual void setState( bool run ) = 0;
+
+  void showToolBar() { if (toolBar) toolBar->show(); }
+  void hideToolBar() { if (toolBar) toolBar->hide(); }
 
 public slots:
   virtual void toggleToolbarLabels(bool) = 0;
 
 protected:
   VkObject::ObjectId objId;
+  QToolBar* toolBar;
 };
 
 

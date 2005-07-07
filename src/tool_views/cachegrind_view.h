@@ -20,7 +20,7 @@ class CachegrindView : public ToolView
 {
   Q_OBJECT
 public:
-  CachegrindView( QWidget* parent, Cachegrind* cg );
+  CachegrindView( QMainWindow* mwin, QWidget* parent, Cachegrind* cg );
   ~CachegrindView();
 
   /* called by cachegrind: set state for buttons; set cursor state */

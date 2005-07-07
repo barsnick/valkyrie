@@ -12,17 +12,18 @@
 #define __VK_MAIN_WINDOW_H
 
 
-#include "workspace.h"
 #include "help_about.h"
 #include "hand_book.h"
 #include "options_window.h"
 
 #include "vk_objects.h"
 #include "valkyrie_object.h"
+#include "tool_view.h"
 
 #include <qbuttongroup.h>
 #include <qlabel.h>
 #include <qtoolbutton.h>
+#include <qptrlist.h>
 
 
 
@@ -75,7 +76,7 @@ private:
   void mkStatusBar();
 
 private:
-  WorkSpace* wSpace;
+  QWidgetStack* wStack;
 
   Valkyrie* valkyrie;
   ToolView* activeView;

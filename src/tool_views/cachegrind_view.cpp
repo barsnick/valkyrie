@@ -19,7 +19,8 @@ CachegrindView::~CachegrindView()
 { }
 
 
-CachegrindView::CachegrindView( QWidget* parent, Cachegrind* cg )
+CachegrindView::CachegrindView( QMainWindow* mwin,
+                                QWidget* parent, Cachegrind* cg )
   : ToolView( parent, cg->name(), cg->id() )
 {
   cachegrind = cg;

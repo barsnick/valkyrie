@@ -22,6 +22,7 @@
 #include <qobject.h>
 #include <qprocess.h>
 #include <qptrlist.h>
+#include <qmainwindow.h>
 
 #include "vk_option.h"          /* class Option */
 #include "vk_popt_option.h"
@@ -104,7 +105,7 @@ public:
   ~ToolObject();
 
   /* creates and returns the ToolView window for a tool object */
-  virtual ToolView* toolView( QWidget* parent ) = 0;
+  virtual ToolView* toolView( QMainWindow* mwin, QWidget* parent ) = 0;
   virtual bool closeView() = 0;
 
   virtual void stop() = 0;

@@ -24,7 +24,7 @@ public:
   ~Massif() { }
 
   /* returns the ToolView window (massifView) for this tool */
-  ToolView* toolView( QWidget* parent );
+  ToolView* toolView( QMainWindow* mwin, QWidget* parent );
   /* called by MainWin::closeToolView() */
   bool closeView();
 

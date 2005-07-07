@@ -22,10 +22,12 @@
 #include <qcursor.h>
 #include <qfiledialog.h>
 #include <qheader.h>
-#include <qmenubar.h>
+#include <qtoolbar.h>
 #include <qmotifstyle.h>
 #include <qtoolbutton.h>
 #include <qtooltip.h>
+#include <qpopupmenu.h>
+#include <qlayout.h>
 
 
 void MemcheckView::showSuppEditor()
@@ -41,15 +43,19 @@ MemcheckView::~MemcheckView()
 }
 
 
-MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
+MemcheckView::MemcheckView( QMainWindow* mwin,
+                            QWidget* parent, Memcheck* mc )
   : ToolView( parent, mc->name(), mc->id() )
 {
   memcheck = mc;
 
-  mkMenuBar();
+  mkMenuBar( mwin );
+
+  QVBoxLayout* vLayout = new QVBoxLayout( this );
 
   /* create the listview */
   lView = new QListView( this, "lview" );
+  vLayout->addWidget( lView );
   lView->setShowToolTips( false );
   lView->setSorting( -1 );
   lView->setMargin( 5 );
@@ -60,8 +66,7 @@ MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
   fnt.setStyleHint( QFont::TypeWriter );
   lView->setFont( fnt );
 
-  setFocusProxy( lView );
-  setCentralWidget( lView );
+  //  setFocusProxy( lView );
 
   savelogButton->setEnabled( false );
   openOneButton->setEnabled( false );
@@ -193,57 +198,51 @@ void MemcheckView::saveLogFile()
 }
 
 
-void MemcheckView::mkMenuBar()
+void MemcheckView::mkMenuBar( QMainWindow* mwin )
 {
-  QMenuBar* mcMenu = new QMenuBar( this, "mc_menubar" );
-  mcMenu->setStyle( new QMotifStyle() );
+  toolBar = new QToolBar( mwin, "mc_toolbar" );
+
+  toolBar->setStyle( new QMotifStyle() );
   bool show_text = vkConfig->rdBool( "show-butt-text", "valkyrie" );
-  int index = -1;
+
+  toolBar->setLabel("Memcheck ToolBar");
 
   /* open-all items button --------------------------------------------- */
-  index++;
-  openAllButton = new QToolButton( this, "tb_open_all" );
+  openAllButton = new QToolButton( toolBar, "tb_open_all" );
   openAllButton->setIconSet( QPixmap( open_all_items_xpm ) );
   openAllButton->setAutoRaise( true );
   openAllButton->setToggleButton( true );
   connect( openAllButton, SIGNAL( toggled(bool) ), 
            this,          SLOT( openAllItems(bool) ) );
-  mcMenu->insertItem( openAllButton, -1, index );
   QToolTip::add( openAllButton, 
                  "Open / Close all errors (and their call chains)" );
   ContextHelp::add( openAllButton, urlValkyrie::Dummy );
 
   /* open-one item button ---------------------------------------------- */
-  index++;
-  openOneButton = new QToolButton( this, "tb_open_one" );
+  openOneButton = new QToolButton( toolBar, "tb_open_one" );
   openOneButton->setIconSet( QPixmap( open_one_item_xpm ) );
   openOneButton->setAutoRaise( true );
   connect( openOneButton, SIGNAL( clicked() ), 
            this,          SLOT( openOneItem() ) );
-  mcMenu->insertItem( openOneButton, -1, index );
   QToolTip::add( openOneButton, 
                  "Open / Close the selected item" );
   ContextHelp::add( openOneButton, urlValkyrie::Dummy );
 
   /* show src path button ---------------------------------------------- */
-  index++;
-  srcPathButton = new QToolButton( this, "tb_src_path" );
+  srcPathButton = new QToolButton( toolBar, "tb_src_path" );
   srcPathButton->setIconSet( QPixmap( src_path_xpm ) );
   srcPathButton->setAutoRaise( true );
   connect( srcPathButton, SIGNAL( clicked() ), 
            this,          SLOT( showSrcPath() ) );
-  mcMenu->insertItem( srcPathButton, -1, index );
   QToolTip::add( srcPathButton, 
                  "Show file paths (for current frame)" );
   ContextHelp::add( srcPathButton, urlValkyrie::Dummy );
 
   /* separator --------------------------------------------------------- */
-  index++;
-  mcMenu->insertSeparator( index );
+  toolBar->addSeparator();
 
   /* open-log(s) button ------------------------------------------------ */
-  index++;
-  openlogButton = new QToolButton( this, "tb_open_log" );
+  openlogButton = new QToolButton( toolBar, "tb_open_log" );
   openlogButton->setIconSet( QPixmap( open_log_xpm ) );
   openlogButton->setTextLabel( "Log File" );
   openlogButton->setTextPosition( QToolButton::BesideIcon );
@@ -254,13 +253,11 @@ void MemcheckView::mkMenuBar()
   logMenu->insertItem( "Merge Multiple", this, SLOT(openMergeFile()) );
   openlogButton->setPopup( logMenu );
   openlogButton->setPopupDelay( 1 );
-  mcMenu->insertItem( openlogButton, -1, index );
   QToolTip::add( openlogButton, "Parse and view log file(s)" );
   ContextHelp::add( openlogButton, urlValkyrie::Dummy );
 
   /* save-log button --------------------------------------------------- */
-  index++;
-  savelogButton = new QToolButton( this, "tb_save_log" );
+  savelogButton = new QToolButton( toolBar, "tb_save_log" );
   savelogButton->setIconSet( QPixmap( save_log_xpm ) );
   savelogButton->setTextLabel( "Save Log" );
   savelogButton->setTextPosition( QToolButton::BesideIcon );
@@ -268,13 +265,11 @@ void MemcheckView::mkMenuBar()
   savelogButton->setAutoRaise( true );
   connect( savelogButton, SIGNAL( clicked() ), 
            this,          SLOT( saveLogFile() ) );
-  mcMenu->insertItem( savelogButton, -1, index );
   QToolTip::add( savelogButton, "Save output to a log file" );
   ContextHelp::add( savelogButton, urlValkyrie::Dummy );
 
   /* suppressions editor button ---------------------------------------- */
-  index++;
-  suppedButton = new QToolButton( this, "tb_supp_ed" );
+  suppedButton = new QToolButton( toolBar, "tb_supp_ed" );
   suppedButton->setIconSet( QPixmap( supp_editor_xpm ) );
   suppedButton->setTextLabel( "Supp'n Editor" );
   suppedButton->setTextPosition( QToolButton::BesideIcon );
@@ -282,7 +277,6 @@ void MemcheckView::mkMenuBar()
   suppedButton->setAutoRaise( true );
   connect( suppedButton, SIGNAL( clicked() ), 
            this,         SLOT( showSuppEditor() ) );
-  mcMenu->insertItem( suppedButton, -1, index );
   QToolTip::add( suppedButton, "Open the Suppressions Editor" );
   ContextHelp::add( suppedButton, urlValkyrie::Dummy );
   suppedButton->setEnabled( false );

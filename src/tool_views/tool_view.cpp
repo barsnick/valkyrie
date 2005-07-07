@@ -16,21 +16,19 @@
 ToolView::~ToolView() { }
 
 ToolView::ToolView( QWidget* parent, QString name, VkObject::ObjectId id )
-  : QMainWindow( parent, name, WDestructiveClose )
+  : QWidget( parent, name, WDestructiveClose )
 {
   objId = id;
 
   name[0] = name[0].upper();
   setCaption( name );
 
+  toolBar = 0;
+
+#if 0 // CAB: Need this?
   QWidget* central = new QWidget( this );
   setCentralWidget( central );
   QVBoxLayout* topLayout = new QVBoxLayout( central, 5, 5 );
   topLayout->setResizeMode( QLayout::FreeResize );
+#endif
 }
-
-
-/* used by Workspace::findView(), and  by MainWin::closeToolView() */
-VkObject::ObjectId ToolView::id()
-{ return objId; }
-

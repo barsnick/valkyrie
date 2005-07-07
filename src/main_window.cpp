@@ -16,6 +16,7 @@
 #include <qstatusbar.h>
 #include <qtooltip.h>
 #include <qvbox.h>
+#include <qobjectlist.h>
 
 #include "main_window.h"
 #include "tb_mainwin_icons.h"
@@ -68,9 +69,8 @@ MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
   vbox->setMargin( 1 );
   vbox->setLineWidth( 1 );
   setCentralWidget( vbox );
-  wSpace = new WorkSpace( vbox );
-  wSpace->setBackgroundMode( QWidget::PaletteBase );
-  wSpace->setScrollBarsEnabled( true );
+
+  wStack = new QWidgetStack( vbox );
 
   /* handbook: init before menubar / toolbar */
   handBook = new HandBook();
@@ -100,15 +100,18 @@ void MainWindow::showToolView( int tvid )
     } 
   }
 
+  ToolView* prev_activeView = (ToolView*)wStack->visibleWidget();
+
   bool set_running = false;
-  activeView = wSpace->findView( tvid );
+  activeView = (ToolView*)wStack->widget( tvid );
   activeTool = vkConfig->vkToolObj( tvid );
 
   if ( activeView == 0 ) {
-
     // tools: MEMCHECK, CACHEGRIND, MASSIF
     activeTool = vkConfig->vkToolObj( tvid );
-    activeView = activeTool->toolView( wSpace );
+    activeView = activeTool->toolView( this, wStack );
+
+    wStack->addWidget( activeView, tvid );
 
     connect( activeTool, SIGNAL(running(bool)), 
              this,       SLOT(updateButtons(bool)) );
@@ -122,11 +125,14 @@ void MainWindow::showToolView( int tvid )
     if ( vkConfig->currentToolName() == activeView->name() ) {
       set_running = true;
     }
-
   }
 
-  activeView->showMaximized();
-  activeView->setFocus();
+  wStack->raiseWidget( tvid );
+
+  // Sync toolbars
+  if ( prev_activeView != 0 )
+    prev_activeView->hideToolBar();
+  activeView->showToolBar();
 
   /* ensure the toolview is visible before we start doing stuff */
   if ( set_running ) {
@@ -142,7 +148,7 @@ void MainWindow::showToolView( int tvid )
 void MainWindow::stop()
 {
   /* don't come in here if there's no current view */
-  if ( wSpace->numViews() == 0 )
+  if ( wStack->visibleWidget() == 0 )
     return;
 
   valkyrie->stopTool( activeTool );
@@ -153,7 +159,7 @@ void MainWindow::stop()
 void MainWindow::run()
 {
   /* don't come in here if there's no current view */
-  if ( wSpace->numViews() == 0 )
+  if ( wStack->visibleWidget() == 0 )
     return;
 
   /* valkyrie may have been started with no executable
@@ -313,13 +319,22 @@ void MainWindow::moveEvent( QMoveEvent* )
 
 void MainWindow::closeEvent( QCloseEvent *ce )
 {
-  QPtrList<ToolView> views = wSpace->viewList();
-  for ( ToolView* tView=views.first(); tView; tView=views.next() ) {
-    if ( !tView->close() ) {
+#if 0
+  // CAB: This segfaults... does qwidgetstack delete its children for us?
+
+  //  QObjectList* objList = wStack->queryList( 0, "QMainWindow", false, false);
+  const QObjectList *objList = wStack->children();
+  QObjectListIt it( *objList ); // iterate over the objects
+  QObject *obj;
+  while ( (obj = it.current()) != 0 ) { // for each found object...
+    ++it;
+    if ( !((ToolView*)obj)->close() ) {
       ce->ignore();
       return;
     }
   }
+  delete objList; // delete the list, not the objects
+#endif
 
   delete optionsWin;
   optionsWin = 0;
@@ -342,7 +357,7 @@ void MainWindow::closeToolView()
   if ( !activeTool->closeView() ) return;
 
   /* find out who is now the active tool / window */
-  activeView = wSpace->activeView();
+  activeView = (ToolView*)wStack->visibleWidget();
   if ( activeView == 0 )
     activeTool = 0;
   else 
@@ -497,7 +512,8 @@ void MainWindow::mkMenuBar()
 }
 
 
-/* 'status bar' with 2 rows: label to show non-default flags on top,
+/* 'status bar' with 3 rows: label to show non-default flags on top,
+   message text in the middle
    toolview buttons on the bottom */
 void MainWindow::mkStatusBar()
 {
@@ -518,7 +534,25 @@ void MainWindow::mkStatusBar()
   flagsLabel->setTextFormat( Qt::PlainText );
   flagsLabel->setText( vkConfig->rdEntry( "vg-exec", "valkyrie" ) );
   flagsLabel->hide();
-  
+
+
+  /* hbox for middle row */
+  QHBoxLayout* mid_row = new QHBoxLayout( 5, "middle_row" );
+  statusLayout->addLayout( mid_row );
+
+  /* frame+layout for messages */
+  QFrame* msgFrame = new QFrame( statusFrame );
+  msgFrame->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
+  mid_row->addWidget( msgFrame );
+  QBoxLayout* msgLayout = new QHBoxLayout( msgFrame, 2 );
+  statusMsg = new QLabel( "", msgFrame );
+  statusMsg->setAlignment( AlignLeft );
+  statusMsg->setTextFormat( Qt::PlainText );
+  int status_height = fontMetrics().height();
+  statusMsg->setFixedHeight( status_height );
+  msgLayout->addWidget( statusMsg );
+  ContextHelp::add( statusMsg, urlValkyrie::Dummy );
+
 
   /* hbox for the bottom row */
   QHBoxLayout* bot_row = new QHBoxLayout( 5, "bot_row" );
@@ -540,6 +574,7 @@ void MainWindow::mkStatusBar()
     int len = tool->accelTitle().length();
     butt_width = ( len > butt_width ) ? len : butt_width;
   }
+  int butt_height = fontMetrics().height() + 12;
 
   QToolButton* tvButton;
   for ( tool = tools.first(); tool; tool = tools.next() ) {
@@ -549,21 +584,13 @@ void MainWindow::mkStatusBar()
     tvButton->setText( tool->accelTitle() );
     tvButton->setAccel( tool->accelKey() );
     tvButton->setMinimumWidth( butt_width );
+    tvButton->setFixedHeight( butt_height );
     viewButtGroup->insert( tvButton, tool->id() );
     bot_row->addWidget( tvButton );
   }
   tools.clear();
 
-  /* frame+layout for messages */
-  QFrame* msgFrame = new QFrame( statusFrame );
-  msgFrame->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
-  bot_row->addWidget( msgFrame, 20 );
-  QBoxLayout* msgLayout = new QHBoxLayout( msgFrame, 5 );
-  statusMsg = new QLabel( "", msgFrame );
-  statusMsg->setAlignment( AlignLeft );
-  statusMsg->setTextFormat( Qt::PlainText );
-  msgLayout->addWidget( statusMsg );
-  ContextHelp::add( statusMsg, urlValkyrie::Dummy );
+  bot_row->addStretch(1);
 
   /* frame+layout for the view-flags icon */
   flagsButton = new QToolButton( statusFrame );

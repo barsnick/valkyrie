@@ -19,7 +19,7 @@ MassifView::~MassifView()
 { }
 
 
-MassifView::MassifView( QWidget* parent, Massif* ms )
+MassifView::MassifView( QMainWindow* mwin, QWidget* parent, Massif* ms )
   : ToolView( parent, ms->name(), ms->id() )
 {
   massif = ms;
