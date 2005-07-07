@@ -1,2 +1,0 @@
-#!/bin/sh
-/home/de/Programs/valkyrie/trunk/configure --debug --thread=yes --vg-exec=/home/sewardj/Vg3LINE/trunk/Inst/bin/valgrind --vg-supp=/home/sewardj/Vg3LINE/trunk/Inst/lib/valgrind/
