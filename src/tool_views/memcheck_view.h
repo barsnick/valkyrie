@@ -111,7 +111,7 @@ public slots:
   void updateErrors( ErrCounts* ecounts );
 
 private:
-  void mkMenuBar( QMainWindow* mwin );
+  void mkToolBar( QMainWindow* mwin );
 
 private slots:
   void openLogFile();       /* load and parse one log file */

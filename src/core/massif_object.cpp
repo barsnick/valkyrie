@@ -108,7 +108,7 @@ int Massif::checkOptArg( int optid, const char* argval,
 
 
 /* returns the ToolView window (memcheckView) for this tool */
-ToolView* Massif::toolView( QMainWindow* mwin, QWidget* parent )
+ToolView* Massif::createToolView( QMainWindow* mwin, QWidget* parent )
 {
   usingGui = true;
   massifView = new MassifView( mwin, parent, this);

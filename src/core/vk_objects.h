@@ -100,12 +100,12 @@ class ToolObject : public VkObject
  Q_OBJECT
 public:
 
- ToolObject( ObjectId id, const QString& capt, const QString& txt,
-             const QKeySequence& key );
+  ToolObject( ObjectId id, const QString& capt, const QString& txt,
+              const QKeySequence& key );
   ~ToolObject();
 
   /* creates and returns the ToolView window for a tool object */
-  virtual ToolView* toolView( QMainWindow* mwin, QWidget* parent ) = 0;
+  virtual ToolView* createToolView( QMainWindow* mwin, QWidget* parent ) = 0;
   virtual bool closeView() = 0;
 
   virtual void stop() = 0;

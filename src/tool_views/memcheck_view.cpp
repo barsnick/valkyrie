@@ -49,7 +49,7 @@ MemcheckView::MemcheckView( QMainWindow* mwin,
 {
   memcheck = mc;
 
-  mkMenuBar( mwin );
+  mkToolBar( mwin );
 
   QVBoxLayout* vLayout = new QVBoxLayout( this );
 
@@ -198,7 +198,7 @@ void MemcheckView::saveLogFile()
 }
 
 
-void MemcheckView::mkMenuBar( QMainWindow* mwin )
+void MemcheckView::mkToolBar( QMainWindow* mwin )
 {
   toolBar = new QToolBar( mwin, "mc_toolbar" );
 

@@ -24,7 +24,7 @@ public:
   ~Cachegrind() { }
 
   /* returns the ToolView window (cachegrindView) for this tool */
-  ToolView* toolView( QMainWindow* mwin, QWidget* parent );
+  ToolView* createToolView( QMainWindow* mwin, QWidget* parent );
   /* called by MainWin::closeToolView() */
   bool closeView();
 

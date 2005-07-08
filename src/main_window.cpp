@@ -108,8 +108,7 @@ void MainWindow::showToolView( int tvid )
 
   if ( activeView == 0 ) {
     // tools: MEMCHECK, CACHEGRIND, MASSIF
-    activeTool = vkConfig->vkToolObj( tvid );
-    activeView = activeTool->toolView( this, wStack );
+    activeView = activeTool->createToolView( this, wStack );
 
     wStack->addWidget( activeView, tvid );
 
