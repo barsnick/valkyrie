@@ -10,6 +10,8 @@ QT_DIR=$3
 
 # minimum qt version we need
 QT_MIN_VERSION="3.0.0"
+# we can't use qt 4
+QT_MAX_VERSION="4.0.0"
 
 # list of paths to search for qt 
 QT_DIR_SEARCH="/usr/lib/qt /usr/lib/qt3 /usr/local/qt /usr/local/qt3 /usr/share/qt /usr/share/qt3"
@@ -331,8 +333,8 @@ echo "${ECHO_T}$result" >&6
 
 
 # check Qt version -------------------------------------------------
-echo "$sh_me:$LINENO: checking Qt version >= $QT_MIN_VERSION" >&5
-echo $ECHO_N "checking Qt version >= $QT_MIN_VERSION... $ECHO_C" >&6
+echo "$sh_me:$LINENO: checking Qt version >= $QT_MIN_VERSION and < $QT_MAX_VERSION" >&5
+echo $ECHO_N "checking Qt version >= $QT_MIN_VERSION and < $QT_MAX_VERSION... $ECHO_C" >&6
   cat >> conftest.cpp <<_VKEOF
 #include <stdlib.h>
 #include <qglobal.h>
@@ -363,10 +365,11 @@ int str2hex( QString ver_str )
 int main ()
 {
   /* QT_VERSION_STR is in the form 'X.X.X' irrespective of age */
-  int found = str2hex( QT_VERSION_STR );
-  int reqd  = str2hex( "$QT_MIN_VERSION" );
+  int found     = str2hex( QT_VERSION_STR );
+  int min_ver  = str2hex( "$QT_MIN_VERSION" );
+  int max_ver  = str2hex( "$QT_MAX_VERSION" );
 
-  if ( found >=  reqd ) {
+  if ( (found >= min_ver) && (found < max_ver) ) {
     exit(0);
   } else {
     exit(2);
