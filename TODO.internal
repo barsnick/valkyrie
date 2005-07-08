@@ -31,7 +31,9 @@ if --shared [CFG_SHARED=yes], make sure we can find the shared libs
   than doing all of the above.)
 
 
+
 General:
+--------
 - make a src item paint its pixmap in the top-left corner
 - fix suppressions stuff
 - find the 'man standing' icon and use instead of the hand for 'stop'
@@ -41,7 +43,8 @@ General:
 - make the stop button actually do something
 
 main_window.cpp:
-  FIXME: this should use VkObject::ObjectId
+ - FIXME: this should use VkObject::ObjectId
+ - Remove activeView saved state - viewStack->visibleView() is enough
 
 options/vk_objects.cpp:
   TODO: check Valgrind opts
@@ -49,6 +52,36 @@ options/vk_objects.cpp:
   FIXME: case SEL_SUPPS: is not done yet
   FIXME: when supp. files are specified on the cmd-line, any ...
   FIXME: case USR/DEF_SUPP_FILES: is not done yet
+
+tool_views/tool_view.h
+ - should maybe hold ptr to ToolObject parent, rather than 'id'
+ - show/hideWidgets() -> private()?
+
+options/*
+ - get rid of vk_Object:OptsIdx as index into Options.
+   replace with a QMap<long_arg_string, Options>.  i.e. long_arg indexes into Options,
+   each vk_Object has a map, searching these maps is simple (almost as now),
+   but no tool needs to know anything about what another tool uses.
+   (although perhaps an idea to do a startup check that no tool duplicates an opt)
+
+vkObjects
+ - ObjectId should be at most: VALKYRIE, VALGRIND, TOOL
+   Then ToolObject could have ToolId: MEMCHECK, CACHEGRIND, MASSIF
+
+
+
+Memcheck:
+--------
+ - stdout, stderr tabs for all non-parsed output.
+
+
+
+Known Bugs:
+-----------
+ - Start with --tool=cachegrind, change to memcheck, 'Run' => Parse err.
+
+
+
 
 
 Links:
