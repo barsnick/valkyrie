@@ -30,7 +30,12 @@ public slots:
   void toggleToolbarLabels( bool );
 
 private:
+  void mkToolBar( QMainWindow* mwin );
+
+private:
   Cachegrind* cachegrind;
+
+  QToolBar* cgToolBar;
 };
 
 

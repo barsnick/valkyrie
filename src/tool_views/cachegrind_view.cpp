@@ -12,6 +12,8 @@
 #include "cachegrind_object.h"
 
 #include <qcursor.h>
+#include <qlayout.h>
+#include <qlabel.h>
 
 
 /* class CachegrindView ------------------------------------------------ */
@@ -24,6 +26,14 @@ CachegrindView::CachegrindView( QMainWindow* mwin,
   : ToolView( parent, cg->name(), cg->id() )
 {
   cachegrind = cg;
+
+  mkToolBar( mwin );
+
+  QVBoxLayout* vLayout = new QVBoxLayout( this );
+
+  /* create the listview */
+  QLabel* lbl = new QLabel( "Cachegrind", this, "cachegrind label" );
+  vLayout->addWidget( lbl );
 }
 
 
@@ -44,3 +54,7 @@ void CachegrindView::toggleToolbarLabels( bool /*state*/ )
 {  }
 
 
+void CachegrindView::mkToolBar( QMainWindow* mwin )
+{
+  mwin = mwin;// stop compiler complaining 
+}

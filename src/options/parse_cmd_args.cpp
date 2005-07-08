@@ -21,7 +21,7 @@
 #define PARSED_OKAY    1
 
 
-int showHelp( vkPoptContext con, int key )
+int showHelp( vkPoptContext con, char key )
 {
   switch ( key ) {
 
@@ -46,6 +46,8 @@ int showHelp( vkPoptContext con, int key )
     printf("Valgrind is copyright %s\n\n", vkConfig->vgCopyright() );
     break;
 
+  default:
+    vk_assert_never_reached();
   }
 
   vkPoptFreeContext( con ); 
@@ -70,7 +72,7 @@ int parseError( vkPoptContext con, const int err )
 int parseCmdArgs( int argc, char** argv )
 {
   int errVal;             // check fn return value
-  char rc;                // used for argument parsing
+  int rc;                 // used for argument parsing
   char argVal[512];       // store argument values for checking
 
   VkObjectList objList = vkConfig->vkObjList();
@@ -109,9 +111,9 @@ int parseCmdArgs( int argc, char** argv )
 
   /* process the options */ 
   while ( (rc = vkPoptGetNextOpt( optCon, argVal ) ) >= 0 ) {
-
-    if ( rc == 'h' || rc == 'v' || rc == 'V' ) {
-      return showHelp( optCon, rc );
+    char vk_arg = (char)rc;
+    if ( vk_arg == 'h' || vk_arg == 'v' || vk_arg == 'V' ) {
+      return showHelp( optCon, vk_arg );
     } else {
       errVal = VkObject::checkArg( rc, argVal );
     }

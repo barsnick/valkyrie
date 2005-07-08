@@ -12,6 +12,8 @@
 #include "massif_object.h"
 
 #include <qcursor.h>
+#include <qlayout.h>
+#include <qlabel.h>
 
 
 /* class MassifView ---------------------------------------------------- */
@@ -23,6 +25,14 @@ MassifView::MassifView( QMainWindow* mwin, QWidget* parent, Massif* ms )
   : ToolView( parent, ms->name(), ms->id() )
 {
   massif = ms;
+
+  mwin = mwin;// stop compiler complaining 
+
+  QVBoxLayout* vLayout = new QVBoxLayout( this );
+
+  /* create the listview */
+  QLabel* lbl = new QLabel( "Massif", this, "massif label" );
+  vLayout->addWidget( lbl );
 }
 
 

@@ -76,7 +76,7 @@ private:
   void mkStatusBar();
 
 private:
-  QWidgetStack* wStack;
+  ToolViewStack* viewStack;
 
   Valkyrie* valkyrie;
   ToolView* activeView;

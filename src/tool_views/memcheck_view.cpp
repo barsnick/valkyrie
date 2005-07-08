@@ -38,6 +38,8 @@ void MemcheckView::showSuppEditor()
 /* class MemcheckView -------------------------------------------------- */
 MemcheckView::~MemcheckView() 
 { 
+  delete mcToolBar;
+  mcToolBar = 0;
   delete lView;
   lView = 0;
 }
@@ -200,15 +202,15 @@ void MemcheckView::saveLogFile()
 
 void MemcheckView::mkToolBar( QMainWindow* mwin )
 {
-  toolBar = new QToolBar( mwin, "mc_toolbar" );
+  mcToolBar = new QToolBar( mwin, "mc_toolbar" );
 
-  toolBar->setStyle( new QMotifStyle() );
+  mcToolBar->setStyle( new QMotifStyle() );
   bool show_text = vkConfig->rdBool( "show-butt-text", "valkyrie" );
 
-  toolBar->setLabel("Memcheck ToolBar");
+  mcToolBar->setLabel("Memcheck ToolBar");
 
   /* open-all items button --------------------------------------------- */
-  openAllButton = new QToolButton( toolBar, "tb_open_all" );
+  openAllButton = new QToolButton( mcToolBar, "tb_open_all" );
   openAllButton->setIconSet( QPixmap( open_all_items_xpm ) );
   openAllButton->setAutoRaise( true );
   openAllButton->setToggleButton( true );
@@ -219,7 +221,7 @@ void MemcheckView::mkToolBar( QMainWindow* mwin )
   ContextHelp::add( openAllButton, urlValkyrie::Dummy );
 
   /* open-one item button ---------------------------------------------- */
-  openOneButton = new QToolButton( toolBar, "tb_open_one" );
+  openOneButton = new QToolButton( mcToolBar, "tb_open_one" );
   openOneButton->setIconSet( QPixmap( open_one_item_xpm ) );
   openOneButton->setAutoRaise( true );
   connect( openOneButton, SIGNAL( clicked() ), 
@@ -229,7 +231,7 @@ void MemcheckView::mkToolBar( QMainWindow* mwin )
   ContextHelp::add( openOneButton, urlValkyrie::Dummy );
 
   /* show src path button ---------------------------------------------- */
-  srcPathButton = new QToolButton( toolBar, "tb_src_path" );
+  srcPathButton = new QToolButton( mcToolBar, "tb_src_path" );
   srcPathButton->setIconSet( QPixmap( src_path_xpm ) );
   srcPathButton->setAutoRaise( true );
   connect( srcPathButton, SIGNAL( clicked() ), 
@@ -239,10 +241,10 @@ void MemcheckView::mkToolBar( QMainWindow* mwin )
   ContextHelp::add( srcPathButton, urlValkyrie::Dummy );
 
   /* separator --------------------------------------------------------- */
-  toolBar->addSeparator();
+  mcToolBar->addSeparator();
 
   /* open-log(s) button ------------------------------------------------ */
-  openlogButton = new QToolButton( toolBar, "tb_open_log" );
+  openlogButton = new QToolButton( mcToolBar, "tb_open_log" );
   openlogButton->setIconSet( QPixmap( open_log_xpm ) );
   openlogButton->setTextLabel( "Log File" );
   openlogButton->setTextPosition( QToolButton::BesideIcon );
@@ -257,7 +259,7 @@ void MemcheckView::mkToolBar( QMainWindow* mwin )
   ContextHelp::add( openlogButton, urlValkyrie::Dummy );
 
   /* save-log button --------------------------------------------------- */
-  savelogButton = new QToolButton( toolBar, "tb_save_log" );
+  savelogButton = new QToolButton( mcToolBar, "tb_save_log" );
   savelogButton->setIconSet( QPixmap( save_log_xpm ) );
   savelogButton->setTextLabel( "Save Log" );
   savelogButton->setTextPosition( QToolButton::BesideIcon );
@@ -269,7 +271,7 @@ void MemcheckView::mkToolBar( QMainWindow* mwin )
   ContextHelp::add( savelogButton, urlValkyrie::Dummy );
 
   /* suppressions editor button ---------------------------------------- */
-  suppedButton = new QToolButton( toolBar, "tb_supp_ed" );
+  suppedButton = new QToolButton( mcToolBar, "tb_supp_ed" );
   suppedButton->setIconSet( QPixmap( supp_editor_xpm ) );
   suppedButton->setTextLabel( "Supp'n Editor" );
   suppedButton->setTextPosition( QToolButton::BesideIcon );

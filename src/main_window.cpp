@@ -70,7 +70,7 @@ MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
   vbox->setLineWidth( 1 );
   setCentralWidget( vbox );
 
-  wStack = new QWidgetStack( vbox );
+  viewStack = new ToolViewStack( vbox );
 
   /* handbook: init before menubar / toolbar */
   handBook = new HandBook();
@@ -93,6 +93,8 @@ MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
 
 void MainWindow::showToolView( int tvid )
 {
+//  printf("showToolView(%d), lastView_id = %d\n", tvid, activeView ? activeView->id() : -1);
+
   if ( activeView != 0 ) {
     /* already loaded and visible */
     if ( activeView->id() == tvid ) {
@@ -100,17 +102,16 @@ void MainWindow::showToolView( int tvid )
     } 
   }
 
-  ToolView* prev_activeView = (ToolView*)wStack->visibleWidget();
-
+  /* Setup new view */
   bool set_running = false;
-  activeView = (ToolView*)wStack->widget( tvid );
+  activeView = viewStack->view( tvid );
   activeTool = vkConfig->vkToolObj( tvid );
 
   if ( activeView == 0 ) {
     // tools: MEMCHECK, CACHEGRIND, MASSIF
-    activeView = activeTool->createToolView( this, wStack );
+    activeView = activeTool->createToolView( this, viewStack );
 
-    wStack->addWidget( activeView, tvid );
+    viewStack->addView( activeView, tvid );
 
     connect( activeTool, SIGNAL(running(bool)), 
              this,       SLOT(updateButtons(bool)) );
@@ -126,12 +127,7 @@ void MainWindow::showToolView( int tvid )
     }
   }
 
-  wStack->raiseWidget( tvid );
-
-  // Sync toolbars
-  if ( prev_activeView != 0 )
-    prev_activeView->hideToolBar();
-  activeView->showToolBar();
+  viewStack->raiseView( tvid );
 
   /* ensure the toolview is visible before we start doing stuff */
   if ( set_running ) {
@@ -147,7 +143,7 @@ void MainWindow::showToolView( int tvid )
 void MainWindow::stop()
 {
   /* don't come in here if there's no current view */
-  if ( wStack->visibleWidget() == 0 )
+  if ( viewStack->visibleView() == 0 )
     return;
 
   valkyrie->stopTool( activeTool );
@@ -158,7 +154,7 @@ void MainWindow::stop()
 void MainWindow::run()
 {
   /* don't come in here if there's no current view */
-  if ( wStack->visibleWidget() == 0 )
+  if ( viewStack->visibleView() == 0 )
     return;
 
   /* valkyrie may have been started with no executable
@@ -318,22 +314,16 @@ void MainWindow::moveEvent( QMoveEvent* )
 
 void MainWindow::closeEvent( QCloseEvent *ce )
 {
-#if 0
-  // CAB: This segfaults... does qwidgetstack delete its children for us?
-
-  //  QObjectList* objList = wStack->queryList( 0, "QMainWindow", false, false);
-  const QObjectList *objList = wStack->children();
-  QObjectListIt it( *objList ); // iterate over the objects
-  QObject *obj;
-  while ( (obj = it.current()) != 0 ) { // for each found object...
-    ++it;
-    if ( !((ToolView*)obj)->close() ) {
+  const ToolViewList* views = viewStack->viewList();
+  ToolViewListIter it( *views );
+  ToolView* view;
+  for (; ((view = it.current()) != 0); ++it ) {
+    if ( !(view->close()) ) {
       ce->ignore();
       return;
     }
   }
-  delete objList; // delete the list, not the objects
-#endif
+  delete views; // delete the list, not the objects
 
   delete optionsWin;
   optionsWin = 0;
@@ -355,15 +345,19 @@ void MainWindow::closeToolView()
   /* try to deliver the coup de grace */
   if ( !activeTool->closeView() ) return;
 
-  /* find out who is now the active tool / window */
-  activeView = (ToolView*)wStack->visibleWidget();
-  if ( activeView == 0 )
-    activeTool = 0;
-  else 
-    activeTool = vkConfig->vkToolObj( activeView->id() );
+  /* remove from stack */
+  viewStack->removeView( activeView );
 
-  int id = ( activeView == 0 ) ? -1 : activeTool->id();
-  setToggles( id );
+  /* find the next view to be shown, if exists, and show it */
+  activeTool = 0;
+  activeView = viewStack->nextView();
+  if ( activeView != 0 ) {  // Found another view != current
+//    printf("nextView: id(%d), name(%s)\n", activeView->id(), activeView->name());
+    activeTool = vkConfig->vkToolObj( activeView->id() );
+    viewStack->raiseView( activeView );
+  }
+
+  setToggles( ( activeView == 0 ) ? -1 : activeTool->id() );
 }
 
 

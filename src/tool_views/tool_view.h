@@ -12,6 +12,7 @@
 
 
 #include <qwidget.h>
+#include <qwidgetstack.h>
 
 #include "vk_objects.h"
 
@@ -29,15 +30,46 @@ public:
   /* called by the view's object */
   virtual void setState( bool run ) = 0;
 
-  void showToolBar() { if (toolBar) toolBar->show(); }
-  void hideToolBar() { if (toolBar) toolBar->hide(); }
+  virtual void showWidgets() {}
+  virtual void hideWidgets() {}
 
 public slots:
   virtual void toggleToolbarLabels(bool) = 0;
 
 protected:
   VkObject::ObjectId objId;
-  QToolBar* toolBar;
+};
+
+
+
+
+/* ToolViewStack */
+
+typedef QPtrList<ToolView> ToolViewList;
+typedef QPtrListIterator<ToolView> ToolViewListIter;
+
+class ToolViewStack : public QWidgetStack
+{
+  Q_OBJECT
+public:
+  ToolViewStack ( QWidget * parent = 0, const char * name = 0 );
+  ToolViewStack ( QWidget * parent, const char * name, WFlags f );
+  ~ToolViewStack();
+
+  int addView ( ToolView* tv, int id = -1 );
+  void removeView( QWidget* w );
+  ToolView* view ( int id ) const;
+
+  const ToolViewList* viewList();
+  ToolView* nextView( ToolView* lastView = 0 );
+
+  ToolView* visibleView();
+
+  void listViews();
+
+public slots:
+  void raiseView ( int id );
+  void raiseView ( ToolView* tv );
 };
 
 
