@@ -1,0 +1,66 @@
+Pre-Release
+-----------
+- disable all buttons except memcheck
+- disable all options pages except vg, vk, memcheck
+
+- go over vk_config.cpp and see who exactly uses those vkobj type fns
+  and see if we can do without them where poss.
+- grep on FIXME, and fix
+- grep on TODO, and do
+
+- write some docs and replace urlNone and Dummy with proper links
+
+
+
+configure:
+----------
+if --shared [CFG_SHARED=yes], make sure we can find the shared libs
+(.a = static, .so = shared)
+- add a --path-to-debugger=x
+  then look for debugger(gdb) and set path in vk_include.h 
+    so vkConfig can write it to [valgrind]db-command=gdb -nw %f %p
+- add a --path-to-editor=x
+  then look for editor (emacs) and set path in vk_include.h
+    so vkConfig can write it to [valkyrie]src-editor=/usr/bin/emacs
+- grep inside /coregrind/pub_core_options.h and get the value for
+  #define VG_CLO_MAX_SFILES 10 and save to vk_include.h so the
+  listbox widget knows the max. no. of suppression files allowed.
+  Also, have to code for this in ValkyrieOptionsPage::getVgExec()
+  so we know what the value is for a new valgrind version.
+  Ask J if he could put a fn in wot I can query for this (easier 
+  than doing all of the above.)
+
+
+General:
+- make a src item paint its pixmap in the top-left corner
+- fix suppressions stuff
+- find the 'man standing' icon and use instead of the hand for 'stop'
+- make xml docs for valkyrie
+- put some stuff in class option to say that certain option fields cannot 
+  be empty if the option is a popt option.
+- make the stop button actually do something
+
+main_window.cpp:
+  FIXME: this should use VkObject::ObjectId
+
+options/vk_objects.cpp:
+  TODO: check Valgrind opts
+  FIXME: this does not work with xml output
+  FIXME: case SEL_SUPPS: is not done yet
+  FIXME: when supp. files are specified on the cmd-line, any ...
+  FIXME: case USR/DEF_SUPP_FILES: is not done yet
+
+
+Links:
+------
+Drawing Graphs:
+http://www.kde-apps.org/content/show.php?content=14826
+http://www.kde-apps.org/content/show.php?content=9881
+http://www.ics.com/qt
+http://www.icewalkers.com/Linux/Software/519630/GraphPak-for-Qt.html
+
+
+The Competition:
+----------------
+http://www.klocwork.com/products/
+
