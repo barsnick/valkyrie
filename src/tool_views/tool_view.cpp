@@ -16,7 +16,7 @@
 ToolView::~ToolView() { }
 
 ToolView::ToolView( QWidget* parent, QString name, VkObject::ObjectId id )
-  : QWidget( parent, name, WDestructiveClose )
+  : QWidget( parent, name )
 {
   objId = id;
 
