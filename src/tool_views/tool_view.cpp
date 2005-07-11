@@ -75,7 +75,7 @@ ToolViewStack::ToolViewStack::nextView( ToolView* lastView/* = 0*/ )
 }
 
 ToolView*
-ToolViewStack::visibleView()
+ToolViewStack::visible()
 { return (ToolView*)QWidgetStack::visibleWidget(); }
 
 void

@@ -24,7 +24,6 @@ Memcheck::~Memcheck()
     delete xmlParser;
     xmlParser = 0;
   }
-
 }
 
 
@@ -129,7 +128,7 @@ int Memcheck::checkOptArg( int optid, const char* argval,
 
 
 /* returns the ToolView window (memcheckView) for this tool */
-ToolView* Memcheck::createToolView( QWidget* parent )
+ToolView* Memcheck::createView( QWidget* parent )
 {
   usingGui = true;
   memcheckView = new MemcheckView( parent, this );
@@ -161,7 +160,7 @@ void Memcheck::statusMsg( QString hdr, QString msg )
 
 
 /* called by MainWin::closeToolView() */
-bool Memcheck::closeView()
+bool Memcheck::isDone()
 {
   /* if current process is not yet finished, ask user if they really
      want to close */

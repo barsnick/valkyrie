@@ -49,8 +49,7 @@
 
 /* class MainWindow ---------------------------------------------------- */
 MainWindow::~MainWindow() 
-{ /* handBook + optionsWin are deleted in closeEvent() */ }
-
+{}
 
 MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
 {
@@ -60,14 +59,11 @@ MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
   setIcon( vkConfig->pixmap( "valkyrie.xpm" ) );
   statusBar()->setSizeGripEnabled( false );
 
-  /* setup tool space */
-  QVBox* vbox = new QVBox( this );
-  //  vbox->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
-  vbox->setMargin( 0 );
-  vbox->setLineWidth( 0 );
-  setCentralWidget( vbox );
+  viewStack = new ToolViewStack( this, "view_stack" );
+  viewStack->setMargin( 0 );
+  viewStack->setLineWidth( 0 );
 
-  viewStack = new ToolViewStack( vbox );
+  setCentralWidget( viewStack );
 
   /* handbook: init before menubar / toolbar */
   handBook = new HandBook();
@@ -90,21 +86,22 @@ MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
 
 void MainWindow::showToolView( int tvid )
 {
-  if ( viewStack->visibleView() != 0 ) {
+  if ( viewStack->visible() != 0 ) {
     /* already loaded and visible */
-    if ( viewStack->visibleView()->id() == tvid ) {
+    if ( viewStack->visible()->id() == tvid ) {
       return;
     } 
   }
 
-  /* Setup new view */
+  /* set up next view */
   bool set_running = false;
   ToolView*   nextView = viewStack->view( tvid );
   ToolObject* nextTool = vkConfig->vkToolObj( tvid );
+  vk_assert( nextTool != 0 );
 
   if ( nextView == 0 ) {
-    { // newToolView()
-      nextView = nextTool->createToolView( viewStack );
+    { // new toolview
+      nextView = nextTool->createView( viewStack );
       vk_assert( nextView != 0 );
 
       viewStack->addView( nextView, tvid );
@@ -146,10 +143,10 @@ void MainWindow::showToolView( int tvid )
 void MainWindow::stop()
 {
   /* don't come in here if there's no current view */
-  if ( viewStack->visibleView() == 0 )
+  if ( viewStack->visible() == 0 )
     return;
 
-  ToolObject* tool = vkConfig->vkToolObj( viewStack->visibleView()->id() );
+  ToolObject* tool = vkConfig->vkToolObj( viewStack->visible()->id() );
   valkyrie->stopTool( tool );
 }
 
@@ -158,7 +155,7 @@ void MainWindow::stop()
 void MainWindow::run()
 {
   /* don't come in here if there's no current view */
-  if ( viewStack->visibleView() == 0 )
+  if ( viewStack->visible() == 0 )
     return;
 
   /* valkyrie may have been started with no executable
@@ -172,7 +169,7 @@ void MainWindow::run()
   }
 
   valkyrie->setRunMode( Valkyrie::modeParseOutput );
-  ToolObject* tool = vkConfig->vkToolObj( viewStack->visibleView()->id() );
+  ToolObject* tool = vkConfig->vkToolObj( viewStack->visible()->id() );
   if ( valkyrie->runTool( tool ) ) {
     printf("TODO: toggle buttons to reflect running state\n");
   } else {
@@ -194,8 +191,8 @@ void MainWindow::showAboutInfo( int id )
 
 void MainWindow::showOptionsWindow( int view_id )
 { 
-	optionsWin->showPage( view_id ); 
-	optionsWin->raise();
+  optionsWin->showPage( view_id ); 
+  optionsWin->raise();
 }
 
 
@@ -243,8 +240,8 @@ void MainWindow::setToggles( int tview_id )
     /* someone is hanging around ... */
     fileMenu->setItemEnabled( FILE_CLOSE,   true );
     bool is_running = false;
-    if (viewStack->visibleView() != 0) {
-      ToolObject* tool = vkConfig->vkToolObj( viewStack->visibleView()->id() );
+    if (viewStack->visible() != 0) {
+      ToolObject* tool = vkConfig->vkToolObj( viewStack->visible()->id() );
       is_running = tool->isRunning();
     }
     fileMenu->setItemEnabled( FILE_RUN,  !is_running );
@@ -274,8 +271,8 @@ void MainWindow::showFlagsWidget( bool show )
   if ( !show ) {
     flagsLabel->hide();
   } else {
-    if ( viewStack->visibleView() != 0 ) {
-      ToolObject* tool = vkConfig->vkToolObj( viewStack->visibleView()->id() );
+    if ( viewStack->visible() != 0 ) {
+      ToolObject* tool = vkConfig->vkToolObj( viewStack->visible()->id() );
       QString flags = valkyrie->currentFlags( tool );
       flagsLabel->setText( flags );
       if ( !flagsLabel->isVisible() ) {
@@ -322,23 +319,22 @@ void MainWindow::moveEvent( QMoveEvent* )
 }
 
 
+/* the stack owns the toolviews, and MainWin owns the stack, so we
+   don't need to explicitly delete the toolviews as they will be
+   auto-deleted when MainWin closes */
 void MainWindow::closeEvent( QCloseEvent *ce )
 {
-  const ToolViewList* views = viewStack->viewList();
-  ToolViewListIter it( *views );
-  ToolView* view;
-  for (; ((view = it.current()) != 0); ++it ) {
-    if ( !(view->close()) ) {
+  ToolList tools = valkyrie->toolList();
+  for ( ToolObject* tool = tools.first(); tool; tool = tools.next() ) {
+    if ( !tool->isDone() ) {
       ce->ignore();
       return;
     }
   }
-  delete views; // delete the list, not the objects
+  tools.clear();
 
-  delete optionsWin;
-  optionsWin = 0;
-
-  /* save history + bookmarks */
+  /* handbook is a top-level parent-less widget, so we have to
+     explicitly delete it - but save history + bookmarks first */
   handBook->save();
   delete handBook;
   handBook = 0;
@@ -349,19 +345,19 @@ void MainWindow::closeEvent( QCloseEvent *ce )
 
 void MainWindow::closeToolView()
 {
-  ToolView* currView = viewStack->visibleView();
+  ToolView* currView = viewStack->visible();
   /* don't come in here if there's no current view */
   if ( currView == 0 ) return;
 
   ToolObject* currTool = vkConfig->vkToolObj( currView->id() );
 
-  /* try to deliver the coup de grace */
-  if ( !currTool->closeView() ) return;
+  /* process might still be running, or whatever ... */
+  if ( !currTool->isDone() ) return;
 
-  /* remove from stack (doesn't delete) */
+  /* remove view from stack (doesn't delete) */
   viewStack->removeView( currView );
 
-  /* delete toolview, and set ToolObject's ptr to 0 */
+  /* delete view, and zero tool's view ptr */
   currTool->deleteView();
 
   /* find the next view to be shown, if exists, and show it */
@@ -403,7 +399,7 @@ void MainWindow::mkMenuBar()
 
   /* file menu --------------------------------------------------------- */
   index++;
-  fileMenu = new QPopupMenu( this );
+  fileMenu = new QPopupMenu( this, "file_menu" );
   fileMenu->insertItem( "&Run", this, SLOT(run()), 
                         CTRL+Key_R, FILE_RUN );
   fileMenu->insertItem( "S&top", this, SLOT(stop()), 
@@ -420,7 +416,7 @@ void MainWindow::mkMenuBar()
   /* toolview menu ----------------------------------------------------- */
   index++;
   QPixmap bulletSet(black_bullet_xpm);
-  toolsMenu = new QPopupMenu( this );
+  toolsMenu = new QPopupMenu( this, "tools_menu" );
   ToolList tools = valkyrie->toolList();
   for ( ToolObject* tool = tools.first(); tool; tool = tools.next() ) {
     toolsMenu->insertItem( bulletSet, tool->accelTitle(), 
@@ -434,7 +430,7 @@ void MainWindow::mkMenuBar()
 
   /* options / preferences et al --------------------------------------- */
   index++;
-  QPopupMenu* prefsMenu = new QPopupMenu( this );
+  QPopupMenu* prefsMenu = new QPopupMenu( this, "prefs_menu" );
   VkObjectList objList = vkConfig->vkObjList();
   for ( VkObject* obj = objList.first(); obj; obj = objList.next() ) {
     prefsMenu->insertItem( obj->title(), this, 
@@ -599,7 +595,7 @@ void MainWindow::mkStatusBar()
   bot_row->addStretch(1);
 
   /* frame+layout for the view-flags icon */
-  flagsButton = new QToolButton( statusFrame );
+  flagsButton = new QToolButton( statusFrame, "flags_button" );
   bot_row->addWidget( flagsButton );
   flagsButton->setToggleButton( true );
   flagsButton->setEnabled( true );

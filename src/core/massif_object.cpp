@@ -16,6 +16,8 @@
 
 
 /* class Massif -------------------------------------------------------- */
+Massif::~Massif() { }
+
 Massif::Massif() 
   : ToolObject( MASSIF, "Massif", "Ma&ssif", Qt::SHIFT+Qt::Key_S ) 
 {
@@ -108,7 +110,7 @@ int Massif::checkOptArg( int optid, const char* argval,
 
 
 /* returns the ToolView window (memcheckView) for this tool */
-ToolView* Massif::createToolView( QWidget* parent )
+ToolView* Massif::createView( QWidget* parent )
 {
   usingGui = true;
   massifView = new MassifView( parent, this);
@@ -129,8 +131,10 @@ void Massif::emitRunning( bool run )
 
 
 /* called by MainWin::closeToolView() */
-bool Massif::closeView()
+bool Massif::isDone()
 {
+  vk_assert( massifView != 0 );
+
   /* if current process is not yet finished, ask user if they really
      want to close */
   if ( is_Running ) {
@@ -163,6 +167,7 @@ bool Massif::closeView()
 void Massif::deleteView()
 {
   emit message( "" );  /* clear the status bar */
+  vk_assert( massifView != 0 );
   massifView->close( true );
   massifView = 0;
 }

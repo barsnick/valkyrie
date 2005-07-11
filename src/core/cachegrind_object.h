@@ -21,12 +21,12 @@ class Cachegrind : public ToolObject
 {
 public:
   Cachegrind();
-  ~Cachegrind() { }
+  ~Cachegrind();
 
   /* returns the ToolView window (cachegrindView) for this tool */
-  ToolView* createToolView( QWidget* parent );
+  ToolView* createView( QWidget* parent );
   /* called by MainWin::closeToolView() */
-  bool closeView();
+  bool isDone();
   void deleteView();
 
   void stop() { }

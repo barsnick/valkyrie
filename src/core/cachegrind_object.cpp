@@ -16,6 +16,8 @@
 
 
 /* class Cachegrind ---------------------------------------------------- */
+Cachegrind::~Cachegrind() { }
+
 Cachegrind::Cachegrind() 
   : ToolObject(CACHEGRIND, "Cachegrind", "&Cachegrind", Qt::SHIFT+Qt::Key_C) 
 { 
@@ -174,7 +176,7 @@ int Cachegrind::checkOptArg( int optid, const char* argval,
 
 
 /* returns the ToolView window (memcheckView) for this tool */
-ToolView* Cachegrind::createToolView( QWidget* parent )
+ToolView* Cachegrind::createView( QWidget* parent )
 {
   usingGui = true;
   cachegrindView = new CachegrindView( parent, this );
@@ -195,7 +197,7 @@ void Cachegrind::emitRunning( bool run )
 
 
 /* called by MainWin::closeToolView() */
-bool Cachegrind::closeView()
+bool Cachegrind::isDone()
 {
   /* if current process is not yet finished, ask user if they really
      want to close */

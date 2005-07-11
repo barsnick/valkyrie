@@ -175,6 +175,10 @@ int main ( int argc, char* argv[] )
     delete vkConfig;
     vkConfig = 0;
   }
+  if ( vkWin ) {
+    delete vkWin;
+    vkWin = 0;
+  }
 
   return res;
 }

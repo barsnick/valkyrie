@@ -21,12 +21,12 @@ class Massif : public ToolObject
 {
 public:
   Massif();
-  ~Massif() { }
+  ~Massif();
 
   /* returns the ToolView window (massifView) for this tool */
-  ToolView* createToolView( QWidget* parent );
+  ToolView* createView( QWidget* parent );
   /* called by MainWin::closeToolView() */
-  bool closeView();
+  bool isDone();
   void deleteView();
 
   void stop() { }

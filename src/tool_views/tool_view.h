@@ -62,7 +62,7 @@ public:
   const ToolViewList* viewList();
   ToolView* nextView( ToolView* lastView = 0 );
 
-  ToolView* visibleView();
+  ToolView* visible();   /* return currently-visible view */
 
   void listViews();
 
