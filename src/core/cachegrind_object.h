@@ -27,6 +27,7 @@ public:
   ToolView* createToolView( QWidget* parent );
   /* called by MainWin::closeToolView() */
   bool closeView();
+  void deleteView();
 
   void stop() { }
   bool run( QStringList /*flags*/ ) { return true; }

@@ -34,6 +34,7 @@ public:
   ToolView* createToolView( QWidget* parent );
   /* called by MainWin::closeToolView() */
   bool closeView();
+  void deleteView();
 
   void stop() { }
 

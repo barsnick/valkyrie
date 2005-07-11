@@ -157,7 +157,12 @@ bool Massif::closeView()
     }
   }
 
-  emit message( "" );  /* clear the status bar */
-  return massifView->close();
+  return true;
 }
 
+void Massif::deleteView()
+{
+  emit message( "" );  /* clear the status bar */
+  massifView->close( true );
+  massifView = 0;
+}

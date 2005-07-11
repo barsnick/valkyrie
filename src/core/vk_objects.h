@@ -106,7 +106,9 @@ public:
 
   /* creates and returns the ToolView window for a tool object */
   virtual ToolView* createToolView( QWidget* parent ) = 0;
+  /* called by MainWin::closeToolView() */
   virtual bool closeView() = 0;
+  virtual void deleteView() = 0;
 
   virtual void stop() = 0;
   virtual bool run( QStringList flags ) = 0;

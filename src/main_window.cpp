@@ -358,8 +358,11 @@ void MainWindow::closeToolView()
   /* try to deliver the coup de grace */
   if ( !currTool->closeView() ) return;
 
-  /* remove from stack */
+  /* remove from stack (doesn't delete) */
   viewStack->removeView( currView );
+
+  /* delete toolview, and set ToolObject's ptr to 0 */
+  currTool->deleteView();
 
   /* find the next view to be shown, if exists, and show it */
   ToolView* nextView = viewStack->nextView();

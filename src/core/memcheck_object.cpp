@@ -189,8 +189,18 @@ bool Memcheck::closeView()
     }
   }
 
+  return true;
+}
+
+void Memcheck::deleteView()
+{
   emit message( "" );  /* clear the status bar */
-  return memcheckView->close();
+
+  // CAB: which is correct: close or delete ?
+  memcheckView->close( true );
+  //  delete memcheckView;
+
+  memcheckView = 0;
 }
 
 

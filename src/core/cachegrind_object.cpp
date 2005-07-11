@@ -223,8 +223,14 @@ bool Cachegrind::closeView()
     }
   }
 
+  return true;
+}
+
+void Cachegrind::deleteView()
+{
   emit message( "" );  /* clear the status bar */
-  return cachegrindView->close();
+  cachegrindView->close( true );
+  cachegrindView = 0;
 }
 
 
