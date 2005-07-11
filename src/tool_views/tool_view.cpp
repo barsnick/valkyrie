@@ -16,7 +16,7 @@
 ToolView::~ToolView() { }
 
 ToolView::ToolView( QWidget* parent, QString name, VkObject::ObjectId id )
-  : QMainWindow( parent, name, 0/*not toplevel*/ ) // | WDestructiveClose )
+  : QMainWindow( parent, name, WDestructiveClose )
 {
   objId = id;
 
@@ -47,10 +47,7 @@ ToolViewStack::addView ( ToolView* tv, int id/* = -1*/ )
 
 void
 ToolViewStack::removeView ( QWidget* w )
-{
-  removeWidget( w );
-  removeChild( w );
-}
+{ removeWidget( w ); }
 
 ToolView*
 ToolViewStack::view ( int id ) const
