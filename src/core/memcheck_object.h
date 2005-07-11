@@ -35,6 +35,8 @@ public:
   /* called by MainWin::closeToolView() */
   bool isDone();
   void deleteView();
+  /* called by MainWin::closeEvent() */
+  ToolView* view() { return memcheckView; }
 
   void stop() { }
 

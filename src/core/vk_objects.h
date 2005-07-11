@@ -109,6 +109,8 @@ public:
   /* called by MainWin::closeToolView() */
   virtual bool isDone() = 0;
   virtual void deleteView() = 0;
+  /* called by MainWin::closeEvent() */
+  virtual ToolView* view() = 0;
 
   virtual void stop() = 0;
   virtual bool run( QStringList flags ) = 0;

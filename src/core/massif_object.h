@@ -28,6 +28,8 @@ public:
   /* called by MainWin::closeToolView() */
   bool isDone();
   void deleteView();
+  /* called by MainWin::closeEvent() */
+  ToolView* view() { return massifView; }
 
   void stop() { }
   bool run( QStringList /*flags*/ ) { return true; }

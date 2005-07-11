@@ -326,7 +326,7 @@ void MainWindow::closeEvent( QCloseEvent *ce )
 {
   ToolList tools = valkyrie->toolList();
   for ( ToolObject* tool = tools.first(); tool; tool = tools.next() ) {
-    if ( !tool->isDone() ) {
+    if ( tool->view() != 0 && !tool->isDone() ) {
       ce->ignore();
       return;
     }
