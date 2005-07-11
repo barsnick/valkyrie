@@ -33,7 +33,7 @@ Memcheck::Memcheck()
   /* init vars */
   memcheckView = 0;
 
-	logStream.setEncoding( QTextStream::UnicodeUTF8 );
+  logStream.setEncoding( QTextStream::UnicodeUTF8 );
   xmlParser = new XMLParser( this, true );
   reader.setContentHandler( xmlParser );
   reader.setErrorHandler( xmlParser );
@@ -529,9 +529,9 @@ bool Memcheck::run( QStringList flags )
   //logStream.setEncoding( QTextStream::UnicodeUTF8 );
   //logStream.setDevice( &logFile );
   //if ( !logFile.open( IO_WriteOnly ) ) {
-	if ( ! setupFileStream( true ) ) {
+  if ( ! setupFileStream( true ) ) {
     emitRunning( false );
-		setupFileStream( false );
+    setupFileStream( false );
     return vkError( memcheckView, "Open File Error", 
                     "<p>Unable to open file '%s' for writing.</p>", 
                     save_fname.latin1() );
@@ -565,11 +565,11 @@ void Memcheck::parseOutput()
 
   bool ok;
   QString data;
-	int lineNumber = 0;
+  int lineNumber = 0;
 
   if ( log_fd == 1 ) {                    /* stdout */
     while ( proc->canReadLineStdout() ) {
-			lineNumber++;
+      lineNumber++;
       data = proc->readLineStdout();
       // printf("data: -->%s<--\n", data.latin1() );
       logStream << data << "\n";
@@ -581,7 +581,7 @@ void Memcheck::parseOutput()
     }
   } else if ( log_fd == 2 ) {             /* stderr */
     while ( proc->canReadLineStderr() ) {
-			lineNumber++;
+      lineNumber++;
       data = proc->readLineStderr();
       // printf("data: -->%s<--\n", data.latin1() );
       logStream << data << "\n";
@@ -596,7 +596,7 @@ void Memcheck::parseOutput()
   if ( !ok ) {
     vkError( memcheckView, "Parse Error", 
              "<p>Parsing failed on line #%d: '%s'</p>", 
-						 lineNumber, data.latin1() );
+             lineNumber, data.latin1() );
 #endif
   }
 
@@ -620,7 +620,7 @@ void Memcheck::saveParsedOutput()
 
   //logFile.close();
   //logStream.unsetDevice();
-	setupFileStream( false );  /* close down auto-save log stuff */
+  setupFileStream( false );  /* close down auto-save log stuff */
   setupParser( false );      /* disconnect the parser */
   setupProc( false );        /* disconnect and delete the proc */
 
@@ -749,15 +749,15 @@ void Memcheck::setupParser( bool init )
 
 bool Memcheck::setupFileStream( bool init )
 {
-	bool ok = true;
+  bool ok = true;
 
-	if ( init ) {
-		ok = logFile.open( IO_WriteOnly );
-		logStream.setDevice( &logFile );
-	} else {
-		logFile.close();
-		logStream.unsetDevice();
-	}
-
-	return ok;
+  if ( init ) {
+    ok = logFile.open( IO_WriteOnly );
+    logStream.setDevice( &logFile );
+  } else {
+    logFile.close();
+    logStream.unsetDevice();
+  }
+  
+  return ok;
 }
