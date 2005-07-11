@@ -20,7 +20,7 @@ class MassifView : public ToolView
 {
   Q_OBJECT
 public:
-  MassifView( QMainWindow* mwin, QWidget* parent, Massif* ms );
+  MassifView( QWidget* parent, Massif* ms );
   ~MassifView();
 
   /* called by massif: set state for buttons; set cursor state */

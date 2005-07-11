@@ -174,10 +174,10 @@ int Cachegrind::checkOptArg( int optid, const char* argval,
 
 
 /* returns the ToolView window (memcheckView) for this tool */
-ToolView* Cachegrind::createToolView( QMainWindow* mwin, QWidget* parent )
+ToolView* Cachegrind::createToolView( QWidget* parent )
 {
   usingGui = true;
-  cachegrindView = new CachegrindView( mwin, parent, this );
+  cachegrindView = new CachegrindView( parent, this );
   cachegrindView->setState( is_Running );
   return (ToolView*)cachegrindView;
 }

@@ -105,7 +105,7 @@ public:
   ~ToolObject();
 
   /* creates and returns the ToolView window for a tool object */
-  virtual ToolView* createToolView( QMainWindow* mwin, QWidget* parent ) = 0;
+  virtual ToolView* createToolView( QWidget* parent ) = 0;
   virtual bool closeView() = 0;
 
   virtual void stop() = 0;

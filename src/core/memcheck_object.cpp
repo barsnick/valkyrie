@@ -129,10 +129,10 @@ int Memcheck::checkOptArg( int optid, const char* argval,
 
 
 /* returns the ToolView window (memcheckView) for this tool */
-ToolView* Memcheck::createToolView( QMainWindow* mwin, QWidget* parent )
+ToolView* Memcheck::createToolView( QWidget* parent )
 {
   usingGui = true;
-  memcheckView = new MemcheckView( mwin, parent, this );
+  memcheckView = new MemcheckView( parent, this );
   memcheckView->setState( is_Running );
   return (ToolView*)memcheckView;
 }

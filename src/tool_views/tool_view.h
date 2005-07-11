@@ -17,7 +17,7 @@
 #include "vk_objects.h"
 
 
-class ToolView : public QWidget
+class ToolView : public QMainWindow
 {
   Q_OBJECT
 public:
@@ -38,6 +38,8 @@ public slots:
 
 protected:
   VkObject::ObjectId objId;
+
+  QWidget* central;
 };
 
 

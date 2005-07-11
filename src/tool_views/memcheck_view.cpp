@@ -37,26 +37,21 @@ void MemcheckView::showSuppEditor()
 
 /* class MemcheckView -------------------------------------------------- */
 MemcheckView::~MemcheckView() 
-{ 
-  delete mcToolBar;
-  mcToolBar = 0;
-  delete lView;
-  lView = 0;
-}
+{}
 
 
-MemcheckView::MemcheckView( QMainWindow* mwin,
-                            QWidget* parent, Memcheck* mc )
+MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
   : ToolView( parent, mc->name(), mc->id() )
 {
   memcheck = mc;
 
-  mkToolBar( mwin );
+  mkToolBar();
 
-  QVBoxLayout* vLayout = new QVBoxLayout( this );
+  QVBoxLayout* vLayout = new QVBoxLayout( central, 0, -1, "vLayout" );
+  vLayout->setResizeMode( QLayout::FreeResize );
 
   /* create the listview */
-  lView = new QListView( this, "lview" );
+  lView = new QListView( central, "lview" );
   vLayout->addWidget( lView );
   lView->setShowToolTips( false );
   lView->setSorting( -1 );
@@ -200,9 +195,9 @@ void MemcheckView::saveLogFile()
 }
 
 
-void MemcheckView::mkToolBar( QMainWindow* mwin )
+void MemcheckView::mkToolBar()
 {
-  mcToolBar = new QToolBar( mwin, "mc_toolbar" );
+  mcToolBar = new QToolBar( this, "mc_toolbar" );
 
   mcToolBar->setStyle( new QMotifStyle() );
   bool show_text = vkConfig->rdBool( "show-butt-text", "valkyrie" );

@@ -94,7 +94,7 @@ class MemcheckView : public ToolView
 {
   Q_OBJECT
 public:
-  MemcheckView( QMainWindow* mwin, QWidget* parent, Memcheck* mc );
+  MemcheckView( QWidget* parent, Memcheck* mc );
   ~MemcheckView();
 
   /* called by memcheck: set state for buttons; set cursor state */
@@ -114,7 +114,7 @@ public slots:
   void updateErrors( ErrCounts* ecounts );
 
 private:
-  void mkToolBar( QMainWindow* mwin );
+  void mkToolBar();
 
 private slots:
   void openLogFile();       /* load and parse one log file */

@@ -63,11 +63,11 @@ MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
   setIcon( vkConfig->pixmap( "valkyrie.xpm" ) );
   statusBar()->setSizeGripEnabled( false );
 
-  /* workspace */
+  /* setup tool space */
   QVBox* vbox = new QVBox( this );
-  vbox->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
-  vbox->setMargin( 1 );
-  vbox->setLineWidth( 1 );
+  //  vbox->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
+  vbox->setMargin( 0 );
+  vbox->setLineWidth( 0 );
   setCentralWidget( vbox );
 
   viewStack = new ToolViewStack( vbox );
@@ -109,7 +109,7 @@ void MainWindow::showToolView( int tvid )
 
   if ( activeView == 0 ) {
     // tools: MEMCHECK, CACHEGRIND, MASSIF
-    activeView = activeTool->createToolView( this, viewStack );
+    activeView = activeTool->createToolView( viewStack );
 
     viewStack->addView( activeView, tvid );
 

@@ -21,18 +21,17 @@ CachegrindView::~CachegrindView()
 { }
 
 
-CachegrindView::CachegrindView( QMainWindow* mwin,
-                                QWidget* parent, Cachegrind* cg )
+CachegrindView::CachegrindView( QWidget* parent, Cachegrind* cg )
   : ToolView( parent, cg->name(), cg->id() )
 {
   cachegrind = cg;
 
-  mkToolBar( mwin );
+  mkToolBar();
 
-  QVBoxLayout* vLayout = new QVBoxLayout( this );
+  QVBoxLayout* vLayout = new QVBoxLayout( central );
 
   /* create the listview */
-  QLabel* lbl = new QLabel( "Cachegrind", this, "cachegrind label" );
+  QLabel* lbl = new QLabel( "Cachegrind", central, "cachegrind label" );
   vLayout->addWidget( lbl );
 }
 
@@ -54,7 +53,6 @@ void CachegrindView::toggleToolbarLabels( bool /*state*/ )
 {  }
 
 
-void CachegrindView::mkToolBar( QMainWindow* mwin )
+void CachegrindView::mkToolBar( )
 {
-  mwin = mwin;// stop compiler complaining 
 }

@@ -31,7 +31,7 @@ public:
   bool run( QStringList flags );
 
   /* returns the ToolView window (memcheckView) for this tool */
-  ToolView* createToolView( QMainWindow* mw, QWidget* parent );
+  ToolView* createToolView( QWidget* parent );
   /* called by MainWin::closeToolView() */
   bool closeView();
 

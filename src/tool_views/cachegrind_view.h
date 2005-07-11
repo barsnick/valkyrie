@@ -20,7 +20,7 @@ class CachegrindView : public ToolView
 {
   Q_OBJECT
 public:
-  CachegrindView( QMainWindow* mwin, QWidget* parent, Cachegrind* cg );
+  CachegrindView( QWidget* parent, Cachegrind* cg );
   ~CachegrindView();
 
   /* called by cachegrind: set state for buttons; set cursor state */
@@ -30,7 +30,7 @@ public slots:
   void toggleToolbarLabels( bool );
 
 private:
-  void mkToolBar( QMainWindow* mwin );
+  void mkToolBar();
 
 private:
   Cachegrind* cachegrind;

@@ -16,19 +16,15 @@
 ToolView::~ToolView() { }
 
 ToolView::ToolView( QWidget* parent, QString name, VkObject::ObjectId id )
-  : QWidget( parent, name )
+  : QMainWindow( parent, name, 0/*not toplevel*/ ) // | WDestructiveClose )
 {
   objId = id;
 
   name[0] = name[0].upper();
   setCaption( name );
 
-#if 0 // CAB: Need this?
-  QWidget* central = new QWidget( this );
+  central = new QWidget( this );
   setCentralWidget( central );
-  QVBoxLayout* topLayout = new QVBoxLayout( central, 5, 5 );
-  topLayout->setResizeMode( QLayout::FreeResize );
-#endif
 }
 
 

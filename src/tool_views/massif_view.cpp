@@ -21,17 +21,15 @@ MassifView::~MassifView()
 { }
 
 
-MassifView::MassifView( QMainWindow* mwin, QWidget* parent, Massif* ms )
+MassifView::MassifView( QWidget* parent, Massif* ms )
   : ToolView( parent, ms->name(), ms->id() )
 {
   massif = ms;
 
-  mwin = mwin;// stop compiler complaining 
-
-  QVBoxLayout* vLayout = new QVBoxLayout( this );
+  QVBoxLayout* vLayout = new QVBoxLayout( central );
 
   /* create the listview */
-  QLabel* lbl = new QLabel( "Massif", this, "massif label" );
+  QLabel* lbl = new QLabel( "Massif", central, "massif label" );
   vLayout->addWidget( lbl );
 }
 
