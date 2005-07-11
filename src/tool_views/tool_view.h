@@ -51,13 +51,13 @@ class ToolViewStack : public QWidgetStack
 {
   Q_OBJECT
 public:
-  ToolViewStack ( QWidget * parent = 0, const char * name = 0 );
-  ToolViewStack ( QWidget * parent, const char * name, WFlags f );
+  ToolViewStack( QWidget * parent = 0, const char * name = 0 );
+  ToolViewStack( QWidget * parent, const char * name, WFlags f );
   ~ToolViewStack();
 
-  int addView ( ToolView* tv, int id = -1 );
+  int addView( ToolView* tv, int id = -1 );
   void removeView( QWidget* w );
-  ToolView* view ( int id ) const;
+  ToolView* view( int id ) const;
 
   const ToolViewList* viewList();
   ToolView* nextView( ToolView* lastView = 0 );
@@ -67,8 +67,8 @@ public:
   void listViews();
 
 public slots:
-  void raiseView ( int id );
-  void raiseView ( ToolView* tv );
+  void raiseView( int id );
+  void raiseView( ToolView* tv );
 };
 
 

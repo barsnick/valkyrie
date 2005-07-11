@@ -32,6 +32,7 @@ CachegrindView::CachegrindView( QWidget* parent, Cachegrind* cg )
 
   /* create the listview */
   QLabel* lbl = new QLabel( "Cachegrind", central, "cachegrind label" );
+  lbl->setAlignment( AlignCenter );
   vLayout->addWidget( lbl );
 }
 

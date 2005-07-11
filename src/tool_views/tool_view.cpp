@@ -33,36 +33,31 @@ ToolView::ToolView( QWidget* parent, QString name, VkObject::ObjectId id )
 
 /* Stack of ToolViews */
 
-ToolViewStack::~ToolViewStack() {}
+ToolViewStack::~ToolViewStack() { }
 
-ToolViewStack::ToolViewStack ( QWidget* parent/* = 0*/, const char * name/* = 0*/ )
-: QWidgetStack( parent, name ) {}
+ToolViewStack::ToolViewStack( QWidget* parent/*=0*/, const char * name/*=0*/ )
+  : QWidgetStack( parent, name ) { }
 
-ToolViewStack::ToolViewStack ( QWidget* parent, const char * name, WFlags f )
-: QWidgetStack( parent, name, f ) {}
+ToolViewStack::ToolViewStack( QWidget* parent, const char * name, WFlags f )
+  : QWidgetStack( parent, name, f ) { }
 
-int
-ToolViewStack::addView ( ToolView* tv, int id/* = -1*/ )
+int ToolViewStack::addView( ToolView* tv, int id/*=-1*/ )
 { return addWidget(tv, id); }
 
-void
-ToolViewStack::removeView ( QWidget* w )
+void ToolViewStack::removeView( QWidget* w )
 { removeWidget( w ); }
 
-ToolView*
-ToolViewStack::view ( int id ) const
+ToolView* ToolViewStack::view( int id ) const
 { return (ToolView*)widget(id); }
 
 
-/* Returns list of ToolViews */
-const ToolViewList*
-ToolViewStack::viewList ( )
+/* returns a list of ToolViews */
+const ToolViewList* ToolViewStack::viewList()
 { return (ToolViewList*)queryList( "ToolView", 0, false, false); } 
 
-/* Iterate over the views to find one != lastView
-   Returns NULL if none found */
-ToolView*
-ToolViewStack::ToolViewStack::nextView( ToolView* lastView/* = 0*/ )
+/* iterate over the views to find one != lastView
+   returns 0 if none found */
+ToolView* ToolViewStack::ToolViewStack::nextView( ToolView* lastView/*=0*/ )
 {
   const ToolViewList* views = viewList();
   ToolViewListIter it( *views );
@@ -74,12 +69,10 @@ ToolViewStack::ToolViewStack::nextView( ToolView* lastView/* = 0*/ )
   return 0;
 }
 
-ToolView*
-ToolViewStack::visible()
+ToolView* ToolViewStack::visible()
 { return (ToolView*)QWidgetStack::visibleWidget(); }
 
-void
-ToolViewStack::listViews()
+void ToolViewStack::listViews()
 {
   printf("=============\n");
   const ToolViewList* views = viewList();
@@ -95,11 +88,9 @@ ToolViewStack::listViews()
     - Hide any previous ToolView widgets
     - Raise new ToolView
     - Show any current ToolView widgets */
-void
-ToolViewStack::raiseView ( int id )
+void ToolViewStack::raiseView( int id )
 { raiseWidget(id); }
 
 /* Ditto */
-void
-ToolViewStack::raiseView ( ToolView* tv )
+void ToolViewStack::raiseView( ToolView* tv )
 { raiseWidget(tv); }

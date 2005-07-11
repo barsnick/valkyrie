@@ -30,6 +30,7 @@ MassifView::MassifView( QWidget* parent, Massif* ms )
 
   /* create the listview */
   QLabel* lbl = new QLabel( "Massif", central, "massif label" );
+  lbl->setAlignment( AlignCenter );
   vLayout->addWidget( lbl );
 }
 
@@ -47,7 +48,5 @@ void MassifView::setState( bool run )
 /* slot: connected to MainWindow::toggleToolbarLabels(). 
    called when user toggles 'show-butt-text' in Options page */
 void MassifView::toggleToolbarLabels( bool /*state*/ )
-{
-
-}
+{ }
 

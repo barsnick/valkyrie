@@ -36,8 +36,7 @@ void MemcheckView::showSuppEditor()
 
 
 /* class MemcheckView -------------------------------------------------- */
-MemcheckView::~MemcheckView() 
-{}
+MemcheckView::~MemcheckView() { }
 
 
 MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
@@ -63,8 +62,6 @@ MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
   fnt.setStyleHint( QFont::TypeWriter );
   lView->setFont( fnt );
 
-  //  setFocusProxy( lView );
-
   savelogButton->setEnabled( false );
   openOneButton->setEnabled( false );
   openAllButton->setEnabled( false );
@@ -81,9 +78,7 @@ MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
 
 /* clear and reset the listview for a new run */
 void MemcheckView::clear()
-{ 
-  lView->clear(); 
-}
+{ lView->clear(); }
 
 
 /* called by memcheck: set state for buttons; set cursor state */
@@ -197,12 +192,11 @@ void MemcheckView::saveLogFile()
 
 void MemcheckView::mkToolBar()
 {
-  mcToolBar = new QToolBar( this, "mc_toolbar" );
+  mcToolBar = new QToolBar( "Memcheck ToolBar", this,
+                            DockTop, false, "mc_toolbar" );
 
   mcToolBar->setStyle( new QMotifStyle() );
   bool show_text = vkConfig->rdBool( "show-butt-text", "valkyrie" );
-
-  mcToolBar->setLabel("Memcheck ToolBar");
 
   /* open-all items button --------------------------------------------- */
   openAllButton = new QToolButton( mcToolBar, "tb_open_all" );
@@ -235,8 +229,9 @@ void MemcheckView::mkToolBar()
                  "Show file paths (for current frame)" );
   ContextHelp::add( srcPathButton, urlValkyrie::Dummy );
 
-  /* separator --------------------------------------------------------- */
-  mcToolBar->addSeparator();
+  /* fake motif-style separator ---------------------------------------- */
+  QLabel* sep_lbl = new QLabel( mcToolBar, "lbl_sep" );
+  mcToolBar->setStretchableWidget( sep_lbl );
 
   /* open-log(s) button ------------------------------------------------ */
   openlogButton = new QToolButton( mcToolBar, "tb_open_log" );
