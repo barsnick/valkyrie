@@ -30,9 +30,6 @@ public:
   /* called by the view's object */
   virtual void setState( bool run ) = 0;
 
-  virtual void showWidgets() {}
-  virtual void hideWidgets() {}
-
 public slots:
   virtual void toggleToolbarLabels(bool) = 0;
 

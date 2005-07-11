@@ -100,23 +100,9 @@ ToolViewStack::listViews()
     - Show any current ToolView widgets */
 void
 ToolViewStack::raiseView ( int id )
-{
-  ToolView* prevView = visibleView();
-  if ( prevView != 0 ) {
-    prevView->hideWidgets();
-  }
-  raiseWidget(id);
-  view(id)->showWidgets();
-}
+{ raiseWidget(id); }
 
 /* Ditto */
 void
 ToolViewStack::raiseView ( ToolView* tv )
-{
-  ToolView* prevView = visibleView();
-  if ( prevView != 0 ) {
-    prevView->hideWidgets();
-  }
-  raiseWidget(tv);
-  tv->showWidgets();
-}
+{ raiseWidget(tv); }

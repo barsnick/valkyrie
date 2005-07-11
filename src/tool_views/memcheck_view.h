@@ -102,9 +102,6 @@ public:
   /* clear and reset the listview for a new run */
   void clear();
 
-  void showWidgets() { if (mcToolBar) mcToolBar->show(); }
-  void hideWidgets() { if (mcToolBar) mcToolBar->hide(); }
-
 public slots:
   void toggleToolbarLabels( bool );
 
