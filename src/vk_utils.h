@@ -11,6 +11,7 @@
 #define __VK_UTILS_H
 
 #include <qstring.h>
+#include <qpalette.h>
 
 
 #define DEBUG_ON 1
@@ -64,14 +65,13 @@ QString vk_mkstemp( QString fname, QString path, QString ext=QString::null );
 /* 3.0.5 --> 0x030005 -------------------------------------------------- */
 int str2hex( QString ver_str );
 
-/* command-line args parsing ------------------------------------------- 
-   implemented in /src/options/parse_cmd_args.cpp */
+/* command-line args parsing
+   implemented in /src/options/parse_cmd_args.cpp ---------------------- */
 extern int parseCmdArgs( int argc, char** argv );
 
 /* escape html entities
  * current list: '<', '>', '&' ----------------------------------------- */
 QString escapeEntities( const QString& str );
-
 
 /* malloc and free fns ------------------------------------------------- */
 void * vk_free( const void* p );
@@ -88,6 +88,9 @@ char* vk_str_malloc( int sz );
 bool vk_strcmp( const char* str1, const char* str2 );
 
 char* vk_strdup( const char* str );
+
+/* valkyrie's default palette ------------------------------------------ */
+QPalette vkPalette();
 
 
 #endif

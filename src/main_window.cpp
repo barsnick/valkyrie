@@ -48,8 +48,7 @@
 
 
 /* class MainWindow ---------------------------------------------------- */
-MainWindow::~MainWindow() 
-{}
+MainWindow::~MainWindow() { }
 
 MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
 {
