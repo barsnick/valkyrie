@@ -29,10 +29,9 @@ public:
 public slots:
   void toggleToolbarLabels( bool );
 
-protected:
-
 private:
-  Massif* massif;
+  /* overriding to avoid casting everywhere */
+  Massif* tool() { return (Massif*)m_tool; }
 };
 
 

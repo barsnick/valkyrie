@@ -22,10 +22,8 @@ MassifView::~MassifView()
 
 
 MassifView::MassifView( QWidget* parent, Massif* ms )
-  : ToolView( parent, ms->name(), ms->id() )
+  : ToolView( parent, ms )
 {
-  massif = ms;
-
   QVBoxLayout* vLayout = new QVBoxLayout( central );
 
   /* create the listview */

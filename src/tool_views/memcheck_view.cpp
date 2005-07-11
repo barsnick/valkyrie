@@ -40,10 +40,8 @@ MemcheckView::~MemcheckView() { }
 
 
 MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
-  : ToolView( parent, mc->name(), mc->id() )
+  : ToolView( parent, mc )
 {
-  memcheck = mc;
-
   mkToolBar();
 
   QVBoxLayout* vLayout = new QVBoxLayout( central, 0, -1, "vLayout" );
@@ -126,7 +124,7 @@ void MemcheckView::openLogFile()
     return;
 
   vkConfig->wrEntry( log_file, "view-log", "valkyrie" );
-  memcheck->parseLogFile( false );
+  tool()->parseLogFile( false );
 #endif
 }
 
@@ -146,7 +144,7 @@ void MemcheckView::openMergeFile()
 
   vkConfig->wrEntry( merge_file, "merge", "valkyrie" );
   /* returns the filename the merge has been saved to */
-  memcheck->mergeLogFiles();
+  tool()->mergeLogFiles();
 }
 
 
@@ -181,7 +179,7 @@ void MemcheckView::saveLogFile()
   /* save (rename, actually) the log-file */
   if ( dir.rename( fi.fileName(), fname ) ) {
     logFilename = fname;
-    memcheck->statusMsg( "Saved", logFilename );
+    tool()->statusMsg( "Saved", logFilename );
   } else {
     vkInfo( this, "Save Failed", "<p>Failed to save file to '%s'",
             fname.latin1() );

@@ -112,6 +112,8 @@ public slots:
 
 private:
   void mkToolBar();
+  /* overriding to avoid casting everywhere */
+  Memcheck* tool() { return (Memcheck*)m_tool; }
 
 private slots:
   void openLogFile();       /* load and parse one log file */
@@ -128,9 +130,6 @@ private slots:
 
 private:
   QString logFilename;
-
-  /* keep a ptr to parent tool so we can ask it to do stuff */
-  Memcheck* memcheck;
 
   QListView* lView;
 

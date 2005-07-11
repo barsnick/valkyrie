@@ -31,10 +31,10 @@ public slots:
 
 private:
   void mkToolBar();
+  /* overriding to avoid casting everywhere */
+  Cachegrind* tool() { return (Cachegrind*)m_tool; }
 
 private:
-  Cachegrind* cachegrind;
-
   QToolBar* cgToolBar;
 };
 

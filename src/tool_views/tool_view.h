@@ -21,20 +21,24 @@ class ToolView : public QMainWindow
 {
   Q_OBJECT
 public:
-  ToolView( QWidget* parent, QString title, VkObject::ObjectId id );
+  //  ToolView( QWidget* parent, QString title, VkObject::ObjectId id );
+  ToolView( QWidget* parent, ToolObject* tool );
   ~ToolView();
 
   /* used by MainWin::closeToolView() */
-  VkObject::ObjectId id() { return objId; }
+  VkObject::ObjectId id() { return m_tool->id(); }
 
   /* called by the view's object */
   virtual void setState( bool run ) = 0;
+
+  ToolObject* tool() { return m_tool; }
 
 public slots:
   virtual void toggleToolbarLabels(bool) = 0;
 
 protected:
-  VkObject::ObjectId objId;
+  /* keep a ptr to parent tool so we can ask it to do stuff */
+  ToolObject* m_tool;
 
   QWidget* central;
 };

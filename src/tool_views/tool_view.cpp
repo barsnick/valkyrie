@@ -15,11 +15,13 @@
 
 ToolView::~ToolView() { }
 
-ToolView::ToolView( QWidget* parent, QString name, VkObject::ObjectId id )
-  : QMainWindow( parent, name, WDestructiveClose )
+//ToolView::ToolView( QWidget* parent, QString name, VkObject::ObjectId id )
+ToolView::ToolView( QWidget* parent, ToolObject* tool )
+  : QMainWindow( parent, tool->name(), WDestructiveClose )
 {
-  objId = id;
+  m_tool = tool;
 
+  QString name = tool->name();
   name[0] = name[0].upper();
   setCaption( name );
 

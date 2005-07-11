@@ -22,10 +22,8 @@ CachegrindView::~CachegrindView()
 
 
 CachegrindView::CachegrindView( QWidget* parent, Cachegrind* cg )
-  : ToolView( parent, cg->name(), cg->id() )
+  : ToolView( parent, cg )
 {
-  cachegrind = cg;
-
   mkToolBar();
 
   QVBoxLayout* vLayout = new QVBoxLayout( central );

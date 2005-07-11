@@ -94,10 +94,11 @@ void MainWindow::showToolView( int tvid )
 
   /* set up next view */
   bool set_running = false;
-  ToolView*   nextView = viewStack->view( tvid );
   ToolObject* nextTool = vkConfig->vkToolObj( tvid );
   vk_assert( nextTool != 0 );
 
+  /* view already created and on stack? */
+  ToolView* nextView = viewStack->view( tvid );
   if ( nextView == 0 ) {
     { // new toolview
       nextView = nextTool->createView( viewStack );
@@ -145,8 +146,7 @@ void MainWindow::stop()
   if ( viewStack->visible() == 0 )
     return;
 
-  ToolObject* tool = vkConfig->vkToolObj( viewStack->visible()->id() );
-  valkyrie->stopTool( tool );
+  valkyrie->stopTool( viewStack->visible()->tool() );
 }
 
 
@@ -168,8 +168,7 @@ void MainWindow::run()
   }
 
   valkyrie->setRunMode( Valkyrie::modeParseOutput );
-  ToolObject* tool = vkConfig->vkToolObj( viewStack->visible()->id() );
-  if ( valkyrie->runTool( tool ) ) {
+  if ( valkyrie->runTool( viewStack->visible()->tool() ) ) {
     printf("TODO: toggle buttons to reflect running state\n");
   } else {
     vkError( this, "Run Valgrind",
@@ -240,8 +239,7 @@ void MainWindow::setToggles( int tview_id )
     fileMenu->setItemEnabled( FILE_CLOSE,   true );
     bool is_running = false;
     if (viewStack->visible() != 0) {
-      ToolObject* tool = vkConfig->vkToolObj( viewStack->visible()->id() );
-      is_running = tool->isRunning();
+      is_running = viewStack->visible()->tool()->isRunning();
     }
     fileMenu->setItemEnabled( FILE_RUN,  !is_running );
     fileMenu->setItemEnabled( FILE_STOP, is_running );
@@ -271,8 +269,7 @@ void MainWindow::showFlagsWidget( bool show )
     flagsLabel->hide();
   } else {
     if ( viewStack->visible() != 0 ) {
-      ToolObject* tool = vkConfig->vkToolObj( viewStack->visible()->id() );
-      QString flags = valkyrie->currentFlags( tool );
+      QString flags = valkyrie->currentFlags( viewStack->visible()->tool() );
       flagsLabel->setText( flags );
       if ( !flagsLabel->isVisible() ) {
         flagsLabel->show();
@@ -348,7 +345,7 @@ void MainWindow::closeToolView()
   /* don't come in here if there's no current view */
   if ( currView == 0 ) return;
 
-  ToolObject* currTool = vkConfig->vkToolObj( currView->id() );
+  ToolObject* currTool = currView->tool();
 
   /* process might still be running, or whatever ... */
   if ( !currTool->isDone() ) return;
