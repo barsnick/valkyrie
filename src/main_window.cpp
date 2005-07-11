@@ -56,9 +56,6 @@ MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
 {
   valkyrie = valk;
 
-  activeView = 0;
-  activeTool = 0;
-
   setCaption( vkConfig->vkName() );
   setIcon( vkConfig->pixmap( "valkyrie.xpm" ) );
   statusBar()->setSizeGripEnabled( false );
@@ -93,38 +90,44 @@ MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
 
 void MainWindow::showToolView( int tvid )
 {
-//  printf("showToolView(%d), lastView_id = %d\n", tvid, activeView ? activeView->id() : -1);
-
-  if ( activeView != 0 ) {
+  if ( viewStack->visibleView() != 0 ) {
     /* already loaded and visible */
-    if ( activeView->id() == tvid ) {
+    if ( viewStack->visibleView()->id() == tvid ) {
       return;
     } 
   }
 
   /* Setup new view */
   bool set_running = false;
-  activeView = viewStack->view( tvid );
-  activeTool = vkConfig->vkToolObj( tvid );
+  ToolView*   nextView = viewStack->view( tvid );
+  ToolObject* nextTool = vkConfig->vkToolObj( tvid );
 
-  if ( activeView == 0 ) {
-    // tools: MEMCHECK, CACHEGRIND, MASSIF
-    activeView = activeTool->createToolView( viewStack );
+  if ( nextView == 0 ) {
+    { // newToolView()
+      nextView = nextTool->createToolView( viewStack );
+      vk_assert( nextView != 0 );
 
-    viewStack->addView( activeView, tvid );
+      viewStack->addView( nextView, tvid );
 
-    connect( activeTool, SIGNAL(running(bool)), 
-             this,       SLOT(updateButtons(bool)) );
-    connect( activeTool, SIGNAL(message(QString)),
-             this,       SLOT(setStatus(QString)) );
-    connect( this,       SIGNAL(toolbarLabelsToggled(bool)),
-             activeView, SLOT(toggleToolbarLabels(bool)) );
+      connect( nextTool, SIGNAL(running(bool)), 
+               this,       SLOT(updateButtons(bool)) );
+      connect( nextTool, SIGNAL(message(QString)),
+               this,       SLOT(setStatus(QString)) );
+      connect( this,       SIGNAL(toolbarLabelsToggled(bool)),
+               nextView, SLOT(toggleToolbarLabels(bool)) );
+    }
 
+#if 1 
+/* CAB: This ain't right, I think...
+   if we close the view, then open it again...
+   do we want an 'on-open' flag?
+*/
     /* if what-to-do was specified on the cmd-line, do it.
        otherwise, hang around and look boo'ful */
-    if ( vkConfig->currentToolName() == activeView->name() ) {
+    if ( vkConfig->currentToolName() == nextView->name() ) {
       set_running = true;
     }
+#endif
   }
 
   viewStack->raiseView( tvid );
@@ -133,7 +136,7 @@ void MainWindow::showToolView( int tvid )
   if ( set_running ) {
     qApp->processEvents();
     /* don't do anything if runMode == modeNotSet */
-    valkyrie->runTool( activeTool );
+    valkyrie->runTool( nextTool );
   }
 
   setToggles( tvid );
@@ -146,7 +149,8 @@ void MainWindow::stop()
   if ( viewStack->visibleView() == 0 )
     return;
 
-  valkyrie->stopTool( activeTool );
+  ToolObject* tool = vkConfig->vkToolObj( viewStack->visibleView()->id() );
+  valkyrie->stopTool( tool );
 }
 
 
@@ -168,7 +172,8 @@ void MainWindow::run()
   }
 
   valkyrie->setRunMode( Valkyrie::modeParseOutput );
-  if ( valkyrie->runTool( activeTool ) ) {
+  ToolObject* tool = vkConfig->vkToolObj( viewStack->visibleView()->id() );
+  if ( valkyrie->runTool( tool ) ) {
     printf("TODO: toggle buttons to reflect running state\n");
   } else {
     vkError( this, "Run Valgrind",
@@ -237,7 +242,11 @@ void MainWindow::setToggles( int tview_id )
   } else {
     /* someone is hanging around ... */
     fileMenu->setItemEnabled( FILE_CLOSE,   true );
-    bool is_running = (activeView == 0) ? false : activeTool->isRunning();
+    bool is_running = false;
+    if (viewStack->visibleView() != 0) {
+      ToolObject* tool = vkConfig->vkToolObj( viewStack->visibleView()->id() );
+      is_running = tool->isRunning();
+    }
     fileMenu->setItemEnabled( FILE_RUN,  !is_running );
     fileMenu->setItemEnabled( FILE_STOP, is_running );
 
@@ -265,8 +274,9 @@ void MainWindow::showFlagsWidget( bool show )
   if ( !show ) {
     flagsLabel->hide();
   } else {
-    if ( activeView != 0 ) {
-      QString flags = valkyrie->currentFlags( activeTool );
+    if ( viewStack->visibleView() != 0 ) {
+      ToolObject* tool = vkConfig->vkToolObj( viewStack->visibleView()->id() );
+      QString flags = valkyrie->currentFlags( tool );
       flagsLabel->setText( flags );
       if ( !flagsLabel->isVisible() ) {
         flagsLabel->show();
@@ -339,25 +349,25 @@ void MainWindow::closeEvent( QCloseEvent *ce )
 
 void MainWindow::closeToolView()
 {
-  /* you can never be too careful */
-  if ( activeView == 0 ) return;
+  ToolView* currView = viewStack->visibleView();
+  /* don't come in here if there's no current view */
+  if ( currView == 0 ) return;
+
+  ToolObject* currTool = vkConfig->vkToolObj( currView->id() );
 
   /* try to deliver the coup de grace */
-  if ( !activeTool->closeView() ) return;
+  if ( !currTool->closeView() ) return;
 
   /* remove from stack */
-  viewStack->removeView( activeView );
+  viewStack->removeView( currView );
 
   /* find the next view to be shown, if exists, and show it */
-  activeTool = 0;
-  activeView = viewStack->nextView();
-  if ( activeView != 0 ) {  // Found another view != current
-//    printf("nextView: id(%d), name(%s)\n", activeView->id(), activeView->name());
-    activeTool = vkConfig->vkToolObj( activeView->id() );
-    viewStack->raiseView( activeView );
+  ToolView* nextView = viewStack->nextView();
+  if ( nextView != 0 ) {  // Found another view in stack
+    viewStack->raiseView( nextView );
   }
 
-  setToggles( ( activeView == 0 ) ? -1 : activeTool->id() );
+  setToggles( ( nextView == 0 ) ? -1 : nextView->id() );
 }
 
 

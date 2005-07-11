@@ -79,8 +79,6 @@ private:
   ToolViewStack* viewStack;
 
   Valkyrie* valkyrie;
-  ToolView* activeView;
-  ToolObject* activeTool;
 
   HandBook* handBook;
   OptionsWindow* optionsWin;
