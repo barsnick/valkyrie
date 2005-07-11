@@ -268,6 +268,7 @@ ToolObject::ToolObject( ObjectId id, const QString& capt,
                         const QString& txt, const QKeySequence& key )
   : VkObject( id, capt, txt, key, true )
 {
+  m_view = 0;
   proc = 0;
 
   is_Running = false;
@@ -292,4 +293,12 @@ void ToolObject::killProc()
   }
 }
 
-
+void ToolObject::deleteView()
+{
+  emit message( "" );  /* clear the status bar */
+  vk_assert( m_view != 0 );
+  // CAB: which is correct: close or delete ?
+  m_view->close( true );
+  //  delete memcheckView;
+  m_view = 0;
+}

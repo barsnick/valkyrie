@@ -27,9 +27,8 @@ public:
   ToolView* createView( QWidget* parent );
   /* called by MainWin::closeToolView() */
   bool isDone();
-  void deleteView();
-  /* called by MainWin::closeEvent() */
-  ToolView* view() { return massifView; }
+
+  MassifView* view() { return (MassifView*)m_view; }
 
   void stop() { }
   bool run( QStringList /*flags*/ ) { return true; }
@@ -50,9 +49,6 @@ public:
 
 private:
   void emitRunning( bool );
-
-private:
-  MassifView* massifView;    /* the toolview window */
 };
 
 

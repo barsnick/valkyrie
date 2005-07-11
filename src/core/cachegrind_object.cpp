@@ -21,10 +21,6 @@ Cachegrind::~Cachegrind() { }
 Cachegrind::Cachegrind() 
   : ToolObject(CACHEGRIND, "Cachegrind", "&Cachegrind", Qt::SHIFT+Qt::Key_C) 
 { 
-  /* init vars */
-  cachegrindView = 0;
-
-
   /* cachegrind flags */
   addOpt( I1_CACHE,     Option::ARG_UINT,   Option::SPINBOX, 
           "cachegrind", '\0',               "I1",
@@ -179,9 +175,9 @@ int Cachegrind::checkOptArg( int optid, const char* argval,
 ToolView* Cachegrind::createView( QWidget* parent )
 {
   usingGui = true;
-  cachegrindView = new CachegrindView( parent, this );
-  cachegrindView->setState( is_Running );
-  return (ToolView*)cachegrindView;
+  m_view = new CachegrindView( parent, this );
+  view()->setState( is_Running );
+  return m_view;
 }
 
 
@@ -191,7 +187,7 @@ void Cachegrind::emitRunning( bool run )
   emit running( is_Running );
 
   if ( usingGui ) {
-    cachegrindView->setState( is_Running );
+    view()->setState( is_Running );
   }
 }
 
@@ -199,10 +195,12 @@ void Cachegrind::emitRunning( bool run )
 /* called by MainWin::closeToolView() */
 bool Cachegrind::isDone()
 {
+  vk_assert( view() != 0 );
+
   /* if current process is not yet finished, ask user if they really
      want to close */
   if ( is_Running ) {
-    int ok = vkQuery( cachegrindView, "Process Running", "&Abort;&Cancel",
+    int ok = vkQuery( view(), "Process Running", "&Abort;&Cancel",
                       "<p>The current process is not yet finished.</p>"
                       "<p>Do you want to abort it ?</p>" );
     if ( ok == MsgBox::vkYes ) {
@@ -214,7 +212,7 @@ bool Cachegrind::isDone()
 
   if ( !fileSaved ) {
     /* currently loaded / parsed stuff isn't saved to disk */
-    int ok = vkQuery( cachegrindView, "Unsaved File", 
+    int ok = vkQuery( view(), "Unsaved File", 
                       "&Save;&Discard;&Cancel",
                       "<p>The current output is not saved."
                       "Do you want to save it ?</p>" );
@@ -227,12 +225,3 @@ bool Cachegrind::isDone()
 
   return true;
 }
-
-void Cachegrind::deleteView()
-{
-  emit message( "" );  /* clear the status bar */
-  cachegrindView->close( true );
-  cachegrindView = 0;
-}
-
-

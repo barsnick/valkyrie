@@ -108,8 +108,8 @@ public:
   virtual ToolView* createView( QWidget* parent ) = 0;
   /* called by MainWin::closeToolView() */
   virtual bool isDone() = 0;
-  virtual void deleteView() = 0;
-  /* called by MainWin::closeEvent() */
+  virtual void deleteView();
+
   virtual ToolView* view() = 0;
 
   virtual void stop() = 0;
@@ -128,6 +128,8 @@ protected:
   virtual void emitRunning( bool ) = 0;
 
 protected:
+  ToolView* m_view;  /* the toolview window */
+
   bool is_Running;
   bool fileSaved;
 

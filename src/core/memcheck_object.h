@@ -34,9 +34,8 @@ public:
   ToolView* createView( QWidget* parent );
   /* called by MainWin::closeToolView() */
   bool isDone();
-  void deleteView();
-  /* called by MainWin::closeEvent() */
-  ToolView* view() { return memcheckView; }
+
+  MemcheckView* view() { return (MemcheckView*)m_view; }
 
   void stop() { }
 
@@ -72,8 +71,6 @@ private:
 	bool setupFileStream( bool init );
 
 private:
-  MemcheckView* memcheckView;    /* the toolview window */
-
   XMLParser* xmlParser;
   QXmlSimpleReader reader;
   QXmlInputSource source;

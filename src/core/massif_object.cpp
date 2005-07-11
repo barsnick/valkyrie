@@ -21,10 +21,7 @@ Massif::~Massif() { }
 Massif::Massif() 
   : ToolObject( MASSIF, "Massif", "Ma&ssif", Qt::SHIFT+Qt::Key_S ) 
 {
-  /* init vars */
-  massifView = 0;
-
-
+  /* massif flags */
   addOpt( HEAP,        Option::ARG_BOOL,   Option::CHECK,
           "massif",    '\0',               "heap",
           "<yes|no>",  "yes|no",           "yes",
@@ -113,9 +110,9 @@ int Massif::checkOptArg( int optid, const char* argval,
 ToolView* Massif::createView( QWidget* parent )
 {
   usingGui = true;
-  massifView = new MassifView( parent, this);
-  massifView->setState( is_Running );
-  return (ToolView*)massifView;
+  m_view = new MassifView( parent, this);
+  view()->setState( is_Running );
+  return m_view;
 }
 
 
@@ -125,7 +122,7 @@ void Massif::emitRunning( bool run )
   emit running( is_Running );
 
   if ( usingGui ) {
-    massifView->setState( is_Running );
+    view()->setState( is_Running );
   }
 }
 
@@ -133,12 +130,12 @@ void Massif::emitRunning( bool run )
 /* called by MainWin::closeToolView() */
 bool Massif::isDone()
 {
-  vk_assert( massifView != 0 );
+  vk_assert( view() != 0 );
 
   /* if current process is not yet finished, ask user if they really
      want to close */
   if ( is_Running ) {
-    int ok = vkQuery( massifView, "Process Running", "&Abort;&Cancel",
+    int ok = vkQuery( this->view(), "Process Running", "&Abort;&Cancel",
                       "<p>The current process is not yet finished.</p>"
                       "<p>Do you want to abort it ?</p>" );
     if ( ok == MsgBox::vkYes ) {
@@ -150,7 +147,7 @@ bool Massif::isDone()
 
   if ( !fileSaved ) {
     /* currently loaded / parsed stuff isn't saved to disk */
-    int ok = vkQuery( massifView, "Unsaved File", 
+    int ok = vkQuery( this->view(), "Unsaved File", 
                       "&Save;&Discard;&Cancel",
                       "<p>The current output is not saved."
                       "Do you want to save it ?</p>" );
@@ -162,12 +159,4 @@ bool Massif::isDone()
   }
 
   return true;
-}
-
-void Massif::deleteView()
-{
-  emit message( "" );  /* clear the status bar */
-  vk_assert( massifView != 0 );
-  massifView->close( true );
-  massifView = 0;
 }

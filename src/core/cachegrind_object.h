@@ -27,9 +27,8 @@ public:
   ToolView* createView( QWidget* parent );
   /* called by MainWin::closeToolView() */
   bool isDone();
-  void deleteView();
-  /* called by MainWin::closeEvent() */
-  ToolView* view() { return cachegrindView; }
+
+  CachegrindView* view() { return (CachegrindView*)m_view; }
 
   void stop() { }
   bool run( QStringList /*flags*/ ) { return true; }
@@ -53,9 +52,6 @@ public:
 
 private:
   void emitRunning( bool );
-
-private:
-  CachegrindView* cachegrindView;    /* the toolview window */
 };
 
 

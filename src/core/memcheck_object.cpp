@@ -31,8 +31,6 @@ Memcheck::Memcheck()
   : ToolObject( MEMCHECK, "Memcheck", "&Memcheck", Qt::SHIFT+Qt::Key_M ) 
 {
   /* init vars */
-  memcheckView = 0;
-
   logStream.setEncoding( QTextStream::UnicodeUTF8 );
   xmlParser = new XMLParser( this, true );
   reader.setContentHandler( xmlParser );
@@ -131,9 +129,9 @@ int Memcheck::checkOptArg( int optid, const char* argval,
 ToolView* Memcheck::createView( QWidget* parent )
 {
   usingGui = true;
-  memcheckView = new MemcheckView( parent, this );
-  memcheckView->setState( is_Running );
-  return (ToolView*)memcheckView;
+  m_view = new MemcheckView( parent, this );
+  view()->setState( is_Running );
+  return m_view;
 }
 
 
@@ -143,7 +141,7 @@ void Memcheck::emitRunning( bool run )
   emit running( is_Running );
 
   if ( usingGui ) {
-    memcheckView->setState( is_Running );
+    view()->setState( is_Running );
   }
 }
 
@@ -162,10 +160,12 @@ void Memcheck::statusMsg( QString hdr, QString msg )
 /* called by MainWin::closeToolView() */
 bool Memcheck::isDone()
 {
+  vk_assert( view() != 0 );
+
   /* if current process is not yet finished, ask user if they really
      want to close */
   if ( is_Running ) {
-    int ok = vkQuery( memcheckView, "Process Running", "&Abort;&Cancel",
+    int ok = vkQuery( this->view(), "Process Running", "&Abort;&Cancel",
                       "<p>The current process is not yet finished.</p>"
                       "<p>Do you want to abort it ?</p>" );
     if ( ok == MsgBox::vkYes ) {
@@ -177,7 +177,7 @@ bool Memcheck::isDone()
 
   /* currently loaded / parsed stuff isn't saved to disk */
   if ( !fileSaved ) {
-    int ok = vkQuery( memcheckView, "Unsaved File", 
+    int ok = vkQuery( this->view(), "Unsaved File", 
                       "&Save;&Discard;&Cancel",
                       "<p>The current output is not saved."
                       "Do you want to save it ?</p>" );
@@ -191,18 +191,6 @@ bool Memcheck::isDone()
   return true;
 }
 
-void Memcheck::deleteView()
-{
-  emit message( "" );  /* clear the status bar */
-
-  // CAB: which is correct: close or delete ?
-  memcheckView->close( true );
-  //  delete memcheckView;
-
-  memcheckView = 0;
-}
-
-
 /* when --view-log=<file> is set on the cmd-line, valkyrie checks the
    file's perms + format, and writes the value to [valkyrie:view-log].
    However, when a file is set via the open-file-dialog in the gui, or
@@ -215,7 +203,7 @@ QString Memcheck::validateFile( QString log_file,  bool *ok )
   /* check this is a valid file, and has the right perms */
   QString ret_file = fileCheck( &errval, log_file.latin1(), true, false );
   if ( errval != PARSED_OK ) {
-    *ok = vkError( memcheckView, "File Error", 
+    *ok = vkError( view(), "File Error", 
                    "%s: \n\"%s\"", 
                    parseErrString(errval), 
                    escapeEntities(log_file).latin1() );
@@ -225,14 +213,14 @@ QString Memcheck::validateFile( QString log_file,  bool *ok )
   /* check the file is readable, and the format is xml */
   bool is_xml = xmlFormatCheck( &errval, log_file );
   if ( errval != PARSED_OK ) {
-    *ok = vkError( memcheckView, "File Error", 
+    *ok = vkError( view(), "File Error", 
                    "%s: \n\"%s\"", 
                    parseErrString(errval), log_file.latin1() );
     return QString::null;
   }
 
   if ( !is_xml ) {
-    *ok = vkError( memcheckView, "File Format Error", 
+    *ok = vkError( view(), "File Format Error", 
                    "<p>The file '%s' is not in xml format.</p>",
                    log_file.latin1() );
     return QString::null;
@@ -268,7 +256,7 @@ bool Memcheck::parseLog( QString log_filename )
     source.setData( inputData );
     ok = reader.parseContinue();
     if ( !ok ) {
-      vkError( memcheckView, "Parse Error",
+      vkError( view(), "Parse Error",
                "<p>Parsing failed on line no %d: '%s'</p>", 
                lineNumber, inputData.latin1() );
       break;
@@ -312,24 +300,24 @@ bool Memcheck::parseLogFile( bool checked/*=true*/ )
   emitRunning( true );
 
   connect( xmlParser,    SIGNAL(loadItem(XmlOutput *)),
-           memcheckView, SLOT(loadItem(XmlOutput *)) );
+           this->view(), SLOT(loadItem(XmlOutput *)) );
   connect( xmlParser,    SIGNAL(updateErrors(ErrCounts*)),
-           memcheckView, SLOT(updateErrors(ErrCounts*)) );
+           this->view(), SLOT(updateErrors(ErrCounts*)) );
   connect( xmlParser,    SIGNAL(updateStatus()),
-           memcheckView, SLOT(updateStatus()) );
+           this->view(), SLOT(updateStatus()) );
 
   xmlParser->reset();
   source.reset();
-  memcheckView->clear();
+  view()->clear();
 
   bool success = parseLog( log_file);
 
   disconnect( xmlParser,    SIGNAL(loadItem(XmlOutput *)),
-              memcheckView, SLOT(loadItem(XmlOutput *)) );
+              this->view(), SLOT(loadItem(XmlOutput *)) );
   disconnect( xmlParser,    SIGNAL(updateErrors(ErrCounts*)),
-              memcheckView, SLOT(updateErrors(ErrCounts*)) );
+              this->view(), SLOT(updateErrors(ErrCounts*)) );
   disconnect( xmlParser,    SIGNAL(updateStatus()),
-              memcheckView, SLOT(updateStatus()) );
+              this->view(), SLOT(updateStatus()) );
 
   emitRunning( false );
 
@@ -361,7 +349,7 @@ bool Memcheck::mergeLogFiles()
   QFile logFile( log_list );
   if ( !logFile.open( IO_ReadOnly ) ) {
     emitRunning( false );
-    return vkError( memcheckView, "Open File Error", 
+    return vkError( this->view(), "Open File Error", 
            "<p>Unable to open logfile '%s'</p>", log_list.latin1() );
   }
   QFileInfo fi( log_list );
@@ -390,7 +378,7 @@ bool Memcheck::mergeLogFiles()
       max_errs = max_errs - 1;
     }
     if ( max_errs <= 0 ) {
-      int val = vkQuery( memcheckView, 2, "Invalid Files",
+      int val = vkQuery( this->view(), 2, "Invalid Files",
                 "<p>This doesn't look like a valid list of logfiles.</p>"
                 "<p>Would you like to cancel the operation?</p>" );
       if ( val == MsgBox::vkYes ) {        /* abort */
@@ -409,7 +397,7 @@ bool Memcheck::mergeLogFiles()
   /* check there's a minimum of two files-to-merge */
   if ( logFileList.count() < 2 ) {
     emitRunning( false );
-    return vkError( memcheckView, "Merge LogFiles Error", 
+    return vkError( this->view(), "Merge LogFiles Error", 
            "<p>The minimum number of files required is 2.</p>"
            "<p>The file '%s' contains %d valid xml logfiles.</p>", 
            log_list.latin1(), logFileList.count() );
@@ -532,7 +520,7 @@ bool Memcheck::run( QStringList flags )
   if ( ! setupFileStream( true ) ) {
     emitRunning( false );
     setupFileStream( false );
-    return vkError( memcheckView, "Open File Error", 
+    return vkError( this->view(), "Open File Error", 
                     "<p>Unable to open file '%s' for writing.</p>", 
                     save_fname.latin1() );
   }
@@ -548,7 +536,7 @@ bool Memcheck::run( QStringList flags )
     setupProc( false );
     setupParser( false );
     setupFileStream( false );
-    return vkError( memcheckView, "Error", 
+    return vkError( this->view(), "Error", 
                     "<p>Process failed to start</p>" );
   }
 
@@ -594,7 +582,7 @@ void Memcheck::parseOutput()
   }
 #if 1
   if ( !ok ) {
-    vkError( memcheckView, "Parse Error", 
+    vkError( this->view(), "Parse Error", 
              "<p>Parsing failed on line #%d: '%s'</p>", 
              lineNumber, data.latin1() );
 #endif
@@ -650,7 +638,7 @@ void Memcheck::saveParsedOutput()
     fi.setFile( fname );
     /* if this filename already exists, check if we should over-write it */
     if ( fi.exists() ) {
-      int ok = vkQuery( memcheckView, 2, "Overwrite File",
+      int ok = vkQuery( this->view(), 2, "Overwrite File",
                         "<p>Over-write existing file '%s' ?</p>", 
                         fname.latin1() );
       if ( ok == MsgBox::vkNo ) {
@@ -663,7 +651,7 @@ void Memcheck::saveParsedOutput()
     if ( dir.rename( fi.fileName(), fname ) ) {
       ;//logFilename = save_fname;
     } else {
-      vkInfo( memcheckView, "Save Failed", 
+      vkInfo( this->view(), "Save Failed", 
               "<p>Failed to save file to '%s'",  fname.latin1() );
     }
 
@@ -722,26 +710,26 @@ void Memcheck::setupParser( bool init )
   if ( !usingGui ) return;
 
   if ( init ) {                   /* starting up */
-    memcheckView->clear();
+    view()->clear();
     xmlParser->reset();
     source.reset();
   
     connect( xmlParser,    SIGNAL(loadItem(XmlOutput *)),
-             memcheckView, SLOT(loadItem(XmlOutput *)) );
+             this->view(), SLOT(loadItem(XmlOutput *)) );
     connect( xmlParser,    SIGNAL(updateErrors(ErrCounts*)),
-             memcheckView, SLOT(updateErrors(ErrCounts*)) );
+             this->view(), SLOT(updateErrors(ErrCounts*)) );
     connect( xmlParser,    SIGNAL(updateStatus()),
-             memcheckView, SLOT(updateStatus()) );
+             this->view(), SLOT(updateStatus()) );
 
     source.setData( "" );
     reader.parse( &source, true );
   } else {                        /* closing down */
     disconnect( xmlParser,    SIGNAL(loadItem(XmlOutput *)),
-                memcheckView, SLOT(loadItem(XmlOutput *)) );
+                this->view(), SLOT(loadItem(XmlOutput *)) );
     disconnect( xmlParser,    SIGNAL(updateErrors(ErrCounts*)),
-                memcheckView, SLOT(updateErrors(ErrCounts*)) );
+                this->view(), SLOT(updateErrors(ErrCounts*)) );
     disconnect( xmlParser,    SIGNAL(updateStatus()),
-                memcheckView, SLOT(updateStatus()) );
+                this->view(), SLOT(updateStatus()) );
   }
 
 }
