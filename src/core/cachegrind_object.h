@@ -28,8 +28,6 @@ public:
   /* called by MainWin::closeToolView() */
   bool isDone();
 
-  CachegrindView* view() { return (CachegrindView*)m_view; }
-
   void stop() { }
   bool run( QStringList /*flags*/ ) { return true; }
 
@@ -51,6 +49,9 @@ public:
   };
 
 private:
+  /* overriding to avoid casting everywhere */
+  CachegrindView* view() { return (CachegrindView*)m_view; }
+
   void emitRunning( bool );
 };
 

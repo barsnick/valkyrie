@@ -110,7 +110,7 @@ public:
   virtual bool isDone() = 0;
   virtual void deleteView();
 
-  virtual ToolView* view() = 0;
+  ToolView* view() { return m_view; }
 
   virtual void stop() = 0;
   virtual bool run( QStringList flags ) = 0;

@@ -35,8 +35,6 @@ public:
   /* called by MainWin::closeToolView() */
   bool isDone();
 
-  MemcheckView* view() { return (MemcheckView*)m_view; }
-
   void stop() { }
 
   int checkOptArg( int optid, const char* argval, bool use_gui=false );
@@ -60,6 +58,9 @@ private slots:
 
 private:
   friend class MemcheckView;
+
+  /* overriding to avoid casting everywhere */
+  MemcheckView* view() { return (MemcheckView*)m_view; }
 
   void emitRunning( bool );
   bool parseLog( QString logfile );

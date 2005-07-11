@@ -28,8 +28,6 @@ public:
   /* called by MainWin::closeToolView() */
   bool isDone();
 
-  MassifView* view() { return (MassifView*)m_view; }
-
   void stop() { }
   bool run( QStringList /*flags*/ ) { return true; }
 
@@ -48,6 +46,9 @@ public:
   };
 
 private:
+  /* overriding to avoid casting everywhere */
+  MassifView* view() { return (MassifView*)m_view; }
+
   void emitRunning( bool );
 };
 
