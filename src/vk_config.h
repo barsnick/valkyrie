@@ -95,11 +95,11 @@ public:
   QChar sepChar() { return sep; }
 
   /* Returns a ptr to the tool currently set in [valgrind:tool] */
-  ToolObject* currentTool();
+  ToolObject* tool();
   /* Returns the name of the current tool in [valgrind:tool] */
-  QString currentToolName();
+  QString toolName();
   /* Returns the tool id of [valgrind:tool] */
-  VkObject::ObjectId currentToolId();
+  VkObject::ObjectId toolId();
 
   /* Returns a list of all VkObjects, irrespective of whether they are
      tools or otherwise */

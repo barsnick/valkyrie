@@ -679,7 +679,7 @@ VkObjectList VkConfig::vkObjList()
 { return vkObjectList; }
 
 /* Returns a ptr to be tool currently set in [valgrind:tool] */
-ToolObject* VkConfig::currentTool()
+ToolObject* VkConfig::tool()
 {
   QString name = rdEntry("tool", "valgrind");
   for ( VkObject* obj=vkObjectList.first(); obj; obj=vkObjectList.next() ) {
@@ -692,11 +692,11 @@ ToolObject* VkConfig::currentTool()
 }
 
 /* returns the name of the current tool in [valgrind:tool] */
-QString VkConfig::currentToolName()
+QString VkConfig::toolName()
 { return rdEntry("tool", "valgrind"); }
 
 /* returns the tool id of [valgrind:tool] */
-VkObject::ObjectId VkConfig::currentToolId()
+VkObject::ObjectId VkConfig::toolId()
 {
   QString tool_name = rdEntry( "tool", "valgrind" );
 

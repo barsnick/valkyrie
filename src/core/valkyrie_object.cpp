@@ -358,7 +358,7 @@ void Valkyrie::stopTool( ToolObject* activeTool/*=0*/ )
 bool Valkyrie::runTool( ToolObject* activeTool/*=0*/ )
 {
   if ( activeTool == 0 ) {
-    activeTool = vkConfig->currentTool();
+    activeTool = vkConfig->tool();
     vk_assert( activeTool != 0 );
   }
 

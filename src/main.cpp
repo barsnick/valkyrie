@@ -109,7 +109,7 @@ int main ( int argc, char* argv[] )
     vkWin->show();
     /* start up with the tool currently set in vkConfig (either the
        default, the last-used, or whatever was set on the cmd-line) */
-    vkWin->showToolView( vkConfig->currentToolId() );
+    vkWin->showToolView( vkConfig->toolId(), true );
   }
 
   res = app->exec();

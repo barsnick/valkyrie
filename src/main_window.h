@@ -45,7 +45,7 @@ public slots:
   /* show toolbutton text labels (or not) */
   void toggleToolbarLabels();
   /* show toolview for tool set in [valgrind:tool] */
-  void showToolView( int tvid ); 
+  void showToolView( int tvid, bool auto_run=false ); 
   /* connected to optionsWin signal flagsChanged() */
   void updateFlagsWidget();
 

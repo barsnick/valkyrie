@@ -83,7 +83,7 @@ MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
 }
 
 
-void MainWindow::showToolView( int tvid )
+void MainWindow::showToolView( int tvid, bool auto_run/*=false*/ )
 {
   if ( viewStack->visible() != 0 ) {
     /* already loaded and visible */
@@ -93,7 +93,6 @@ void MainWindow::showToolView( int tvid )
   }
 
   /* set up next view */
-  bool set_running = false;
   ToolObject* nextTool = vkConfig->vkToolObj( tvid );
   vk_assert( nextTool != 0 );
 
@@ -113,24 +112,13 @@ void MainWindow::showToolView( int tvid )
       connect( this,       SIGNAL(toolbarLabelsToggled(bool)),
                nextView, SLOT(toggleToolbarLabels(bool)) );
     }
-
-#if 1 
-/* CAB: This ain't right, I think...
-   if we close the view, then open it again...
-   do we want an 'on-open' flag?
-*/
-    /* if what-to-do was specified on the cmd-line, do it.
-       otherwise, hang around and look boo'ful */
-    if ( vkConfig->currentToolName() == nextView->name() ) {
-      set_running = true;
-    }
-#endif
   }
 
   viewStack->raiseView( tvid );
 
-  /* ensure the toolview is visible before we start doing stuff */
-  if ( set_running ) {
+  /* if what-to-do was specified on the cmd-line, do it.
+     otherwise, hang around and look boo'ful */
+  if ( auto_run ) {
     qApp->processEvents();
     /* don't do anything if runMode == modeNotSet */
     valkyrie->runTool( nextTool );
