@@ -349,7 +349,16 @@ QString Valkyrie::currentFlags( ToolObject* tool_obj )
 
 /* called from MainWin when user clicks stopButton */
 void Valkyrie::stopTool( ToolObject* activeTool/*=0*/ )
-{ VK_DEBUG("TODO: %s", activeTool->name().latin1() ); }
+{
+  if ( activeTool == 0 ) {
+    activeTool = vkConfig->tool();
+    vk_assert( activeTool != 0 );
+  }
+
+  bool success = activeTool->stop( runMode );
+
+  vk_assert( success );  // TODO: what to do if couldn't stop?
+}
 
 
 /* If called from MainWin, then activeTool is set.

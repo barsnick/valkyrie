@@ -16,6 +16,7 @@
 #include "logfile.h"
 
 #include <qapplication.h>
+#include <qtimer.h>
 
 
 /* class Memcheck ------------------------------------------------------ */
@@ -170,9 +171,10 @@ bool Memcheck::isDone()
                       "<p>The current process is not yet finished.</p>"
                       "<p>Do you want to abort it ?</p>" );
     if ( ok == MsgBox::vkYes ) {
-      VK_DEBUG("TODO: stop();");           /* abort */
+      bool stopped = stop( Valkyrie::modeNotSet );     /* abort */
+      vk_assert( stopped );         // TODO: what todo if couldn't stop?
     } else if ( ok == MsgBox::vkNo ) {
-      return false;                        /* continue */
+      return false;                                    /* continue */
     }
   }
 
@@ -191,6 +193,35 @@ bool Memcheck::isDone()
 
   return true;
 }
+
+bool Memcheck::stop( Valkyrie::RunMode rm )
+{
+  if (!is_Running) return true;
+
+  switch (rm) {
+  case Valkyrie::modeParseLog:
+    VK_DEBUG("TODO: %s::stop(parse log)", name().latin1() );
+    break;
+
+  case Valkyrie::modeMergeLogs:
+    VK_DEBUG("TODO: %s::stop(merge logs)", name().latin1() );
+    break;
+
+  case Valkyrie::modeParseOutput:
+    proc->tryTerminate();   /* First ask nicely. */
+    /* If proc still running after msec_timeout, terminate with prejudice */
+    QTimer::singleShot( 2000, proc, SLOT( kill() ) );   // TODO: move N to config
+    break;
+
+  default:
+    break;
+  }
+
+  // TODO: statusMsg() ?
+
+  return true;
+}
+
 
 /* when --view-log=<file> is set on the cmd-line, valkyrie checks the
    file's perms + format, and writes the value to [valkyrie:view-log].

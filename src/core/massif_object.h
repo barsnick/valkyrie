@@ -28,7 +28,7 @@ public:
   /* called by MainWin::closeToolView() */
   bool isDone();
 
-  void stop() { }
+  bool stop( Valkyrie::RunMode rm );
   bool run( QStringList /*flags*/ ) { return true; }
 
   int checkOptArg( int optid, const char* argval, bool use_gui=false );

@@ -139,9 +139,10 @@ bool Massif::isDone()
                       "<p>The current process is not yet finished.</p>"
                       "<p>Do you want to abort it ?</p>" );
     if ( ok == MsgBox::vkYes ) {
-      VK_DEBUG("TODO: stop();");           /* abort */
+      bool stopped = stop( Valkyrie::modeNotSet );     /* abort */
+      vk_assert( stopped );          // TODO: what todo if couldn't stop?
     } else if ( ok == MsgBox::vkNo ) {
-      return false;                        /* continue */
+      return false;                                    /* continue */
     }
   }
 
@@ -158,5 +159,12 @@ bool Massif::isDone()
     }
   }
 
+  return true;
+}
+
+
+bool Massif::stop( Valkyrie::RunMode rm )
+{
+  VK_DEBUG("TODO: %s::stop()", name().latin1() );
   return true;
 }

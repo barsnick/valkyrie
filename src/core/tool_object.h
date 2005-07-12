@@ -42,7 +42,7 @@ public:
 
   ToolView* view() { return m_view; }
 
-  virtual void stop() = 0;
+  virtual bool stop( Valkyrie::RunMode rm ) = 0;
   virtual bool run( QStringList flags ) = 0;
 
   bool isRunning();
