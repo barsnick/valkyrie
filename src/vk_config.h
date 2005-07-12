@@ -64,6 +64,8 @@ typedef QMap<EntryKey, EntryData>::Iterator EntryMapIterator;
 
 
 
+class ToolObject;
+
 typedef QPtrList<VkObject> VkObjectList;
 
 class VkConfig : public QObject

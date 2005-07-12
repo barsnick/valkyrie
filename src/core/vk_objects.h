@@ -1,8 +1,7 @@
 /* ---------------------------------------------------------------------- 
- * Definition of class VkObject and subclass ToolObject      vk_objects.h
+ * Definition of class VkObject                              vk_objects.h
  * 
- * Essential functionality is contained within a VkObject / ToolObject.
- * Each ToolObject has an associated ToolView for displaying output.
+ * Essential functionality is contained within a VkObject.
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind
  * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
@@ -20,7 +19,6 @@
 
 #include <qkeysequence.h>
 #include <qobject.h>
-#include <qprocess.h>
 #include <qptrlist.h>
 #include <qmainwindow.h>
 
@@ -91,53 +89,6 @@ protected:
 };
 
 
-
-/* class ToolObject ---------------------------------------------------- */
-class ToolView;
-
-class ToolObject : public VkObject 
-{
- Q_OBJECT
-public:
-
-  ToolObject( ObjectId id, const QString& capt, const QString& txt,
-              const QKeySequence& key );
-  ~ToolObject();
-
-  /* creates and returns the ToolView window for a tool object */
-  virtual ToolView* createView( QWidget* parent ) = 0;
-  /* called by MainWin::closeToolView() */
-  virtual bool isDone() = 0;
-  virtual void deleteView();
-
-  ToolView* view() { return m_view; }
-
-  virtual void stop() = 0;
-  virtual bool run( QStringList flags ) = 0;
-
-  bool isRunning();
-
-signals:
-  void running( bool );
-  void message( QString );
-  /* connected to valkyrie's quit() slot when in non-gui mode */
-  void finished();
-
-protected:
-  void killProc();
-  virtual void emitRunning( bool ) = 0;
-
-protected:
-  ToolView* m_view;  /* the toolview window */
-
-  bool is_Running;
-  bool fileSaved;
-
-  QProcess* proc;
-};
-
-
-#endif
-
+#endif // #ifndef __VK_OBJECTS_H
 
 

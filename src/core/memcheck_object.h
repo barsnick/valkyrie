@@ -12,8 +12,7 @@
 #define __MEMCHECK_OBJECT_H
 
 
-#include "vk_objects.h"
-#include "valkyrie_object.h"
+#include "tool_object.h"
 #include "memcheck_view.h"
 #include "xml_parser.h"
 

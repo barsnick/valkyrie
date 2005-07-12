@@ -9,6 +9,7 @@
  */
 
 #include "memcheck_object.h"
+#include "valkyrie_object.h"
 #include "vk_config.h"
 #include "html_urls.h"
 #include "vk_messages.h"
@@ -279,7 +280,7 @@ bool Memcheck::parseLogFile( bool checked/*=true*/ )
 {
   if ( usingGui ) {
     /* tell valkyrie what we are doing */
-    ;//FIXME: emit setRunMode( Valkyrie::modeParseLog );
+    emit setRunMode( Valkyrie::modeParseLog );
   }
 
   QString log_file = vkConfig->rdEntry( "view-log", "valkyrie" );
@@ -339,7 +340,7 @@ bool Memcheck::mergeLogFiles()
 {
   if ( usingGui ) {
     /* tell valkyrie what we are doing */
-    ;//FIXME: emit setRunMode( Valkyrie::modeMergeLogs );
+    emit setRunMode( Valkyrie::modeMergeLogs );
   }
 
   fileSaved = false;
@@ -499,7 +500,7 @@ bool Memcheck::run( QStringList flags )
 {
   if ( usingGui ) {
     /* tell valkyrie what we are doing */
-    ;//FIXME: emit setRunMode( Valkyrie::modeParseOutput );
+    emit setRunMode( Valkyrie::modeParseOutput );
   }
 
 #if 0

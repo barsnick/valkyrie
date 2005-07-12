@@ -36,6 +36,8 @@ public:
   ~MainWindow();
 
 public slots:
+  /* sets Valkyrie::RunMode */
+  void updateVkMode( Valkyrie::RunMode rm );
   /* sets run and stop buttons to correct state */
   void updateButtons( bool running );
   /* show a message in the status bar */

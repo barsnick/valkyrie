@@ -15,7 +15,9 @@
 #include <stdarg.h>                 // va_start, va_end
 
 #include <qapplication.h>
+#include <qfileinfo.h>
 #include <qfile.h>
+#include <qdir.h>
 
 
 

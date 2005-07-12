@@ -21,6 +21,7 @@ class Valgrind;
 class Memcheck;
 class Cachegrind;
 class Massif;
+class ToolObject;
 
 typedef QPtrList<ToolObject> ToolList;
 

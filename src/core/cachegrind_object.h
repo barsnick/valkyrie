@@ -12,7 +12,7 @@
 #define __CACHEGRIND_OBJECT_H
 
 
-#include "vk_objects.h"
+#include "tool_object.h"
 #include "cachegrind_view.h"
 
 

@@ -116,7 +116,11 @@ void MemcheckView::openLogFile()
 	fd->exec();
 #else
   QString log_file;
-  log_file = QFileDialog::getOpenFileName( QString::null,
+
+  QFileDialog dlg;
+  dlg.setShowHiddenFiles( true );
+  
+  log_file = dlg.getOpenFileName( QString::null,
                 "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)", 
                 this, "fdlg", "Select Log File" );
   /* user might have clicked Cancel */

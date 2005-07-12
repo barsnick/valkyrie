@@ -105,6 +105,8 @@ void MainWindow::showToolView( int tvid, bool auto_run/*=false*/ )
 
       viewStack->addView( nextView, tvid );
 
+      connect( nextTool, SIGNAL(setRunMode(Valkyrie::RunMode)), 
+               this,       SLOT(updateVkMode(Valkyrie::RunMode)) );
       connect( nextTool, SIGNAL(running(bool)), 
                this,       SLOT(updateButtons(bool)) );
       connect( nextTool, SIGNAL(message(QString)),
@@ -180,6 +182,11 @@ void MainWindow::showOptionsWindow( int view_id )
   optionsWin->showPage( view_id ); 
   optionsWin->raise();
 }
+
+
+/* slot, connected to tool object signal runMode(Valkyrie::RunMode) */
+void MainWindow::updateVkMode( Valkyrie::RunMode rm )
+{ valkyrie->setRunMode( rm ); }
 
 
 /* slot, connected to a tool object's signal running(bool) */

@@ -15,6 +15,7 @@
 #include <qwidgetstack.h>
 
 #include "vk_objects.h"
+#include "tool_object.h"
 
 
 class ToolView : public QMainWindow
