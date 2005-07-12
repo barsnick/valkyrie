@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------
- * Custom file dialog                                 vk_file_dialog.cpp
+ * Custom file dialog                                  vk_file_utils.cpp
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind
  * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
@@ -7,7 +7,7 @@
  * See the file LICENSE.GPL for the full license details.
  */
 
-#include "vk_file_dialog.h"
+#include "vk_file_utils.h"
 #include "filedlg_icons.h"
 #include "vk_messages.h"
 

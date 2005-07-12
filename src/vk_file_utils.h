@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------
- * Custom file dialog                                   vk_file_dialog.h
+ * Custom file dialog                                    vk_file_utils.h
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind
  * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
@@ -7,8 +7,8 @@
  * See the file LICENSE.GPL for the full license details.
  */
 
-#ifndef __VK_FILE_DIALOG_H
-#define __VK_FILE_DIALOG_H
+#ifndef __VK_FILE_UTILS_H
+#define __VK_FILE_UTILS_H
 
 
 class QPushButton;
@@ -350,4 +350,5 @@ private:
   QPushButton* cancelB;
 };
 
-#endif
+#endif // #ifndef __VK_FILE_UTILS_H
+

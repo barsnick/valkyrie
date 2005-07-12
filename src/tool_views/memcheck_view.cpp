@@ -15,7 +15,7 @@
 #include "tb_memcheck_icons.h"
 #include "async_process.h"
 #include "vk_messages.h"
-#include "vk_file_dialog.h"  //FIXME: rename to vk_file_utils.*
+#include "vk_file_utils.h"
 #include "context_help.h"
 #include "html_urls.h"
 
