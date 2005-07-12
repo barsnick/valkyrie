@@ -40,11 +40,9 @@ General:
 - make xml docs for valkyrie
 - put some stuff in class option to say that certain option fields cannot 
   be empty if the option is a popt option.
-- make the stop button actually do something
 
 main_window.cpp:
  - FIXME: this should use VkObject::ObjectId
- - Remove activeView saved state - viewStack->visibleView() is enough
 
 options/vk_objects.cpp:
   TODO: check Valgrind opts
@@ -52,10 +50,6 @@ options/vk_objects.cpp:
   FIXME: case SEL_SUPPS: is not done yet
   FIXME: when supp. files are specified on the cmd-line, any ...
   FIXME: case USR/DEF_SUPP_FILES: is not done yet
-
-tool_views/tool_view.h
- - should maybe hold ptr to ToolObject parent, rather than 'id'
- - show/hideWidgets() -> private()?
 
 options/*
  - get rid of vk_Object:OptsIdx as index into Options.
@@ -73,7 +67,10 @@ vkObjects
 Memcheck:
 --------
  - stdout, stderr tabs for all non-parsed output.
-
+ - stop()
+   - move delay-time-before-killing to config
+   - what to do if we can't stop sthng running?
+   - implement stop for parse/merge log files
 
 
 Known Bugs:
