@@ -597,6 +597,12 @@ bool XMLParser::startElement( const QString&, const QString&,
 {
   TagType ttype = tagType( startTag );
 
+  /* Any content before a start tag => client program output */
+  if (!content.isEmpty()) {
+    // TODO: content has lost it's spaces/formatting.
+    emit loadClientOutput( content );
+  }
+
   switch ( ttype ) {
     case PREAMBLE: 
       inPreamble = true;
@@ -795,6 +801,9 @@ bool XMLParser::endElement( const QString&, const QString&,
       vk_assert_never_reached();
       break;
   }
+
+  /* reset content, so we can detect client output before a start tag */
+  content = "";
 
   return true;
 }

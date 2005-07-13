@@ -17,6 +17,7 @@
 
 #include <qlistview.h>
 #include <qtoolbutton.h>
+#include <qtextedit.h>
 
 /* base class for SrcItem and OutputItem ------------------------------- */
 class XmlOutputItem : public QListViewItem
@@ -102,6 +103,8 @@ public:
   /* clear and reset the listview for a new run */
   void clear();
 
+  void loadClientOutput( const QString& client_output, int log_fd );
+
 public slots:
   void toggleToolbarLabels( bool );
 
@@ -132,6 +135,8 @@ private:
   QString logFilename;
 
   QListView* lView;
+  QTextEdit* stdout_tedit;
+  QTextEdit* stderr_tedit;
 
   QToolButton* savelogButton;
   QToolButton* openlogButton;

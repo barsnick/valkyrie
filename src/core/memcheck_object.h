@@ -51,6 +51,9 @@ public:
     LAST_CMD_OPT  = STRLEN
   };
 
+public slots:
+  void loadClientOutput( const QString&, int log_fd=-1 );
+
 private slots:
   void parseOutput();
   void saveParsedOutput();
@@ -75,7 +78,6 @@ private:
   QXmlSimpleReader reader;
   QXmlInputSource source;
 
-  int log_fd;                   /* stdout=1 | stderr=2 | ... */
   QFile logFile;
   QString save_fname;
   QTextStream logStream;

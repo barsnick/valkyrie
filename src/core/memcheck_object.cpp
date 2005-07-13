@@ -578,38 +578,57 @@ bool Memcheck::run( QStringList flags )
 
 /* slot, connected to proc's signal readyReadStd***().
    read and process the data, which might be output in chunks.
-   output is auto-saved to a logfile in ~/.valkyrie-X.X.X/logs/ */
+   output is auto-saved to a logfile in ~/.valkyrie-X.X.X/logs/
+   Note: In non-gui mode, and client program output on the same log_fd
+   as valgrind/valkyrie will get saved to the logfile.
+*/
 void Memcheck::parseOutput()
 {
   statusMsg( "Memcheck", "Parsing output ... " );
 
-  bool ok;
+  bool ok = true;
   QString data;
   int lineNumber = 0;
+
+  int log_fd = vkConfig->rdInt( "log-fd", "valgrind" );
+
+  // TODO: proc->readLineXXX() doesn't respect client output formatting
 
   if ( log_fd == 1 ) {                    /* stdout */
     while ( proc->canReadLineStdout() ) {
       lineNumber++;
       data = proc->readLineStdout();
-      // printf("data: -->%s<--\n", data.latin1() );
+      // printf("stdout: '%s'\n", data.latin1() );
       logStream << data << "\n";
       if ( usingGui ) {
         source.setData( data );
         ok = reader.parseContinue();
+	if ( !ok ) break;
       }
-      if ( !ok ) break;
+    }
+
+    /* Anything from stderr will be from client prog */
+    while ( proc->canReadLineStderr() ) {
+      data = proc->readLineStderr();
+      loadClientOutput( data, 2 );
     }
   } else if ( log_fd == 2 ) {             /* stderr */
     while ( proc->canReadLineStderr() ) {
       lineNumber++;
       data = proc->readLineStderr();
-      // printf("data: -->%s<--\n", data.latin1() );
+      // printf("stderr: '%s'\n", data.latin1() );
       logStream << data << "\n";
       if ( usingGui ) {
         source.setData( data );
         ok = reader.parseContinue();
+	if ( !ok ) break;
       }
-      if ( !ok ) break;
+    }
+
+    /* Anything from stdout will be from client prog */
+    while ( proc->canReadLineStdout() ) {
+      data = proc->readLineStdout();
+      loadClientOutput( data, 1 );
     }
   }
 #if 1
@@ -707,28 +726,17 @@ void Memcheck::setupProc( bool init )
     proc = new QProcess( this, "mc_proc" );
     connect( proc, SIGNAL( processExited() ),
              this, SLOT( saveParsedOutput() ) );
-    log_fd = vkConfig->rdInt( "log-fd", "valgrind" );
-    if ( log_fd == 1 ) {           /* stdout */
-      connect( proc, SIGNAL( readyReadStdout() ),
-               this, SLOT( parseOutput() ) );
-    } else if ( log_fd == 2 ) {    /* stderr */
-      connect( proc, SIGNAL( readyReadStderr() ),
-               this, SLOT( parseOutput() ) );
-    } else {
-      vk_assert_never_reached();
-    }
+    connect( proc, SIGNAL( readyReadStdout() ),
+             this, SLOT( parseOutput() ) );
+    connect( proc, SIGNAL( readyReadStderr() ),
+             this, SLOT( parseOutput() ) );
   } else {                      /* closing down */
     disconnect( proc, SIGNAL( processExited() ),
                 this, SLOT( saveParsedOutput() ) );
-    if ( log_fd == 1 ) {           /* stdout */
-      disconnect( proc, SIGNAL( readyReadStdout() ),
-                  this, SLOT( parseOutput() ) );
-    } else if ( log_fd == 2 ) {    /* stderr */
-      disconnect( proc, SIGNAL( readyReadStderr() ),
-                  this, SLOT( parseOutput() ) );
-    } else {
-      vk_assert_never_reached();
-    }
+    disconnect( proc, SIGNAL( readyReadStdout() ),
+                this, SLOT( parseOutput() ) );
+    disconnect( proc, SIGNAL( readyReadStderr() ),
+                this, SLOT( parseOutput() ) );
     delete proc;
     proc = 0;
   }
@@ -752,6 +760,8 @@ void Memcheck::setupParser( bool init )
              this->view(), SLOT(updateErrors(ErrCounts*)) );
     connect( xmlParser,    SIGNAL(updateStatus()),
              this->view(), SLOT(updateStatus()) );
+    connect( xmlParser,    SIGNAL(loadClientOutput(const QString&)),
+	     this,         SLOT(loadClientOutput(const QString&)) );
 
     source.setData( "" );
     reader.parse( &source, true );
@@ -762,6 +772,8 @@ void Memcheck::setupParser( bool init )
                 this->view(), SLOT(updateErrors(ErrCounts*)) );
     disconnect( xmlParser,    SIGNAL(updateStatus()),
                 this->view(), SLOT(updateStatus()) );
+    disconnect( xmlParser,    SIGNAL(loadClientOutput(const QString&)),
+		this,         SLOT(loadClientOutput(const QString&)) );
   }
 
 }
@@ -781,3 +793,24 @@ bool Memcheck::setupFileStream( bool init )
   
   return ok;
 }
+
+
+
+void Memcheck::loadClientOutput( const QString& client_output, int log_fd/*=-1*/ )
+{
+  if (log_fd == -1)
+    log_fd = vkConfig->rdInt( "log-fd", "valgrind" );
+
+  //  printf("client output (log_fd=%d): '%s'\n", log_fd, data.latin1() );
+
+  if ( usingGui ) {
+    this->view()->loadClientOutput(client_output, log_fd);
+  } else {
+    if (log_fd == 1) {
+      fprintf( stdout, "%s\n", client_output.latin1() );
+    } else {// if (log_fd == 2) {
+      fprintf( stderr, "%s\n", client_output.latin1() );
+    }
+  }
+}
+

@@ -40,6 +40,8 @@ General:
 - make xml docs for valkyrie
 - put some stuff in class option to say that certain option fields cannot 
   be empty if the option is a popt option.
+- if valgrind not found, simply disable run button, rather than not just build at all.
+
 
 main_window.cpp:
  - FIXME: this should use VkObject::ObjectId
@@ -66,11 +68,17 @@ vkObjects
 
 Memcheck:
 --------
- - stdout, stderr tabs for all non-parsed output.
  - stop()
    - move delay-time-before-killing to config
    - what to do if we can't stop sthng running?
    - implement stop for parse/merge log files
+ - parseOutput(): 
+   - proc->readLineXXX() doesn't respect client output formatting
+
+XMLParser:
+---------
+ - client program output:
+   - content has lost it's spaces/formatting.
 
 
 Known Bugs:

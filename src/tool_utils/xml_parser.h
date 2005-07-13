@@ -243,6 +243,7 @@ signals:
   void loadItem( XmlOutput * );
   void updateErrors( ErrCounts* );
   void updateStatus();
+  void loadClientOutput( const QString& );
 
 private:
   /* if the output is being displayed in a listview, then don't bother

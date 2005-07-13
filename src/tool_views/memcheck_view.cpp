@@ -28,6 +28,7 @@
 #include <qtooltip.h>
 #include <qpopupmenu.h>
 #include <qlayout.h>
+#include <qtabwidget.h>
 
 
 void MemcheckView::showSuppEditor()
@@ -47,18 +48,23 @@ MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
   QVBoxLayout* vLayout = new QVBoxLayout( central, 0, -1, "vLayout" );
   vLayout->setResizeMode( QLayout::FreeResize );
 
-  /* create the listview */
-  lView = new QListView( central, "lview" );
-  vLayout->addWidget( lView );
+  /* create a tabwidget */
+  QTabWidget* tabwidget = new QTabWidget(central, "mc_tabwidget");
+  vLayout->addWidget( tabwidget );
+
+  /* first tab: the listview */
+  lView = new QListView( tabwidget, "lview" );
+  //  vLayout->addWidget( lView );
+  tabwidget->addTab( lView, "MemCheck" );
   lView->setShowToolTips( false );
   lView->setSorting( -1 );
   lView->setMargin( 5 );
   lView->addColumn( "" );
   lView->header()->setStretchEnabled( true, 0 );
   lView->header()->hide();
-  QFont fnt( "Adobe Courier", 12, QFont::Normal, false );
-  fnt.setStyleHint( QFont::TypeWriter );
-  lView->setFont( fnt );
+  QFont lview_fnt( "Adobe Courier", 12, QFont::Normal, false );
+  lview_fnt.setStyleHint( QFont::TypeWriter );
+  lView->setFont( lview_fnt );
 
   savelogButton->setEnabled( false );
   openOneButton->setEnabled( false );
@@ -71,12 +77,40 @@ MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
   /* launch editor with src file loaded */
   connect( lView, SIGNAL(doubleClicked(QListViewItem*, const QPoint&, int)),
            this,  SLOT(launchEditor(QListViewItem*, const QPoint&, int)) );
+
+
+  QFont clientout_fnt( "Adobe Courier", 10, QFont::Normal, false );
+  clientout_fnt.setStyleHint( QFont::TypeWriter );
+
+  /* second tab: stdout */
+  stdout_tedit = new QTextEdit(tabwidget, "stdout_tedit");
+  tabwidget->addTab( stdout_tedit, "StdOut" );
+  stdout_tedit->setMargin( 5 );
+  stdout_tedit->setFont( clientout_fnt );
+  //setTextFormat(plain|rich|LogText(=lotsoftext)|auto)
+  stdout_tedit->setReadOnly( true );
+  stdout_tedit->setText( "stdout... not yet implemented" );
+
+
+  /* third tab: stderr */
+  stderr_tedit = new QTextEdit(tabwidget, "stderr_tedit");
+  tabwidget->addTab( stderr_tedit, "StdErr" );
+  stderr_tedit->setMargin( 5 );
+  stderr_tedit->setFont( clientout_fnt );
+  //setTextFormat(plain|rich|LogText(=lotsoftext)|auto)
+  stderr_tedit->setReadOnly( true );
+  stderr_tedit->setText( "stderr... not yet implemented" );
+
 }
 
 
 /* clear and reset the listview for a new run */
 void MemcheckView::clear()
-{ lView->clear(); }
+{
+  lView->clear();
+  stdout_tedit->clear();
+  stderr_tedit->clear();
+}
 
 
 /* called by memcheck: set state for buttons; set cursor state */
@@ -512,6 +546,16 @@ void MemcheckView::updateErrors( ErrCounts * ecounts )
       }
     }
     myChild = myChild->nextSibling();
+  }
+}
+
+
+void MemcheckView::loadClientOutput( const QString& client_output, int log_fd )
+{
+  if (log_fd == 1) {
+    stdout_tedit->append( client_output );  
+  } else if (log_fd == 2) {
+    stderr_tedit->append( client_output );  
   }
 }
 
