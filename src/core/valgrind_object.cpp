@@ -310,7 +310,6 @@ QStringList Valgrind::modifiedFlags()
 
       case LOG_PID:         /* log to file.pid           */
       case LOG_FILE:        /* log to file.name          */
-      case LOG_FD:          /* log to file descriptor    */
       case LOG_SOCKET:      /* log to socket ipaddr:port */
         break;
 
