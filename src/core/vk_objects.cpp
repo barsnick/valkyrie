@@ -174,11 +174,7 @@ vkPoptOption * VkObject::poptOpts()
       vkopts[idx].shortFlag  = opt->shortFlag.latin1();
       vkopts[idx].longFlag   = opt->longFlag.latin1();
       vkopts[idx].arg        = 0;
-      if ( opt->key == Valkyrie::HELP_OPT ) {
-        vkopts[idx].val      = opt->shortFlag.latin1();
-      } else {
-        vkopts[idx].val      = opt->key;
-      }
+      vkopts[idx].val        = opt->key;
       if ( opt->defaultValue.isEmpty() ) {
         vkopts[idx].helptxt  = opt->longHelp;
       } else {

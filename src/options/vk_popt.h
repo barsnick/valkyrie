@@ -53,9 +53,10 @@ extern "C" {
 vkPoptContext vkPoptGetContext( int argc, const char ** argv,
                                 const vkPoptOption * options );
 
-/* return value of next option found, 
-   -1 on last item, PERROR_* on error */
-int vkPoptGetNextOpt( vkPoptContext con, char *akey );
+/* get next option opt_ret
+   returns 1 on success, -1 on last item, PERROR_* on error */
+int vkPoptGetNextOpt( vkPoptContext con, char *arg_val,
+                      const vkPoptOption** opt/*OUT*/ );
 
 /* return current option's argument, 
    or NULL if no more options are available */

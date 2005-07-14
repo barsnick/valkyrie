@@ -110,13 +110,16 @@ int parseCmdArgs( int argc, char** argv )
                                            allOptions ); 
 
   /* process the options */ 
-  while ( (rc = vkPoptGetNextOpt( optCon, argVal ) ) >= 0 ) {
-    char vk_arg = (char)rc;
-    if ( vk_arg == 'h' || vk_arg == 'v' || vk_arg == 'V' ) {
+  const vkPoptOption* opt = NULL;
+  while ( (rc = vkPoptGetNextOpt( optCon, argVal, &opt ) ) == 1 ) {
+    vk_assert(opt);
+
+    char vk_arg = opt->shortFlag;
+    //    printf("vk_arg: '%c'\n", vk_arg);
+    if ( vk_arg == 'h' || vk_arg == 'v' || vk_arg == 'V' )
       return showHelp( optCon, vk_arg );
-    } else {
-      errVal = VkObject::checkArg( rc, argVal );
-    }
+    
+    errVal = VkObject::checkArg( opt->val, argVal );
 
     if ( errVal != PARSED_OK ) {
       return parseError( optCon, errVal );

@@ -136,8 +136,10 @@ static const char * vkExpandNextArg( const char * s )
 }
 
 
-/* returns 'val' element, -1 on last item, PERROR_* on error */
-int vkPoptGetNextOpt( vkPoptContext con, char *arg_val )
+/* get next option opt_ret
+   returns 1 on success, -1 on last item, PERROR_* on error */
+int vkPoptGetNextOpt( vkPoptContext con, char *arg_val,
+                      const vkPoptOption** opt_ret/*OUT*/ )
 {
   const vkPoptOption * opt = NULL;
   int done = 0;
@@ -331,7 +333,8 @@ int vkPoptGetNextOpt( vkPoptContext con, char *arg_val )
     }
   }  /* end while ( !done ) */
 
-  return ( opt ? opt->val : -1 );
+  *opt_ret = opt;
+  return ( opt ? 1 : -1 );
 }
 
 

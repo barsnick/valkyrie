@@ -22,7 +22,7 @@ typedef struct {
   const char* longFlag;    /* NULL || --help             */
   void* arg;               /* 0 for Options, 
                               'tablename' for tables eg. 'vkOptions' */
-  int val;                 /* 'h' || optid eg. VIEW-LOG  */
+  int val;                 /* optid eg. VIEW-LOG         */
   const char* helptxt;     /* help text                  */
   const char* helpdesc;    /* eg. <file>                 */
 } vkPoptOption;
