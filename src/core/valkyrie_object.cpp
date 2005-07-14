@@ -312,7 +312,11 @@ QString Valkyrie::currentFlags( ToolObject* tool_obj )
       /* get the /path/to/valgrind */
       flags << vkConfig->rdEntry( "vg-exec","valkyrie");
        /* set the tool we are using */
+#if 1
       flags << "--tool=" + tool_obj->name();
+#else
+      flags << "--tool=none";
+#endif
       /* check if any valgrind core opts have been modified.
          'modified' means 'set to anything other than default' */
       flags += valgrind->modifiedFlags();
