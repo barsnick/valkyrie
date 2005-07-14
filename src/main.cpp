@@ -78,7 +78,8 @@ int main ( int argc, char* argv[] )
 
   if ( !usingGui ) {
     /* strut your stuff, girl */
-    valkyrie->runTool();
+    if (!valkyrie->runTool())
+      goto cleanup_and_exit;
   } else {
 
     /* style ----------------------------------------------------------- */
