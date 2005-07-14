@@ -660,33 +660,32 @@ VkConfig::RetVal VkConfig::checkAccess() const
 }
 
 
-/* objects MUST be inserted into this list in the exact order in which
-   their id appears in VkObject::ObjectId (/src/options/vk_objects.h):
-   VALKYRIE=0, VALGRIND=1, MEMCHECK=2, CACHEGRIND=3, MASSIF=4 
-   so that we can index into the list with ObjectId */
-bool VkConfig::initVkObjects() 
-{ 
-  vkObjectList.append( new Valkyrie() );
-  vkObjectList.append( new Valgrind() );
-  vkObjectList.append( new Memcheck() );
-  vkObjectList.append( new Cachegrind() );
-  vkObjectList.append( new Massif() );
-
-  return true; 
+/* Create an object based on it's ObjectId
+   Called by initVkObjects() */
+VkObject* VkConfig::createVkObject( VkObject::ObjectId id )
+{
+  switch (id) {
+  case VkObject::VALKYRIE:   return new Valkyrie();
+  case VkObject::VALGRIND:   return new Valgrind();
+  case VkObject::MEMCHECK:   return new Memcheck();
+  case VkObject::CACHEGRIND: return new Cachegrind();
+  case VkObject::MASSIF:     return new Massif();
+  case VkObject::INVALID:
+  case VkObject::N_OBJECTS:
+  default: break;
+  }
+  vk_assert_never_reached();
+  return NULL;
 }
 
-VkObjectList VkConfig::vkObjList()
-{ return vkObjectList; }
-
-ToolList VkConfig::vkToolList()
-{
-  ToolList toolList;
-
-  for ( VkObject* obj=vkObjectList.first(); obj; obj=vkObjectList.next() ) {
-    if ( obj->isTool() )
-      toolList.append( (ToolObject*)obj );
+/* Initialise pointer list of objects.
+   Objects are appended in the order of their ObjectId value,
+   so we can easily index into the list using that id */
+void VkConfig::initVkObjects() 
+{ 
+  for (int objId=0; objId<VkObject::N_OBJECTS; objId++) {
+    vkObjectList.append( createVkObject( (VkObject::ObjectId)objId ) );
   }
-  return toolList;
 }
 
 /* Returns a ptr to be tool currently set in [valgrind:tool] */
@@ -694,10 +693,9 @@ ToolObject* VkConfig::tool()
 {
   QString name = rdEntry("tool", "valgrind");
   for ( VkObject* obj=vkObjectList.first(); obj; obj=vkObjectList.next() ) {
-    if ( obj->name() == name )
+    if ( obj->isTool() && obj->name() == name )
       return (ToolObject*)obj;
   }
-
   vk_assert_never_reached();
   return NULL;
 }
@@ -710,7 +708,6 @@ QString VkConfig::toolName()
 VkObject::ObjectId VkConfig::toolId()
 {
   QString tool_name = rdEntry( "tool", "valgrind" );
-
   for ( VkObject* obj=vkObjectList.first(); obj; obj=vkObjectList.next() ) {
     if ( obj->isTool() && obj->name() == tool_name )
       return obj->id();
@@ -719,16 +716,16 @@ VkObject::ObjectId VkConfig::toolId()
   return VkObject::INVALID;
 }
 
-/* returns an object based on its ObjectId */
-VkObject* VkConfig::vkObject( int tvid, bool tools_only/*=false*/ )
+/* returns the list of ToolObjects
+   Note: toolList order doesn't match VkObject::ObjectId */
+ToolList VkConfig::toolList()
 {
-  VkObject* obj = vkObjectList.at( tvid );
-  vk_assert( obj != 0 && obj->id() == tvid );
-  if ( tools_only ) {
-    vk_assert( obj->isTool() );
+  ToolList tools;
+  for ( VkObject* obj=vkObjectList.first(); obj; obj=vkObjectList.next() ) {
+    if ( obj->isTool() )
+      tools.append( (ToolObject*)obj );
   }
-
-  return obj;
+  return tools;
 }
 
 /* returns a ToolObject, based on its ObjectId */
@@ -737,6 +734,18 @@ ToolObject* VkConfig::vkToolObj( int tvid )
   VkObject* obj = vkObjectList.at( tvid );
   vk_assert( obj != 0 && obj->id() == tvid && obj->isTool() );
   return (ToolObject*)obj;
+}
+
+/* returns list of all objects */
+VkObjectList VkConfig::vkObjList()
+{ return vkObjectList; }
+
+/* returns an object based on its ObjectId */
+VkObject* VkConfig::vkObject( int tvid )
+{
+  VkObject* obj = vkObjectList.at( tvid );
+  vk_assert( obj != 0 && obj->id() == tvid );
+  return obj;
 }
 
 /* returns a vkObject based on its name */

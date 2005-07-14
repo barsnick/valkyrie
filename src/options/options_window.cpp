@@ -192,7 +192,7 @@ void OptionsWindow::categoryClicked( QListBoxItem *item )
 
 OptionsPage * OptionsWindow::mkOptionsPage( int catid )
 {
-  VkObject* obj = vkConfig->vkObject( catid, false );
+  VkObject* obj = vkConfig->vkObject( catid );
   OptionsPage* page = 0;
 
   switch ( obj->id() ) {

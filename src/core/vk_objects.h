@@ -29,17 +29,13 @@
 class VkObject;
 typedef QPtrList<VkObject> VkObjectList;
 
-/* IMPORTANT: when adding new objects, keep in numerical sequence. If
-   you change the ordering of the enum values, you must change the
-   insertion order in VkConfig::initVkObjects() as well. */
-
 /* class VkObject ------------------------------------------------------ */
 class VkObject : public QObject 
 {
  Q_OBJECT
 public:
   enum ObjectId { 
-    INVALID=-1, VALKYRIE=0, VALGRIND=1, MEMCHECK=2, CACHEGRIND=3, MASSIF=4 
+    INVALID=-1, VALKYRIE=0, VALGRIND=1, MEMCHECK=2, CACHEGRIND=3, MASSIF=4, N_OBJECTS
   };
 
   VkObject( ObjectId id, const QString& capt, const QString& txt,

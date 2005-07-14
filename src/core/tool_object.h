@@ -18,6 +18,7 @@
 #define __TOOL_OBJECT_H
 
 #include <qprocess.h>
+#include <qptrlist.h>
 
 #include "vk_objects.h"
 #include "valkyrie_object.h"

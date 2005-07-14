@@ -7,12 +7,11 @@
  * - add a new enum value to enum VkObject::ObjectId{ ... }.
  * - create the subclass in its own files in the src/core/ directory.
  *   see the Example below w.r.t. addOpt(...)
- * - add new stuff to the various VkObject fns where necessary.
- * - in VkConfig::initVkObjects() [vk_config.cpp], 
- *   add the new tool to the list of objects to be created at startup
- * - in [/core/valkyrie_object.cpp], add the new tool where necessary.
+ * - in VkConfig::createVkObjects() [vk_config.cpp], 
+ *   add case objId: ctor to the switch stmt, so it can be created at startup
  * - create a new options page for the Options dialog, and add this
  *   into OptionsWindow::mkOptionsPage(int) in /options/options_window.cpp
+ * - create the ToolView subclass in its own files, in the src/tool_view dir
  * That's all, folks.
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind

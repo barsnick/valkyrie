@@ -100,17 +100,19 @@ public:
   /* Returns the tool id of [valgrind:tool] */
   VkObject::ObjectId toolId();
 
+  /* Returns a list of all ToolObjects
+     Note: toolList order doesn't match VkObject::ObjectId */
+  ToolList toolList();
+  /* returns a vkObject tool, based on its ObjectId */
+  ToolObject* vkToolObj( int tvid );
+
   /* Returns a list of all VkObjects, irrespective of whether they are
      tools or otherwise */
   VkObjectList vkObjList();
-  /* Returns a list of all ToolObjects */
-  ToolList vkToolList();
   /* returns a vkObject based on its name */
   VkObject* vkObject( const QString& obj_name );
   /* returns a vkObject based on its ObjectId */
-  VkObject* vkObject( int tvid, bool tools_only=false );
-  /* returns a vkObject tool, based on its ObjectId */
-  ToolObject* vkToolObj( int tvid );
+  VkObject* vkObject( int tvid );
 
   /* read fns ---------------------------------------------------------- */
   QString rdEntry( const QString &pKey, const QString &pGroup );
@@ -150,7 +152,9 @@ private:
 
   /* creates the various VkObjects and initialises their options,
      ready for cmd-line parsing (if any). */
-  bool initVkObjects();
+  void initVkObjects();
+  /* Called by initVkObjects to create an object based on it's ObjectId */
+  VkObject* createVkObject( VkObject::ObjectId id );
 
 private:
   QChar sep;

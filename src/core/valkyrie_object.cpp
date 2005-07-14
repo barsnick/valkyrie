@@ -200,7 +200,7 @@ void Valkyrie::init()
 
   valgrind   = (Valgrind*)vkConfig->vkObject( "valgrind" );
 
-  ToolList toolList = vkConfig->vkToolList();
+  ToolList toolList = vkConfig->toolList();
 
   for ( ToolObject* tool=toolList.first(); tool; tool=toolList.next() ) {
     if ( !usingGui ) {
