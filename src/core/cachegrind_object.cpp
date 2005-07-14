@@ -228,7 +228,7 @@ bool Cachegrind::isDone()
 }
 
 
-bool Cachegrind::stop( Valkyrie::RunMode rm )
+bool Cachegrind::stop( Valkyrie::RunMode )
 {
   VK_DEBUG("TODO: %s::stop()", name().latin1() );
   return true;

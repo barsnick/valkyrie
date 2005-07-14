@@ -163,7 +163,7 @@ bool Massif::isDone()
 }
 
 
-bool Massif::stop( Valkyrie::RunMode rm )
+bool Massif::stop( Valkyrie::RunMode )
 {
   VK_DEBUG("TODO: %s::stop()", name().latin1() );
   return true;
