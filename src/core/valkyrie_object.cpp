@@ -260,6 +260,9 @@ QStringList Valkyrie::modifiedFlags()
       if ( cfgVal != opt->defaultValue )
         modFlags << "--" + opt->longFlag + "=" + cfgVal;
       break;
+
+  default:
+    vk_assert_never_reached();
   }
 
   return modFlags;
@@ -304,6 +307,9 @@ QString Valkyrie::currentFlags( ToolObject* tool_obj )
     case modeMergeLogs:
       flags += modifiedFlags();
       break;
+
+  default:
+    vk_assert_never_reached();
   }
 
 	/* ## hack alert: unfortunately, we have to pass each arg to
@@ -366,8 +372,13 @@ bool Valkyrie::runTool( ToolObject* activeTool/*=0*/ )
     break;
 
   /* let tool decide what to do for other runModes */
-  default:
+  case modeParseLog:
+  case modeMergeLogs:
     success = activeTool->start( runMode );
+    break;
+
+  default:
+    vk_assert_never_reached();
   }
 
 

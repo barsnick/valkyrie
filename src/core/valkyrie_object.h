@@ -18,9 +18,6 @@
 #include "vk_objects.h"
 
 class Valgrind;
-class Memcheck;
-class Cachegrind;
-class Massif;
 class ToolObject;
 
 /* class Valkyrie ------------------------------------------------------
@@ -70,9 +67,6 @@ private:
   QStringList flags;
 
   Valgrind* valgrind;
-  Memcheck* memcheck;
-  Cachegrind* cachegrind;
-  Massif* massif;
 };
 
 
