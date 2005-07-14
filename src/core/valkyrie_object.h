@@ -23,8 +23,6 @@ class Cachegrind;
 class Massif;
 class ToolObject;
 
-typedef QPtrList<ToolObject> ToolList;
-
 /* class Valkyrie ------------------------------------------------------
    Note: the very first option must be > 0, otherwise it conflicts
    with arg_flags in popt. */
@@ -38,9 +36,6 @@ public:
   void init();        /* set usingGui + get ptrs to all tools */
   bool runTool( ToolObject* activeTool=0 );
   void stopTool( ToolObject* activeTool=0 );
-
-  /* used in gui mode. returns a list containing only tool objects. */
-  ToolList toolList();
 
   /* modeNotSet:      no cmd-line options given
    * modeParseLog:    read <logfile> from disk
@@ -78,8 +73,6 @@ private:
   Memcheck* memcheck;
   Cachegrind* cachegrind;
   Massif* massif;
-
-  ToolList toolObjectList;
 };
 
 

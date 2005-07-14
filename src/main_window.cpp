@@ -315,7 +315,7 @@ void MainWindow::moveEvent( QMoveEvent* )
    auto-deleted when MainWin closes */
 void MainWindow::closeEvent( QCloseEvent *ce )
 {
-  ToolList tools = valkyrie->toolList();
+  ToolList tools = vkConfig->vkToolList();
   for ( ToolObject* tool = tools.first(); tool; tool = tools.next() ) {
     if ( tool->view() != 0 && !tool->isDone() ) {
       ce->ignore();
@@ -408,7 +408,7 @@ void MainWindow::mkMenuBar()
   index++;
   QPixmap bulletSet(black_bullet_xpm);
   toolsMenu = new QPopupMenu( this, "tools_menu" );
-  ToolList tools = valkyrie->toolList();
+  ToolList tools = vkConfig->vkToolList();
   for ( ToolObject* tool = tools.first(); tool; tool = tools.next() ) {
     toolsMenu->insertItem( bulletSet, tool->accelTitle(), 
                            this, SLOT( showToolView(int) ),
@@ -561,7 +561,7 @@ void MainWindow::mkStatusBar()
 
   /* set the buttons to all be the same width */
   int butt_width = fontMetrics().width( "XMemcheckX" );
-  ToolList tools = valkyrie->toolList();
+  ToolList tools = vkConfig->vkToolList();
   ToolObject* tool;
   for ( tool = tools.first(); tool; tool = tools.next() ) {
     int len = tool->accelTitle().length();

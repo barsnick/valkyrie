@@ -34,6 +34,7 @@ public:
   /* called by MainWin::closeToolView() */
   bool isDone();
 
+  bool start( Valkyrie::RunMode rm );
   bool stop( Valkyrie::RunMode rm );
 
   int checkOptArg( int optid, const char* argval, bool use_gui=false );

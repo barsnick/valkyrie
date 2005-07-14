@@ -10,9 +10,7 @@
 
 #include "valkyrie_object.h"
 #include "valgrind_object.h"
-#include "memcheck_object.h"
-#include "cachegrind_object.h"
-#include "massif_object.h"
+#include "tool_object.h"
 
 #include "vk_config.h"
 #include "vk_messages.h"
@@ -29,12 +27,7 @@
    The key value of NOT_POPT is used:
    - to exclude the option from popt options.  
 */
-Valkyrie:: ~Valkyrie()
-{ 
-  if ( usingGui ) {
-    toolObjectList.clear(); 
-  }
-}
+Valkyrie:: ~Valkyrie() { }
 
 
 Valkyrie::Valkyrie()
@@ -43,10 +36,7 @@ Valkyrie::Valkyrie()
   /* init vars */
   runMode = modeNotSet;
 
-  memcheck   = 0;
   valgrind   = 0;
-  cachegrind = 0;
-  massif     = 0;
 
 
   addOpt( HELP_OPT,    Option::ARG_NONE,   Option::NONE,
@@ -209,33 +199,16 @@ void Valkyrie::init()
   usingGui = vkConfig->rdBool( "gui","valkyrie" );
 
   valgrind   = (Valgrind*)vkConfig->vkObject( "valgrind" );
-  memcheck   = (Memcheck*)vkConfig->vkObject( "memcheck" );
-  cachegrind = (Cachegrind*)vkConfig->vkObject( "cachegrind" );
-  massif     = (Massif*)vkConfig->vkObject( "massif" );
 
-  if ( usingGui ) {
-    toolObjectList.append( memcheck );
-    toolObjectList.append( cachegrind );
-    toolObjectList.append( massif );
+  ToolList toolList = vkConfig->vkToolList();
+
+  for ( ToolObject* tool=toolList.first(); tool; tool=toolList.next() ) {
+    if ( !usingGui ) {
+      connect( tool, SIGNAL( finished() ), this, SLOT( quit() ) );
+    }
+    connect( tool, SIGNAL( fatal() ), this, SLOT( quit() ) );
   }
-
-  if ( !usingGui ) {
-    connect( memcheck,   SIGNAL( finished() ),
-             this,       SLOT( quit() ) );
-    connect( cachegrind, SIGNAL( finished() ),
-             this,       SLOT( quit() ) );
-    connect( massif,     SIGNAL( finished() ),
-             this,       SLOT( quit() ) );
-  }
-
 }
-
-
-/* only used in gui mode; called by MainWindow::mkStatusBar() and
-   MainWindow::mkMenuBar(). returns a list containing only tool
-   objects. */
-ToolList Valkyrie::toolList()
-{ return toolObjectList; }
 
 
 /* slot: called by a tools when it has finished() its task */
@@ -380,32 +353,21 @@ bool Valkyrie::runTool( ToolObject* activeTool/*=0*/ )
   /* find out what we are supposed to be doing */
   switch ( runMode ) {
 
-    case modeNotSet:       /* no flags given on cmd-line */
-      if ( !usingGui ) {
-        vkInfo( 0, "Error", "</p>You haven't told me what to do.</p>" );
-        quit();
-      } break;
+  case modeNotSet:       /* no flags given on cmd-line */
+    if ( !usingGui ) {
+      vkInfo( 0, "Error", "</p>You haven't told me what to do.</p>" );
+      quit();
+    } break;
+    
+  /* run valgrind --tool=tool_name, with all flags */
+  case modeParseOutput:
+    currentFlags( activeTool ); /* ensure flags up-to-date */
+    success = activeTool->run( flags );
+    break;
 
-    /* run valgrind --tool=tool_name, with all flags */
-    case modeParseOutput:
-      /* ensure we are up-to-date w.r.t. flags */
-      currentFlags( activeTool );
-      success = activeTool->run( flags );
-      break;
-
-    case modeParseLog:     /* memcheck */
-      if ( usingGui ) {
-        success = memcheck->parseLogFile();
-      } else {
-        vkFatal( 0, "Error",
-                 "--view-log doesn't make any sense in non-gui mode.\n"
-                 "       ** Quitting **" );
-        quit();
-      } break;
-
-    case modeMergeLogs:     /* memcheck */
-      success = memcheck->mergeLogFiles();
-      break;
+  /* let tool decide what to do for other runModes */
+  default:
+    success = activeTool->start( runMode );
   }
 
 

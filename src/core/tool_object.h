@@ -22,6 +22,9 @@
 #include "vk_objects.h"
 #include "valkyrie_object.h"
 
+class ToolObject;
+typedef QPtrList<ToolObject> ToolList;
+
 /* class ToolObject ---------------------------------------------------- */
 class ToolView;
 
@@ -42,6 +45,7 @@ public:
 
   ToolView* view() { return m_view; }
 
+  virtual bool start( Valkyrie::RunMode rm ) = 0;
   virtual bool stop( Valkyrie::RunMode rm ) = 0;
   virtual bool run( QStringList flags ) = 0;
 
@@ -53,6 +57,7 @@ signals:
   void message( QString );
   /* connected to valkyrie's quit() slot when in non-gui mode */
   void finished();
+  void fatal();
 
 protected:
   void killProc();

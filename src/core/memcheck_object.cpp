@@ -194,6 +194,33 @@ bool Memcheck::isDone()
   return true;
 }
 
+bool Memcheck::start( Valkyrie::RunMode rm )
+{
+  vk_assert(!is_Running);
+  bool ok = false;
+  
+  switch ( rm ) {
+    case Valkyrie::modeParseLog:
+      if ( !usingGui ) {
+        vkFatal( 0, "Error",
+                 "--view-log doesn't make any sense in non-gui mode.\n"
+                 "       ** Quitting **" );
+        emit fatal();  /* tell valkyrie to die */
+	break;
+      }
+      ok = this->parseLogFile();
+      break;
+
+    case Valkyrie::modeMergeLogs:
+      ok = this->mergeLogFiles();
+      break;
+
+  default:
+    vk_assert_never_reached();
+  }
+  return ok;
+}
+
 bool Memcheck::stop( Valkyrie::RunMode rm )
 {
   if (!is_Running) return true;
@@ -214,7 +241,7 @@ bool Memcheck::stop( Valkyrie::RunMode rm )
     break;
 
   default:
-    break;
+    vk_assert_never_reached();
   }
 
   // TODO: statusMsg() ?

@@ -228,8 +228,31 @@ bool Cachegrind::isDone()
 }
 
 
-bool Cachegrind::stop( Valkyrie::RunMode )
+bool Cachegrind::start( Valkyrie::RunMode rm )
 {
-  VK_DEBUG("TODO: %s::stop()", name().latin1() );
+  vk_assert(!is_Running);
+  bool ok = false;
+  
+  switch ( rm ) {
+
+  default:
+    vk_assert_never_reached();
+  }
+  return ok;
+}
+
+
+bool Cachegrind::stop( Valkyrie::RunMode rm )
+{
+  if (!is_Running) return true;
+
+  switch (rm) {
+
+  default:
+    vk_assert_never_reached();
+  }
+
+  // TODO: statusMsg() ?
+
   return true;
 }

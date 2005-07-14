@@ -19,6 +19,7 @@
 #include <qstring.h>
 
 #include "vk_objects.h"
+#include "tool_object.h"
 
 
 struct EntryData
@@ -64,10 +65,6 @@ typedef QMap<EntryKey, EntryData>::Iterator EntryMapIterator;
 
 
 
-class ToolObject;
-
-typedef QPtrList<VkObject> VkObjectList;
-
 class VkConfig : public QObject
 {
 public:
@@ -106,6 +103,8 @@ public:
   /* Returns a list of all VkObjects, irrespective of whether they are
      tools or otherwise */
   VkObjectList vkObjList();
+  /* Returns a list of all ToolObjects */
+  ToolList vkToolList();
   /* returns a vkObject based on its name */
   VkObject* vkObject( const QString& obj_name );
   /* returns a vkObject based on its ObjectId */

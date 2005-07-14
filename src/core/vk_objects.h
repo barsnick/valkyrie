@@ -26,6 +26,8 @@
 #include "vk_popt_option.h"
 #include "vk_utils.h"
 
+class VkObject;
+typedef QPtrList<VkObject> VkObjectList;
 
 /* IMPORTANT: when adding new objects, keep in numerical sequence. If
    you change the ordering of the enum values, you must change the

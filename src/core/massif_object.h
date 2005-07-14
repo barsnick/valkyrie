@@ -28,6 +28,7 @@ public:
   /* called by MainWin::closeToolView() */
   bool isDone();
 
+  bool start( Valkyrie::RunMode rm );
   bool stop( Valkyrie::RunMode rm );
   bool run( QStringList /*flags*/ ) { return true; }
 

@@ -678,6 +678,17 @@ bool VkConfig::initVkObjects()
 VkObjectList VkConfig::vkObjList()
 { return vkObjectList; }
 
+ToolList VkConfig::vkToolList()
+{
+  ToolList toolList;
+
+  for ( VkObject* obj=vkObjectList.first(); obj; obj=vkObjectList.next() ) {
+    if ( obj->isTool() )
+      toolList.append( (ToolObject*)obj );
+  }
+  return toolList;
+}
+
 /* Returns a ptr to be tool currently set in [valgrind:tool] */
 ToolObject* VkConfig::tool()
 {

@@ -163,8 +163,31 @@ bool Massif::isDone()
 }
 
 
-bool Massif::stop( Valkyrie::RunMode )
+bool Massif::start( Valkyrie::RunMode rm )
 {
-  VK_DEBUG("TODO: %s::stop()", name().latin1() );
+  vk_assert(!is_Running);
+  bool ok = false;
+  
+  switch ( rm ) {
+
+  default:
+    vk_assert_never_reached();
+  }
+  return ok;
+}
+
+
+bool Massif::stop( Valkyrie::RunMode rm )
+{
+  if (!is_Running) return true;
+
+  switch (rm) {
+
+  default:
+    vk_assert_never_reached();
+  }
+
+  // TODO: statusMsg() ?
+
   return true;
 }
