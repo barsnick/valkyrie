@@ -301,7 +301,7 @@ int vkPoptGetNextOpt( vkPoptContext con, char *arg_val,
       }
     }     /* end if ! ARG_NONE */
 
-    if ( opt->val ) {
+    if ( opt->optKey >= 0 ) {
       done = 1;
     }
 

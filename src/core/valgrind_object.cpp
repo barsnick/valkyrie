@@ -196,7 +196,7 @@ Valgrind::Valgrind()
 int Valgrind::checkOptArg( int optid, const char* argval, 
                            bool use_gui/*=false*/ )
 {
-  vk_assert( optid >= FIRST_CMD_OPT && optid <= LAST_CMD_OPT );
+  vk_assert( optid >= 0 && optid <= LAST_CMD_OPT );
 
   int errval = PARSED_OK;
   QString argVal( argval );

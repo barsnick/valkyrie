@@ -17,14 +17,15 @@
 
 
 typedef struct {
+  int  optKey;             /* eg. VIEW-LOG               */
   int  argType;            /* option type: ARG_***       */
   char shortFlag;          /* '\0' || 'h'                */
   const char* longFlag;    /* NULL || --help             */
   void* arg;               /* 0 for Options, 
                               'tablename' for tables eg. 'vkOptions' */
-  int val;                 /* optid eg. VIEW-LOG         */
   const char* helptxt;     /* help text                  */
   const char* helpdesc;    /* eg. <file>                 */
+  int objectId;            /* eg. MEMCHECK               */
 } vkPoptOption;
 
 

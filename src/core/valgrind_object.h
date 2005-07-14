@@ -26,37 +26,20 @@ public:
   int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
   enum vgOpts {
-    FIRST_CMD_OPT = 16,
-    TOOL          = FIRST_CMD_OPT,
+    TOOL,
     /* common options relevant to all tools */
-    VERBOSITY     = 17,
-    XML_OUTPUT    = 18,   /* this may apply to more tools later */
-    TRACE_CH      = 19,
-    TRACK_FDS     = 20,
-    TIME_STAMP    = 21,
+    VERBOSITY,
+    XML_OUTPUT,   /* this may apply to more tools later */
+    TRACE_CH,   TRACK_FDS,  TIME_STAMP,
     /* uncommon options relevant to all tools */
-    RUN_LIBC      = 22,
-    WEIRD         = 23,
-    PTR_CHECK     = 24,
-    ELAN_HACKS    = 25,
-    EM_WARNS      = 26,
+    RUN_LIBC,  WEIRD, PTR_CHECK, ELAN_HACKS, EM_WARNS,
     /* options relevant to error-reporting tools */
-    LOG_FD        = 27,
-    LOG_PID       = 28,
-    LOG_FILE      = 29,
-    LOG_SOCKET    = 30,
-    DEMANGLE      = 31,
-    NUM_CALLERS   = 32,
-    ERROR_LIMIT   = 33,
-    SHOW_BELOW    = 34,
-    SUPPS_SEL     = 35,  /* the currently selected suppression(s) */
-    SUPPS_ALL     = 36,  /* list of all supp. files ever found, inc. paths */
-    SUPPS_DEF     = 37,  /* as above, but never gets changed -> defaults */
-    GEN_SUPP      = 38,
-    DB_ATTACH     = 39,
-    DB_COMMAND    = 40,
-    INPUT_FD      = 41,
-    MAX_SFRAME    = 42,
+    LOG_FD,   LOG_PID,     LOG_FILE,    LOG_SOCKET,
+    DEMANGLE, NUM_CALLERS, ERROR_LIMIT, SHOW_BELOW,
+    SUPPS_SEL,  /* the currently selected suppression(s) */
+    SUPPS_ALL,  /* list of all supp. files ever found, inc. paths */
+    SUPPS_DEF,  /* as above, but never gets changed -> defaults */
+    GEN_SUPP, DB_ATTACH, DB_COMMAND, INPUT_FD, MAX_SFRAME,
     LAST_CMD_OPT = MAX_SFRAME
   };
 

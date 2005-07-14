@@ -27,11 +27,8 @@
 #include "vk_messages.h"       // vkInfo() and friends
 #include "html_urls.h"
 
-#include "valkyrie_object.h"   // for configEntries() && checkArg()
-#include "valgrind_object.h"   // modFlags(), checkArg()
-#include "memcheck_object.h"   // only for checkArg()
-#include "cachegrind_object.h"
-#include "massif_object.h"
+#include "valkyrie_object.h"   // for configEntries()
+#include "valgrind_object.h"   // modFlags()
 
 #include <qdir.h>
 #include <qfileinfo.h>
@@ -168,31 +165,31 @@ vkPoptOption * VkObject::poptOpts()
     vk_assert( opt != NULL );
     vk_assert( vkopts != NULL );
 
-    /* not a popt option */
+    /* only add me if i'm a popt option */
     if ( opt->argType != Option::NOT_POPT ) {
+      vkopts[idx].optKey     = opt->key;
       vkopts[idx].argType    = opt->argType;
       vkopts[idx].shortFlag  = opt->shortFlag.latin1();
       vkopts[idx].longFlag   = opt->longFlag.latin1();
       vkopts[idx].arg        = 0;
-      vkopts[idx].val        = opt->key;
-      if ( opt->defaultValue.isEmpty() ) {
-        vkopts[idx].helptxt  = opt->longHelp;
-      } else {
-        tmp = opt->longHelp + " [" + opt->defaultValue + "]";
-        vkopts[idx].helptxt  = vk_strdup( tmp.latin1() );
-      }
+      tmp = opt->longHelp;
+      if ( !opt->defaultValue.isEmpty() )
+        tmp += " [" + opt->defaultValue + "]";
+      vkopts[idx].helptxt  = vk_strdup( tmp.latin1() );
       vkopts[idx].helpdesc   = opt->flagDescrip.latin1();
+      vkopts[idx].objectId   = (int)this->objectId;
       idx++;
     }
   }
   /* we need a null entry to terminate the table */
+  vkopts[idx].optKey    = -1;
   vkopts[idx].argType   = 0;
   vkopts[idx].shortFlag = '\0';
   vkopts[idx].longFlag  = NULL;
   vkopts[idx].arg       = 0;
-  vkopts[idx].val       = 0;
   vkopts[idx].helptxt   = NULL;
   vkopts[idx].helpdesc  = NULL;
+  vkopts[idx].objectId  = VkObject::INVALID;
 
   return vkopts;
 }
@@ -225,26 +222,4 @@ void VkObject::freePoptOpts( vkPoptOption * vkopts )
 
   vk_free( vkopts );
   vkopts = NULL;
-}
-
-
-/* static fn, called from parseCmdArgs() in parse_cmd_args.cpp */
-int VkObject::checkArg(int optid, const char* argval, bool use_gui/*=false*/)
-{
-  VkObject * vkObj = NULL;
-  if ( optid >= Valkyrie::HELP_OPT && optid <= Valkyrie::LAST_CMD_OPT )
-    vkObj = vkConfig->vkObject( "valkyrie" );
-  else if ( optid >= Valgrind::FIRST_CMD_OPT && optid <= Valgrind::LAST_CMD_OPT )
-    vkObj = vkConfig->vkObject( "valgrind" );
-  else if ( optid >= Memcheck::FIRST_CMD_OPT && optid <= Memcheck::LAST_CMD_OPT )
-    vkObj = vkConfig->vkObject( "memcheck" );
-  else if ( optid >= Cachegrind::FIRST_CMD_OPT && optid <= Cachegrind::LAST_CMD_OPT )
-    vkObj = vkConfig->vkObject( "cachegrind" );
-  else if ( optid >= Massif::FIRST_CMD_OPT && optid <= Massif::LAST_CMD_OPT )
-    vkObj = vkConfig->vkObject( "massif" );
-  else
-    vk_assert_never_reached();
-
-  vk_assert( vkObj != NULL );
-  return vkObj->checkOptArg( optid, argval, use_gui );
 }

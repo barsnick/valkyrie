@@ -58,24 +58,12 @@ public:
   int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
   enum vkOpts {
-    FIRST_CMD_OPT = 11,
-    HELP_OPT      = 1,
-    TOOLTIP       = 2,
-    PALETTE       = 3,
-    ICONTXT       = 4,
-    FONT_SYSTEM   = 5,
-    FONT_USER     = 6,
-    SRC_EDITOR    = 7,
-    SRC_LINES     = 8,
-    /* path to valgrind executable (/usr/bin/valgrind) */
-    VG_EXEC       = 9,
-    /* path to supp. files dir [def = /usr/lib/valgrind/] */
-    VG_SUPPS_DIR  = 10,
-    BINARY        = FIRST_CMD_OPT,
-    BIN_FLAGS     = 12,
-    VIEW_LOG      = 13,
-    MERGE_LOGS    = 14,
-    USE_GUI       = 15,
+    HELP_OPT,    TOOLTIP,   PALETTE,    ICONTXT,
+    FONT_SYSTEM, FONT_USER, SRC_EDITOR, SRC_LINES,
+    VG_EXEC,      /* path to valgrind executable (/usr/bin/valgrind) */
+    VG_SUPPS_DIR, /* path to supp. files dir [def = /usr/lib/valgrind/] */
+    /* FIRST_CMD_OPT */
+    BINARY, BIN_FLAGS, VIEW_LOG, MERGE_LOGS, USE_GUI,
     LAST_CMD_OPT  = USE_GUI
   };
 

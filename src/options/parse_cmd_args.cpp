@@ -85,11 +85,11 @@ int parseCmdArgs( int argc, char** argv )
   for ( obj = objList.first(); obj; obj = objList.next() ) {
 
     name_str.sprintf( "%s options:", obj->title().latin1() ); 
+    allOptions[i].optKey    = -1;
     allOptions[i].argType   = ARG_INC_TABLE;
     allOptions[i].shortFlag = '\0';
     allOptions[i].longFlag  = NULL;
     allOptions[i].arg       = obj->poptOpts();
-    allOptions[i].val       = 0;
     allOptions[i].helptxt   = vk_strdup( name_str.latin1() );
     allOptions[i].helpdesc  = NULL;
 
@@ -97,11 +97,11 @@ int parseCmdArgs( int argc, char** argv )
   }
 
   /* null entry terminator */
+  allOptions[i].optKey    = -1;
   allOptions[i].argType   = 0;
   allOptions[i].shortFlag = '\0';
   allOptions[i].longFlag  = NULL;
   allOptions[i].arg       = 0;
-  allOptions[i].val       = 0;
   allOptions[i].helptxt   = NULL;
   allOptions[i].helpdesc  = NULL;
 
@@ -119,7 +119,9 @@ int parseCmdArgs( int argc, char** argv )
     if ( vk_arg == 'h' || vk_arg == 'v' || vk_arg == 'V' )
       return showHelp( optCon, vk_arg );
     
-    errVal = VkObject::checkArg( opt->val, argVal );
+    obj = vkConfig->vkObject( opt->objectId );
+    vk_assert( obj != NULL );
+    errVal = obj->checkOptArg( opt->optKey, argVal );
 
     if ( errVal != PARSED_OK ) {
       return parseError( optCon, errVal );

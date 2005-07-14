@@ -34,17 +34,8 @@ public:
   int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
   enum cgOpts {
-    FIRST_CMD_OPT = 51,
-    I1_CACHE      = FIRST_CMD_OPT, 
-    D1_CACHE      = 52,
-    L2_CACHE      = 53,
-    PID_FILE      = 54,
-    SHOW          = 55,
-    SORT          = 56,
-    THRESH        = 57,
-    AUTO          = 58,
-    CONTEXT       = 59,
-    INCLUDE       = 60,
+    I1_CACHE, D1_CACHE, L2_CACHE, PID_FILE, SHOW,
+    SORT,     THRESH,   AUTO,     CONTEXT,  INCLUDE,
     LAST_CMD_OPT = INCLUDE 
   };
 

@@ -51,9 +51,8 @@ public:
   QString accelTitle()    { return accelText;       }
   QKeySequence accelKey() { return accel_Key;       }
 
-  /* called by parseCmdArgs() in parse_cmd_args.cpp, and from the gui
-     options pages; calls checkOptArg() */
-  static int checkArg(int optid, const char* argval, bool gui=false);
+  /* called by parseCmdArgs() in parse_cmd_args.cpp,
+     and from the gui options pages */
   virtual int checkOptArg(int optid, const char* argval, bool gui=false) = 0; 
 
   /* returns a list of non-default flags to pass to valgrind */
