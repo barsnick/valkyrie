@@ -115,7 +115,8 @@ QString VkObject::configEntries()
   for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
 
     /* skip these entirely */
-    if ( opt->key == Valkyrie::HELP_OPT ) continue;
+    if ( this->id() == VkObject::VALKYRIE &&
+         opt->key == Valkyrie::HELP_OPT ) continue;
 
     cfgEntry += opt->longFlag + "=" + opt->defaultValue + "\n";
   }
