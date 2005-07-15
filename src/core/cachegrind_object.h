@@ -14,6 +14,7 @@
 
 #include "tool_object.h"
 #include "cachegrind_view.h"
+#include "cachegrind_options_page.h"
 
 
 /* class Cachegrind ---------------------------------------------------- */
@@ -39,6 +40,10 @@ public:
     SORT,     THRESH,   AUTO,     CONTEXT,  INCLUDE,
     LAST_CMD_OPT = INCLUDE 
   };
+
+  OptionsPage* createOptionsPage( OptionsWindow* parent ) {
+    return (OptionsPage*)new CachegrindOptionsPage( parent, this );
+  }
 
 private:
   /* overriding to avoid casting everywhere */

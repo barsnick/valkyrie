@@ -52,6 +52,8 @@ public:
 
   bool isRunning();
 
+  virtual OptionsPage* createOptionsPage( OptionsWindow* parent ) = 0;
+
 signals:
   void setRunMode( Valkyrie::RunMode );
   void running( bool );

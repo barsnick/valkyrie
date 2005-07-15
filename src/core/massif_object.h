@@ -14,6 +14,7 @@
 
 #include "tool_object.h"
 #include "massif_view.h"
+#include "massif_options_page.h"
 
 
 /* class Massif -------------------------------------------------------- */
@@ -39,6 +40,10 @@ public:
     ALLOC_FN, FORMAT,     ALIGNMENT,
     LAST_CMD_OPT  = ALIGNMENT
   };
+
+  OptionsPage* createOptionsPage( OptionsWindow* parent ) {
+    return (OptionsPage*)new MassifOptionsPage( parent, this );
+  }
 
 private:
   /* overriding to avoid casting everywhere */

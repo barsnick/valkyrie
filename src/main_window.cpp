@@ -150,7 +150,7 @@ void MainWindow::run()
   /* valkyrie may have been started with no executable
      specified. if so, show prefsWindow + msgbox */
   if ( vkConfig->rdEntry("binary","valkyrie").isEmpty() ) {
-    showOptionsWindow( VkObject::VALKYRIE );
+    showOptionsWindow( valkyrie->id() );
     vkInfo( optionsWin, "Run Valgrind",
             "Please enter the path to the executable "
             "you wish to run, together with any arguments");

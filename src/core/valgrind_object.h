@@ -13,6 +13,7 @@
 
 
 #include "vk_objects.h"
+#include "valgrind_options_page.h"
 
 
 /* class Valgrind ------------------------------------------------------ */
@@ -43,6 +44,9 @@ public:
     LAST_CMD_OPT = MAX_SFRAME
   };
 
+  OptionsPage* createOptionsPage( OptionsWindow* parent ) {
+    return (OptionsPage*)new ValgrindOptionsPage( parent, this );
+  }
 };
 
 

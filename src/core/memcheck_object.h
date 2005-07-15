@@ -15,6 +15,7 @@
 #include "tool_object.h"
 #include "memcheck_view.h"
 #include "xml_parser.h"
+#include "memcheck_options_page.h"
 
 
 /* class Memcheck ------------------------------------------------------ */
@@ -44,6 +45,10 @@ public:
     SHOW_REACH, GCC_296,  ALIGNMENT,  STRLEN,
     LAST_CMD_OPT  = STRLEN
   };
+
+  OptionsPage* createOptionsPage( OptionsWindow* parent ) {
+    return (OptionsPage*)new MemcheckOptionsPage( parent, this );
+  }
 
 public slots:
   void loadClientOutput( const QString&, int log_fd=-1 );

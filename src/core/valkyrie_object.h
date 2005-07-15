@@ -16,6 +16,8 @@
 #include <qstringlist.h>
 
 #include "vk_objects.h"
+#include "valkyrie_options_page.h"
+
 
 class Valgrind;
 class ToolObject;
@@ -58,6 +60,10 @@ public:
     BINARY, BIN_FLAGS, VIEW_LOG, MERGE_LOGS, USE_GUI,
     LAST_CMD_OPT  = USE_GUI
   };
+
+  OptionsPage* createOptionsPage( OptionsWindow* parent ) {
+    return (OptionsPage*)new ValkyrieOptionsPage( parent, this );
+  }
 
 public slots:
   void quit();

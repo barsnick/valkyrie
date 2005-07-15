@@ -21,13 +21,6 @@
 #include "vk_objects.h"
 #include "vk_config.h"
 
-#include "valkyrie_options_page.h"
-#include "valgrind_options_page.h"
-#include "memcheck_options_page.h"
-#include "cachegrind_options_page.h"
-#include "massif_options_page.h"
-
-
 /* class Categories ---------------------------------------------------- */
 Categories::Categories( QWidget* parent )
   : QListBox( parent, "cat_listbox" ) 
@@ -193,30 +186,7 @@ void OptionsWindow::categoryClicked( QListBoxItem *item )
 OptionsPage * OptionsWindow::mkOptionsPage( int catid )
 {
   VkObject* obj = vkConfig->vkObject( catid );
-  OptionsPage* page = 0;
-
-  switch ( obj->id() ) {
-
-    case VkObject::VALKYRIE: {
-      page = (OptionsPage*)new ValkyrieOptionsPage( this, obj );
-    } break;
-    case VkObject::VALGRIND: {
-      page = (OptionsPage*)new ValgrindOptionsPage( this, obj );
-    } break;
-    case VkObject::MEMCHECK: {
-      page = (OptionsPage*)new MemcheckOptionsPage( this, obj );
-    } break;
-    case VkObject::CACHEGRIND: {
-      page = (OptionsPage*)new CachegrindOptionsPage( this, obj );
-    } break;
-    case VkObject::MASSIF: {
-      page = (OptionsPage*)new MassifOptionsPage( this, obj );
-    } break;
-    default: {
-      vk_assert_never_reached();
-    } break;
-
-  }
+  OptionsPage* page = obj->createOptionsPage( this );
   vk_assert( page != 0 );
 
   optPages.append( page );

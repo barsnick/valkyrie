@@ -25,6 +25,8 @@
 #include "vk_option.h"          /* class Option */
 #include "vk_popt_option.h"
 #include "vk_utils.h"
+#include "options_window.h"
+#include "options_page.h"
 
 class VkObject;
 typedef QPtrList<VkObject> VkObjectList;
@@ -62,6 +64,8 @@ public:
   void freePoptOpts( vkPoptOption * );
   /* also called by OptionsPage::optionWidget() */
   Option * findOption( int optid );
+
+  virtual OptionsPage* createOptionsPage( OptionsWindow* parent ) = 0;
 
 protected:
   /* writes the value of the option to vkConfig */
