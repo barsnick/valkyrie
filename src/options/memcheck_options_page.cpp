@@ -86,19 +86,19 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
 
 /* called when user clicks "Apply" or "Ok" button.  
    also called when Cancel button is clicked, to reset toggled values */
-bool MemcheckOptionsPage::applyOptions( int id, bool/*=false*/ )
+bool MemcheckOptionsPage::applyOptions( int optId, bool/*=false*/ )
 { 
   bool retval = true;
 
-  switch ( id ) {
+  switch ( optId ) {
 
     case Memcheck::FREELIST: {
-      const char* argval = itemList[id]->currValue().latin1();
-      int errval = vkObj->checkOptArg( id, argval, true );
+      const char* argval = itemList[optId]->currValue().latin1();
+      int errval = vkObj->checkOptArg( optId, argval, true );
       if ( errval != PARSED_OK ) {
         vkInfo( this, "Invalid Entry", "%s:\n\"%s\"", 
                 parseErrString(errval), argval );
-        itemList[id]->cancelEdit();
+        itemList[optId]->cancelEdit();
         retval = false;
       }
     } break;

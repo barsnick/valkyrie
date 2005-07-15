@@ -19,7 +19,7 @@ class ValgrindOptionsPage : public OptionsPage
   Q_OBJECT
 public:
   ValgrindOptionsPage( QWidget* parent, VkObject* obj );
-  bool applyOptions( int id, bool undo=false );
+  bool applyOptions( int optId, bool undo=false );
 
 private slots:
   void dummy();

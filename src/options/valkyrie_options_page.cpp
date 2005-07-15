@@ -133,11 +133,11 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
 
 /* called when user clicks "Apply" or "Ok" button.  
    also called when Cancel button is clicked, to reset toggled values */
-bool ValkyrieOptionsPage::applyOptions( int id, bool undo/*=false*/ )
+bool ValkyrieOptionsPage::applyOptions( int optId, bool undo/*=false*/ )
 { 
   bool retval = true;
 
-  switch ( id ) {
+  switch ( optId ) {
 
     case Valkyrie::TOOLTIP: {
       MainWindow* vkWin = (MainWindow*)qApp->mainWidget();
@@ -157,12 +157,12 @@ bool ValkyrieOptionsPage::applyOptions( int id, bool undo/*=false*/ )
 
     default:
       if ( !undo ) {
-        const char* argval = itemList[id]->currValue().latin1();
-        int errval = vkObj->checkOptArg( id, argval, true );
+        const char* argval = itemList[optId]->currValue().latin1();
+        int errval = vkObj->checkOptArg( optId, argval, true );
         if ( errval != PARSED_OK ) {
           vkError( this, "Invalid Entry", "%s:\n\"%s\"", 
                    parseErrString(errval), argval );
-          itemList[id]->cancelEdit();
+          itemList[optId]->cancelEdit();
           retval = false;
         }
       } break;

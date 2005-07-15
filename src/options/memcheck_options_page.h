@@ -19,7 +19,7 @@ class MemcheckOptionsPage : public OptionsPage
   Q_OBJECT
 public:
   MemcheckOptionsPage( QWidget* parent, VkObject* obj );
-  bool applyOptions( int id, bool undo=false );
+  bool applyOptions( int optId, bool undo=false );
 
 private slots:
 

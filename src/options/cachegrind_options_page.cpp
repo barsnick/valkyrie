@@ -127,13 +127,13 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
 
 /* called when user clicks "Apply" or "Ok" button.  
    also called when Cancel button is clicked, to reset toggled values */
-bool CachegrindOptionsPage::applyOptions( int id, bool undo/*=false*/ )
+bool CachegrindOptionsPage::applyOptions( int optId, bool undo/*=false*/ )
 { 
   bool retval = true;
 
   if ( undo ) return retval;   /* nothing to do */
 
-  switch ( id ) {
+  switch ( optId ) {
 
     case Cachegrind::SHOW:
     case Cachegrind::SORT:
@@ -144,12 +144,12 @@ bool CachegrindOptionsPage::applyOptions( int id, bool undo/*=false*/ )
     case Cachegrind::L2_CACHE:
     case Cachegrind::PID_FILE:
     case Cachegrind::INCLUDE: {
-      const char* argval = itemList[id]->currValue().latin1();
-      int errval = vkObj->checkOptArg( id, argval, true );
+      const char* argval = itemList[optId]->currValue().latin1();
+      int errval = vkObj->checkOptArg( optId, argval, true );
       if ( errval != PARSED_OK ) {
         vkError( this, "Invalid Entry", 
                  "%s:\n\"%s\"", parseErrString(errval), argval );
-        itemList[id]->cancelEdit();
+        itemList[optId]->cancelEdit();
         retval = false;
       }
     } break;

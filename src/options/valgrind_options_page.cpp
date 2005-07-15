@@ -217,7 +217,7 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
 
 /* Called when user clicks "Apply" or "Ok" button.  
    Also called when Cancel button is clicked, to reset toggled values */
-bool ValgrindOptionsPage::applyOptions( int /*id*/, bool/*=false*/ )
+bool ValgrindOptionsPage::applyOptions( int /*optId*/, bool/*=false*/ )
 { 
   return true;
 }
