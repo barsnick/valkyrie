@@ -140,12 +140,7 @@ void OptionsWindow::addCategory( int cid, QString text )
 {
   OptionsPage* page = NULL;
   wStack->addWidget( page, cid );
-  CategItem* item = new CategItem( categories, page, text, cid );
-
-  if ( cid < 3 && 
-       categories->height() < (3 * item->height(categories)) ) { 
-    categories->setMinimumHeight( 3 * item->height( categories ) ); 
-  }
+  new CategItem( categories, page, text, cid );
 }
 
 
