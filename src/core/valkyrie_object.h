@@ -29,7 +29,7 @@ class Valkyrie : public VkObject
 {
   Q_OBJECT
 public:
-  Valkyrie( int objId );
+  Valkyrie();
   ~Valkyrie();
 
   void init();        /* set usingGui + get ptrs to all tools */

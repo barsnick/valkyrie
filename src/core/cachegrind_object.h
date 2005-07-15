@@ -21,7 +21,7 @@
 class Cachegrind : public ToolObject
 {
 public:
-  Cachegrind( int objId );
+  Cachegrind();
   ~Cachegrind();
 
   /* returns the ToolView window (cachegrindView) for this tool */

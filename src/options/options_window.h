@@ -82,7 +82,7 @@ private slots:
 private:
   void adjustPosition();
   void setCategory( int catid );
-  void addCategory( int cid, QString text );
+  void addCategory( VkObject* obj );
   OptionsPage * mkOptionsPage( int catid );
 
 private:

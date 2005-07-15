@@ -114,6 +114,9 @@ public:
   /* returns a vkObject based on its objectId */
   VkObject* vkObject( int tvid );
 
+  /* returns an object's id */
+  int vkObjectId( VkObject* obj );
+
   /* read fns ---------------------------------------------------------- */
   QString rdEntry( const QString &pKey, const QString &pGroup );
   int     rdInt  ( const QString &pKey, const QString &pGroup );

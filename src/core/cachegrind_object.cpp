@@ -18,8 +18,8 @@
 /* class Cachegrind ---------------------------------------------------- */
 Cachegrind::~Cachegrind() { }
 
-Cachegrind::Cachegrind( int objId ) 
-  : ToolObject( objId, "Cachegrind", "&Cachegrind", Qt::SHIFT+Qt::Key_C ) 
+Cachegrind::Cachegrind() 
+  : ToolObject( "Cachegrind", "&Cachegrind", Qt::SHIFT+Qt::Key_C ) 
 { 
   /* cachegrind flags */
   addOpt( I1_CACHE,     Option::ARG_UINT,   Option::SPINBOX, 

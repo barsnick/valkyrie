@@ -25,7 +25,7 @@ typedef struct {
                               'tablename' for tables eg. 'vkOptions' */
   const char* helptxt;     /* help text                  */
   const char* helpdesc;    /* eg. <file>                 */
-  int objectId;
+  int objectId;            /* used to call obj->checkOptArg() */
 } vkPoptOption;
 
 

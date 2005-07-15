@@ -18,8 +18,8 @@
 Valgrind::~Valgrind() { }
 
 
-Valgrind::Valgrind( int objId )
-  : VkObject( objId, "Valgrind", "Valgrind", Qt::Key_unknown, false ) 
+Valgrind::Valgrind()
+  : VkObject( "Valgrind", "Valgrind", Qt::Key_unknown, false ) 
 { 
   addOpt( TOOL,        Option::ARG_STRING, Option::COMBO, 
           "valgrind",  '\0',               "tool", 

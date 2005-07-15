@@ -660,17 +660,14 @@ VkConfig::RetVal VkConfig::checkAccess() const
 }
 
 
-/* Initialise pointer list of objects.
-   Objects are appended in the order of their objectId,
-   so we can easily index into the list using that id */
+/* Initialise pointer list of objects. */
 void VkConfig::initVkObjects() 
 { 
-  int objId=0;  /* must start at zero: -1 is used for 'invalid' */
-  vkObjectList.append( new Valkyrie  ( objId++ ) );
-  vkObjectList.append( new Valgrind  ( objId++ ) );
-  vkObjectList.append( new Memcheck  ( objId++ ) );
-  vkObjectList.append( new Cachegrind( objId++ ) );
-  vkObjectList.append( new Massif    ( objId++ ) );
+  vkObjectList.append( new Valkyrie() );
+  vkObjectList.append( new Valgrind() );
+  vkObjectList.append( new Memcheck() );
+  vkObjectList.append( new Cachegrind() );
+  vkObjectList.append( new Massif() );
 }
 
 /* Returns a ptr to be tool currently set in [valgrind:tool] */
@@ -695,7 +692,7 @@ int VkConfig::toolId()
   QString tool_name = rdEntry( "tool", "valgrind" );
   for ( VkObject* obj=vkObjectList.first(); obj; obj=vkObjectList.next() ) {
     if ( obj->isTool() && obj->name() == tool_name )
-      return obj->id();
+      return vkObjectId( obj );
   }
   vk_assert_never_reached();
   return -1;
@@ -717,7 +714,7 @@ ToolList VkConfig::toolList()
 ToolObject* VkConfig::vkToolObj( int tvid )
 {
   VkObject* obj = vkObjectList.at( tvid );
-  vk_assert( obj != 0 && obj->id() == tvid && obj->isTool() );
+  vk_assert( obj != 0 && obj->isTool() );
   return (ToolObject*)obj;
 }
 
@@ -729,7 +726,7 @@ VkObjectList VkConfig::vkObjList()
 VkObject* VkConfig::vkObject( int tvid )
 {
   VkObject* obj = vkObjectList.at( tvid );
-  vk_assert( obj != 0 && obj->id() == tvid );
+  vk_assert( obj != 0 );
   return obj;
 }
 
@@ -744,6 +741,14 @@ VkObject* VkConfig::vkObject( const QString& obj_name )
 
   vk_assert_never_reached();
   return NULL;
+}
+
+/* returns an object's id */
+int VkConfig::vkObjectId( VkObject* obj )
+{
+  int id = vkObjectList.findRef( obj );
+  vk_assert( id >= 0 );
+  return id;
 }
 
 

@@ -131,16 +131,17 @@ OptionsWindow::OptionsWindow( QWidget* parent )
   VkObjectList objList = vkConfig->vkObjList();
   VkObject* obj;
   for ( obj = objList.first(); obj; obj = objList.next() ) {
-    addCategory( obj->id(), obj->title() );
+    addCategory( obj );
   }
 }
 
 
-void OptionsWindow::addCategory( int cid, QString text )
+void OptionsWindow::addCategory( VkObject* obj )
 {
+  int cid = vkConfig->vkObjectId( obj );
   OptionsPage* page = NULL;
   wStack->addWidget( page, cid );
-  new CategItem( categories, page, text, cid );
+  new CategItem( categories, page, obj->title(), cid );
 }
 
 

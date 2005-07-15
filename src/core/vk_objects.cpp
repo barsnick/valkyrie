@@ -6,8 +6,8 @@
  * To add a new valgrind tool:
  * - create the subclass in its own files in the src/core/ directory.
  *   see the Example below w.r.t. addOpt(...)
- * - in VkConfig::createVkObjects() [vk_config.cpp], 
- *   add case objId: ctor to the switch stmt, so it can be created at startup
+ * - in VkConfig::initVkObjects() [vk_config.cpp], 
+ *   add 'vkObjectList.append( new tool() )': this registers the tool with valkyrie.
  * - create a new options page for the Options dialog, and add this
  *   into OptionsWindow::mkOptionsPage(int) in /options/options_window.cpp
  * - create the ToolView subclass in its own files, in the src/tool_view dir
@@ -57,11 +57,10 @@ VkObject::~VkObject()
 }
 
 
-VkObject::VkObject( int id, const QString& capt, const QString& txt,
+VkObject::VkObject( const QString& capt, const QString& txt,
                     const QKeySequence& key, bool is_tool ) 
   : QObject( 0, capt )
 {
-  objectId  = id;
   caption   = capt;
   accelText = txt;
   is_Tool   = is_tool;
@@ -177,7 +176,7 @@ vkPoptOption * VkObject::poptOpts()
         tmp += " [" + opt->defaultValue + "]";
       vkopts[idx].helptxt  = vk_strdup( tmp.latin1() );
       vkopts[idx].helpdesc   = opt->flagDescrip.latin1();
-      vkopts[idx].objectId   = (int)this->objectId;
+      vkopts[idx].objectId   = vkConfig->vkObjectId( this );
       idx++;
     }
   }

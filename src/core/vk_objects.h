@@ -36,11 +36,10 @@ class VkObject : public QObject
 {
  Q_OBJECT
 public:
-  VkObject( int id, const QString& capt, const QString& txt,
+  VkObject( const QString& capt, const QString& txt,
             const QKeySequence& key, bool is_tool=true );
   ~VkObject();
 
-  int id()                { return objectId;        }
   bool isTool()           { return is_Tool;         }
   QString name()          { return caption.lower(); }
   QString title()         { return caption;         }
@@ -76,7 +75,6 @@ protected:
   bool usingGui;             /* whether in gui || non-gui mode */
   bool is_Tool;              /* not valkyrie or valgrind-core */
 
-  int objectId;              /* runtime calculated */
   QString caption;           /* eg. Memcheck */
 
   QString accelText;         /* eg. &Memcheck */

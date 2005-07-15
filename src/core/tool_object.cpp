@@ -25,9 +25,9 @@ ToolObject::~ToolObject()
   killProc();
 }
 
-ToolObject::ToolObject( int id, const QString& capt, 
+ToolObject::ToolObject( const QString& capt, 
                         const QString& txt, const QKeySequence& key )
-  : VkObject( id, capt, txt, key, true )
+  : VkObject( capt, txt, key, true )
 {
   m_view = 0;
   proc = 0;

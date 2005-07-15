@@ -150,7 +150,7 @@ void MainWindow::run()
   /* valkyrie may have been started with no executable
      specified. if so, show prefsWindow + msgbox */
   if ( vkConfig->rdEntry("binary","valkyrie").isEmpty() ) {
-    showOptionsWindow( valkyrie->id() );
+    showOptionsWindow( vkConfig->vkObjectId( valkyrie ) );
     vkInfo( optionsWin, "Run Valgrind",
             "Please enter the path to the executable "
             "you wish to run, together with any arguments");
@@ -412,7 +412,7 @@ void MainWindow::mkMenuBar()
   for ( ToolObject* tool = tools.first(); tool; tool = tools.next() ) {
     toolsMenu->insertItem( bulletSet, tool->accelTitle(), 
                            this, SLOT( showToolView(int) ),
-                           tool->accelKey(), tool->id() );
+                           tool->accelKey(), vkConfig->vkObjectId( tool ) );
   }
   tools.clear();
   id = mainMenu->insertItem( "&Tools", toolsMenu, -1, index );
@@ -425,7 +425,8 @@ void MainWindow::mkMenuBar()
   VkObjectList objList = vkConfig->vkObjList();
   for ( VkObject* obj = objList.first(); obj; obj = objList.next() ) {
     prefsMenu->insertItem( obj->title(), this, 
-                           SLOT(showOptionsWindow(int)), 0, obj->id() );
+                           SLOT(showOptionsWindow(int)),
+                           0, vkConfig->vkObjectId( obj ) );
   }
   id = mainMenu->insertItem( "O&ptions", prefsMenu, -1, index );
   mainMenu->setAccel( ALT+Key_P, id );
@@ -578,7 +579,7 @@ void MainWindow::mkStatusBar()
     tvButton->setAccel( tool->accelKey() );
     tvButton->setMinimumWidth( butt_width );
     tvButton->setFixedHeight( butt_height );
-    viewButtGroup->insert( tvButton, tool->id() );
+    viewButtGroup->insert( tvButton, vkConfig->vkObjectId( tool ) );
     bot_row->addWidget( tvButton );
   }
   tools.clear();
