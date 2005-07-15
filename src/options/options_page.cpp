@@ -223,8 +223,7 @@ OptionWidget* OptionsPage::optionWidget( int optid, QWidget* parent,
     case Option::SPINBOX: {
       /* 0 == use_powers_of_two, 1 == do not */
       int use_powers = 1;
-      if ((opt->cfgGroup() == "memcheck" && opt->key == Memcheck::ALIGNMENT) ||
-	  (opt->cfgGroup() == "massif"   && opt->key == Massif::ALIGNMENT))
+      if ( vkConfig->vkObject(opt->cfgGroup())->optionUsesPwr2( opt->key ) )
 	use_powers = 0;
 
       SpWidget* spinw = new SpWidget( parent, opt, mklabel, 1 );

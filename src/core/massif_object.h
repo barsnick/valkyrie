@@ -41,6 +41,11 @@ public:
     LAST_CMD_OPT  = ALIGNMENT
   };
 
+  bool optionUsesPwr2( int optId ) {
+    if (optId == ALIGNMENT) return true;
+    return false;
+  }
+
   OptionsPage* createOptionsPage( OptionsWindow* parent ) {
     return (OptionsPage*)new MassifOptionsPage( parent, this );
   }

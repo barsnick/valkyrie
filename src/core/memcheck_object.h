@@ -46,6 +46,11 @@ public:
     LAST_CMD_OPT  = STRLEN
   };
 
+  bool optionUsesPwr2( int optId ) {
+    if (optId == ALIGNMENT) return true;
+    return false;
+  }
+
   OptionsPage* createOptionsPage( OptionsWindow* parent ) {
     return (OptionsPage*)new MemcheckOptionsPage( parent, this );
   }

@@ -59,6 +59,8 @@ public:
   void freePoptOpts( vkPoptOption * );
   /* also called by OptionsPage::optionWidget() */
   Option * findOption( int optid );
+  /* called by OptionsPage::optionWidget() to if should use ^2 spin widget */
+  virtual bool optionUsesPwr2( int /*optId*/ ) { return false; }
 
   virtual OptionsPage* createOptionsPage( OptionsWindow* parent ) = 0;
 
