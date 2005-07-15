@@ -222,8 +222,11 @@ OptionWidget* OptionsPage::optionWidget( int optid, QWidget* parent,
       break;
     case Option::SPINBOX: {
       /* 0 == use_powers_of_two, 1 == do not */
-      int use_powers = ( opt->key == Memcheck::ALIGNMENT || 
-                         opt->key == Massif::ALIGNMENT ) ? 0 : 1;
+      int use_powers = 1;
+      if ((opt->cfgGroup() == "memcheck" && opt->key == Memcheck::ALIGNMENT) ||
+	  (opt->cfgGroup() == "massif"   && opt->key == Massif::ALIGNMENT))
+	use_powers = 0;
+
       SpWidget* spinw = new SpWidget( parent, opt, mklabel, 1 );
       QString ival = vkConfig->rdEntry( opt->cfgKey(), opt->cfgGroup() );
       spinw->addSection( opt->possValues[0].toInt(),  /* min */

@@ -113,7 +113,7 @@ QString VkObject::configEntries()
   for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
 
     /* skip these entirely */
-    if ( this->name() == "valkyrie" &&
+    if ( opt->cfgGroup() == "valkyrie" &&
          opt->key == Valkyrie::HELP_OPT ) continue;
 
     cfgEntry += opt->longFlag + "=" + opt->defaultValue + "\n";
@@ -132,7 +132,8 @@ QStringList VkObject::modifiedFlags()
   for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
 
     /* config already has this 'cos we need it to be first in the queue */
-    if ( opt->key == Valgrind::TOOL )
+    if ( this->name() == "valgrind" &&
+	 opt->key == Valgrind::TOOL )
       continue;
 
     defVal = opt->defaultValue;     /* opt holds the default */
