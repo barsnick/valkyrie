@@ -660,32 +660,17 @@ VkConfig::RetVal VkConfig::checkAccess() const
 }
 
 
-/* Create an object based on it's ObjectId
-   Called by initVkObjects() */
-VkObject* VkConfig::createVkObject( VkObject::ObjectId id )
-{
-  switch (id) {
-  case VkObject::VALKYRIE:   return new Valkyrie();
-  case VkObject::VALGRIND:   return new Valgrind();
-  case VkObject::MEMCHECK:   return new Memcheck();
-  case VkObject::CACHEGRIND: return new Cachegrind();
-  case VkObject::MASSIF:     return new Massif();
-  case VkObject::INVALID:
-  case VkObject::N_OBJECTS:
-  default: break;
-  }
-  vk_assert_never_reached();
-  return NULL;
-}
-
 /* Initialise pointer list of objects.
-   Objects are appended in the order of their ObjectId value,
+   Objects are appended in the order of their objectId,
    so we can easily index into the list using that id */
 void VkConfig::initVkObjects() 
 { 
-  for (int objId=0; objId<VkObject::N_OBJECTS; objId++) {
-    vkObjectList.append( createVkObject( (VkObject::ObjectId)objId ) );
-  }
+  int objId=0;  /* must start at zero: -1 is used for 'invalid' */
+  vkObjectList.append( new Valkyrie  ( objId++ ) );
+  vkObjectList.append( new Valgrind  ( objId++ ) );
+  vkObjectList.append( new Memcheck  ( objId++ ) );
+  vkObjectList.append( new Cachegrind( objId++ ) );
+  vkObjectList.append( new Massif    ( objId++ ) );
 }
 
 /* Returns a ptr to be tool currently set in [valgrind:tool] */
@@ -705,7 +690,7 @@ QString VkConfig::toolName()
 { return rdEntry("tool", "valgrind"); }
 
 /* returns the tool id of [valgrind:tool] */
-VkObject::ObjectId VkConfig::toolId()
+int VkConfig::toolId()
 {
   QString tool_name = rdEntry( "tool", "valgrind" );
   for ( VkObject* obj=vkObjectList.first(); obj; obj=vkObjectList.next() ) {
@@ -713,11 +698,11 @@ VkObject::ObjectId VkConfig::toolId()
       return obj->id();
   }
   vk_assert_never_reached();
-  return VkObject::INVALID;
+  return -1;
 }
 
 /* returns the list of ToolObjects
-   Note: toolList order doesn't match VkObject::ObjectId */
+   Note: toolList order doesn't match objectId */
 ToolList VkConfig::toolList()
 {
   ToolList tools;
@@ -728,7 +713,7 @@ ToolList VkConfig::toolList()
   return tools;
 }
 
-/* returns a ToolObject, based on its ObjectId */
+/* returns a ToolObject, based on its objectId */
 ToolObject* VkConfig::vkToolObj( int tvid )
 {
   VkObject* obj = vkObjectList.at( tvid );
@@ -740,7 +725,7 @@ ToolObject* VkConfig::vkToolObj( int tvid )
 VkObjectList VkConfig::vkObjList()
 { return vkObjectList; }
 
-/* returns an object based on its ObjectId */
+/* returns an object based on its objectId */
 VkObject* VkConfig::vkObject( int tvid )
 {
   VkObject* obj = vkObjectList.at( tvid );

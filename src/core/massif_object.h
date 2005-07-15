@@ -21,7 +21,7 @@
 class Massif : public ToolObject
 {
 public:
-  Massif();
+  Massif( int objId );
   ~Massif();
 
   /* returns the ToolView window (massifView) for this tool */

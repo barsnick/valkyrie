@@ -18,8 +18,8 @@
 /* class Massif -------------------------------------------------------- */
 Massif::~Massif() { }
 
-Massif::Massif() 
-  : ToolObject( MASSIF, "Massif", "Ma&ssif", Qt::SHIFT+Qt::Key_S ) 
+Massif::Massif( int objId ) 
+  : ToolObject( objId, "Massif", "Ma&ssif", Qt::SHIFT+Qt::Key_S ) 
 {
   /* massif flags */
   addOpt( HEAP,        Option::ARG_BOOL,   Option::CHECK,

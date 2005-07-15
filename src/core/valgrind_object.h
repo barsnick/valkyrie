@@ -20,7 +20,7 @@
 class Valgrind : public VkObject
 {
 public:
-  Valgrind();
+  Valgrind( int objId );
   ~Valgrind();
 
   QStringList modifiedFlags();

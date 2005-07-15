@@ -34,7 +34,7 @@ class ToolObject : public VkObject
  Q_OBJECT
 public:
 
-  ToolObject( ObjectId id, const QString& capt, const QString& txt,
+  ToolObject( int id, const QString& capt, const QString& txt,
               const QKeySequence& key );
   ~ToolObject();
 

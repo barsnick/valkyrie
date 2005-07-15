@@ -15,7 +15,6 @@
 
 ToolView::~ToolView() { }
 
-//ToolView::ToolView( QWidget* parent, QString name, VkObject::ObjectId id )
 ToolView::ToolView( QWidget* parent, ToolObject* tool )
   : QMainWindow( parent, tool->name(), WDestructiveClose )
 {

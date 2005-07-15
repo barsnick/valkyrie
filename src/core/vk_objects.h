@@ -36,15 +36,11 @@ class VkObject : public QObject
 {
  Q_OBJECT
 public:
-  enum ObjectId { 
-    INVALID=-1, VALKYRIE=0, VALGRIND=1, MEMCHECK=2, CACHEGRIND=3, MASSIF=4, N_OBJECTS
-  };
-
-  VkObject( ObjectId id, const QString& capt, const QString& txt,
+  VkObject( int id, const QString& capt, const QString& txt,
             const QKeySequence& key, bool is_tool=true );
   ~VkObject();
 
-  VkObject::ObjectId id() { return objectId;        }
+  int id()                { return objectId;        }
   bool isTool()           { return is_Tool;         }
   QString name()          { return caption.lower(); }
   QString title()         { return caption;         }
@@ -80,7 +76,7 @@ protected:
   bool usingGui;             /* whether in gui || non-gui mode */
   bool is_Tool;              /* not valkyrie or valgrind-core */
 
-  ObjectId objectId;         /* eg. MEMCHECK */
+  int objectId;              /* runtime calculated */
   QString caption;           /* eg. Memcheck */
 
   QString accelText;         /* eg. &Memcheck */

@@ -25,7 +25,7 @@ ToolObject::~ToolObject()
   killProc();
 }
 
-ToolObject::ToolObject( ObjectId id, const QString& capt, 
+ToolObject::ToolObject( int id, const QString& capt, 
                         const QString& txt, const QKeySequence& key )
   : VkObject( id, capt, txt, key, true )
 {

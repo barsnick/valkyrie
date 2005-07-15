@@ -29,8 +29,8 @@ Memcheck::~Memcheck()
 }
 
 
-Memcheck::Memcheck() 
-  : ToolObject( MEMCHECK, "Memcheck", "&Memcheck", Qt::SHIFT+Qt::Key_M ) 
+Memcheck::Memcheck( int objId ) 
+  : ToolObject( objId, "Memcheck", "&Memcheck", Qt::SHIFT+Qt::Key_M ) 
 {
   /* init vars */
   logStream.setEncoding( QTextStream::UnicodeUTF8 );

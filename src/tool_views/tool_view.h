@@ -14,7 +14,6 @@
 #include <qwidget.h>
 #include <qwidgetstack.h>
 
-#include "vk_objects.h"
 #include "tool_object.h"
 
 
@@ -22,12 +21,11 @@ class ToolView : public QMainWindow
 {
   Q_OBJECT
 public:
-  //  ToolView( QWidget* parent, QString title, VkObject::ObjectId id );
   ToolView( QWidget* parent, ToolObject* tool );
   ~ToolView();
 
   /* used by MainWin::closeToolView() */
-  VkObject::ObjectId id() { return m_tool->id(); }
+  int id() { return m_tool->id(); }
 
   /* called by the view's object */
   virtual void setState( bool run ) = 0;

@@ -23,7 +23,7 @@ class Memcheck : public ToolObject
 {
   Q_OBJECT
 public:
-  Memcheck();
+  Memcheck( int objId );
   ~Memcheck();
 
   bool parseLogFile( bool checked=true );

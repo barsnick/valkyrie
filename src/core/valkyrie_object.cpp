@@ -30,8 +30,8 @@
 Valkyrie:: ~Valkyrie() { }
 
 
-Valkyrie::Valkyrie()
-  : VkObject( VALKYRIE, "Valkyrie", "Valkyrie", Qt::Key_unknown, false ) 
+Valkyrie::Valkyrie( int objId )
+  : VkObject( objId, "Valkyrie", "Valkyrie", Qt::Key_unknown, false ) 
 {
   /* init vars */
   runMode = modeNotSet;

@@ -4,7 +4,6 @@
  * Essential functionality is contained within a VkObject.
  * 
  * To add a new valgrind tool:
- * - add a new enum value to enum VkObject::ObjectId{ ... }.
  * - create the subclass in its own files in the src/core/ directory.
  *   see the Example below w.r.t. addOpt(...)
  * - in VkConfig::createVkObjects() [vk_config.cpp], 
@@ -58,7 +57,7 @@ VkObject::~VkObject()
 }
 
 
-VkObject::VkObject( ObjectId id, const QString& capt, const QString& txt,
+VkObject::VkObject( int id, const QString& capt, const QString& txt,
                     const QKeySequence& key, bool is_tool ) 
   : QObject( 0, capt )
 {
@@ -114,7 +113,7 @@ QString VkObject::configEntries()
   for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
 
     /* skip these entirely */
-    if ( this->id() == VkObject::VALKYRIE &&
+    if ( this->name() == "valkyrie" &&
          opt->key == Valkyrie::HELP_OPT ) continue;
 
     cfgEntry += opt->longFlag + "=" + opt->defaultValue + "\n";
@@ -189,7 +188,7 @@ vkPoptOption * VkObject::poptOpts()
   vkopts[idx].arg       = 0;
   vkopts[idx].helptxt   = NULL;
   vkopts[idx].helpdesc  = NULL;
-  vkopts[idx].objectId  = VkObject::INVALID;
+  vkopts[idx].objectId  = -1;
 
   return vkopts;
 }
