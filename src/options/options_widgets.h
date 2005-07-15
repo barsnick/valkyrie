@@ -136,6 +136,9 @@ public:
   QPushButton* button();
   QHBoxLayout* hlayout();
 
+signals:
+  void returnPressed();
+
 private slots:
   void leChanged(const QString& txt);
 

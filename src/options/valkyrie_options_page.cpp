@@ -83,8 +83,11 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
                    optionWidget( Valkyrie::BINARY, group1, false ) );
   LeWidget* binLedit = ((LeWidget*)itemList[Valkyrie::BINARY]);
   binLedit->addButton( group1, this, SLOT(getBinary()) );
+  connect(binLedit, SIGNAL(returnPressed()), this, SIGNAL(apply()));
   itemList.insert( Valkyrie::BIN_FLAGS, 
                    optionWidget( Valkyrie::BIN_FLAGS, group1, true ) );
+  LeWidget* binFlgsLedit = ((LeWidget*)itemList[Valkyrie::BIN_FLAGS]);
+  connect(binFlgsLedit, SIGNAL(returnPressed()), this, SIGNAL(apply()));
 
   itemList.insert( Valkyrie::VG_EXEC,         /* ledit + button */
                    optionWidget(Valkyrie::VG_EXEC, group1, false ) );

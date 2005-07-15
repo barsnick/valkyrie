@@ -187,6 +187,7 @@ OptionsPage * OptionsWindow::mkOptionsPage( int catid )
 
   optPages.append( page );
   connect( page, SIGNAL(modified()), this, SLOT(modified()) );
+  connect( page, SIGNAL(apply()), this, SLOT(apply()) );
 
   return page;
 }

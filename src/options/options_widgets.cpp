@@ -229,6 +229,8 @@ LeWidget::LeWidget( QWidget *parent, Option * vkopt, bool mklabel )
   ledit->setText( initialValue );
   connect( ledit, SIGNAL( textChanged(const QString &) ),
            this,  SLOT( leChanged(const QString &) ) );
+  connect( ledit, SIGNAL( returnPressed() ),
+           this,  SIGNAL( returnPressed() ) );
 
   /* not added if the url is empty */
   ContextHelp::add( widg, opt->url() );

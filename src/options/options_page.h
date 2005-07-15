@@ -46,6 +46,7 @@ public:
 
 signals:
   void modified();
+  void apply();
 
 public slots:
   void updateEditList( bool, OptionWidget * );
