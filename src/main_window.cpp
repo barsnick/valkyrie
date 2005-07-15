@@ -87,7 +87,7 @@ void MainWindow::showToolView( int tvid, bool auto_run/*=false*/ )
 {
   if ( viewStack->visible() != 0 ) {
     /* already loaded and visible */
-    if ( viewStack->visible()->id() == tvid ) {
+    if ( viewStack->id( viewStack->visible() ) == tvid ) {
       return;
     } 
   }
@@ -357,7 +357,7 @@ void MainWindow::closeToolView()
     viewStack->raiseView( nextView );
   }
 
-  setToggles( ( nextView == 0 ) ? -1 : nextView->id() );
+  setToggles( viewStack->id( nextView ) );
 }
 
 

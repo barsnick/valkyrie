@@ -42,7 +42,7 @@ ToolViewStack::ToolViewStack( QWidget* parent/*=0*/, const char * name/*=0*/ )
 ToolViewStack::ToolViewStack( QWidget* parent, const char * name, WFlags f )
   : QWidgetStack( parent, name, f ) { }
 
-int ToolViewStack::addView( ToolView* tv, int id/*=-1*/ )
+int ToolViewStack::addView( ToolView* tv, int id )
 { return addWidget(tv, id); }
 
 void ToolViewStack::removeView( QWidget* w )
@@ -80,7 +80,7 @@ void ToolViewStack::listViews()
   ToolViewListIter it( *views ); // iterate over the views
   ToolView* view;
   for (; ((view = it.current()) != 0); ++it ) {
-    printf("ToolView: id(%d), name(%s)\n", view->id(), view->name());
+    printf("ToolView: id(%d), name(%s)\n", id(view), view->name());
   }
 }
 

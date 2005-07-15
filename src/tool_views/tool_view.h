@@ -24,9 +24,6 @@ public:
   ToolView( QWidget* parent, ToolObject* tool );
   ~ToolView();
 
-  /* used by MainWin::closeToolView() */
-  int id() { return m_tool->id(); }
-
   /* called by the view's object */
   virtual void setState( bool run ) = 0;
 
@@ -58,7 +55,7 @@ public:
   ToolViewStack( QWidget * parent, const char * name, WFlags f );
   ~ToolViewStack();
 
-  int addView( ToolView* tv, int id = -1 );
+  int addView( ToolView* tv, int id );
   void removeView( QWidget* w );
   ToolView* view( int id ) const;
 
