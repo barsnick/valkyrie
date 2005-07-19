@@ -13,6 +13,7 @@
 #include <qptrlist.h>
 #include <qtimer.h>
 #include <qwidget.h>
+#include <qstyle.h>
 
 
 /* class SpinWidget ---------------------------------------------------- */
@@ -54,6 +55,7 @@ private:
   void startTimer( int msec );
   void startTimer( bool up, int msec );
   void stopTimer();
+  QRect querySubControlMetrics ( QStyle::SubControl sc );
 
   uint upEnabled : 1;
   uint downEnabled : 1;

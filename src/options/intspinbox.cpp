@@ -61,26 +61,53 @@ void SpinWidget::setEditWidget( QWidget* w )
   updateDisplay();
 }
 
+QRect SpinWidget::querySubControlMetrics ( QStyle::SubControl sc )
+{
+  int fw = style().pixelMetric( QStyle::PM_SpinBoxFrameWidth, this);
+  QSize buttSize;
+  buttSize.setHeight( this->height()/2 - fw );
+  if ( buttSize.height() < 8 )
+    buttSize.setHeight( 8 );
+  /* 8/5 = 1.6 => approximate golden mean */
+  //  buttSize.setWidth( QMIN( buttSize.height() * 8 / 5, this->width() / 4 ) );
+  buttSize.setWidth( buttSize.height() * 8 / 5 );
+  /* Ensure we're not smaller than the smallest allowable size: */
+  buttSize = buttSize.expandedTo( QApplication::globalStrut() );
+  int top      = fw;
+  int buttLeft = this->width() - fw - buttSize.width();
+  int left     = fw;
+  int edWidth  = buttLeft - fw;
+  
+  switch ( sc ) {
+  case QStyle::SC_SpinWidgetUp:
+    return QRect(buttLeft, top, buttSize.width(), buttSize.height());
+  case QStyle::SC_SpinWidgetDown:
+    return QRect(buttLeft, top + buttSize.height(), buttSize.width(), buttSize.height());
+  case QStyle::SC_SpinWidgetButtonField:
+    return QRect(buttLeft, top, buttSize.width(), this->height() - 2*fw);
+  case QStyle::SC_SpinWidgetEditField:
+    return QRect(left, fw, edWidth, this->height() - 2*fw);
+  case QStyle::SC_SpinWidgetFrame:
+    return this->rect();
+  default:
+    break;
+  }
+  return QRect();
+}
+
+
 void SpinWidget::arrange()
 {
-  QRect mr1 = style().querySubControlMetrics(
-                      QStyle::CC_SpinWidget, this, 
-                      QStyle::SC_SpinWidgetUp );
-  upRect = QStyle::visualRect( mr1, this );
+  QRect mr_up   = querySubControlMetrics( QStyle::SC_SpinWidgetUp );
+  upRect        = QStyle::visualRect( mr_up, this );
 
-  QRect mr2 = style().querySubControlMetrics(
-                      QStyle::CC_SpinWidget, this, 
-                      QStyle::SC_SpinWidgetDown );
-  downRect = QStyle::visualRect( mr2, this );
+  QRect mr_down = querySubControlMetrics( QStyle::SC_SpinWidgetDown );
+  downRect      = QStyle::visualRect( mr_down, this );
 
   if ( ed ) {
-    QRect mr3 = style().querySubControlMetrics(
-                        QStyle::CC_SpinWidget, this, 
-                        QStyle::SC_SpinWidgetEditField );
-    QRect r = QStyle::visualRect( mr3, this );
-    ed->setGeometry( r );
+    QRect mr_ed = querySubControlMetrics( QStyle::SC_SpinWidgetEditField );
+    ed->setGeometry( QStyle::visualRect( mr_ed, this ) );
   }
-
 }
 
 void SpinWidget::stepUp()
