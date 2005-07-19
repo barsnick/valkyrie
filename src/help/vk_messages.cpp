@@ -379,7 +379,7 @@ int printStrippedMsg( QString hdr, QString msg, bool ask_user )
     while ( choice != 'y' && choice != 'n' ) {
       printf("Type one of: 'y(es)', 'n(o)'\n");
       printf(": ");
-      scanf( "%c", &choice );
+      scanf( "%1s", &choice );
       choice = tolower( choice );  /* just in case */
       switch ( choice ) {
         case 'y': ret = MsgBox::vkYes;    break;
