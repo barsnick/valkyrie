@@ -55,12 +55,14 @@ public:
     return (OptionsPage*)new MemcheckOptionsPage( parent, this );
   }
 
+  void saveParsedOutput( QString& fname );
+
 public slots:
   void loadClientOutput( const QString&, int log_fd=-1 );
 
 private slots:
   void parseOutput();
-  void saveParsedOutput();
+  void processDone();
 
 private:
   friend class MemcheckView;

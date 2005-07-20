@@ -187,9 +187,7 @@ void MemcheckView::openMergeFile()
 
 
 /* slot: called from savelogButton. Opens a dialog so user can choose
-   a (different) filename to save the currently loaded logfile to. 
-   FIXME: this functionality is already in memcheck, so just get it to
-   do this. */
+   a (different) filename to save the currently loaded logfile to. */
 void MemcheckView::saveLogFile()
 {
   logFilename = vkConfig->rdEntry( "view-log", "valkyrie" );
@@ -197,32 +195,8 @@ void MemcheckView::saveLogFile()
   QString fname = QFileDialog::getSaveFileName( fi.dirPath(), 
                   "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)", 
                   this, "fdlg", "Save Log File As" );
-  if ( fname.isEmpty() ) 
-    return;
 
-  /* don't do anything if user has chosen the same file to save to */
-  if ( logFilename == fname ) {
-    vkInfo( this, "Save File As",
-            "<p>You've chosen the same file to save to, "
-            "so there's nothing for me to do.</p." );
-    return;
-  }
-
-  /* all we have to do is rename the current logfile, because either:
-     - we've just displayed a currently existing logfile;
-     - we've just parsed output directly from valgrind, which was
-       auto-saved at parse-time to vkConfig->logsDir(). */
-  fi.setFile( logFilename );
-  QDir dir( fi.dir( true ) );
-  /* save (rename, actually) the log-file */
-  if ( dir.rename( fi.fileName(), fname ) ) {
-    logFilename = fname;
-    tool()->statusMsg( "Saved", logFilename );
-  } else {
-    vkInfo( this, "Save Failed", "<p>Failed to save file to '%s'",
-            fname.latin1() );
-  }
-
+  tool()->saveParsedOutput( fname );
 }
 
 

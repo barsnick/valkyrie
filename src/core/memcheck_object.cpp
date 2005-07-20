@@ -674,8 +674,8 @@ void Memcheck::parseOutput()
    if the user passed either 'log-file' or 'log-file-exactly' on the
    cmd-line, save the output immediately to whatever they specified.
    log-file == <file>.pid<pid> || log-file-exactly == <file> */
-void Memcheck::saveParsedOutput()
-{ 
+void Memcheck::processDone()
+{
   statusMsg( "Memcheck", "Parsing complete" );
   /* did valgrind exit normally ? */
   if ( proc->normalExit() )
@@ -701,13 +701,26 @@ void Memcheck::saveParsedOutput()
     }
   }
 
-  /* there's nothing else we can do; let the user decide */
-  if ( fname.isEmpty() ) {
-    fname = save_fname;
+  /* Save output to logfile <fname> */
+  saveParsedOutput( fname );
+
+  emitRunning( false );
+  /* if we are in non-gui mode, tell valkyrie we are done */
+  emit finished();
+}
+
+
+void Memcheck::saveParsedOutput( QString& fname )
+{ 
+  if ( fname.isEmpty() || fname == save_fname ) {
+    /* nothing to do: log already saved to save_fname */
+    statusMsg( "Saved to default", save_fname );
   } else {
     QFileInfo fi( fname );
-    if ( fi.dirPath() == "." ) {
-      /* no filepath given, so save in default dir */
+    if ( fname[0] != '/' && fname[0] != '.' ) {
+      /* CAB: TODO: Not sure about this...
+          - normally, even if no './' is given, it is still implied... */
+      /* no abs or rel path given, so save in default dir */
       fname = vkConfig->logsDir() + fname;
     } else {
       /* found a path: make sure it's the absolute version */
@@ -720,26 +733,22 @@ void Memcheck::saveParsedOutput()
                         "<p>Over-write existing file '%s' ?</p>", 
                         fname.latin1() );
       if ( ok == MsgBox::vkNo ) {
+        // TODO: Allow user to enter new logfile if in gui-mode
+        statusMsg( "Saved to default", save_fname );
         return;
       }
     }
 
     /* save (rename, actually) the auto-named log-file */
     QDir dir( fi.dir() );
-    if ( dir.rename( fi.fileName(), fname ) ) {
-      ;//logFilename = save_fname;
+    if ( dir.rename( save_fname, fname ) ) {
+      statusMsg( "Saved", fname );
     } else {
       vkInfo( this->view(), "Save Failed", 
               "<p>Failed to save file to '%s'",  fname.latin1() );
+      statusMsg( "Saved to default", save_fname );
     }
-
   }
-
-  statusMsg( "Saved", fname );
-  emitRunning( false );
-
-  /* if we are in non-gui mode, tell valkyrie we are done */
-  emit finished();
 }
 
 
@@ -752,14 +761,14 @@ void Memcheck::setupProc( bool init )
     vk_assert( proc == 0 );
     proc = new QProcess( this, "mc_proc" );
     connect( proc, SIGNAL( processExited() ),
-             this, SLOT( saveParsedOutput() ) );
+             this, SLOT( processDone() ) );
     connect( proc, SIGNAL( readyReadStdout() ),
              this, SLOT( parseOutput() ) );
     connect( proc, SIGNAL( readyReadStderr() ),
              this, SLOT( parseOutput() ) );
   } else {                      /* closing down */
     disconnect( proc, SIGNAL( processExited() ),
-                this, SLOT( saveParsedOutput() ) );
+                this, SLOT( processDone() ) );
     disconnect( proc, SIGNAL( readyReadStdout() ),
                 this, SLOT( parseOutput() ) );
     disconnect( proc, SIGNAL( readyReadStderr() ),
