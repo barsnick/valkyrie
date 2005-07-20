@@ -514,7 +514,7 @@ void MemcheckView::loadItem( XmlOutput * output )
   }
 
   /* grab current pid while the going is good (used for creating
-     filename.pid when required); set relevant items expandable */
+     <filename>.pid<pid> when required); set relevant items expandable */
   switch ( output->itemType ) {
     case XmlOutput::INFO:
     case XmlOutput::PREAMBLE:

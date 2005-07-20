@@ -673,7 +673,7 @@ void Memcheck::parseOutput()
    parsing of valgrind's output is finished, successfully or otherwise.
    if the user passed either 'log-file' or 'log-file-exactly' on the
    cmd-line, save the output immediately to whatever they specified.
-   log-file == file.pid || log-file-exactly == file.name */
+   log-file == <file>.pid<pid> || log-file-exactly == <file> */
 void Memcheck::saveParsedOutput()
 { 
   statusMsg( "Memcheck", "Parsing complete" );
@@ -697,7 +697,7 @@ void Memcheck::saveParsedOutput()
     fname = vkConfig->rdEntry( "log-file","valgrind" );
     if ( !fname.isEmpty() && currentPid != -1 ) {
       /* tack the pid on the end */
-      fname += "." + QString::number( currentPid );
+      fname += ".pid" + QString::number( currentPid );
     }
   }
 

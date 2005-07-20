@@ -99,7 +99,7 @@ Valgrind::Valgrind()
   addOpt( LOG_PID,     Option::ARG_STRING, Option::LEDIT, 
           "valgrind",  '\0',               "log-file", 
           "<file>",    "",                 "",
-          "Log to <file>.pid:",
+          "Log to <file>.pid<pid>:",
           "Log messages to <file>.pid<pid>", 
           urlNone );
   addOpt( LOG_FILE,    Option::ARG_STRING, Option::LEDIT, 
@@ -308,8 +308,8 @@ QStringList Valgrind::modifiedFlags()
         }
       } break;
 
-      case LOG_PID:         /* log to file.pid           */
-      case LOG_FILE:        /* log to file.name          */
+      case LOG_PID:         /* log to <file>.pid<pid>    */
+      case LOG_FILE:        /* log to <file>             */
       case LOG_SOCKET:      /* log to socket ipaddr:port */
         break;
 
