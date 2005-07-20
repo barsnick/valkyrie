@@ -54,11 +54,7 @@ options/vk_objects.cpp:
   FIXME: case USR/DEF_SUPP_FILES: is not done yet
 
 options/*
- - get rid of vk_Object:OptsIdx as index into Options.
-   replace with a QMap<long_arg_string, Options>.  i.e. long_arg indexes into Options,
-   each vk_Object has a map, searching these maps is simple (almost as now),
-   but no tool needs to know anything about what another tool uses.
-   (although perhaps an idea to do a startup check that no tool duplicates an opt)
+   perhaps a startup check that no tool duplicates an option
 
 vkObjects
  - ObjectId should be at most: VALKYRIE, VALGRIND, TOOL
