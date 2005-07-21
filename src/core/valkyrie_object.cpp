@@ -313,7 +313,7 @@ QString Valkyrie::currentFlags( ToolObject* tool_obj )
   }
 
 	/* ## hack alert: unfortunately, we have to pass each arg to
-		 QProcess as a separate string, and this includes any binary
+		 VKProcess as a separate string, and this includes any binary
 		 flags; but for display purposes in the flagWidget, concat the
 		 binary together with its flags 'cos its prettier. */
 	QString flags2 = "";

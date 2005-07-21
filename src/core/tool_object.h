@@ -17,9 +17,9 @@
 #ifndef __TOOL_OBJECT_H
 #define __TOOL_OBJECT_H
 
-#include <qprocess.h>
 #include <qptrlist.h>
 
+#include <vk_process.h>
 #include "vk_objects.h"
 #include "valkyrie_object.h"
 
@@ -72,7 +72,7 @@ protected:
   bool is_Running;
   bool fileSaved;
 
-  QProcess* proc;
+  VKProcess* proc;
 };
 
 

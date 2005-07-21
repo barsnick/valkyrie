@@ -759,7 +759,7 @@ void Memcheck::setupProc( bool init )
 {
   if ( init ) {                   /* starting up */
     vk_assert( proc == 0 );
-    proc = new QProcess( this, "mc_proc" );
+    proc = new VKProcess( this, "mc_proc" );
     connect( proc, SIGNAL( processExited() ),
              this, SLOT( processDone() ) );
     connect( proc, SIGNAL( readyReadStdout() ),
