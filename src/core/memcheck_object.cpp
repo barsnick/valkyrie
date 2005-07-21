@@ -618,46 +618,44 @@ void Memcheck::parseOutput()
   int lineNumber = 0;
 
   int log_fd = vkConfig->rdInt( "log-fd", "valgrind" );
+  vk_assert( log_fd == proc->getFDout() );                // Sanity check
 
   // TODO: proc->readLineXXX() doesn't respect client output formatting
 
-  if ( log_fd == 1 ) {                    /* stdout */
-    while ( proc->canReadLineStdout() ) {
-      lineNumber++;
-      data = proc->readLineStdout();
-      // printf("stdout: '%s'\n", data.latin1() );
-      logStream << data << "\n";
-      if ( usingGui ) {
-        source.setData( data );
-        ok = reader.parseContinue();
-	if ( !ok ) break;
-      }
+  /* FDout takes precedence over stdout/stderr,
+     so even if FDout == 1|2, we'll still get the data here. */
+  while ( proc->canReadLineFDout() ) {
+    lineNumber++;
+    data = proc->readLineFDout();
+//  printf("MC::parseOutput(): FDout(%d): '%s'\n", log_fd, data.latin1() );
+    logStream << data << "\n";
+    if ( usingGui ) {
+      source.setData( data );
+      ok = reader.parseContinue();
+      if ( !ok ) break;
     }
+  }
 
-    /* Anything from stderr will be from client prog */
-    while ( proc->canReadLineStderr() ) {
-      data = proc->readLineStderr();
-      loadClientOutput( data, 2 );
-    }
-  } else if ( log_fd == 2 ) {             /* stderr */
-    while ( proc->canReadLineStderr() ) {
-      lineNumber++;
-      data = proc->readLineStderr();
-      // printf("stderr: '%s'\n", data.latin1() );
-      logStream << data << "\n";
-      if ( usingGui ) {
-        source.setData( data );
-        ok = reader.parseContinue();
-	if ( !ok ) break;
-      }
-    }
-
-    /* Anything from stdout will be from client prog */
+  /* If log_fd != stdout/stderr, read from them here */
+  if ( log_fd != 1 ) {                    /* stdout */
+    /* Anything from stdout will now be from client prog */
     while ( proc->canReadLineStdout() ) {
       data = proc->readLineStdout();
+//      printf("\nMC::parseOutput(): Stdout: '%s'\n", data.latin1() );
       loadClientOutput( data, 1 );
     }
   }
+  if ( log_fd != 2 ) {                    /* stderr */
+  /* If valgrind failed to start, may output to stderr
+     Else will be client prog output
+  */
+    while ( proc->canReadLineStderr() ) {
+      data = proc->readLineStderr();
+//      printf("\nMC::parseOutput(): Stderr: '%s'\n", data.latin1() );
+      loadClientOutput( data, 2 );
+    }
+  }
+
 #if 1
   if ( !ok ) {
     vkError( this->view(), "Parse Error", 
@@ -752,16 +750,21 @@ void Memcheck::saveParsedOutput( QString& fname )
 }
 
 
-/* fork a new process in non-blocking mode; connect up the pipe to
-   stdout || stderr || ...  
-   TODO: re-implement QProcess so we can connect to fd > 2 */
+/* fork a new process in non-blocking mode; connect the pipes:
+   log_fd || stdout || stderr */
 void Memcheck::setupProc( bool init )
 {
   if ( init ) {                   /* starting up */
     vk_assert( proc == 0 );
     proc = new VKProcess( this, "mc_proc" );
+    int log_fd = vkConfig->rdInt( "log-fd", "valgrind" );
+    proc->setCommunication( VKProcess::Stdin | VKProcess::Stdout | VKProcess::Stderr |
+                            VKProcess::FDin | VKProcess::FDout );
+    proc->setFDout( log_fd );
     connect( proc, SIGNAL( processExited() ),
              this, SLOT( processDone() ) );
+    connect( proc, SIGNAL( readyReadFDout() ),
+             this, SLOT( parseOutput() ) );
     connect( proc, SIGNAL( readyReadStdout() ),
              this, SLOT( parseOutput() ) );
     connect( proc, SIGNAL( readyReadStderr() ),
@@ -769,6 +772,8 @@ void Memcheck::setupProc( bool init )
   } else {                      /* closing down */
     disconnect( proc, SIGNAL( processExited() ),
                 this, SLOT( processDone() ) );
+    disconnect( proc, SIGNAL( readyReadFDout() ),
+                this, SLOT( parseOutput() ) );
     disconnect( proc, SIGNAL( readyReadStdout() ),
                 this, SLOT( parseOutput() ) );
     disconnect( proc, SIGNAL( readyReadStderr() ),
@@ -844,7 +849,7 @@ void Memcheck::loadClientOutput( const QString& client_output, int log_fd/*=-1*/
   } else {
     if (log_fd == 1) {
       fprintf( stdout, "%s\n", client_output.latin1() );
-    } else {// if (log_fd == 2) {
+    } else { // any other fd -> stderr
       fprintf( stderr, "%s\n", client_output.latin1() );
     }
   }

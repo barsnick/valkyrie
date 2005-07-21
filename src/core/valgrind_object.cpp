@@ -91,7 +91,7 @@ Valgrind::Valgrind()
   /* options relevant to error-reporting tools */
   addOpt( LOG_FD,      Option::ARG_UINT,   Option::SPINBOX, 
           "valgrind",  '\0',               "log-fd", 
-          "<number>",  "1|2",              "2",
+          "<1..1024>", "1|1023",           "2",
           "Log to file descriptor:",
           "log messages to file descriptor (1=stdout, 2=stderr)",  
           /* TODO: subclass QProcess so we can use fd > 2 */
@@ -180,7 +180,7 @@ Valgrind::Valgrind()
           urlNone );
   addOpt( INPUT_FD,    Option::ARG_UINT,   Option::SPINBOX, 
           "valgrind",  '\0',               "input-fd",
-          "<number>",  "0|1|2",            "0",
+          "<0..1024>", "0|1023",           "0",
           "Input file descriptor:", 
           "File descriptor for (db) input (0=stdin, 1=stdout, 2=stderr)",
           urlNone );

@@ -216,6 +216,8 @@ VKProc::VKProc( pid_t p, VKProcess *proc/*=0*/ )
 #if defined(VK_PROCESS_DEBUG)
   qDebug( "VKProc: Constructor for pid %d and VKProcess %p", pid, process );
 #endif
+  socketFDin = 0;
+  socketFDout = 0;
   socketStdin = 0;
   socketStdout = 0;
   socketStderr = 0;
@@ -227,6 +229,10 @@ VKProc::~VKProc()
   qDebug( "VKProc: Destructor for pid %d and VKProcess %p", pid, process );
 #endif
   if ( process ) {
+    if ( process->d->notifierFDin )
+      process->d->notifierFDin->setEnabled( FALSE );
+    if ( process->d->notifierFDout )
+      process->d->notifierFDout->setEnabled( FALSE );
     if ( process->d->notifierStdin )
       process->d->notifierStdin->setEnabled( FALSE );
     if ( process->d->notifierStdout )
@@ -235,6 +241,10 @@ VKProc::~VKProc()
       process->d->notifierStderr->setEnabled( FALSE );
     process->d->proc = 0;
   }
+  if( socketFDin )
+    ::close( socketFDin );
+  if( socketFDout )
+    ::close( socketFDout );
   if( socketStdin )
     ::close( socketStdin );
   if( socketStdout )
@@ -490,6 +500,15 @@ void VKProcessManager::sigchldHnd( int fd )
 		*/
 		size_t nbytes = 0;
 		// read pending data
+		if ( proc->socketFDout && ::ioctl(proc->socketFDout, FIONREAD, (char*)&nbytes)==0 && nbytes>0 ) {
+#if defined(VK_PROCESS_DEBUG)
+		    qDebug( "VKProcessManager::sigchldHnd() (PID: %d): reading %d bytes of pending data on FDout(%d)",
+			    proc->pid, nbytes, process->getFDout() );
+#endif
+		    process->socketRead( proc->socketFDout );
+		}
+
+		nbytes = 0;
 		if ( proc->socketStdout && ::ioctl(proc->socketStdout, FIONREAD, (char*)&nbytes)==0 && nbytes>0 ) {
 #if defined(VK_PROCESS_DEBUG)
 		    qDebug( "VKProcessManager::sigchldHnd() (PID: %d): reading %d bytes of pending data on stdout", proc->pid, nbytes );
@@ -507,6 +526,12 @@ void VKProcessManager::sigchldHnd( int fd )
 
 		// close filedescriptors if open, and disable the
 		// socket notifiers
+		if ( proc->socketFDout ) {
+		    ::close( proc->socketFDout );
+		    proc->socketFDout = 0;
+		    if (process->d->notifierFDout)
+			process->d->notifierFDout->setEnabled(FALSE);
+		}
 		if ( proc->socketStdout ) {
 		    ::close( proc->socketStdout );
 		    proc->socketStdout = 0;
@@ -564,8 +589,11 @@ VKProcessPrivate::VKProcessPrivate()
 #if defined(VK_PROCESS_DEBUG)
     qDebug( "VKProcessPrivate: Constructor" );
 #endif
+    fdinBufRead = 0;
     stdinBufRead = 0;
 
+    notifierFDin = 0;
+    notifierFDout = 0;
     notifierStdin = 0;
     notifierStdout = 0;
     notifierStderr = 0;
@@ -583,6 +611,10 @@ VKProcessPrivate::~VKProcessPrivate()
 #endif
 
     if ( proc != 0 ) {
+	if ( proc->socketFDin != 0 ) {
+	    ::close( proc->socketFDin );
+	    proc->socketFDin = 0;
+	}
 	if ( proc->socketStdin != 0 ) {
 	    ::close( proc->socketStdin );
 	    proc->socketStdin = 0;
@@ -590,12 +622,32 @@ VKProcessPrivate::~VKProcessPrivate()
 	proc->process = 0;
     }
 
+    while ( !fdinBuf.isEmpty() ) {
+	delete fdinBuf.dequeue();
+    }
     while ( !stdinBuf.isEmpty() ) {
 	delete stdinBuf.dequeue();
     }
-    delete notifierStdin;
-    delete notifierStdout;
-    delete notifierStderr;
+    if (notifierFDin) {
+      delete notifierFDin;
+      notifierFDin = 0;
+    }
+    if (notifierStdin) {
+      delete notifierStdin;
+      notifierStdin = 0;
+    }
+    if (notifierFDout) {
+      delete notifierFDout;
+      notifierFDout = 0;
+    }
+    if (notifierStdout) {
+      delete notifierStdout;
+      notifierStdout = 0;
+    }
+    if (notifierStderr) {
+      delete notifierStderr;
+      notifierStderr = 0;
+    }
 }
 
 /*
@@ -613,7 +665,9 @@ void VKProcessPrivate::closeOpenSocketsForChild()
 
 	// close also the sockets from other VKProcess instances
 	for ( VKProc *p=procManager->procList->first(); p!=0; p=procManager->procList->next() ) {
+	    ::close( p->socketFDin );
 	    ::close( p->socketStdin );
+	    ::close( p->socketFDout );
 	    ::close( p->socketStdout );
 	    ::close( p->socketStderr );
 	}
@@ -634,6 +688,9 @@ void VKProcessPrivate::newProc( pid_t pid, VKProcess *process )
 
 
 
+
+
+
 /***********************************************************************
  *
  * VKProcess
@@ -647,9 +704,11 @@ void VKProcessPrivate::newProc( pid_t pid, VKProcess *process )
 */
 VKProcess::VKProcess( QObject *parent, const char *name )
     : QObject( parent, name ), ioRedirection( FALSE ), notifyOnExit( FALSE ),
-    wroteToStdinConnected( FALSE ),
-    readStdoutCalled( FALSE ), readStderrCalled( FALSE ),
-    comms( Stdin|Stdout|Stderr )
+    wroteToFDinConnected( FALSE ), wroteToStdinConnected( FALSE ),
+    readFDoutCalled( FALSE ), readStdoutCalled( FALSE ), readStderrCalled( FALSE ),
+    comms( Stdin|Stdout|Stderr ),
+    filedesc_in( 0 ), filedesc_out( 1 ),
+    disabledStdin( false ), disabledStdout( false ), disabledStderr( false )
 {
     init();
 }
@@ -666,9 +725,11 @@ VKProcess::VKProcess( QObject *parent, const char *name )
 */
 VKProcess::VKProcess( const QString& arg0, QObject *parent, const char *name )
     : QObject( parent, name ), ioRedirection( FALSE ), notifyOnExit( FALSE ),
-    wroteToStdinConnected( FALSE ),
-    readStdoutCalled( FALSE ), readStderrCalled( FALSE ),
-    comms( Stdin|Stdout|Stderr )
+    wroteToFDinConnected( FALSE ), wroteToStdinConnected( FALSE ),
+    readFDoutCalled( FALSE ), readStdoutCalled( FALSE ), readStderrCalled( FALSE ),
+    comms( Stdin|Stdout|Stderr ),
+    filedesc_in( 0 ), filedesc_out( 1 ),
+    disabledStdin( false ), disabledStdout( false ), disabledStderr( false )
 {
     init();
     addArgument( arg0 );
@@ -688,9 +749,11 @@ VKProcess::VKProcess( const QString& arg0, QObject *parent, const char *name )
 */
 VKProcess::VKProcess( const QStringList& args, QObject *parent, const char *name )
     : QObject( parent, name ), ioRedirection( FALSE ), notifyOnExit( FALSE ),
-    wroteToStdinConnected( FALSE ),
-    readStdoutCalled( FALSE ), readStderrCalled( FALSE ),
-    comms( Stdin|Stdout|Stderr )
+    wroteToFDinConnected( FALSE ), wroteToStdinConnected( FALSE ),
+    readFDoutCalled( FALSE ), readStdoutCalled( FALSE ), readStderrCalled( FALSE ),
+    comms( Stdin|Stdout|Stderr ),
+    filedesc_in( 0 ), filedesc_out( 1 ),
+    disabledStdin( false ), disabledStdout( false ), disabledStderr( false )
 {
     init();
     setArguments( args );
@@ -717,6 +780,7 @@ void VKProcess::reset()
     d = new VKProcessPrivate();
     exitStat = 0;
     exitNormal = FALSE;
+    d->bufFDout.clear();
     d->bufStdout.clear();
     d->bufStderr.clear();
 }
@@ -835,6 +899,51 @@ int VKProcess::communication() const
     return comms;
 }
 
+/* If FDout/in overlaps with Stdout/err/in, FDout/in take precedence */
+void VKProcess::reprioritiseComms()
+{
+    /* If FDin enabled, take care of (dis/re)enabling stdin */
+    if (comms & FDin) {
+      if (comms & Stdin) {   /* Stdin enabled: disable it? */
+	if (filedesc_in == STDIN_FILENO) {
+	  comms &= ~Stdin;
+	  disabledStdin = true;
+	}
+      } else {               /* Stdin not enabled: re-enable it? */
+	if (disabledStdin && filedesc_in != STDIN_FILENO) {
+	  comms |= Stdin;
+	  disabledStdin = false;
+	}
+      }
+    }
+
+    /* If FDout enabled, take care of (dis/re)enabling stdout/stderr */
+    if (comms & FDout) {
+      if (comms & Stdout) {  /* Stdout enabled: disable it? */
+	if (filedesc_out == STDOUT_FILENO) {
+	  comms &= ~Stdout;
+	  disabledStdout = true;
+	}
+      } else {               /* Stdout not enabled: re-enable it? */
+	if (disabledStdout && filedesc_out != STDOUT_FILENO) {
+	  comms |= Stdout;
+	  disabledStdout = false;
+	}
+      }
+      if (comms & Stderr) {  /* Stderr enabled: disable it? */
+	if (filedesc_out == STDERR_FILENO) {
+	  comms &= ~Stderr;
+	  disabledStderr = true;
+	}
+      } else {               /* Stderr not enabled: re-enable it? */
+	if (disabledStderr && filedesc_out != STDERR_FILENO) {
+	  comms |= Stderr;
+	  disabledStderr = false;
+	}
+      }
+    }
+}
+
 /*!
     Sets \a commFlags as the communication required with the process.
 
@@ -843,12 +952,77 @@ int VKProcess::communication() const
 
     The default is \c{Stdin|Stdout|Stderr}.
 
+    NOTE:
+    FDout|in take priority over Stdout/err/in, so the latter
+    are NOT enabled if there's an overlap of fd's.
+    However, their disabling is recorded, and subsequent calls to
+    setCommunication() and setFDin/out() will reflect this.
+    See reprioritiseComms().
+
+    Returns actual communications set.
+
     \sa communication()
 */
-void VKProcess::setCommunication( int commFlags )
+int VKProcess::setCommunication( int commFlags )
 {
     comms = commFlags;
+
+    /* Reset disabling of std fd's */
+    disabledStdin  = false;
+    disabledStdout = false;
+    disabledStderr = false;
+
+    /* disable std fd's if overlap FDout/in */
+    reprioritiseComms();
+
+    return comms;
 }
+
+
+/* 
+    Sets input file descriptor
+    The default is 0
+    If fd == stdin, disable Stdin: FDin takes precedence
+
+    NOTE:
+    FDin takes priority over Stdin, so the latter may be DISABLED
+    if there's an overlap of fd's.
+    See reprioritiseComms().
+ */
+void VKProcess::setFDin( int fd )
+{
+    vk_assert(fd >= 0 && fd < 1024);  // <0..1023>
+    filedesc_in = fd;
+
+    /* disable/enable std fd's wrt overlapping FDout/in */
+    reprioritiseComms();
+}
+
+/* 
+    Sets output file descriptor
+    The default is 1
+    If fd == stdout|stderr, disable Stdout|Stdin: FDout takes precedence
+
+    NOTE:
+    FDout takes priority over Stdout/err, so one of the latter may be DISABLED
+    if there's an overlap of fd's.
+    See reprioritiseComms().
+ */
+void VKProcess::setFDout( int fd )
+{
+    vk_assert(fd > 0 && fd < 1024);  // <1..1023>
+    filedesc_out = fd;
+
+    /* disable/enable std fd's wrt overlapping FDout/in */
+    reprioritiseComms();
+}
+
+int VKProcess::getFDin()
+{ return filedesc_in; }
+
+int VKProcess::getFDout()
+{ return filedesc_out; }
+
 
 /*!
     Returns TRUE if the process has exited normally; otherwise returns
@@ -886,6 +1060,28 @@ int VKProcess::exitStatus() const
 	return exitStat;
 }
 
+
+/*!
+    Reads the data that the process has written to FDout.
+    When new data is written to standard output, the class emits the
+    signal readyReadFDout().
+
+    If there is no data to read, this function returns a QByteArray of
+    size 0: it does not wait until there is something to read.
+
+    \sa readyReadFDout() readLineFDout() readStderr() writeToFDin()
+*/
+QByteArray VKProcess::readFDout()
+{
+    if ( readFDoutCalled ) {
+	return QByteArray();
+    }
+    readFDoutCalled = TRUE;
+    VKMembuf *buf = membufFDout();
+    readFDoutCalled = FALSE;
+
+    return buf->readAll();
+}
 
 /*!
     Reads the data that the process has written to standard output.
@@ -929,6 +1125,42 @@ QByteArray VKProcess::readStderr()
     readStderrCalled = FALSE;
 
     return buf->readAll();
+}
+
+/*!
+    Reads a line of text from FDout, excluding any trailing
+    newline or carriage return characters, and returns it. Returns
+    QString::null if canReadLineFDout() returns FALSE.
+
+    By default, the text is interpreted to be in Latin-1 encoding. If you need
+    other codecs, you can set a different codec with
+    QTextCodec::setCodecForCStrings().
+
+    \sa canReadLineFDout() readyReadFDout() readFDout()
+*/
+QString VKProcess::readLineFDout()
+{
+    QByteArray a( 256 );
+    VKMembuf *buf = membufFDout();
+    if ( !buf->scanNewline( &a ) ) {
+      if ( !canReadLineFDout() )
+	return QString::null;
+
+      if ( !buf->scanNewline( &a ) )
+	return QString( buf->readAll() );
+    }
+
+    uint size = a.size();
+    buf->consumeBytes( size, 0 );
+
+    // get rid of terminating \n or \r\n
+    if ( size>0 && a.at( size - 1 ) == '\n' ) {
+      if ( size>1 && a.at( size - 2 ) == '\r' )
+	a.at( size - 2 ) = '\0';
+      else
+	a.at( size - 1 ) = '\0';
+    }
+    return QString( a );
 }
 
 /*!
@@ -1170,6 +1402,20 @@ void VKProcess::closeStdinLaunch()
     The string \a buf is handled as text using the
     QString::local8Bit() representation.
 */
+void VKProcess::writeToFDin( const QString& buf )
+{
+    QByteArray tmp = buf.local8Bit();
+    tmp.resize( buf.length() );
+    writeToFDin( tmp );
+}
+
+
+/*!
+    \overload
+
+    The string \a buf is handled as text using the
+    QString::local8Bit() representation.
+*/
 void VKProcess::writeToStdin( const QString& buf )
 {
     QByteArray tmp = buf.local8Bit();
@@ -1194,7 +1440,8 @@ void VKProcess::connectNotify( const char * signal )
     qDebug( "VKProcess::connectNotify(): signal %s has been connected", signal );
 #endif
     if ( !ioRedirection )
-	if ( qstrcmp( signal, SIGNAL(readyReadStdout()) )==0 ||
+	if ( qstrcmp( signal, SIGNAL(readyReadFDout())  )==0 ||
+	     qstrcmp( signal, SIGNAL(readyReadStdout()) )==0 ||
 	     qstrcmp( signal, SIGNAL(readyReadStderr()) )==0
 	   ) {
 #if defined(VK_PROCESS_DEBUG)
@@ -1208,6 +1455,13 @@ void VKProcess::connectNotify( const char * signal )
 	qDebug( "VKProcess::connectNotify(): set notifyOnExit to TRUE" );
 #endif
 	setNotifyOnExit( TRUE );
+	return;
+    }
+    if ( !wroteToFDinConnected  && qstrcmp( signal, SIGNAL(wroteToFDin())  )==0 ) {
+#if defined(VK_PROCESS_DEBUG)
+	qDebug( "VKProcess::connectNotify(): set wroteToFDinConnected to TRUE" );
+#endif
+	setWroteFDinConnected( TRUE );
 	return;
     }
     if ( !wroteToStdinConnected && qstrcmp( signal, SIGNAL(wroteToStdin()) )==0 ) {
@@ -1224,6 +1478,7 @@ void VKProcess::connectNotify( const char * signal )
 void VKProcess::disconnectNotify( const char * )
 {
     if ( ioRedirection &&
+	 receivers( SIGNAL(readyReadFDout())  ) ==0 &&
 	 receivers( SIGNAL(readyReadStdout()) ) ==0 &&
 	 receivers( SIGNAL(readyReadStderr()) ) ==0
 	 ) {
@@ -1238,6 +1493,12 @@ void VKProcess::disconnectNotify( const char * )
 #endif
 	setNotifyOnExit( FALSE );
     }
+    if ( wroteToFDinConnected && receivers( SIGNAL(wroteToFDin()) ) == 0 ) {
+#if defined(VK_PROCESS_DEBUG)
+	qDebug( "VKProcess::disconnectNotify(): set wroteToFDinConnected to FALSE" );
+#endif
+	setWroteFDinConnected( FALSE );
+    }
     if ( wroteToStdinConnected && receivers( SIGNAL(wroteToStdin()) ) == 0 ) {
 #if defined(VK_PROCESS_DEBUG)
 	qDebug( "VKProcess::disconnectNotify(): set wroteToStdinConnected to FALSE" );
@@ -1246,6 +1507,31 @@ void VKProcess::disconnectNotify( const char * )
     }
 }
 
+
+VKMembuf* VKProcess::membufFDout()
+{
+    if ( d->proc && d->proc->socketFDout ) {
+	/*
+	  Apparently, there is not consistency among different
+	  operating systems on how to use FIONREAD.
+
+	  FreeBSD, Linux and Solaris all expect the 3rd argument to
+	  ioctl() to be an int, which is normally 32-bit even on
+	  64-bit machines.
+
+	  IRIX, on the other hand, expects a size_t, which is 64-bit
+	  on 64-bit machines.
+
+	  So, the solution is to use size_t initialized to zero to
+	  make sure all bits are set to zero, preventing underflow
+	  with the FreeBSD/Linux/Solaris ioctls.
+	*/
+	size_t nbytes = 0;
+	if ( ::ioctl(d->proc->socketFDout, FIONREAD, (char*)&nbytes)==0 && nbytes>0 )
+	    socketRead( d->proc->socketFDout );
+    }
+    return &d->bufFDout;
+}
 
 VKMembuf* VKProcess::membufStdout()
 {
@@ -1356,7 +1642,9 @@ bool VKProcess::start( QStringList *env )
 #endif
     reset();
 
+    int sFDin[2];
     int sStdin[2];
+    int sFDout[2];
     int sStdout[2];
     int sStderr[2];
 
@@ -1393,6 +1681,50 @@ bool VKProcess::start( QStringList *env )
 	if ( comms & Stderr ) {
 	    ::close( sStderr[0] );
 	    ::close( sStderr[1] );
+	}
+	return FALSE;
+    }
+
+#ifndef Q_OS_QNX6
+    if ( (comms & FDin) && ::socketpair( AF_UNIX, SOCK_STREAM, 0, sFDin ) == -1 ) {
+#else
+    if ( (comms & FDin) && qnx6SocketPairReplacement(sFDin) == -1 ) {
+#endif
+	if ( comms & Stdin ) {
+	    ::close( sStdin[0] );
+	    ::close( sStdin[1] );
+	}
+	if ( comms & Stderr ) {
+	    ::close( sStderr[0] );
+	    ::close( sStderr[1] );
+	}
+	if ( comms & Stdout ) {
+	    ::close( sStdout[0] );
+	    ::close( sStdout[1] );
+	}
+	return FALSE;
+    }
+
+#ifndef Q_OS_QNX6
+    if ( (comms & FDout) && ::socketpair( AF_UNIX, SOCK_STREAM, 0, sFDout ) == -1 ) {
+#else
+    if ( (comms & FDout) && qnx6SocketPairReplacement(sFDout) == -1 ) {
+#endif
+	if ( comms & Stdin ) {
+	    ::close( sStdin[0] );
+	    ::close( sStdin[1] );
+	}
+	if ( comms & Stderr ) {
+	    ::close( sStderr[0] );
+	    ::close( sStderr[1] );
+	}
+	if ( comms & Stdout ) {
+	    ::close( sStdout[0] );
+	    ::close( sStdout[1] );
+	}
+	if ( comms & FDin ) {
+	    ::close( sFDin[0] );
+	    ::close( sFDin[1] );
 	}
 	return FALSE;
     }
@@ -1451,6 +1783,14 @@ bool VKProcess::start( QStringList *env )
     if ( pid == 0 ) {
 	// child
 	d->closeOpenSocketsForChild();
+	if ( comms & FDin ) {
+	    ::close( sFDin[1] );
+	    ::dup2( sFDin[0], filedesc_in );
+	}
+	if ( comms & FDout ) {
+	    ::close( sFDout[0] );
+	    ::dup2( sFDout[1], filedesc_out );
+	}
 	if ( comms & Stdin ) {
 	    ::close( sStdin[1] );
 	    ::dup2( sStdin[0], STDIN_FILENO );
@@ -1605,6 +1945,22 @@ bool VKProcess::start( QStringList *env )
 
     d->newProc( pid, this );
 
+    if ( comms & FDin ) {
+	::close( sFDin[0] );
+	d->proc->socketFDin = sFDin[1];
+
+	// Select non-blocking mode
+	int originalFlags = fcntl(d->proc->socketFDin, F_GETFL, 0);
+	fcntl(d->proc->socketFDin, F_SETFL, originalFlags | O_NONBLOCK);
+
+	d->notifierFDin = new QSocketNotifier( sFDin[1], QSocketNotifier::Write );
+	connect( d->notifierFDin, SIGNAL(activated(int)),
+		this, SLOT(socketWrite(int)) );
+	// setup notifiers for the sockets
+	if ( !d->fdinBuf.isEmpty() ) {
+	    d->notifierFDin->setEnabled( TRUE );
+	}
+    }
     if ( comms & Stdin ) {
 	::close( sStdin[0] );
 	d->proc->socketStdin = sStdin[1];
@@ -1620,6 +1976,15 @@ bool VKProcess::start( QStringList *env )
 	if ( !d->stdinBuf.isEmpty() ) {
 	    d->notifierStdin->setEnabled( TRUE );
 	}
+    }
+    if ( comms & FDout ) {
+	::close( sFDout[1] );
+	d->proc->socketFDout = sFDout[0];
+	d->notifierFDout = new QSocketNotifier( sFDout[0], QSocketNotifier::Read );
+	connect( d->notifierFDout, SIGNAL(activated(int)),
+		this, SLOT(socketRead(int)) );
+	if ( ioRedirection )
+	    d->notifierFDout->setEnabled( TRUE );
     }
     if ( comms & Stdout ) {
 	::close( sStdout[1] );
@@ -1651,9 +2016,17 @@ error:
 #endif
     if ( d->procManager )
 	d->procManager->cleanup();
+    if ( comms & FDin ) {
+	::close( sFDin[1] );
+	::close( sFDin[0] );
+    }
     if ( comms & Stdin ) {
 	::close( sStdin[1] );
 	::close( sStdin[0] );
+    }
+    if ( comms & FDout ) {
+	::close( sFDout[0] );
+	::close( sFDout[1] );
     }
     if ( comms & Stdout ) {
 	::close( sStdout[0] );
@@ -1770,6 +2143,21 @@ bool VKProcess::isRunning() const
 
 /*!
     Returns TRUE if it's possible to read an entire line of text from
+    FDout at this time; otherwise returns FALSE.
+
+    \sa readLineFDout() canReadLineStderr()
+*/
+bool VKProcess::canReadLineFDout() const
+{
+    if ( !d->proc || !d->proc->socketFDout )
+	return d->bufFDout.size() != 0;
+
+    VKProcess *that = (VKProcess*)this;
+    return that->membufFDout()->scanNewline( 0 );
+}
+
+/*!
+    Returns TRUE if it's possible to read an entire line of text from
     standard output at this time; otherwise returns FALSE.
 
     \sa readLineStdout() canReadLineStderr()
@@ -1817,6 +2205,16 @@ bool VKProcess::canReadLineStderr() const
 
     \sa wroteToStdin() closeStdin() readStdout() readStderr()
 */
+void VKProcess::writeToFDin( const QByteArray& buf )
+{
+#if defined(VK_PROCESS_DEBUG)
+//    qDebug( "VKProcess::writeToFDin(): write to fdin (%d)", d->socketFDin );
+#endif
+    d->fdinBuf.enqueue( new QByteArray(buf) );
+    if ( d->notifierFDin != 0 )
+	d->notifierFDin->setEnabled( TRUE );
+}
+
 void VKProcess::writeToStdin( const QByteArray& buf )
 {
 #if defined(VK_PROCESS_DEBUG)
@@ -1827,6 +2225,34 @@ void VKProcess::writeToStdin( const QByteArray& buf )
 	d->notifierStdin->setEnabled( TRUE );
 }
 
+
+/*!
+    Closes the process's FDin.
+
+    This function also deletes any pending data that has not been
+    written to FDin.
+
+    \sa wroteToFDin()
+*/
+void VKProcess::closeFDin()
+{
+    if ( d->proc == 0 )
+	return;
+    if ( d->proc->socketFDin !=0 ) {
+	while ( !d->fdinBuf.isEmpty() ) {
+	    delete d->fdinBuf.dequeue();
+	}
+	delete d->notifierFDin;
+	d->notifierFDin = 0;
+	if ( ::close( d->proc->socketFDin ) != 0 ) {
+	    qWarning( "Could not close fdin of child process" );
+	}
+#if defined(VK_PROCESS_DEBUG)
+	qDebug( "VKProcess::closeFDin(): fdin (%d) closed", d->proc->socketFDin );
+#endif
+	d->proc->socketFDin = 0;
+    }
+}
 
 /*!
     Closes the process's standard input.
@@ -1879,7 +2305,9 @@ void VKProcess::socketRead( int fd )
 	return;
     VKMembuf *buffer = 0;
     int n;
-    if ( fd == d->proc->socketStdout ) {
+    if ( fd == d->proc->socketFDout ) {
+	buffer = &d->bufFDout;
+    } else if ( fd == d->proc->socketStdout ) {
 	buffer = &d->bufStdout;
     } else if ( fd == d->proc->socketStderr ) {
 	buffer = &d->bufStderr;
@@ -1905,7 +2333,17 @@ void VKProcess::socketRead( int fd )
     }
     // eof or error?
     if ( n == 0 || n == -1 ) {
-	if ( fd == d->proc->socketStdout ) {
+	if ( fd == d->proc->socketFDout ) {
+#if defined(VK_PROCESS_DEBUG)
+	    qDebug( "VKProcess::socketRead(): FDout (%d) closed", fd );
+#endif
+	    d->notifierFDout->setEnabled( FALSE );
+	    delete d->notifierFDout;
+	    d->notifierFDout = 0;
+	    ::close( d->proc->socketFDout );
+	    d->proc->socketFDout = 0;
+	    return;
+	} else if ( fd == d->proc->socketStdout ) {
 #if defined(VK_PROCESS_DEBUG)
 	    qDebug( "VKProcess::socketRead(): stdout (%d) closed", fd );
 #endif
@@ -1955,16 +2393,22 @@ void VKProcess::socketRead( int fd )
     }
 
     d->socketReadCalled = TRUE;
-    if ( fd == d->proc->socketStdout ) {
+    if ( fd == d->proc->socketFDout ) {
+#if defined(VK_PROCESS_DEBUG)
+	qDebug( "VKProcess::socketRead(): %d bytes read from FDout (%d)",
+		(int)(buffer->size()-oldSize), fd );
+#endif
+	emit readyReadFDout();
+    } else if ( fd == d->proc->socketStdout ) {
 #if defined(VK_PROCESS_DEBUG)
 	qDebug( "VKProcess::socketRead(): %d bytes read from stdout (%d)",
-		buffer->size()-oldSize, fd );
+		(int)(buffer->size()-oldSize), fd );
 #endif
 	emit readyReadStdout();
     } else if ( fd == d->proc->socketStderr ) {
 #if defined(VK_PROCESS_DEBUG)
 	qDebug( "VKProcess::socketRead(): %d bytes read from stderr (%d)",
-		buffer->size()-oldSize, fd );
+		(int)(buffer->size()-oldSize), fd );
 #endif
 	emit readyReadStderr();
     }
@@ -1978,6 +2422,30 @@ void VKProcess::socketRead( int fd )
 */
 void VKProcess::socketWrite( int fd )
 {
+  if (fd == d->proc->socketFDin) {
+    while ( fd == d->proc->socketFDin && d->proc->socketFDin != 0 ) {
+	if ( d->fdinBuf.isEmpty() ) {
+	    d->notifierFDin->setEnabled( FALSE );
+	    return;
+	}
+	ssize_t ret = ::write( fd,
+		d->fdinBuf.head()->data() + d->fdinBufRead,
+		d->fdinBuf.head()->size() - d->fdinBufRead );
+#if defined(VK_PROCESS_DEBUG)
+	qDebug( "VKProcess::socketWrite(): wrote %d bytes to fdin (%d)", ret, fd );
+#endif
+	if ( ret == -1 )
+	    return;
+	d->fdinBufRead += ret;
+	if ( d->fdinBufRead == (ssize_t)d->fdinBuf.head()->size() ) {
+	    d->fdinBufRead = 0;
+	    delete d->fdinBuf.dequeue();
+	    if ( wroteToFDinConnected && d->fdinBuf.isEmpty() )
+		emit wroteToFDin();
+	}
+    }
+  }
+  else if (fd == d->proc->socketStdin) {
     while ( fd == d->proc->socketStdin && d->proc->socketStdin != 0 ) {
 	if ( d->stdinBuf.isEmpty() ) {
 	    d->notifierStdin->setEnabled( FALSE );
@@ -1999,6 +2467,7 @@ void VKProcess::socketWrite( int fd )
 		emit wroteToStdin();
 	}
     }
+  }
 }
 
 /*!
@@ -2008,6 +2477,12 @@ void VKProcess::socketWrite( int fd )
 
   This function should probably go into the public API.
 */
+void VKProcess::flushFDin()
+{
+    if (d->proc)
+        socketWrite(d->proc->socketFDin);
+}
+
 void VKProcess::flushStdin()
 {
     if (d->proc)
@@ -2031,11 +2506,15 @@ void VKProcess::setIoRedirection( bool value )
 {
     ioRedirection = value;
     if ( ioRedirection ) {
+	if ( d->notifierFDout )
+	    d->notifierFDout->setEnabled( TRUE );
 	if ( d->notifierStdout )
 	    d->notifierStdout->setEnabled( TRUE );
 	if ( d->notifierStderr )
 	    d->notifierStderr->setEnabled( TRUE );
     } else {
+	if ( d->notifierFDout )
+	    d->notifierFDout->setEnabled( FALSE );
 	if ( d->notifierStdout )
 	    d->notifierStdout->setEnabled( FALSE );
 	if ( d->notifierStderr )
@@ -2051,6 +2530,15 @@ void VKProcess::setIoRedirection( bool value )
 void VKProcess::setNotifyOnExit( bool value )
 {
     notifyOnExit = value;
+}
+
+/*
+  This private function is used by connectNotify() and disconnectNotify() to
+  change the value of wroteToFDinConnected (and related behaviour)
+*/
+void VKProcess::setWroteFDinConnected( bool value )
+{
+    wroteToFDinConnected = value;
 }
 
 /*

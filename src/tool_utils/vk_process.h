@@ -79,7 +79,6 @@ inline QIODevice::Offset VKMembuf::size() const
 
 
 
-
 /***********************************************************************
  *
  * VKProc
@@ -102,6 +101,8 @@ public:
     ~VKProc();
 
     pid_t pid;
+    int socketFDin;
+    int socketFDout;
     int socketStdin;
     int socketStdout;
     int socketStderr;
@@ -144,6 +145,7 @@ private:
 
 
 
+
 /***********************************************************************
  *
  * VKProcess
@@ -159,15 +161,20 @@ public:
     void closeOpenSocketsForChild();
     void newProc( pid_t pid, VKProcess *process );
 
+    VKMembuf bufFDout;
     VKMembuf bufStdout;
     VKMembuf bufStderr;
 
+    QPtrQueue<QByteArray> fdinBuf;
     QPtrQueue<QByteArray> stdinBuf;
 
+    QSocketNotifier *notifierFDin;
+    QSocketNotifier *notifierFDout;
     QSocketNotifier *notifierStdin;
     QSocketNotifier *notifierStdout;
     QSocketNotifier *notifierStderr;
 
+    ssize_t fdinBufRead;
     ssize_t stdinBufRead;
     VKProc *proc;
 
@@ -198,9 +205,13 @@ public:
 #endif
 
     // set and get the comms wanted
-    enum Communication { Stdin=0x01, Stdout=0x02, Stderr=0x04, DupStderr=0x08 };
-    void setCommunication( int c );
+    enum Communication { Stdin=0x01, Stdout=0x02, Stderr=0x04, DupStderr=0x08, FDin=0x10, FDout=0x20 };
+    int setCommunication( int c );
     int communication() const;
+    void setFDin( int fd );
+    void setFDout( int fd );
+    int getFDin();
+    int getFDout();
 
     // start the execution
     virtual bool start( QStringList *env=0 );
@@ -213,10 +224,15 @@ public:
     int exitStatus() const;
 
     // reading
+    virtual QByteArray readFDout();
     virtual QByteArray readStdout();
     virtual QByteArray readStderr();
+
+    bool canReadLineFDout() const;
     bool canReadLineStdout() const;
     bool canReadLineStderr() const;
+
+    virtual QString readLineFDout();
     virtual QString readLineStdout();
     virtual QString readLineStderr();
 
@@ -228,12 +244,15 @@ public:
 #endif
     PID processIdentifier();
 
+    void flushFDin();
     void flushStdin();
 
 signals:
+    void readyReadFDout();
     void readyReadStdout();
     void readyReadStderr();
     void processExited();
+    void wroteToFDin();
     void wroteToStdin();
     void launchFinished();
 
@@ -243,6 +262,9 @@ public slots:
     void kill() const;
 
     // input
+    virtual void writeToFDin( const QByteArray& buf );
+    virtual void writeToFDin( const QString& buf );
+    virtual void closeFDin();
     virtual void writeToStdin( const QByteArray& buf );
     virtual void writeToStdin( const QString& buf );
     virtual void closeStdin();
@@ -252,8 +274,11 @@ protected: // ### or private?
     void disconnectNotify( const char * signal );
 
 private:
+    void reprioritiseComms();
+
     void setIoRedirection( bool value );
     void setNotifyOnExit( bool value );
+    void setWroteFDinConnected( bool value );
     void setWroteStdinConnected( bool value );
 
     void init();
@@ -261,6 +286,7 @@ private:
 #if defined(Q_OS_WIN32)
     uint readStddev( HANDLE dev, char *buf, uint bytes );
 #endif
+    VKMembuf* membufFDout();
     VKMembuf* membufStdout();
     VKMembuf* membufStderr();
 
@@ -281,11 +307,14 @@ private:
     bool exitNormal; // normal exit?
     bool ioRedirection; // automatically set be (dis)connectNotify
     bool notifyOnExit; // automatically set be (dis)connectNotify
+    bool wroteToFDinConnected; // automatically set be (dis)connectNotify
     bool wroteToStdinConnected; // automatically set be (dis)connectNotify
 
+    bool readFDoutCalled;
     bool readStdoutCalled;
     bool readStderrCalled;
     int comms;
+    int filedesc_in, filedesc_out;
 
     friend class VKProcessPrivate;
 #if defined(Q_OS_UNIX)
@@ -297,6 +326,11 @@ private:
     VKProcess( const VKProcess & );
     VKProcess &operator=( const VKProcess & );
 #endif
+
+    /* Keep track of FDout/in disabling stdout/err/in */
+    bool disabledStdin;
+    bool disabledStdout;
+    bool disabledStderr;
 };
 
 
