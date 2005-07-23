@@ -113,15 +113,29 @@ bool LogFile::save( QString fname )
   stream << "<ppid>" << info->ppid << "</ppid>\n";
   stream << "<tool>" << info->tool << "</tool>\n\n";
 
-  /* argv stuff */
+  /* args stuff */
+  stream << "<args>\n";
+
+  stream << "<vargv>\n";
+  stream << "  <exe>" << info->vgInfoList[0] << "</exe>\n";
+  for ( uint i=1; i<info->vgInfoList.count(); i++ )
+    stream << "  <arg>" << info->vgInfoList[i] << "</arg>\n";
+  stream << "</vargv>\n";
+
   stream << "<argv>\n";
-  stream << "  <exe>" << info->infoList[0] << "</exe>\n";
-  for ( uint i=1; i<info->infoList.count(); i++ )
-    stream << "  <arg>" << info->infoList[i] << "</arg>\n";
-  stream << "</argv>\n\n";
+  stream << "  <exe>" << info->exInfoList[0] << "</exe>\n";
+  for ( uint i=1; i<info->exInfoList.count(); i++ )
+    stream << "  <arg>" << info->exInfoList[i] << "</arg>\n";
+  stream << "</argv>\n";
+
+  stream << "</args>\n";
+
 
   /* starting status */
-  stream << "<status>" << info->startStatus << "</status>\n\n";
+  stream << "<status>\n";
+  stream << "  <state>" << info->startStatus << "</state>\n";
+  stream << "  <time>"  << info->startTime   << "</time>\n";
+  stream << "</status>\n\n";
 
   /* errors */
   Error* error;
@@ -134,7 +148,10 @@ bool LogFile::save( QString fname )
     errCounts->print2File( stream );
 
   /* ending status */
-  stream << "<status>" << info->endStatus << "</status>\n\n";
+  stream << "<status>\n";
+  stream << "  <state>" << info->endStatus << "</state>\n";
+  stream << "  <time>"  << info->endTime   << "</time>\n";
+  stream << "</status>\n\n";
 
   /* suppcounts */
   if ( suppCounts != 0 )

@@ -14,7 +14,6 @@
 #include <qfile.h>
 #include <qmap.h>
 #include <qobject.h>
-#include <qpixmap.h>
 #include <qcstring.h>
 #include <qstring.h>
 
@@ -90,7 +89,6 @@ public:
   QString logsDir();
   QString dbaseDir();
   QString suppDir();
-  QPixmap pixmap( QString pixfile );
   QChar sepChar() { return sep; }
 
   /* Returns a ptr to the tool currently set in [valgrind:tool] */
@@ -156,6 +154,8 @@ private:
   /* creates the various VkObjects and initialises their options,
      ready for cmd-line parsing (if any). */
   void initVkObjects();
+  /* write vg-exec-path, vg-supp-dir path and default supp file values */
+  void updatePaths();
 
 private:
   QChar sep;

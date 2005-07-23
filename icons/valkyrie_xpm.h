@@ -1,5 +1,5 @@
 /* XPM */
-static char * valkyrie2_xpm[] = {
+static const char* valkyrie_xpm[] = {
 "32 32 486 2",
 "  	c None",
 ". 	c #5E3712",

@@ -19,6 +19,7 @@
 #include <qobjectlist.h>
 
 #include "main_window.h"
+#include "valkyrie_xpm.h"
 #include "tb_mainwin_icons.h"
 #include "vk_config.h"
 #include "vk_utils.h"
@@ -55,7 +56,7 @@ MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
   valkyrie = valk;
 
   setCaption( vkConfig->vkName() );
-  setIcon( vkConfig->pixmap( "valkyrie.xpm" ) );
+  setIcon( QPixmap(valkyrie_xpm) );
   statusBar()->setSizeGripEnabled( false );
 
   viewStack = new ToolViewStack( this, "view_stack" );

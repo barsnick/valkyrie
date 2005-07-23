@@ -49,20 +49,24 @@ MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
   vLayout->setResizeMode( QLayout::FreeResize );
 
   /* create a tabwidget */
-  QTabWidget* tabwidget = new QTabWidget(central, "mc_tabwidget");
+  QTabWidget* tabwidget = new QTabWidget( central, "mc_tabwidget" );
   vLayout->addWidget( tabwidget );
+  /* some tweaks to prettify the tabwidget */
+  tabwidget->setTabPosition( QTabWidget::Bottom  );
+  QFont fnt = tabwidget->font();
+  fnt.setPointSize( fnt.pointSize() - 2 );
+  tabwidget->setFont( fnt );
 
   /* first tab: the listview */
   lView = new QListView( tabwidget, "lview" );
-  //  vLayout->addWidget( lView );
-  tabwidget->addTab( lView, "MemCheck" );
+  tabwidget->addTab( lView, "valgrind output" );
   lView->setShowToolTips( false );
   lView->setSorting( -1 );
   lView->setMargin( 5 );
   lView->addColumn( "" );
   lView->header()->setStretchEnabled( true, 0 );
   lView->header()->hide();
-  QFont lview_fnt( "Adobe Courier", 12, QFont::Normal, false );
+  QFont lview_fnt( "Adobe Courier", 10, QFont::Normal, false );
   lview_fnt.setStyleHint( QFont::TypeWriter );
   lView->setFont( lview_fnt );
 
@@ -79,28 +83,26 @@ MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
            this,  SLOT(launchEditor(QListViewItem*, const QPoint&, int)) );
 
 
-  QFont clientout_fnt( "Adobe Courier", 10, QFont::Normal, false );
+  QFont clientout_fnt( "Adobe Courier", 9, QFont::Normal, false );
   clientout_fnt.setStyleHint( QFont::TypeWriter );
 
   /* second tab: stdout */
-  stdout_tedit = new QTextEdit(tabwidget, "stdout_tedit");
-  tabwidget->addTab( stdout_tedit, "StdOut" );
-  stdout_tedit->setMargin( 5 );
-  stdout_tedit->setFont( clientout_fnt );
+  stdoutTedit = new QTextEdit( tabwidget, "stdout_tedit" );
+  tabwidget->addTab( stdoutTedit, "client stdout" );
+  stdoutTedit->setMargin( 5 );
+  stdoutTedit->setFont( clientout_fnt );
   //setTextFormat(plain|rich|LogText(=lotsoftext)|auto)
-  stdout_tedit->setReadOnly( true );
-  stdout_tedit->setText( "stdout... not yet implemented" );
-
+  stdoutTedit->setReadOnly( true );
+  stdoutTedit->setText( "" );
 
   /* third tab: stderr */
-  stderr_tedit = new QTextEdit(tabwidget, "stderr_tedit");
-  tabwidget->addTab( stderr_tedit, "StdErr" );
-  stderr_tedit->setMargin( 5 );
-  stderr_tedit->setFont( clientout_fnt );
+  stderrTedit = new QTextEdit(tabwidget, "stderr_tedit");
+  tabwidget->addTab( stderrTedit, "client stderr" );
+  stderrTedit->setMargin( 5 );
+  stderrTedit->setFont( clientout_fnt );
   //setTextFormat(plain|rich|LogText(=lotsoftext)|auto)
-  stderr_tedit->setReadOnly( true );
-  stderr_tedit->setText( "stderr... not yet implemented" );
-
+  stderrTedit->setReadOnly( true );
+  stderrTedit->setText( "" );
 }
 
 
@@ -108,8 +110,8 @@ MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
 void MemcheckView::clear()
 {
   lView->clear();
-  stdout_tedit->clear();
-  stderr_tedit->clear();
+  stdoutTedit->clear();
+  stderrTedit->clear();
 }
 
 
@@ -117,7 +119,7 @@ void MemcheckView::clear()
 void MemcheckView::setState( bool run )
 {
   openlogButton->setEnabled( !run );
-  //TODO: suppedButton->setEnabled( !run );
+  // TODO: suppedButton->setEnabled( !run );
   if ( run ) {       /* startup */
     savelogButton->setEnabled( false );
     setCursor( QCursor(Qt::WaitCursor) );
@@ -138,16 +140,16 @@ void MemcheckView::toggleToolbarLabels( bool state )
 }
 
 
-/* slot: called from logMenu. Parse and load a single logfile.
-   Setting the open-file-dialog's 'start-with' dir to null causes it
+/* slot: called from logMenu. parse and load a single logfile.
+   setting the open-file-dialog's 'start-with' dir to null causes it
    to start up in whatever the user's current dir happens to be. */
 void MemcheckView::openLogFile()
 { 
 #if 0
-	/* testing new file dialog stuff */
+  /* testing new file dialog stuff */
   QString fname = "";  
-	FileDialog* fd = new FileDialog( this, "log_file_fd" );
-	fd->exec();
+  FileDialog* fd = new FileDialog( this, "log_file_fd" );
+  fd->exec();
 #else
   QString log_file;
 
@@ -527,9 +529,9 @@ void MemcheckView::updateErrors( ErrCounts * ecounts )
 void MemcheckView::loadClientOutput( const QString& client_output, int log_fd )
 {
   if (log_fd == 1) {
-    stdout_tedit->append( client_output );  
+    stdoutTedit->append( client_output );  
   } else if (log_fd == 2) {
-    stderr_tedit->append( client_output );  
+    stderrTedit->append( client_output );  
   }
 }
 
@@ -696,15 +698,20 @@ void OutputItem::setOpen( bool open )
 
       case XmlOutput::INFO: {
         OutputItem* after = this;
-        OutputItem* argv_item = new OutputItem( this, after, "argv" );
+        OutputItem* args_item = new OutputItem( this, after, "args" );
         Info* info = (Info*)xmlOutput;
-        for ( uint i=0; i<info->infoList.count(); i++ ) {
-          OutputItem*item = new OutputItem( argv_item, after,
-                                            info->infoList[i] );
+        OutputItem* item;
+        for ( unsigned int i=0; i<info->vgInfoList.count(); i++ ) {
+          item = new OutputItem( args_item, after, info->vgInfoList[i] );
           after = item;
         }
-        argv_item->setOpen( true );
+        for ( unsigned int i=0; i<info->vgInfoList.count(); i++ ) {
+          item = new OutputItem( args_item, after, info->exInfoList[i] );
+          after = item;
+        }
+        args_item->setOpen( true );
       } break;
+
 
       /* 'J is the biz' stuff */
       case XmlOutput::PREAMBLE: {

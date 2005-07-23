@@ -77,7 +77,7 @@ private:
 
   void setupProc( bool init );
   void setupParser( bool init );
-	bool setupFileStream( bool init );
+  bool setupFileStream( bool init );
 
 private:
   XMLParser* xmlParser;
@@ -85,7 +85,7 @@ private:
   QXmlInputSource source;
 
   QFile logFile;
-  QString save_fname;
+  QString saveFname;
   QTextStream logStream;
 };
 

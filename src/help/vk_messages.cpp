@@ -10,6 +10,7 @@
 
 #include "vk_messages.h"
 #include "vk_config.h"
+#include "valkyrie_xpm.h"
 #include "msgbox_icons.h"
 
 #include <stdarg.h>           /* va_start, va_end */
@@ -69,7 +70,7 @@ MsgBox::MsgBox( QWidget* parent, Icon icon, QString msg,
     break;
   case About:
     caption.sprintf("About %s", vkConfig->vkName() );
-    pm_file = vkConfig->pixmap( "valkyrie.xpm" );
+    pm_file = QPixmap( valkyrie_xpm );
     break;
   default:
     break;

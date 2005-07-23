@@ -288,7 +288,7 @@ void LeWidget::addButton( QWidget* parent, const QObject* receiver,
   if ( !icon ) {
     pb = new QPushButton( opt->shortHelp, parent );
   } else {
-    QPixmap openIcon( vkConfig->pixmap( "fileopen.xpm" ) );
+    //RM: QPixmap openIcon( vkConfig->pixmap( "fileopen.xpm" ) );
     if ( !txt.isNull() )
       pb = new QPushButton( openIcon, txt, parent );
     else

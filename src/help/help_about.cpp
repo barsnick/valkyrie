@@ -8,6 +8,7 @@
  * See the file LICENSE.GPL for the full license details.
  */
 
+#include "valkyrie_xpm.h"
 #include "help_about.h"
 #include "vk_config.h"
 
@@ -84,7 +85,7 @@ HelpAbout::HelpAbout(  QWidget* parent, TabId tabid )
 
   /* pic */
   QLabel* pic = new QLabel( this );
-  pic->setPixmap( vkConfig->pixmap( "valkyrie.xpm") );
+  pic->setPixmap( QPixmap(valkyrie_xpm) );
   pic->setFixedSize( pic->sizeHint() );
   hbox->addWidget( pic );
 

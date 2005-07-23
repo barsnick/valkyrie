@@ -147,35 +147,7 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
      vg-supp-dir paths found by 'configure' to valkyrierc. 
      These values can be over-ridden by the user via the Options dialog.*/
   if ( newConfigFile ) {
-
-    wrEntry( VG_EXEC_PATH, "vg-exec",  "valkyrie" );
-    wrEntry( VG_SUPP_PATH, "vg-supps-dir", "valkyrie" );
-
-    /* find and store valgrind's suppressions files */
-    QString def_supp   = "";
-    QString supp_files = "";
-    QDir supp_dir( VG_SUPP_PATH );
-    /* see if we have any *.supp files in here - if so, grab 'em while
-       the going's good */
-    QStringList supp_list = supp_dir.entryList( "*.supp", QDir::Files );
-    for ( unsigned int i=0; i<supp_list.count(); i++ ) {
-      supp_files += supp_dir.absPath() + "/" + supp_list[i] + sep;
-      /* the only selected one is the default suppression file */
-      if ( supp_list[i] == rdEntry( "suppressions", "valgrind" ) )
-        def_supp = supp_dir.absPath() + "/" + supp_list[i];
-    }
-    /* chop off the trailing ';' */
-    supp_files.truncate( supp_files.length() - 1 );
-    /* write the list of found .supp files */
-    wrEntry( supp_files, "supps-all", "valgrind" );
-    /* and hold onto these values, 'cos they are the install defaults */
-    wrEntry( supp_files, "supps-def", "valgrind" );
-    /* and write the default supp. file including path */
-    wrEntry( def_supp, "suppressions", "valgrind" );
-
-    /* write entries to disk immediately in case something bad
-       happens, as we won't get another chance to do this */
-    sync();
+    updatePaths();
   }
 
 }
@@ -206,13 +178,6 @@ QString VkConfig::dbaseDir()  { return dbasePath; }
 QString VkConfig::logsDir()   { return logsPath;  }
 /* ~/.valkyrie-X.X.X/suppressions/ */
 QString VkConfig::suppDir()   { return suppPath;  }
-
-QPixmap VkConfig::pixmap( QString pix )
-{
-  QPixmap pm( imgPath + pix );
-  return pm;
-}
-
 
 
 /* read functions ------------------------------------------------------ */
@@ -450,6 +415,43 @@ void VkConfig::insertData( const EntryKey &ekey,
 }
 
 
+/* If we've just created valkyrierc, or if we've moved machines, or
+   changed some install paths, write the vg-exec-path and vg-supp-dir
+   paths found by 'configure' to valkyrierc.  These values can be
+   over-ridden by the user via the Options dialog.*/
+void VkConfig::updatePaths()
+{
+  wrEntry( VG_EXEC_PATH, "vg-exec",  "valkyrie" );
+  wrEntry( VG_SUPP_PATH, "vg-supps-dir", "valkyrie" );
+
+  /* find and store valgrind's suppressions files */
+  QString def_supp   = "";
+  QString supp_files = "";
+  QDir supp_dir( VG_SUPP_PATH );
+  /* see if we have any *.supp files in here - if so, grab 'em while
+     the going's good */
+  QStringList supp_list = supp_dir.entryList( "*.supp", QDir::Files );
+  for ( unsigned int i=0; i<supp_list.count(); i++ ) {
+    supp_files += supp_dir.absPath() + "/" + supp_list[i] + sep;
+    /* the only selected one is the default suppression file */
+    if ( supp_list[i] == rdEntry( "suppressions", "valgrind" ) )
+      def_supp = supp_dir.absPath() + "/" + supp_list[i];
+  }
+  /* chop off the trailing ';' */
+  supp_files.truncate( supp_files.length() - 1 );
+  /* write the list of found .supp files */
+  wrEntry( supp_files, "supps-all", "valgrind" );
+  /* and hold onto these values, 'cos they are the install defaults */
+  wrEntry( supp_files, "supps-def", "valgrind" );
+  /* and write the default supp. file including path */
+  wrEntry( def_supp, "suppressions", "valgrind" );
+
+  /* write entries to disk immediately in case Something Bad happens,
+     as we won't get another chance to do this */
+  sync();
+}
+
+
 VkConfig::RetVal VkConfig::parseFile()
 {
   QFile rFile( rcFileName );
@@ -464,6 +466,16 @@ VkConfig::RetVal VkConfig::parseFile()
     parseConfigFile( rFile );
     rFile.close();
   }
+
+  /* double-check that all the install paths are correct - if not,
+     silently correct them.  we have to delete any entries held in
+     [valgrind:suppressions] as they may contain invalid paths, and
+     re-initialise with default suppressions */
+  if ( rdEntry("vg-exec",      "valkyrie") != VG_EXEC_PATH || 
+       rdEntry("vg-supps-dir", "valkyrie") != VG_SUPP_PATH ) {
+    updatePaths();
+  }
+
   return Okay;
 }
 
@@ -639,7 +651,7 @@ VkConfig::RetVal VkConfig::checkAccess() const
     return CreateRcFile;
   }
 
-  // 5. and finally, check the version no. for compatibility
+  /* 5. and finally, check the version no. for compatibility */
   QFile rcFile( rcFileName );
   if ( rcFile.open( IO_ReadOnly ) ) {
     QTextStream ts( &rcFile );

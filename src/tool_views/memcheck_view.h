@@ -135,8 +135,8 @@ private:
   QString logFilename;
 
   QListView* lView;
-  QTextEdit* stdout_tedit;
-  QTextEdit* stderr_tedit;
+  QTextEdit* stdoutTedit;
+  QTextEdit* stderrTedit;
 
   QToolButton* savelogButton;
   QToolButton* openlogButton;

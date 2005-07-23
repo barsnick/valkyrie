@@ -35,7 +35,6 @@ Valkyrie::Valkyrie()
 {
   /* init vars */
   runMode = modeNotSet;
-
   valgrind   = 0;
 
 
@@ -69,7 +68,7 @@ Valkyrie::Valkyrie()
           "Use default system font",  "",  urlNone );
   addOpt( FONT_USER,   Option::NOT_POPT,   Option::LEDIT, 
           "valkyrie",  '\0',               "user-font", 
-          "",          "",  "Helvetica [Cronyx],12,-1,5,50,0,0,0,0,0", 
+          "",          "",  "Luxi Sans,11,-1,5,50,0,0,0,0,0", 
           "",          "",                 urlNone );
   addOpt( SRC_EDITOR,  Option::NOT_POPT,   Option::LEDIT, 
           "valkyrie",  '\0',               "src-editor", 
@@ -312,21 +311,21 @@ QString Valkyrie::currentFlags( ToolObject* tool_obj )
     vk_assert_never_reached();
   }
 
-	/* ## hack alert: unfortunately, we have to pass each arg to
-		 VKProcess as a separate string, and this includes any binary
-		 flags; but for display purposes in the flagWidget, concat the
-		 binary together with its flags 'cos its prettier. */
-	QString flags2 = "";
-	int num_flags = flags.count();
-	for ( int i=0; i<num_flags-2; i++ )
-		flags2 += flags[i] +  "\n";
-	if ( !vkConfig->rdEntry("binary-flags", "valkyrie").isEmpty() ) {
-		flags2 += flags[num_flags-2] + " " + flags[num_flags-1];
-	} else {
-		flags2 += flags[num_flags-1];
-	}
+  /* ### hack alert: unfortunately, we have to pass each arg to
+     VKProcess as a separate string, and this includes any binary
+     flags; but for display purposes in the flagWidget, concat the
+     binary together with its flags 'cos it's prettier. */
+  QString flags2 = "";
+  int num_flags = flags.count();
+  for ( int i=0; i<num_flags-2; i++ )
+    flags2 += flags[i] +  "\n";
+  if ( !vkConfig->rdEntry("binary-flags", "valkyrie").isEmpty() ) {
+    flags2 += flags[num_flags-2] + " " + flags[num_flags-1];
+  } else {
+    flags2 += flags[num_flags-1];
+  }
 
-	return flags2;
+  return flags2;
 }
 
 
@@ -380,7 +379,6 @@ bool Valkyrie::runTool( ToolObject* activeTool/*=0*/ )
   default:
     vk_assert_never_reached();
   }
-
 
   /* we've done what we were asked to do, so relax */
   //runMode = modeNotSet;

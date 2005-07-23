@@ -1,7 +1,6 @@
 /* ---------------------------------------------------------------------
  * Definition of XMLParser                                  xml_parser.h
  * Subclass of QXmlDefaultHandler for parsing memcheck-specific xml output.
- *
  * Also contains various small classes encapsulating the different
  * chunks of xml output.
  * ---------------------------------------------------------------------
@@ -67,7 +66,7 @@ public:
 
 public:
   int num_errs, num_leaks, num_blocks;
-  QString tmp, status, object;
+  QString state, time, object;
 };
 
 
@@ -85,7 +84,9 @@ public:
   QString tool;
   QString exe;
   QString startStatus, endStatus;
-  QStringList infoList;  /* argv stuff */
+  QString startTime, endTime;
+  QStringList vgInfoList;  /* valgrind args */
+  QStringList exInfoList;  /* executable args */
 };
 
 
@@ -258,8 +259,10 @@ private:
   QString acronym( QString kind );
 
   enum TagType {     /* mapping of tags to enum values */
-    NONE=0, VGOUTPUT, PROTOCOL, PREAMBLE, PID, PPID, TOOL, ARGV, EXE, ARG, 
-    STATUS, ERROR, UNIQUE, TID, KIND, WHAT, STACK, FRAME, IP, OBJ, FN, 
+    NONE=0, VGOUTPUT, PROTOCOL, PREAMBLE, PID, PPID, TOOL, 
+    ARGS, VARGV, ARGV, EXE, ARG, 
+    STATUS, STATE, TIME,
+    ERROR, UNIQUE, TID, KIND, WHAT, STACK, FRAME, IP, OBJ, FN, 
     SRCDIR, SRCFILE, LINE, AUXWHAT, ERRORCOUNTS, PAIR, COUNT, SUPPCOUNTS, 
     NAME, LEAKEDBYTES, LEAKEDBLOCKS 
   };
@@ -279,7 +282,7 @@ private:
   QString content;             /* for storing output */
 
   /* bools so we know where we are and what we're doing */
-  bool inPreamble, inError, inStack, inFrame;
+  bool inPreamble, inVargV, inError, inStack, inFrame;
   bool inErrorCounts, inSuppCounts, inPair;
   bool statusPopped;
 

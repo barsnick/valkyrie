@@ -416,7 +416,7 @@ fi
 
 
 #-------------------------------------------------------------------
-# we have all the info we need to generate vk_include.h at this point
+# we have all the info we need to generate vk_include.h at this point.
 # note: if the #includes are changed in any way, update vk_utils.cpp
 #-------------------------------------------------------------------
 echo "Creating ./src/vk_include.h..."

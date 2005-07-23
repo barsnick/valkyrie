@@ -33,6 +33,7 @@ Memcheck::Memcheck()
   : ToolObject( "Memcheck", "&Memcheck", Qt::SHIFT+Qt::Key_M ) 
 {
   /* init vars */
+  fileSaved = true;
   logStream.setEncoding( QTextStream::UnicodeUTF8 );
   xmlParser = new XMLParser( this, true );
   reader.setContentHandler( xmlParser );
@@ -172,22 +173,30 @@ bool Memcheck::isDone()
                       "<p>Do you want to abort it ?</p>" );
     if ( ok == MsgBox::vkYes ) {
       bool stopped = stop( Valkyrie::modeNotSet );     /* abort */
-      vk_assert( stopped );         // TODO: what todo if couldn't stop?
+      vk_assert( stopped );
+      // TODO: what todo if can't /  won't stop?
     } else if ( ok == MsgBox::vkNo ) {
       return false;                                    /* continue */
     }
   }
 
-  /* currently loaded / parsed stuff isn't saved to disk */
+  /* currently loaded / parsed stuff is saved to tmp file - ask user
+     if they want to save it to a 'real' file */
   if ( !fileSaved ) {
     int ok = vkQuery( this->view(), "Unsaved File", 
                       "&Save;&Discard;&Cancel",
-                      "<p>The current output is not saved."
+                      "<p>The current output is not saved, "
+                      " and will be deleted.<br/>"
                       "Do you want to save it ?</p>" );
-    if ( ok == MsgBox::vkYes ) {
-      VK_DEBUG("TODO: save();\n");         /* save */
-    } else if ( ok == MsgBox::vkCancel ) {
-      return false;                        /* procrastinate */
+    if ( ok == MsgBox::vkYes ) {            /* save */
+      VK_DEBUG("TODO: save();\n");
+    } else if ( ok == MsgBox::vkCancel ) {  /* procrastinate */
+      return false;
+    } else {                                /* discard */
+      //printf("removing tmp file '%s'\n", saveFname.latin1() );
+      QFile file( saveFname );
+      file.remove();
+      fileSaved = true;
     }
   }
 
@@ -196,7 +205,7 @@ bool Memcheck::isDone()
 
 bool Memcheck::start( Valkyrie::RunMode rm )
 {
-  vk_assert(!is_Running);
+  vk_assert( !is_Running );
   bool ok = false;
   
   switch ( rm ) {
@@ -206,7 +215,7 @@ bool Memcheck::start( Valkyrie::RunMode rm )
                  "--view-log doesn't make any sense in non-gui mode.\n"
                  "       ** Quitting **" );
         emit fatal();  /* tell valkyrie to die */
-	break;
+        break;
       }
       ok = this->parseLogFile();
       break;
@@ -570,18 +579,15 @@ bool Memcheck::run( QStringList flags )
   emitRunning( true );
 
   /* init the auto-save filename and stream */
-  save_fname = vk_mkstemp( "mc_output", vkConfig->logsDir(), ".xml" );
-  logFile.setName( save_fname );
-  //printf("save_fname = %s\n", save_fname.latin1() );
-  //logStream.setEncoding( QTextStream::UnicodeUTF8 );
-  //logStream.setDevice( &logFile );
-  //if ( !logFile.open( IO_WriteOnly ) ) {
+  saveFname = vk_mkstemp( "mc_output", vkConfig->logsDir(), ".xml" );
+  //printf("saveFname = %s\n", saveFname.latin1() );
+  logFile.setName( saveFname );
   if ( ! setupFileStream( true ) ) {
     emitRunning( false );
     setupFileStream( false );
     return vkError( this->view(), "Open File Error", 
                     "<p>Unable to open file '%s' for writing.</p>", 
-                    save_fname.latin1() );
+                    saveFname.latin1() );
   }
 
   setupParser( true );
@@ -607,8 +613,7 @@ bool Memcheck::run( QStringList flags )
    read and process the data, which might be output in chunks.
    output is auto-saved to a logfile in ~/.valkyrie-X.X.X/logs/
    Note: In non-gui mode, and client program output on the same log_fd
-   as valgrind/valkyrie will get saved to the logfile.
-*/
+   as valgrind/valkyrie will get saved to the logfile. */
 void Memcheck::parseOutput()
 {
   statusMsg( "Memcheck", "Parsing output ... " );
@@ -627,7 +632,7 @@ void Memcheck::parseOutput()
   while ( proc->canReadLineFDout() ) {
     lineNumber++;
     data = proc->readLineFDout();
-//  printf("MC::parseOutput(): FDout(%d): '%s'\n", log_fd, data.latin1() );
+    //printf("MC::parseOutput(): FDout(%d): '%s'\n", log_fd, data.latin1() );
     logStream << data << "\n";
     if ( usingGui ) {
       source.setData( data );
@@ -641,17 +646,16 @@ void Memcheck::parseOutput()
     /* Anything from stdout will now be from client prog */
     while ( proc->canReadLineStdout() ) {
       data = proc->readLineStdout();
-//      printf("\nMC::parseOutput(): Stdout: '%s'\n", data.latin1() );
+      //printf("\nMC::parseOutput(): Stdout: '%s'\n", data.latin1() );
       loadClientOutput( data, 1 );
     }
   }
   if ( log_fd != 2 ) {                    /* stderr */
-  /* If valgrind failed to start, may output to stderr
-     Else will be client prog output
-  */
+  /* if valgrind failed to start, may output to stderr;
+     else will be client prog output. */
     while ( proc->canReadLineStderr() ) {
       data = proc->readLineStderr();
-//      printf("\nMC::parseOutput(): Stderr: '%s'\n", data.latin1() );
+      //printf("\nMC::parseOutput(): Stderr: '%s'\n", data.latin1() );
       loadClientOutput( data, 2 );
     }
   }
@@ -682,8 +686,6 @@ void Memcheck::processDone()
   /* grab the process id in case we need it later */
   long currentPid = proc->processIdentifier();
 
-  //logFile.close();
-  //logStream.unsetDevice();
   setupFileStream( false );  /* close down auto-save log stuff */
   setupParser( false );      /* disconnect the parser */
   setupProc( false );        /* disconnect and delete the proc */
@@ -710,9 +712,9 @@ void Memcheck::processDone()
 
 void Memcheck::saveParsedOutput( QString& fname )
 { 
-  if ( fname.isEmpty() || fname == save_fname ) {
-    /* nothing to do: log already saved to save_fname */
-    statusMsg( "Saved to default", save_fname );
+  if ( fname.isEmpty() || fname == saveFname ) {
+    /* nothing to do: log already saved to saveFname */
+    statusMsg( "Saved to default", saveFname );
   } else {
     QFileInfo fi( fname );
     if ( fname[0] != '/' && fname[0] != '.' ) {
@@ -732,19 +734,19 @@ void Memcheck::saveParsedOutput( QString& fname )
                         fname.latin1() );
       if ( ok == MsgBox::vkNo ) {
         // TODO: Allow user to enter new logfile if in gui-mode
-        statusMsg( "Saved to default", save_fname );
+        statusMsg( "Saved to default", saveFname );
         return;
       }
     }
 
     /* save (rename, actually) the auto-named log-file */
     QDir dir( fi.dir() );
-    if ( dir.rename( save_fname, fname ) ) {
+    if ( dir.rename( saveFname, fname ) ) {
       statusMsg( "Saved", fname );
     } else {
       vkInfo( this->view(), "Save Failed", 
               "<p>Failed to save file to '%s'",  fname.latin1() );
-      statusMsg( "Saved to default", save_fname );
+      statusMsg( "Saved to default", saveFname );
     }
   }
 }
@@ -758,8 +760,9 @@ void Memcheck::setupProc( bool init )
     vk_assert( proc == 0 );
     proc = new VKProcess( this, "mc_proc" );
     int log_fd = vkConfig->rdInt( "log-fd", "valgrind" );
-    proc->setCommunication( VKProcess::Stdin | VKProcess::Stdout | VKProcess::Stderr |
-                            VKProcess::FDin | VKProcess::FDout );
+    proc->setCommunication( VKProcess::Stdin  | VKProcess::Stdout | 
+                            VKProcess::Stderr | VKProcess::FDin   |
+                            VKProcess::FDout );
     proc->setFDout( log_fd );
     connect( proc, SIGNAL( processExited() ),
              this, SLOT( processDone() ) );
@@ -769,7 +772,7 @@ void Memcheck::setupProc( bool init )
              this, SLOT( parseOutput() ) );
     connect( proc, SIGNAL( readyReadStderr() ),
              this, SLOT( parseOutput() ) );
-  } else {                      /* closing down */
+  } else {                        /* closing down */
     disconnect( proc, SIGNAL( processExited() ),
                 this, SLOT( processDone() ) );
     disconnect( proc, SIGNAL( readyReadFDout() ),
@@ -802,7 +805,7 @@ void Memcheck::setupParser( bool init )
     connect( xmlParser,    SIGNAL(updateStatus()),
              this->view(), SLOT(updateStatus()) );
     connect( xmlParser,    SIGNAL(loadClientOutput(const QString&)),
-	     this,         SLOT(loadClientOutput(const QString&)) );
+       this,         SLOT(loadClientOutput(const QString&)) );
 
     source.setData( "" );
     reader.parse( &source, true );
@@ -814,7 +817,7 @@ void Memcheck::setupParser( bool init )
     disconnect( xmlParser,    SIGNAL(updateStatus()),
                 this->view(), SLOT(updateStatus()) );
     disconnect( xmlParser,    SIGNAL(loadClientOutput(const QString&)),
-		this,         SLOT(loadClientOutput(const QString&)) );
+    this,         SLOT(loadClientOutput(const QString&)) );
   }
 
 }
@@ -842,14 +845,14 @@ void Memcheck::loadClientOutput( const QString& client_output, int log_fd/*=-1*/
   if (log_fd == -1)
     log_fd = vkConfig->rdInt( "log-fd", "valgrind" );
 
-  //  printf("client output (log_fd=%d): '%s'\n", log_fd, data.latin1() );
+  //printf("client output (log_fd=%d): '%s'\n", log_fd, data.latin1() );
 
   if ( usingGui ) {
     this->view()->loadClientOutput(client_output, log_fd);
   } else {
     if (log_fd == 1) {
       fprintf( stdout, "%s\n", client_output.latin1() );
-    } else { // any other fd -> stderr
+    } else {    /* any other fd -> stderr */
       fprintf( stderr, "%s\n", client_output.latin1() );
     }
   }

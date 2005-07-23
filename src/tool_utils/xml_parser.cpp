@@ -1,7 +1,6 @@
 /* ---------------------------------------------------------------------
  * Definition of XMLParser                                xml_parser.cpp
  * Subclass of QXmlDefaultHandler for parsing memcheck-specific xml output.
- *
  * Also contains various small classes encapsulating the different
  * chunks of xml output.
  * ---------------------------------------------------------------------
@@ -38,7 +37,8 @@ Preamble::Preamble() : XmlOutput( PREAMBLE )
 /* class TopStatus ----------------------------------------------------- */
 TopStatus::TopStatus() : XmlOutput( STATUS ) 
 {
-  status     = "";
+  state      = "";
+  time       = "";
   object     = "";
   num_errs   = 0;
   num_leaks  = 0;
@@ -48,8 +48,9 @@ TopStatus::TopStatus() : XmlOutput( STATUS )
 /* format output for displaying in listview */
 void TopStatus::printDisplay() 
 {
-  display = QString("Valgrind: %1 '%2'   Errors: %3   Leaked bytes: %4 in %5 blocks")
-    .arg( status )
+  display = QString("Valgrind: %1 (%2) '%3'   Errors: %4   Leaked bytes: %5 in %6 blocks")
+    .arg( state )
+    .arg( time )
     .arg( object )
     .arg( num_errs )
     .arg( num_leaks )
@@ -65,6 +66,8 @@ Info::Info() : XmlOutput( INFO )
   tool = "";
   startStatus = "";
   endStatus   = "";
+  startTime   = "";
+  endTime     = "";
   protocolVersion = -1;
 }
 
@@ -487,10 +490,14 @@ XMLParser::XMLParser( QObject* parent, bool esc_ents/*=false*/  )
   tagtypeMap["pid"]             = PID;
   tagtypeMap["ppid"]            = PPID;
   tagtypeMap["tool"]            = TOOL;
+  tagtypeMap["args"]            = ARGS;
+  tagtypeMap["vargv"]           = VARGV;
   tagtypeMap["argv"]            = ARGV;
   tagtypeMap["exe"]             = EXE;
   tagtypeMap["arg"]             = ARG;
   tagtypeMap["status"]          = STATUS;
+  tagtypeMap["state"]           = STATE;
+  tagtypeMap["time"]            = TIME;
   tagtypeMap["error"]           = ERROR;
   tagtypeMap["unique"]          = UNIQUE;
   tagtypeMap["tid"]             = TID;
@@ -539,6 +546,7 @@ void XMLParser::reset( bool reinit/*=true*/ )
   inFrame = false;
   statusPopped  = false;
   inPreamble    = false;
+  inVargV       = false;
   inErrorCounts = false;
   inSuppCounts  = false;
   inPair        = false;
@@ -598,8 +606,8 @@ bool XMLParser::startElement( const QString&, const QString&,
   TagType ttype = tagType( startTag );
 
   /* Any content before a start tag => client program output */
-  if (!content.isEmpty()) {
-    // TODO: content has lost it's spaces/formatting.
+  if ( !content.isEmpty() ) {
+    // TODO: content has lost its spaces/formatting.
     emit loadClientOutput( content );
   }
 
@@ -607,6 +615,9 @@ bool XMLParser::startElement( const QString&, const QString&,
     case PREAMBLE: 
       inPreamble = true;
       preamble = new Preamble();
+      break;
+    case VARGV:
+      inVargV = true;
       break;
     case ERROR:
       inError = true;
@@ -668,38 +679,58 @@ bool XMLParser::endElement( const QString&, const QString&,
     case TOOL:
       info->tool = content;
       break;
-    case ARG:
-      info->infoList << content;
-      break;
-    case ARGV:
+
+    case ARGS:
       stack.push( info );
       break;
+    case VARGV:
+      inVargV = false;
+      break;  
+    case ARG:
+      if ( inVargV )
+        info->vgInfoList << content;
+      else
+        info->exInfoList << content;
+      break;
     case EXE: {
-      /* get the name of the executable */
-      QString tmp;
-      int pos = content.findRev( '/' );
-      if ( pos == -1 ) {
-        tmp = content;
+      if ( inVargV ) {
+        info->vgInfoList << content;
       } else {
-        tmp = content.right( content.length() - pos-1 );
+        /* get the name of the executable to display in TopStatus */
+        int pos = content.findRev( '/' );
+        QString tmp = (pos == -1) ? content 
+                                  : content.right( content.length() - pos-1 );
+        topStatus->object = tmp;
+        info->exe = content;
+        info->exInfoList << content; 
       }
-      topStatus->object = tmp;
-      info->exe = content;
-      info->infoList << content; 
     } break;
+
+    case STATE:
+      topStatus->state  = content;
+      if ( ! statusPopped ) 
+        info->startStatus = content;
+      else
+        info->endStatus   = content;
+      break;
+    case TIME:
+      topStatus->time = content;
+      if ( ! statusPopped )
+        info->startTime = content;
+      else
+        info->endTime   = content;
+      break;
     case STATUS:
-      topStatus->status = content;
       if ( statusPopped ) {
-        info->endStatus = content;
         emit updateStatus();
       } else {
-        info->startStatus = content;
         emit loadItem( topStatus );
         statusPopped = true;
         /* pop the others now as well */
         emit loadItem( stack.pop() );   /* Info */
         emit loadItem( stack.pop() );   /* Preamble */
       } break;
+
     case ERROR:
       inError = false;
       emit loadItem( verror );
