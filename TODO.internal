@@ -43,7 +43,7 @@ General:
 - do not refuse to build if valgrind not found, but tell user the
   functionality will be severely restricted
 - if valgrind not found, simply disable run button, 
-  rather than not just build at all.
+  rather than not build at all.
 
 
 main_window.cpp:

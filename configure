@@ -56,9 +56,9 @@ VK_BUILD_TREE=$outpath
 # default outpath
 VK_INSTALL_PREFIX=$outpath
 # default PREFIX/doc
-VK_INSTALL_DOCS=$VK_INSTALL_PREFIX/doc/
+VK_INSTALL_DOCS=       #$VK_INSTALL_PREFIX/doc/
 # default PREFIX/bin
-VK_INSTALL_BIN=$VK_INSTALL_PREFIX/bin/
+VK_INSTALL_BIN=        #$VK_INSTALL_PREFIX/bin/
 
 
 #-------------------------------------------------------------------
@@ -598,14 +598,28 @@ echo "Compiler warnings .... $output"
 #---------------------------------------------------------------------------
 # Looking good to go -- create any necessary dirs
 #---------------------------------------------------------------------------
+# default PREFIX/doc
+VK_INSTALL_DOCS=$VK_INSTALL_PREFIX/doc
+# default PREFIX/bin
+VK_INSTALL_BIN=$VK_INSTALL_PREFIX/bin
+
 if [ ! -d $VK_INSTALL_PREFIX ]; then
+  echo 
+  echo "creating '$VK_INSTALL_PREFIX'"
   mkdir -p $VK_INSTALL_PREFIX
 fi
-if [ ! -d $VK_INSTALL_BIN ]; then
-  mkdir -p $VK_INSTALL_BIN
-fi
-if [ ! -d $VK_INSTALL_DOCS ]; then
-  mkdir -p $VK_INSTALL_DOCS
+
+#---------------------------------------------------------------------------
+# If we are installing to anything other than the default, create symlinks
+#---------------------------------------------------------------------------
+if [ ! "$VK_INSTALL_PREFIX" = "$outpath" ] ; then
+  echo "Creating symlinks"
+  # delete old link; symlink the bin directory
+   rm -f $VK_INSTALL_BIN
+   ln -s $relpath/bin $VK_INSTALL_BIN
+  # delete old link; symlink the doc directory
+  rm -f $VK_INSTALL_DOCS
+  ln -s $relpath/doc $VK_INSTALL_DOCS
 fi
 
 
@@ -648,7 +662,11 @@ fi
 #  QMAKE_LIBDIR_FLAGS="$QMAKE_LIBDIR_FLAGS $MYSQL_LIB_PATH"
 #  QMAKE_INCLUDEPATH="$QMAKE_INCLUDEPATH $MYSQL_INC"
 #fi
-
+# this lots goes after 'compiler flags' below 
+# additional libraries and includes
+#LIBS += $QMAKE_LIBS
+#QMAKE_LIBDIR_FLAGS += $QMAKE_LIBDIR_FLAGS
+#INCLUDEPATH += $QMAKE_INCLUDEPATH
 
 # save to tmp.pro
 cat > $relpath/tmp.pro <<_PRO_EOF
@@ -670,11 +688,6 @@ QMAKE_CFLAGS   += $QMAKE_CFLAGS
 QMAKE_CXXFLAGS += $QMAKE_CXXFLAGS
 QMAKE_LFLAGS   += $QMAKE_LFLAGS
 
-# additional libraries and includes
-LIBS += $QMAKE_LIBS
-QMAKE_LIBDIR_FLAGS += $QMAKE_LIBDIR_FLAGS
-INCLUDEPATH += $QMAKE_INCLUDEPATH
-
 # paths to qt things
 QMAKE_MOC   = $QT_MOC
 QMAKE_UIC   = $QT_UIC -L $QT_DIR/plugins
@@ -689,8 +702,8 @@ QMAKE_ABSOLUTE_SOURCE_ROOT = $VK_SOURCE_TREE
 QT_SOURCE_TREE    = $VK_SOURCE_TREE
 QT_BUILD_TREE     = $VK_BUILD_TREE
 QT_INSTALL_PREFIX = $VK_INSTALL_PREFIX
-docs.path = $VK_INSTALL_DOCS
-bins.path = $VK_INSTALL_BIN
+docs.path         = $VK_INSTALL_DOCS
+bins.path         = $VK_INSTALL_BIN
 
 _PRO_EOF
 
@@ -727,7 +740,7 @@ rm -f config.log
 
 
 #---------------------------------------------------------------------------
-# save the configure command to config.status
+# save the configure command line to config.status
 #---------------------------------------------------------------------------
 cfg_status=$outpath/config.status
 [ -f $cfg_status ] && rm -f $cfg_status
