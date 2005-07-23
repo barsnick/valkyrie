@@ -40,7 +40,10 @@ General:
 - make xml docs for valkyrie
 - put some stuff in class option to say that certain option fields cannot 
   be empty if the option is a popt option.
-- if valgrind not found, simply disable run button, rather than not just build at all.
+- do not refuse to build if valgrind not found, but tell user the
+  functionality will be severely restricted
+- if valgrind not found, simply disable run button, 
+  rather than not just build at all.
 
 
 main_window.cpp:
