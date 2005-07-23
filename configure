@@ -67,8 +67,8 @@ VK_INSTALL_BIN=$VK_INSTALL_PREFIX/bin/
 VG_EXEC_PATH=       # path to valgrind executable
 VG_SUPP_PATH=       # path to valgrind's suppressions dir
 
-MYSQL_LIB=          # path to MySQL library ( -lmysqlclient )
-MYSQL_INC=          # path to MySQL include directory
+#MYSQL_LIB=          # path to MySQL library ( -lmysqlclient )
+#MYSQL_INC=          # path to MySQL include directory
 
 QT_DIR=             # path to qt install dir ( /usr/lib/qt3/ )
 QT_INC_DIR=         # path to qt include dir ( /usr/lib/qt3/include/ )
@@ -127,19 +127,10 @@ while [ "$#" -gt 0 ]; do
       OPT_VERBOSE=yes ;;
     # installation paths
     --prefix=* | -prefix=*)
-      if [ ! -d $optarg ]; then
-        INVALID_ARG="--prefix: '$optarg'"
-      fi
       VK_INSTALL_PREFIX=$optarg ;;
     --bindir=* | -bindir=*)
-      if [ ! -d $optarg ]; then
-        INVALID_ARG="--bindir: '$optarg'"
-      fi
       VK_INSTALL_BIN=$optarg ;;
     --docdir=* | -docdir=*)
-      if [ ! -d $optarg ]; then
-        INVALID_ARG="--docdir: '$optarg'"
-      fi
       VK_INSTALL_DOCS=$optarg ;;
     # program paths
     --vg-exec=* | -vg-exec=*)
@@ -148,10 +139,12 @@ while [ "$#" -gt 0 ]; do
       VG_SUPP_PATH=$optarg ;;
     --qt-dir=* | -qt-dir=*)
       QT_DIR=$optarg ;;
-    --mysql-lib=* | -mysql-lib=*)
-      MYSQL_LIB=$optarg ;;
-    --mysql-inc=* | -mysql-inc=*)
-      MYSQL_INC=$optarg ;;
+    --qt-lib=* | -qt-lib=*)
+      QT_LIB_DIR=$optarg ;;
+#    --mysql-lib=* | -mysql-lib=*)
+#      MYSQL_LIB=$optarg ;;
+#    --mysql-inc=* | -mysql-inc=*)
+#      MYSQL_INC=$optarg ;;
     # compile options (might have multiple of these)
     --shared | -shared)
       CFG_SHARED=yes ;;
@@ -163,9 +156,9 @@ while [ "$#" -gt 0 ]; do
       else
         INVALID_ARG="--thread: '$optarg'"
       fi ;;
+    # these are internal options
     --release | -release)
       CFG_DEBUG=no ;;
-    # these two are really internal options
     --debug | -debug)
       CFG_DEBUG=yes ;;
     --profile | -profile)
@@ -215,23 +208,26 @@ fi
 
 #-------------------------------------------------------------------
 # help: emit a usage message if -h flag given or something failed
+# Future options:
+#   --mysql-lib=dir ....... Path to MySQL library (-lmysqlclient)
+#   --mysql-inc=dir ....... Path to MySQL include directory
+# Internal options:
+#   --profile ............. Compile and linke with profiling turned on
+#   --release ............. Compile and link with debugging turned off
+#   --debug ............... Compile and link with debugging turned on
 #-------------------------------------------------------------------
 if [ "$OPT_HELP" = "yes" ]; then
 
 cat <<_HPEOF
 
-Usage:  ./$relconf [-h] [-q] [-v] [--prefix=dir] [--bindir=dir] 
-  [--docdir=dir] [--vg-exec=] [--vg-supp=] [--qt-dir=] [--mysql-lib=] 
-  [--mysql-inc=] [--release] [--debug] [--profile] [--shared] [--static] 
-  [--thread=] [--platform=] 
+Usage: ./$relconf [-h] [--prefix=dir] [--bindir=dir] [--docdir=dir] 
+       [--vg-exec=] [--vg-supp=] [--qt-dir=] [--qt-lib=] 
+       [--shared] [--static] [--thread=] [--platform=] 
 
 Option defaults (*) are usually acceptable. Here is a short explanation 
 of each option:
 
    -h, --help ............ Print this help and usage information
-   -q, --quiet ........... Do not print 'checking... ' messages
- * -v, --verbose ......... Print verbose information about each step of
-                           the configure process
 
 Fine tuning of the installation directories (optional):
    --prefix=dir .......... This will install everything relative to dir
@@ -245,8 +241,7 @@ Program paths:
    --vg-exec=path ........ Path to the Valgrind executable
    --vg-supp=dir ......... Path to Valgrind suppression files directory
    --qt-dir=dir .......... Path to the Qt installation directory
-   --mysql-lib=dir ....... Path to MySQL library (-lmysqlclient)
-   --mysql-inc=dir ....... Path to MySQL include directory
+   --qt-lib=dir .......... Path to the Qt libraries directory
 
 Compile options:
  * --shared .............. Use a shared Qt library [libqt so]
@@ -254,10 +249,6 @@ Compile options:
 
  * --thread=arg .......... Do / do not compile threading support
                              [default=yes if libqt-mt found]
-
- * --release ............. Compile and link with debugging turned off
-   --debug ............... Compile and link with debugging turned on
-   --profile ............. Compile and linke with profiling turned on
 
 System options:
    --platform=target ... The operating system / compiler you are building on
@@ -348,13 +339,11 @@ _VKEOF
 
 
 #-------------------------------------------------------------------
-# where is qt ?
+# where is Qt ?
 # if not supplied on the cmd-line, see if which can find it
 #-------------------------------------------------------------------
-$cfgtests/qt.test $VK_CACHE $CFG_THREAD $QT_DIR && QT_RESULT="$QT_RESULT qt"
+$cfgtests/qt.test $VK_CACHE $CFG_THREAD $QT_DIR $QT_LIB_DIR && QT_RESULT="$QT_RESULT qt"
 if [ -z "$QT_RESULT" ] ; then
-  echo "   Cannot continue: Qt is a sine qua non"
-  echo "   Rerun configure with --qt-dir=/path/to/qt." >&2
   rm -f $VK_CACHE
   exit 1
 fi
@@ -369,9 +358,9 @@ if [ -z "$VG_EXEC_PATH" ] ; then
   if [ -x "$vg" ] ; then  
     VG_EXEC_PATH=$vg
   else
-    echo "   Cannot find valgrind.  " >&2
-    echo "   You don't seem to have valgrind in your PATH."
-    echo "   Rerun configure with --vg-exec=/path/to/valgrind." >&2
+    echo "Cannot find valgrind.  " >&2
+    echo "You don't seem to have valgrind in your PATH."
+    echo "Rerun configure with --vg-exec=/path/to/valgrind." >&2
     exit 1
   fi
 fi
@@ -386,17 +375,17 @@ fi
 # where is mysql ( -lmysqlclient and mysql.h ) ?
 # if not supplied on the cmd-line, try to find it
 #-------------------------------------------------------------------
-$cfgtests/mysql.test $VK_CACHE $MYSQL_LIB $MYSQL_INC && MYSQL_RESULT="$MYSQL_RESULT mysql"
-if [ -z "$MYSQL_RESULT" ] ; then
-  rm -f $VK_CACHE
-  exit 1
-fi
+#$cfgtests/mysql.test $VK_CACHE $MYSQL_LIB $MYSQL_INC && MYSQL_RESULT="$MYSQL_RESULT mysql"
+#if [ -z "$MYSQL_RESULT" ] ; then
+#  rm -f $VK_CACHE
+#  exit 1
+#fi
 
 
 #---------------------------------------------------------------------------
 # rescue the stashed options/flags from the temporary cache
 #--------------------------------------------------------------------------
-MYSQL_LIB_PATH=""
+#MYSQL_LIB_PATH=""
 if [ ! -f $VK_CACHE ] ; then
   echo "Cache '$VK_CACHE' not found - Aborting"
   exit 1
@@ -414,9 +403,9 @@ if [ -r $VK_CACHE ]; then
       QT_QMAKE)       QT_QMAKE=$VAL ;;
       VG_EXEC_PATH)   VG_EXEC_PATH=$VAL ;;  # only used in vk_include_h
       VG_SUPP_PATH)   VG_SUPP_PATH=$VAL ;;   # ditto
-      MYSQL_LIB)      MYSQL_LIB=$VAL ;;
-      MYSQL_LIB_PATH) MYSQL_LIB_PATH=$VAL ;;
-      MYSQL_INC)      MYSQL_INC=$VAL ;;
+#     MYSQL_LIB)      MYSQL_LIB=$VAL ;;
+#     MYSQL_LIB_PATH) MYSQL_LIB_PATH=$VAL ;;
+#     MYSQL_INC)      MYSQL_INC=$VAL ;;
       *) ;;
     esac
   done < $VK_CACHE
@@ -589,8 +578,8 @@ fi
 echo "Qt ................... $QT_DIR/"
 echo "Valgrind ............. $VG_EXEC_PATH"
 output="yes"
-[ -z "$MYSQL_LIB" ] && output="no"
-echo "MySQL support ........ $output"
+#[ -z "$MYSQL_LIB" ] && output="no"
+#echo "MySQL support ........ $output"
 echo "Thread support ....... $CFG_THREAD"
 output="dynamically (shared )"
 [ "$CFG_SHARED" = "no" ] && output="statically"
@@ -605,6 +594,19 @@ output="warn_off"
 [ "$CFG_DEBUG" = "yes" ] && output="warn_on"
 echo "Compiler warnings .... $output"
 
+
+#---------------------------------------------------------------------------
+# Looking good to go -- create any necessary dirs
+#---------------------------------------------------------------------------
+if [ ! -d $VK_INSTALL_PREFIX ]; then
+  mkdir -p $VK_INSTALL_PREFIX
+fi
+if [ ! -d $VK_INSTALL_BIN ]; then
+  mkdir -p $VK_INSTALL_BIN
+fi
+if [ ! -d $VK_INSTALL_DOCS ]; then
+  mkdir -p $VK_INSTALL_DOCS
+fi
 
 
 #---------------------------------------------------------------------------
@@ -641,11 +643,11 @@ if [ "$CFG_PROFILE" = "yes" ] ; then
 fi
 
 # compose any extra libs
-if [ -n "$MYSQL_LIB" ] && [ -n "$MYSQL_LIB_PATH" ] ; then
-  QMAKE_LIBS="$QMAKE_LIBS $MYSQL_LIB"
-  QMAKE_LIBDIR_FLAGS="$QMAKE_LIBDIR_FLAGS $MYSQL_LIB_PATH"
-  QMAKE_INCLUDEPATH="$QMAKE_INCLUDEPATH $MYSQL_INC"
-fi
+#if [ -n "$MYSQL_LIB" ] && [ -n "$MYSQL_LIB_PATH" ] ; then
+#  QMAKE_LIBS="$QMAKE_LIBS $MYSQL_LIB"
+#  QMAKE_LIBDIR_FLAGS="$QMAKE_LIBDIR_FLAGS $MYSQL_LIB_PATH"
+#  QMAKE_INCLUDEPATH="$QMAKE_INCLUDEPATH $MYSQL_INC"
+#fi
 
 
 # save to tmp.pro

@@ -28,23 +28,22 @@ source "$testdir/logging.sh"
 # ------------------------------------------------------------------
 found=no
 result=no
+echo "$sh_me:$LINENO: checking for valgrind" >&5
+echo $ECHO_N "checking for valgrind... $ECHO_C" >&6
+
 # check if user supplied a path but no executable
 if [ -d "$VG_EXEC_PATH" ] ; then
   # strip any trailing slashes
   dir=`echo $VG_EXEC_PATH | sed -e "s,^\(.*\)\/$,\1,"`
   VG_EXEC_PATH="$dir/valgrind"
 fi
-
 # quick 'n dirty check
 if [ -x "$VG_EXEC_PATH" ] ; then
   result="$VG_EXEC_PATH"
   found=yes
 fi
 
-# guess $VG_EXEC_PATH ---------------------------------------------
-echo "$sh_me:$LINENO: checking for valgrind" >&5
-echo $ECHO_N "checking for valgrind... $ECHO_C" >&6
-
+# guess $VG_EXEC_PATH 
 if [ "$found" = "no" ] ; then
   for dir in $EXEC_DIR_SEARCH; do
     if [ -x "$exe/valgrind" ] ; then
