@@ -83,9 +83,16 @@ void LogFile::loadItem(XmlOutput* output )
 
 bool LogFile::save( QString fname )
 {
-  QFile outFile( fname );
-  if ( !outFile.open( IO_WriteOnly ) ) {
-    return false;
+  QFile outFile;
+  if (!fname.isEmpty()) {
+    outFile.setName( fname );
+    if ( !outFile.open( IO_WriteOnly ) ) {
+      return false;
+    }
+  } else { /* no fname - write to stdout */
+    if ( !outFile.open( IO_WriteOnly, stdout ) ) {
+      return false;
+    }    
   }
 
   QTextStream stream( &outFile );
