@@ -12,7 +12,6 @@
 
 #include "logfile.h"
 #include "vk_utils.h"
-#include "vk_messages.h"
 
 #include <qfileinfo.h>
 
@@ -86,9 +85,6 @@ bool LogFile::save( QString fname )
 {
   QFile outFile( fname );
   if ( !outFile.open( IO_WriteOnly ) ) {
-    vkError( 0, "I/O Error",
-             "<p>Failed to open file '%s' for writing</p>",
-             fname.latin1() );
     return false;
   }
 

@@ -535,6 +535,11 @@ bool Memcheck::mergeLogFiles()
   fileSaved = masterLogFile->save( fname );
   if ( fileSaved ) vkConfig->wrEntry( fname, "view-log", "valkyrie" );
   else             vkConfig->wrEntry( "", "view-log", "valkyrie" );
+  if (!fileSaved) {
+    vkError( 0, "I/O Error",
+             "<p>Failed to open file '%s' for writing</p>",
+             fname.latin1() );
+  }
 
   QString msg = "("+fi.fileName()+")";
   if ( !fileSaved ) msg += "<p> unable to save result</p>";
