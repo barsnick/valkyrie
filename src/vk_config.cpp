@@ -168,8 +168,6 @@ const char* VkConfig::vgCopyright() { return vg_copyright.data(); }
 QString VkConfig::vkdocDir()  { return vkdocPath; }
 
 QString VkConfig::vgdocDir()  { return vgdocPath; }
-/*  /valkyrie-inst-dir/icons/ */
-QString VkConfig::imgDir()    { return imgPath;   }
 /* ~/.valkyrie-X.X.X/ */
 QString VkConfig::rcDir()     { return rcPath;    }
 /* ~/.valkyrie-X.X.X/dbase/ */

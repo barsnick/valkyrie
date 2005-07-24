@@ -84,7 +84,6 @@ public:
   /* these fns return values held in private vars ---------------------- */
   QString vgdocDir();
   QString vkdocDir();
-  QString imgDir();
   QString rcDir();
   QString logsDir();
   QString dbaseDir();

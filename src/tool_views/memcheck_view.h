@@ -77,7 +77,7 @@ public:
   SrcItem( OutputItem* parent, QString txt );
   ~SrcItem();
 
-  void setPixmap( QString pix_file );
+  void setPixmap( const char* pix_xpm[] );
   const QPixmap* pixmap( int i ) const;
   void paintCell( QPainter* p, const QColorGroup& cg,
                   int col, int width, int align );

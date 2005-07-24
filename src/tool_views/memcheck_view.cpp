@@ -12,7 +12,7 @@
 #include "memcheck_object.h"
 
 #include "vk_config.h"
-#include "tb_memcheck_icons.h"
+#include "memcheck_icons.h"
 #include "async_process.h"
 #include "vk_messages.h"
 #include "vk_file_utils.h"
@@ -593,9 +593,9 @@ void SrcItem::paintCell( QPainter* p, const QColorGroup& cg,
   QListViewItem::paintCell( p, cgrp, col, width, align );
 }
 
-void SrcItem::setPixmap( QString pix_file ) 
+void SrcItem::setPixmap( const char* pix_xpm[] ) 
 {
-  pix = new QPixmap( vkConfig->imgDir() + pix_file );
+  pix = new QPixmap( pix_xpm );
   setup();
   widthChanged( 0 );
   invalidateHeight();
@@ -612,10 +612,11 @@ void SrcItem::setReadWrite( bool read, bool write )
 {
   isReadable  = read;
   isWriteable = write;
-  if ( isWriteable )
-    setPixmap( "write.xpm" );
-  else if ( isReadable )
-    setPixmap( "read.xpm" );
+  if ( isWriteable ) {
+    setPixmap( write_xpm );
+  } else if ( isReadable ) {
+    setPixmap( read_xpm );
+  }
 }
 
 
@@ -705,13 +706,12 @@ void OutputItem::setOpen( bool open )
           item = new OutputItem( args_item, after, info->vgInfoList[i] );
           after = item;
         }
-        for ( unsigned int i=0; i<info->vgInfoList.count(); i++ ) {
+        for ( unsigned int i=0; i<info->exInfoList.count(); i++ ) {
           item = new OutputItem( args_item, after, info->exInfoList[i] );
           after = item;
         }
         args_item->setOpen( true );
       } break;
-
 
       /* 'J is the biz' stuff */
       case XmlOutput::PREAMBLE: {
