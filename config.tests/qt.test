@@ -52,7 +52,7 @@ fi
 # guess $QT_DIR if not set -----------------------------------------
 echo "$sh_me:$LINENO: checking for qt path" >&5
 echo $ECHO_N "checking for Qt install path... $ECHO_C" >&6
-if [ "$found" = "no" ] ; then
+if [ x"$found" = xno ] ; then
   for dir in $QT_DIR_SEARCH; do
     if [ -d "$dir" ] ; then
       QT_DIR="$dir"
@@ -65,7 +65,7 @@ fi
 
 echo "${ECHO_T}$result" >&6
 
-if [ "$found" = "no" ] ; then
+if [ x"$found" = xno ] ; then
   echo "Cannot continue: Qt library (library and includes) is required" >&6
   echo "Rerun configure with --qt-dir=/path/to/qt." >&6
   exit 1
@@ -89,7 +89,7 @@ for dir in $INC_DIR_SEARCH; do
   fi
 done
 # try to guess $QT_INC_DIR independently
-if [ "$found" = "no" ] ; then
+if [ x"$found" = xno ] ; then
   for dir in $INC_DIR_SEARCH2; do
     if [ -d "$dir" ] ; then
       if [ -f $dir/qglobal.h ] ; then
@@ -120,7 +120,7 @@ echo "$sh_me:$LINENO: checking thread support" >&5
 echo $ECHO_N "checking thread support... $ECHO_C" >&6
 qt_libs="libqt-mt.*"
 found=enabled
-if [ "$THREADING" = "no" ] ; then
+if [ x"$THREADING" = xno ] ; then
   qt_libs="libqt.*"
   found=disabled
 fi
@@ -146,7 +146,7 @@ fi
 
 # if we haven't found the libs, try searching; 
 # forget what was set in $QT_LIB_DIR, if anything
-if [ "$found" = "no" ] ; then
+if [ x"$found" = xno ] ; then
   for dir in $LIB_DIR_SEARCH; do
     found_lib=`ls $QT_DIR/$dir/$qt_libs 2>/dev/null`
     if [ ! -z "$found_lib" ] ; then
@@ -160,7 +160,7 @@ fi
 
 echo "${ECHO_T}$result" >&6
 
-if [ "$found" = "no" ] ; then
+if [ x"$found" = xno ] ; then
 
   if [ "$THREADING" = "no" ] ; then
     echo "Error: cannot find Qt libraries ( libqt.* )" >&6
