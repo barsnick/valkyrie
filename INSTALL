@@ -75,4 +75,4 @@ That's all.  Valkyrie is now installed.  See if it works.
 Try "valkyrie ls -l".  Either this works, or it bombs out with some 
 complaint.  In that case, please let me know.
 
-Donna Robinson <donna@valgrind.org>
+Copyright (c) 2000-2005, OpenWorks LLP <info@open-works.co.uk>

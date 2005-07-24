@@ -3,8 +3,7 @@
  * Massif-specific options / flags / fns
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind
- * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
- * This program is released under the terms of the GNU GPL v.2
+ * Copyright (c) 2000-2005, OpenWorks LLP <info@open-works.co.uk>
  * See the file LICENSE.GPL for the full license details.
  */
 

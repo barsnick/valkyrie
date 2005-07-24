@@ -2,7 +2,7 @@
  * Definition of ToolView                                    tool_view.h
  * Base class for all tool views
  * ---------------------------------------------------------------------
- * Copyright (c) 2000-2005, Donna Robinson <donna@valgrind.org>
+ * Copyright (c) 2000-2005, OpenWorks LLP <info@open-works.co.uk>
  * This program is released under the terms of the GNU GPL v.2
  * See the file LICENSE.GPL for the full license details.
  */

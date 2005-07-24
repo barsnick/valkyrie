@@ -1,16 +1,10 @@
 /* ---------------------------------------------------------------------- 
- * Definition of class VKProcess                             vk_process.h
- * 
+ * Definition of class VKProcess                            vk_process.h
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind
- * Copyright (c) 2005, Cerion Armour-Brown <cerion@valgrind.org>
- *
+ * Copyright (c) 2005, OpenWorks LLP <info@open-works.co.uk>
  * This program is released under the terms of the GNU GPL v.2
  * See the file LICENSE.GPL for the full license details.
- *
- * This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
- * WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- *
  * ---------------------------------------------------------------------
  * This file is a re-implementation of QProcess:
  * ** $Id: qt/qprocess.h   3.3.4   edited May 27 2003 $
@@ -39,25 +33,25 @@
 class VKMembuf
 {
 public:
-    VKMembuf();
-    ~VKMembuf();
+  VKMembuf();
+  ~VKMembuf();
 
-    void append( QByteArray *ba );
-    void clear();
+  void append( QByteArray *ba );
+  void clear();
 
-    bool consumeBytes( Q_ULONG nbytes, char *sink );
-    QByteArray readAll();
-    bool scanNewline( QByteArray *store );
-    bool canReadLine() const;
+  bool consumeBytes( Q_ULONG nbytes, char *sink );
+  QByteArray readAll();
+  bool scanNewline( QByteArray *store );
+  bool canReadLine() const;
 
-    int ungetch( int ch );
+  int ungetch( int ch );
 
-    QIODevice::Offset size() const;
+  QIODevice::Offset size() const;
 
 private:
-    QPtrList<QByteArray> *buf;
-    QIODevice::Offset _size;
-    QIODevice::Offset _index;
+  QPtrList<QByteArray> *buf;
+  QIODevice::Offset _size;
+  QIODevice::Offset _index;
 };
 
 inline void VKMembuf::append( QByteArray *ba )
@@ -78,259 +72,242 @@ inline QIODevice::Offset VKMembuf::size() const
 
 
 
-
-/***********************************************************************
- *
- * VKProc
- *
- **********************************************************************/
-/*
-  The class VKProcess does not necessarily map exactly to the running
-  child processes: if the process is finished, the VKProcess class may still be
-  there; furthermore a user can use VKProcess to start more than one process.
-
-  The helper-class VKProc has the semantics that one instance of this class maps
-  directly to a running child process.
-*/
+/* class VKProc --------------------------------------------------------------
+   The class VKProcess does not necessarily map exactly to the running
+   child processes: if the process is finished, the VKProcess class
+   may still be there; furthermore a user can use VKProcess to start
+   more than one process.
+   The helper-class VKProc has the semantics that one instance of this
+   class maps directly to a running child process. */
 class VKProcess;
 
 class VKProc
 {
 public:
-    VKProc( pid_t p, VKProcess *proc=0 );
-    ~VKProc();
+  VKProc( pid_t p, VKProcess *proc=0 );
+  ~VKProc();
 
-    pid_t pid;
-    int socketFDin;
-    int socketFDout;
-    int socketStdin;
-    int socketStdout;
-    int socketStderr;
-    VKProcess *process;
+  pid_t pid;
+  int socketFDin;
+  int socketFDout;
+  int socketStdin;
+  int socketStdout;
+  int socketStderr;
+  VKProcess *process;
 };
 
 
 
-/***********************************************************************
- *
- * VKProcessManager
- *
- **********************************************************************/
+/* class VKProcessManager ---------------------------------------------------- */
 class VKProcessManager : public QObject
 {
-    Q_OBJECT
-
+  Q_OBJECT
 public:
-    VKProcessManager();
-    ~VKProcessManager();
+  VKProcessManager();
+  ~VKProcessManager();
 
-    void append( VKProc *p );
-    void remove( VKProc *p );
+  void append( VKProc *p );
+  void remove( VKProc *p );
 
-    void cleanup();
+  void cleanup();
 
 public slots:
-    void removeMe();
-    void sigchldHnd( int );
+  void removeMe();
+  void sigchldHnd( int );
 
 public:
-    struct sigaction oldactChld;
-    struct sigaction oldactPipe;
-    QPtrList<VKProc> *procList;
-    int sigchldFd[2];
+  struct sigaction oldactChld;
+  struct sigaction oldactPipe;
+  QPtrList<VKProc> *procList;
+  int sigchldFd[2];
 
 private:
-    QSocketNotifier *sn;
+  QSocketNotifier *sn;
 };
 
 
 
 
-/***********************************************************************
- *
- * VKProcess
- *
- **********************************************************************/
-
+/* class VKProcess ----------------------------------------------------------- */
 class VKProcessPrivate
 {
 public:
-    VKProcessPrivate();
-    ~VKProcessPrivate();
+  VKProcessPrivate();
+  ~VKProcessPrivate();
 
-    void closeOpenSocketsForChild();
-    void newProc( pid_t pid, VKProcess *process );
+  void closeOpenSocketsForChild();
+  void newProc( pid_t pid, VKProcess *process );
 
-    VKMembuf bufFDout;
-    VKMembuf bufStdout;
-    VKMembuf bufStderr;
+  VKMembuf bufFDout;
+  VKMembuf bufStdout;
+  VKMembuf bufStderr;
 
-    QPtrQueue<QByteArray> fdinBuf;
-    QPtrQueue<QByteArray> stdinBuf;
+  QPtrQueue<QByteArray> fdinBuf;
+  QPtrQueue<QByteArray> stdinBuf;
 
-    QSocketNotifier *notifierFDin;
-    QSocketNotifier *notifierFDout;
-    QSocketNotifier *notifierStdin;
-    QSocketNotifier *notifierStdout;
-    QSocketNotifier *notifierStderr;
+  QSocketNotifier *notifierFDin;
+  QSocketNotifier *notifierFDout;
+  QSocketNotifier *notifierStdin;
+  QSocketNotifier *notifierStdout;
+  QSocketNotifier *notifierStderr;
 
-    ssize_t fdinBufRead;
-    ssize_t stdinBufRead;
-    VKProc *proc;
+  ssize_t fdinBufRead;
+  ssize_t stdinBufRead;
+  VKProc *proc;
 
-    bool exitValuesCalculated;
-    bool socketReadCalled;
+  bool exitValuesCalculated;
+  bool socketReadCalled;
 
-    static VKProcessManager *procManager;
+  static VKProcessManager *procManager;
 };
 
 
 class VKProcess : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    VKProcess( QObject *parent=0, const char *name=0 );
-    VKProcess( const QString& arg0, QObject *parent=0, const char *name=0 );
-    VKProcess( const QStringList& args, QObject *parent=0, const char *name=0 );
-    ~VKProcess();
+  VKProcess( QObject *parent=0, const char *name=0 );
+  VKProcess( const QString& arg0, QObject *parent=0, const char *name=0 );
+  VKProcess( const QStringList& args, QObject *parent=0, const char *name=0 );
+  ~VKProcess();
 
-    // set and get the arguments and working directory
-    QStringList arguments() const;
-    void clearArguments();
-    virtual void setArguments( const QStringList& args );
-    virtual void addArgument( const QString& arg );
+  // set and get the arguments and working directory
+  QStringList arguments() const;
+  void clearArguments();
+  virtual void setArguments( const QStringList& args );
+  virtual void addArgument( const QString& arg );
 #ifndef QT_NO_DIR
-    QDir workingDirectory() const;
-    virtual void setWorkingDirectory( const QDir& dir );
+  QDir workingDirectory() const;
+  virtual void setWorkingDirectory( const QDir& dir );
 #endif
 
-    // set and get the comms wanted
-    enum Communication { Stdin=0x01, Stdout=0x02, Stderr=0x04, DupStderr=0x08, FDin=0x10, FDout=0x20 };
-    int setCommunication( int c );
-    int communication() const;
-    void setFDin( int fd );
-    void setFDout( int fd );
-    int getFDin();
-    int getFDout();
+  // set and get the comms wanted
+  enum Communication { Stdin=0x01, Stdout=0x02, Stderr=0x04, DupStderr=0x08, FDin=0x10, FDout=0x20 };
+  int setCommunication( int c );
+  int communication() const;
+  void setFDin( int fd );
+  void setFDout( int fd );
+  int getFDin();
+  int getFDout();
 
-    // start the execution
-    virtual bool start( QStringList *env=0 );
-    virtual bool launch( const QString& buf, QStringList *env=0  );
-    virtual bool launch( const QByteArray& buf, QStringList *env=0  );
+  // start the execution
+  virtual bool start( QStringList *env=0 );
+  virtual bool launch( const QString& buf, QStringList *env=0  );
+  virtual bool launch( const QByteArray& buf, QStringList *env=0  );
 
-    // inquire the status
-    bool isRunning() const;
-    bool normalExit() const;
-    int exitStatus() const;
+  // inquire the status
+  bool isRunning() const;
+  bool normalExit() const;
+  int exitStatus() const;
 
-    // reading
-    virtual QByteArray readFDout();
-    virtual QByteArray readStdout();
-    virtual QByteArray readStderr();
+  // reading
+  virtual QByteArray readFDout();
+  virtual QByteArray readStdout();
+  virtual QByteArray readStderr();
 
-    bool canReadLineFDout() const;
-    bool canReadLineStdout() const;
-    bool canReadLineStderr() const;
+  bool canReadLineFDout() const;
+  bool canReadLineStdout() const;
+  bool canReadLineStderr() const;
 
-    virtual QString readLineFDout();
-    virtual QString readLineStdout();
-    virtual QString readLineStderr();
-
-    // get platform dependent process information
+  virtual QString readLineFDout();
+  virtual QString readLineStdout();
+  virtual QString readLineStderr();
+  
+  // get platform dependent process information
 #if defined(Q_OS_WIN32)
-    typedef void* PID;
+  typedef void* PID;
 #else
-    typedef Q_LONG PID;
+  typedef Q_LONG PID;
 #endif
-    PID processIdentifier();
+  PID processIdentifier();
 
-    void flushFDin();
-    void flushStdin();
+  void flushFDin();
+  void flushStdin();
 
 signals:
-    void readyReadFDout();
-    void readyReadStdout();
-    void readyReadStderr();
-    void processExited();
-    void wroteToFDin();
-    void wroteToStdin();
-    void launchFinished();
+  void readyReadFDout();
+  void readyReadStdout();
+  void readyReadStderr();
+  void processExited();
+  void wroteToFDin();
+  void wroteToStdin();
+  void launchFinished();
 
 public slots:
-    // end the execution
-    void tryTerminate() const;
-    void kill() const;
+  // end the execution
+  void tryTerminate() const;
+  void kill() const;
 
-    // input
-    virtual void writeToFDin( const QByteArray& buf );
-    virtual void writeToFDin( const QString& buf );
-    virtual void closeFDin();
-    virtual void writeToStdin( const QByteArray& buf );
-    virtual void writeToStdin( const QString& buf );
-    virtual void closeStdin();
+  // input
+  virtual void writeToFDin( const QByteArray& buf );
+  virtual void writeToFDin( const QString& buf );
+  virtual void closeFDin();
+  virtual void writeToStdin( const QByteArray& buf );
+  virtual void writeToStdin( const QString& buf );
+  virtual void closeStdin();
 
 protected: // ### or private?
-    void connectNotify( const char * signal );
-    void disconnectNotify( const char * signal );
+  void connectNotify( const char * signal );
+  void disconnectNotify( const char * signal );
 
 private:
-    void reprioritiseComms();
+  void reprioritiseComms();
 
-    void setIoRedirection( bool value );
-    void setNotifyOnExit( bool value );
-    void setWroteFDinConnected( bool value );
-    void setWroteStdinConnected( bool value );
+  void setIoRedirection( bool value );
+  void setNotifyOnExit( bool value );
+  void setWroteFDinConnected( bool value );
+  void setWroteStdinConnected( bool value );
 
-    void init();
-    void reset();
+  void init();
+  void reset();
 #if defined(Q_OS_WIN32)
-    uint readStddev( HANDLE dev, char *buf, uint bytes );
+  uint readStddev( HANDLE dev, char *buf, uint bytes );
 #endif
-    VKMembuf* membufFDout();
-    VKMembuf* membufStdout();
-    VKMembuf* membufStderr();
+  VKMembuf* membufFDout();
+  VKMembuf* membufStdout();
+  VKMembuf* membufStderr();
 
 private slots:
-    void socketRead( int fd );
-    void socketWrite( int fd );
-    void timeout();
-    void closeStdinLaunch();
+  void socketRead( int fd );
+  void socketWrite( int fd );
+  void timeout();
+  void closeStdinLaunch();
 
 private:
-    VKProcessPrivate *d;
+  VKProcessPrivate *d;
 #ifndef QT_NO_DIR
-    QDir        workingDir;
+  QDir workingDir;
 #endif
-    QStringList _arguments;
+  QStringList _arguments;
 
-    int  exitStat; // exit status
-    bool exitNormal; // normal exit?
-    bool ioRedirection; // automatically set be (dis)connectNotify
-    bool notifyOnExit; // automatically set be (dis)connectNotify
-    bool wroteToFDinConnected; // automatically set be (dis)connectNotify
-    bool wroteToStdinConnected; // automatically set be (dis)connectNotify
+  int  exitStat;              // exit status
+  bool exitNormal;            // normal exit?
+  bool ioRedirection;         // automatically set be (dis)connectNotify
+  bool notifyOnExit;          // automatically set be (dis)connectNotify
+  bool wroteToFDinConnected;  // automatically set be (dis)connectNotify
+  bool wroteToStdinConnected; // automatically set be (dis)connectNotify
 
-    bool readFDoutCalled;
-    bool readStdoutCalled;
-    bool readStderrCalled;
-    int comms;
-    int filedesc_in, filedesc_out;
+  bool readFDoutCalled;
+  bool readStdoutCalled;
+  bool readStderrCalled;
+  int comms;
+  int filedesc_in, filedesc_out;
 
-    friend class VKProcessPrivate;
+  friend class VKProcessPrivate;
 #if defined(Q_OS_UNIX)
-    friend class VKProcessManager;
-    friend class VKProc;
+  friend class VKProcessManager;
+  friend class VKProc;
 #endif
 
 #if defined(Q_DISABLE_COPY) // Disabled copy constructor and operator=
-    VKProcess( const VKProcess & );
-    VKProcess &operator=( const VKProcess & );
+  VKProcess( const VKProcess & );
+  VKProcess &operator=( const VKProcess & );
 #endif
 
-    /* Keep track of FDout/in disabling stdout/err/in */
-    bool disabledStdin;
-    bool disabledStdout;
-    bool disabledStderr;
+  /* Keep track of FDout/in disabling stdout/err/in */
+  bool disabledStdin;
+  bool disabledStdout;
+  bool disabledStderr;
 };
 
 

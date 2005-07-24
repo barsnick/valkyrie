@@ -1,11 +1,11 @@
 <!-- stuff ... -->
 <!ENTITY vk-url      "http://www.valgrind.org/">
-<!ENTITY vk-author   "Donna Robinson">
-<!ENTITY vk-email    "donna@valgrind.org">
+<!ENTITY vk-author   "Donna Robinson, Cerion Armour-Brown">
+<!ENTITY vk-email    "donna@open-works.co.uk, cerion@open-works.co.uk">
 <!ENTITY vk-lifespan "2000-2005">
 
 <!-- and nonsense -->
 <!ENTITY rel-type    "Development release">
-<!ENTITY rel-version "2.1.2">
-<!ENTITY rel-date    "June 30 2005">
+<!ENTITY rel-version "1.2.1">
+<!ENTITY rel-date    "July 25 2005">
 
