@@ -89,8 +89,5 @@ bool vk_strcmp( const char* str1, const char* str2 );
 
 char* vk_strdup( const char* str );
 
-/* valkyrie's default palette ------------------------------------------ */
-QPalette vkPalette();
-
 
 #endif

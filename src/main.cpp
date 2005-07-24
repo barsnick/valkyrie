@@ -25,6 +25,65 @@
 VkConfig* vkConfig = 0;
 
 
+/* valkyrie's default palette ------------------------------------------ */
+QPalette vkPalette()
+{
+  QColor bg = vkConfig->rdColor( "background" );
+  if ( !bg.isValid() ) return qApp->palette();
+  QColor base = vkConfig->rdColor( "base" );
+  if ( !base.isValid() ) return qApp->palette();
+  QColor text = vkConfig->rdColor( "text" );
+  if ( !text.isValid() ) return qApp->palette();
+  QColor dkgray = vkConfig->rdColor( "dkgray" );
+  if ( !dkgray.isValid() ) return qApp->palette();
+  QColor hilite = vkConfig->rdColor( "highlight" );
+  if ( !hilite.isValid() )  return qApp->palette();
+
+  /* 3 colour groups: active, inactive, disabled */
+  QPalette pal( bg, bg );
+  /* bg colour for text entry widgets */
+  pal.setColor( QPalette::Active,   QColorGroup::Base, base );
+  pal.setColor( QPalette::Inactive, QColorGroup::Base, base );
+  pal.setColor( QPalette::Disabled, QColorGroup::Base, base );
+  /* general bg colour */
+  pal.setColor( QPalette::Active,   QColorGroup::Background, bg );
+  pal.setColor( QPalette::Inactive, QColorGroup::Background, bg );
+  pal.setColor( QPalette::Disabled, QColorGroup::Background, bg );
+  /* same as bg */
+  pal.setColor( QPalette::Active,   QColorGroup::Button, bg );
+  pal.setColor( QPalette::Inactive, QColorGroup::Button, bg );
+  pal.setColor( QPalette::Disabled, QColorGroup::Button, bg );
+  /* general fg colour - same as Text */
+  pal.setColor( QPalette::Active,   QColorGroup::Foreground, text );
+  pal.setColor( QPalette::Inactive, QColorGroup::Foreground, text );
+  pal.setColor( QPalette::Disabled, QColorGroup::Foreground, dkgray );
+  /* same as fg */
+  pal.setColor( QPalette::Active,   QColorGroup::Text, text );
+  pal.setColor( QPalette::Inactive, QColorGroup::Text, text );
+  pal.setColor( QPalette::Disabled, QColorGroup::Text, dkgray );
+  /* same as text and fg */
+  pal.setColor( QPalette::Active,   QColorGroup::ButtonText, text );
+  pal.setColor( QPalette::Inactive, QColorGroup::ButtonText, text );
+  pal.setColor( QPalette::Disabled, QColorGroup::ButtonText, dkgray );
+  /* highlight */
+  pal.setColor( QPalette::Active,   QColorGroup::Highlight, hilite );
+  pal.setColor( QPalette::Inactive, QColorGroup::Highlight, hilite );
+  pal.setColor( QPalette::Disabled, QColorGroup::Highlight, hilite );
+  /* contrast with highlight */
+  pal.setColor( QPalette::Active,
+                QColorGroup::HighlightedText, base );
+  pal.setColor( QPalette::Inactive,
+                QColorGroup::HighlightedText, base );
+  pal.setColor( QPalette::Disabled,
+                QColorGroup::HighlightedText, base );
+
+  return pal;
+}
+
+
+#include "vk_include.h"
+
+
 /* See /src/kernel/qapplication.cpp #740 re starting non-gui apps */
 
 int main ( int argc, char* argv[] )
