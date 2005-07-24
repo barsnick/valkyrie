@@ -420,12 +420,12 @@ void VkConfig::insertData( const EntryKey &ekey,
 void VkConfig::updatePaths()
 {
   wrEntry( VG_EXEC_PATH, "vg-exec",  "valkyrie" );
-  wrEntry( VG_SUPP_PATH, "vg-supps-dir", "valkyrie" );
+  wrEntry( VG_SUPP_DIR,  "vg-supps-dir", "valkyrie" );
 
   /* find and store valgrind's suppressions files */
   QString def_supp   = "";
   QString supp_files = "";
-  QDir supp_dir( VG_SUPP_PATH );
+  QDir supp_dir( VG_SUPP_DIR );
   /* see if we have any *.supp files in here - if so, grab 'em while
      the going's good */
   QStringList supp_list = supp_dir.entryList( "*.supp", QDir::Files );
@@ -470,7 +470,7 @@ VkConfig::RetVal VkConfig::parseFile()
      [valgrind:suppressions] as they may contain invalid paths, and
      re-initialise with default suppressions */
   if ( rdEntry("vg-exec",      "valkyrie") != VG_EXEC_PATH || 
-       rdEntry("vg-supps-dir", "valkyrie") != VG_SUPP_PATH ) {
+       rdEntry("vg-supps-dir", "valkyrie") != VG_SUPP_DIR ) {
     updatePaths();
   }
 
