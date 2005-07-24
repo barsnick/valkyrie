@@ -74,37 +74,6 @@ const char* parseErrString( const int error )
 
 /* helper functions ---------------------------------------------------- */
 
-/* Reads a few lines of text from the file to try to ascertain if the
-   file is in xml format */
-bool xmlFormatCheck( int* err_val, QString fpath )
-{
-  bool ok = false;
-  QFile xmlFile( fpath );
-  if ( !xmlFile.open( IO_ReadOnly ) ) {
-    *err_val = PERROR_BADFILE;
-    goto bye;
-  } else {
-    QTextStream stream( &xmlFile );
-    int n = 0;
-    while ( !stream.atEnd() && n < 10 ) {
-      QString aline = stream.readLine().simplifyWhiteSpace();
-      if ( !aline.isEmpty() ) {      /* found something */
-        int pos = aline.find( "<valgrindoutput>", 0 );
-        if ( pos != -1 ) {
-          ok = true;
-          break;
-        }
-      }
-      n++;
-    }
-    xmlFile.close();
-  }
-
- bye:
-  return ok;
-}
-
-
 QString checkFile( int* err_val, const char* fname )
 {
   *err_val = PARSED_OK;

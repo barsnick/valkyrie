@@ -240,6 +240,8 @@ public:
   bool endElement( const QString&, const QString&, const QString& etag );
   bool characters( const QString& content );
 
+  static bool xmlFormatCheck( int* err_val, QString fpath );
+
 signals:
   void loadItem( XmlOutput * );
   void updateErrors( ErrCounts* );

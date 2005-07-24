@@ -279,7 +279,7 @@ QString Memcheck::validateFile( QString log_file,  bool *ok )
   }
 
   /* check the file is readable, and the format is xml */
-  bool is_xml = xmlFormatCheck( &errval, log_file );
+  bool is_xml = XMLParser::xmlFormatCheck( &errval, log_file );
   if ( errval != PARSED_OK ) {
     *ok = vkError( view(), "File Error", 
                    "%s: \n\"%s\"", 

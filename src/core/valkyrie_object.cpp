@@ -11,6 +11,7 @@
 #include "valkyrie_object.h"
 #include "valgrind_object.h"
 #include "tool_object.h"
+#include "xml_parser.h"        // xmlFormatCheck
 
 #include "vk_config.h"
 #include "vk_messages.h"
@@ -152,7 +153,7 @@ int Valkyrie::checkOptArg( int optid, const char* argval,
       argVal = fileCheck( &errval, argval, true, false );
       if ( errval == PARSED_OK ) {
         /* check the file format is xml */
-        bool ok = xmlFormatCheck( &errval, argVal );
+        bool ok = XMLParser::xmlFormatCheck( &errval, argVal );
         if ( ok && errval == PARSED_OK ) {
           runMode = modeParseLog;
         }

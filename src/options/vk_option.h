@@ -14,7 +14,6 @@
 
 
 /* helper functions ---------------------------------------------------- */
-bool xmlFormatCheck( int* err_val, QString fpath );
 QString fileCheck( int* err_val, const char* fpath, 
                    bool rd_perms, bool wr_perms );
 QString binaryCheck( int* err_val, const char* exe_name );

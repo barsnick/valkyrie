@@ -12,6 +12,7 @@
 
 #include "xml_parser.h"
 #include "vk_utils.h"
+#include "vk_popt_option.h"
 
 #include <qfileinfo.h>
 
@@ -837,4 +838,38 @@ bool XMLParser::endElement( const QString&, const QString&,
   content = "";
 
   return true;
+}
+
+
+
+/* Reads a few lines of text from the file to try to ascertain if the
+   file is in xml format
+   static function
+*/
+bool XMLParser::xmlFormatCheck( int* err_val, QString fpath )
+{
+  bool ok = false;
+  QFile xmlFile( fpath );
+  if ( !xmlFile.open( IO_ReadOnly ) ) {
+    *err_val = PERROR_BADFILE;
+    goto bye;
+  } else {
+    QTextStream stream( &xmlFile );
+    int n = 0;
+    while ( !stream.atEnd() && n < 10 ) {
+      QString aline = stream.readLine().simplifyWhiteSpace();
+      if ( !aline.isEmpty() ) {      /* found something */
+        int pos = aline.find( "<valgrindoutput>", 0 );
+        if ( pos != -1 ) {
+          ok = true;
+          break;
+        }
+      }
+      n++;
+    }
+    xmlFile.close();
+  }
+
+ bye:
+  return ok;
 }
