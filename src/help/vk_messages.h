@@ -33,7 +33,7 @@ public:
                      QString buttonNames );
   static void info( QWidget* parent, QString hdr, QString msg );
   static int warning( QWidget* parent, QString hdr, QString msg );
-  static bool error( QWidget* parent, QString hdr, QString msg );
+  static void error( QWidget* parent, QString hdr, QString msg );
   static void fatal( QWidget* parent, QString hdr, QString msg );
   static void about( QWidget* parent );
 
@@ -100,8 +100,8 @@ extern int vkWarn( QWidget* w, QString hdr,
      __attribute__ (( format( printf, 3, 4 ) ));
 
 /* error message box */
-extern bool vkError( QWidget* w, QString hdr,
-                    const char*, ... )
+extern void vkError( QWidget* w, QString hdr,
+                     const char*, ... )
      __attribute__ (( format( printf, 3, 4 ) ));
 
 

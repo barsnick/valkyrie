@@ -24,7 +24,7 @@ public:
 
 private:
   bool parseLog( QString logfile );
-  QString validateFile( QString& log_file, bool& ok );
+  QString validateFile( QString& log_file );
 
 private:
   XMLParser* xmlParser;

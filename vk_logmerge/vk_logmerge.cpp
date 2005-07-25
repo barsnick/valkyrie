@@ -29,15 +29,17 @@ VKLogMerge::VKLogMerge( QObject* parent, const char* name )
 VKLogMerge::~VKLogMerge() { }
 
 
-
-QString VKLogMerge::validateFile( QString& log_file,  bool& ok ) 
+/* check is valid file, correct perms, and format is xml.
+   returns absolute path of log_file.
+   returns QString::null on error.
+*/
+QString VKLogMerge::validateFile( QString& log_file ) 
 {
   int errval = PARSED_OK;
 
   /* check this is a valid file, and has the right perms */
   QString ret_file = fileCheck( &errval, log_file.latin1(), true, false );
   if ( errval != PARSED_OK ) {
-    ok = false;
     fprintf(stderr ,"File Error: %s: \n\"%s\"", 
             parseErrString(errval), 
             escapeEntities(log_file).latin1() );
@@ -47,20 +49,17 @@ QString VKLogMerge::validateFile( QString& log_file,  bool& ok )
   /* check the file is readable, and the format is xml */
   bool is_xml = XMLParser::xmlFormatCheck( &errval, log_file );
   if ( errval != PARSED_OK ) {
-    ok = false;
     fprintf(stderr, "File Error: %s: \n\"%s\"", 
 	    parseErrString(errval), log_file.latin1() );
     return QString::null;
   }
 
   if ( !is_xml ) {
-    ok = false;
     fprintf(stderr, "File Format Error: File '%s' not in xml format.",
 	    log_file.latin1() );
     return QString::null;
   }
 
-  ok = true;
   return ret_file;
 }
 
@@ -131,9 +130,8 @@ bool VKLogMerge::mergeLogFiles( QString& log_list, QString& fname_out )
     if ( temp.isEmpty() )
       continue;
     /* check re file perms and format */
-    bool valid;
-    temp = validateFile( temp, valid );
-    if ( valid ) {
+    temp = validateFile( temp );
+    if ( !temp.isNull() ) {
       logFileList << temp;
     } else {
       /* die on first error */

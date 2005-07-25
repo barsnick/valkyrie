@@ -72,7 +72,7 @@ private:
 
   void emitRunning( bool );
   bool parseLog( QString logfile );
-  QString validateFile( QString log_file, bool* ok );
+  QString validateFile( QString log_file );
   void statusMsg(  QString hdr, QString msg );
 
   void setupProc( bool init );

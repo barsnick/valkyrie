@@ -339,12 +339,12 @@ int MsgBox::warning( QWidget* parent, QString hdr, QString msg )
   return mb->exec();
 }
 
-bool MsgBox::error( QWidget* parent, QString hdr, QString msg )
+void MsgBox::error( QWidget* parent, QString hdr, QString msg )
 {
   MsgBox* mb = new MsgBox( parent, MsgBox::Error, msg, hdr );
   mb->setButtonTexts( QStringList( "O&K" ) );
   Q_CHECK_PTR( mb );
-  return ( mb->exec() != vkYes );  /* ### evil hack */
+  mb->exec();
 }
 
 void MsgBox::fatal( QWidget* parent, QString hdr, QString msg )
@@ -408,14 +408,14 @@ int vkWarn( QWidget* w, QString hdr, const char* msg, ... )
 }
 
 /* error message box */
-bool vkError( QWidget* w, QString hdr, const char* msg, ... ) 
+void vkError( QWidget* w, QString hdr, const char* msg, ... ) 
 {
   char buf[VK_BUFLEN];
   va_list ap;
   va_start( ap, msg );
   vsnprintf( buf, VK_BUFLEN, msg, ap );
   va_end( ap );
-  return MsgBox::error( w, hdr, buf );
+  MsgBox::error( w, hdr, buf );
 }
 
 /* msg box widget with ok button, returns exit errno */

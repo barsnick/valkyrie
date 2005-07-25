@@ -248,38 +248,36 @@ bool Memcheck::stop( Valkyrie::RunMode rm )
    file's perms + format, and writes the value to [valkyrie:view-log].
    However, when a file is set via the open-file-dialog in the gui, or
    is contained with in a list of logfiles-to-merge, then perms +
-   format checks must be made */
-QString Memcheck::validateFile( QString log_file,  bool *ok ) 
+   format checks must be made
+   Returns absolute path of log_file, or QString::null on error
+*/
+QString Memcheck::validateFile( QString log_file ) 
 {
   int errval = PARSED_OK;
 
   /* check this is a valid file, and has the right perms */
   QString ret_file = fileCheck( &errval, log_file.latin1(), true, false );
   if ( errval != PARSED_OK ) {
-    *ok = vkError( view(), "File Error", 
-                   "%s: \n\"%s\"", 
-                   parseErrString(errval), 
-                   escapeEntities(log_file).latin1() );
+    vkError( view(), "File Error", "%s: \n\"%s\"", 
+             parseErrString(errval), escapeEntities(log_file).latin1() );
     return QString::null;
   }
 
   /* check the file is readable, and the format is xml */
   bool is_xml = XMLParser::xmlFormatCheck( &errval, log_file );
   if ( errval != PARSED_OK ) {
-    *ok = vkError( view(), "File Error", 
-                   "%s: \n\"%s\"", 
-                   parseErrString(errval), log_file.latin1() );
+    vkError( view(), "File Error", "%s: \n\"%s\"", 
+             parseErrString(errval), log_file.latin1() );
     return QString::null;
   }
 
   if ( !is_xml ) {
-    *ok = vkError( view(), "File Format Error", 
-                   "<p>The file '%s' is not in xml format.</p>",
-                   log_file.latin1() );
+    vkError( view(), "File Format Error", 
+             "<p>The file '%s' is not in xml format.</p>",
+             log_file.latin1() );
     return QString::null;
   }
 
-  *ok = true;
   return ret_file;
 }
 
@@ -335,9 +333,8 @@ bool Memcheck::parseLogFile( bool checked/*=true*/ )
 
   QString log_file = vkConfig->rdEntry( "view-log", "valkyrie" );
   if ( !checked ) {
-    bool valid = false;
-    log_file = validateFile( log_file, &valid );
-    if ( valid ) {
+    log_file = validateFile( log_file );
+    if ( !log_file.isNull() ) {
       vkConfig->wrEntry( log_file, "view-log", "valkyrie" );
     } else {
       vkConfig->wrEntry( "", "view-log", "valkyrie" );
@@ -395,8 +392,9 @@ bool Memcheck::mergeLogFiles()
   QFile logFile( log_list );
   if ( !logFile.open( IO_ReadOnly ) ) {
     emitRunning( false );
-    return vkError( this->view(), "Open File Error", 
-           "<p>Unable to open logfile '%s'</p>", log_list.latin1() );
+    vkError( this->view(), "Open File Error", 
+             "<p>Unable to open logfile '%s'</p>", log_list.latin1() );
+    return false;
   }
   QFileInfo fi( log_list );
   statusMsg( "Merging", fi.fileName() );
@@ -407,7 +405,6 @@ bool Memcheck::mergeLogFiles()
      if we bomb out > 5 times, offer a chance to cancel the operation. */
   QString temp;
   QStringList logFileList;
-  bool valid;
   int max_errs = 5;
 
   QTextStream stream( &logFile );
@@ -417,10 +414,10 @@ bool Memcheck::mergeLogFiles()
     if ( temp.isEmpty() )
       continue;
     /* check re file perms and format */
-    temp = validateFile( temp, &valid );
-    if ( valid )
+    temp = validateFile( temp );
+    if ( !temp.isNull() ) {
       logFileList << temp;
-    else {
+    } else {
       max_errs = max_errs - 1;
     }
     if ( max_errs <= 0 ) {
@@ -443,10 +440,11 @@ bool Memcheck::mergeLogFiles()
   /* check there's a minimum of two files-to-merge */
   if ( logFileList.count() < 2 ) {
     emitRunning( false );
-    return vkError( this->view(), "Merge LogFiles Error", 
-           "<p>The minimum number of files required is 2.</p>"
-           "<p>The file '%s' contains %d valid xml logfiles.</p>", 
-           log_list.latin1(), logFileList.count() );
+    vkError( this->view(), "Merge LogFiles Error", 
+             "<p>The minimum number of files required is 2.</p>"
+             "<p>The file '%s' contains %d valid xml logfiles.</p>", 
+             log_list.latin1(), logFileList.count() );
+    return false;
   }
 
   /* create a 'master' LogFile, and parse the contents of file #1 into it.
@@ -563,9 +561,10 @@ bool Memcheck::run( QStringList flags )
   if ( ! setupFileStream( true ) ) {
     emitRunning( false );
     setupFileStream( false );
-    return vkError( this->view(), "Open File Error", 
-                    "<p>Unable to open file '%s' for writing.</p>", 
-                    saveFname.latin1() );
+    vkError( this->view(), "Open File Error", 
+             "<p>Unable to open file '%s' for writing.</p>", 
+             saveFname.latin1() );
+    return false;
   }
 
   setupParser( true );
@@ -579,8 +578,8 @@ bool Memcheck::run( QStringList flags )
     setupProc( false );
     setupParser( false );
     setupFileStream( false );
-    return vkError( this->view(), "Error", 
-                    "<p>Process failed to start</p>" );
+    vkError( this->view(), "Error", "<p>Process failed to start</p>" );
+    return false;
   }
 
   return true;
