@@ -65,8 +65,6 @@ VkObject::VkObject( const QString& capt, const QString& txt,
   accelText = txt;
   is_Tool   = is_tool;
   accel_Key = key;
-
-  usingGui   = false;
 }
 
 

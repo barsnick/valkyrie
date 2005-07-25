@@ -74,7 +74,6 @@ protected:
                QString shelp,      QString lhelp,      const char* url );
 
 protected:
-  bool usingGui;             /* whether in gui || non-gui mode */
   bool is_Tool;              /* not valkyrie or valgrind-core */
 
   QString caption;           /* eg. Memcheck */

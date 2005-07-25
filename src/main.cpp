@@ -84,15 +84,18 @@ QPalette vkPalette()
 #include "vk_include.h"
 
 
-/* See /src/kernel/qapplication.cpp #740 re starting non-gui apps */
-
 int main ( int argc, char* argv[] )
 {
-  bool usingGui;
   int res = EXIT_SUCCESS;
   Valkyrie* valkyrie = 0;
   QApplication* app  = 0;
   MainWindow* vkWin  = 0;
+
+  /* start turning the engine over... ---------------------------------- */
+  app = new QApplication( argc, argv );
+
+  /* style ----------------------------------------------------------- */
+  app->setStyle( QStyleFactory::create( "windows" ) );
 
   /* vkConfig ---------------------------------------------------------- 
      Check the configuration dir+file ~/.PACKAGE/PACKAGErc is present,
@@ -125,52 +128,37 @@ int main ( int argc, char* argv[] )
     }
   }
 
-  /* find out if we are in gui || non-gui mode ------------------------- */
-  usingGui = vkConfig->rdBool( "gui", "valkyrie" );
   /* get hold of valkyrie */
   valkyrie = (Valkyrie*)vkConfig->vkObject( "valkyrie" );
-  /* set usingGui + get ptrs to all tools */
+  /* get ptrs to all tools */
   valkyrie->init();
 
-  /* start turning the engine over... ---------------------------------- */
-  app = new QApplication( argc, argv, usingGui );
-
-  if ( !usingGui ) {
-    /* strut your stuff, girl */
-    if (!valkyrie->runTool())
-      goto cleanup_and_exit;
-  } else {
-
-    /* style ----------------------------------------------------------- */
-    app->setStyle( QStyleFactory::create( "windows" ) );
-
-    /* font: allow user to specify an app-wide font setting ------------ */
-    if ( !vkConfig->rdBool( "use-system-font", "valkyrie" ) ) {
-      QFont vkfnt = vkConfig->rdFont( "user-font", "valkyrie" );
-      app->setFont( vkfnt, true );
-    }
-
-    /* palette: allow user to choose between app. default palette
-       and the default palette assigned by their system ---------------- */
-    if ( vkConfig->rdBool( "use-vk-palette", "valkyrie" ) ) {
-      app->setPalette( vkPalette(), true );
-    }
-
-    /* we have lift-off: start up the gui ------------------------------ */
-    vkWin = new MainWindow( valkyrie );
-    app->setMainWidget( vkWin );
-    app->connect( app, SIGNAL(lastWindowClosed()), 
-                  app, SLOT(quit()) );
-
-    vkWin->resize( vkConfig->rdInt("width", "MainWin"),
-                   vkConfig->rdInt("height","MainWin") );
-    vkWin->move( vkConfig->rdInt("x-pos", "MainWin"),
-                 vkConfig->rdInt("y-pos", "MainWin") );
-    vkWin->show();
-    /* start up with the tool currently set in vkConfig (either the
-       default, the last-used, or whatever was set on the cmd-line) */
-    vkWin->showToolView( vkConfig->toolId(), true );
+  /* font: allow user to specify an app-wide font setting ------------ */
+  if ( !vkConfig->rdBool( "use-system-font", "valkyrie" ) ) {
+    QFont vkfnt = vkConfig->rdFont( "user-font", "valkyrie" );
+    app->setFont( vkfnt, true );
   }
+
+  /* palette: allow user to choose between app. default palette
+     and the default palette assigned by their system ---------------- */
+  if ( vkConfig->rdBool( "use-vk-palette", "valkyrie" ) ) {
+    app->setPalette( vkPalette(), true );
+  }
+    
+  /* we have lift-off: start up the gui ------------------------------ */
+  vkWin = new MainWindow( valkyrie );
+  app->setMainWidget( vkWin );
+  app->connect( app, SIGNAL(lastWindowClosed()), 
+                app, SLOT(quit()) );
+
+  vkWin->resize( vkConfig->rdInt("width", "MainWin"),
+                 vkConfig->rdInt("height","MainWin") );
+  vkWin->move( vkConfig->rdInt("x-pos", "MainWin"),
+               vkConfig->rdInt("y-pos", "MainWin") );
+  vkWin->show();
+  /* start up with the tool currently set in vkConfig (either the
+     default, the last-used, or whatever was set on the cmd-line) */
+  vkWin->showToolView( vkConfig->toolId(), true );
 
   res = app->exec();
 

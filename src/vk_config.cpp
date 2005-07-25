@@ -110,7 +110,7 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   case BadRcVersion:
     vkInfo( 0, "Configuration",
             "<p>The configuration file '%s' version is invalid.</p> "
-            "<p>Removing and re-creating it now ... ... </p>", 
+            "<p>Removing and re-creating it now ...</p>", 
             rcFileName.latin1() );
     mkConfigFile( true );
     num_tries++;
@@ -121,7 +121,7 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
     vkInfo( 0, "Configuration",
             "<p>The configuration file '%s' does not exist, "
             "and %s cannot run without this file.<br>"
-            "Creating it now ... ... </p>", 
+            "Creating it now ...</p>", 
             rcFileName.latin1(), vkName() );
     mkConfigFile();
     num_tries++;
@@ -569,10 +569,6 @@ void VkConfig::writebackConfig()
     close(fd);
     return;
   }
-
-  /* ### evil hack: this is the one flag we never want changed on a
-     permanent basis: user must specify 'no' each run. */
-  wrEntry( "yes", "gui", "valkyrie" );
 
   bool firstEntry = true;
   QString currGroup;

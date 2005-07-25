@@ -131,7 +131,6 @@ int Memcheck::checkOptArg( int optid, const char* argval,
 /* returns the ToolView window (memcheckView) for this tool */
 ToolView* Memcheck::createView( QWidget* parent )
 {
-  usingGui = true;
   m_view = new MemcheckView( parent, this );
   view()->setState( is_Running );
   return m_view;
@@ -142,21 +141,14 @@ void Memcheck::emitRunning( bool run )
 {
   is_Running = run;
   emit running( is_Running );
-
-  if ( usingGui ) {
-    view()->setState( is_Running );
-  }
+  view()->setState( is_Running );
 }
 
 
-/* in gui mode, outputs a message to the status bar.
-   in non-gui mode, prints a msg to stdout */
+/* outputs a message to the status bar. */
 void Memcheck::statusMsg( QString hdr, QString msg ) 
 { 
-  if ( usingGui )
-    emit message( hdr + ": " + msg );
-  else
-    vkInfo( 0, hdr, msg );
+  emit message( hdr + ": " + msg );
 }
 
 
@@ -210,13 +202,6 @@ bool Memcheck::start( Valkyrie::RunMode rm )
   
   switch ( rm ) {
     case Valkyrie::modeParseLog:
-      if ( !usingGui ) {
-        vkFatal( 0, "Error",
-                 "--view-log doesn't make any sense in non-gui mode.\n"
-                 "       ** Quitting **" );
-        emit fatal();  /* tell valkyrie to die */
-        break;
-      }
       ok = this->parseLogFile();
       break;
 
@@ -345,10 +330,8 @@ bool Memcheck::parseLog( QString log_filename )
    w.r.t. perms and format. */
 bool Memcheck::parseLogFile( bool checked/*=true*/ )
 {
-  if ( usingGui ) {
-    /* tell valkyrie what we are doing */
-    emit setRunMode( Valkyrie::modeParseLog );
-  }
+  /* tell valkyrie what we are doing */
+  emit setRunMode( Valkyrie::modeParseLog );
 
   QString log_file = vkConfig->rdEntry( "view-log", "valkyrie" );
   if ( !checked ) {
@@ -392,9 +375,6 @@ bool Memcheck::parseLogFile( bool checked/*=true*/ )
   QString hdr = ( success ) ? "Loaded" : "Parse failed";
   statusMsg( hdr, log_file );
 
-  /* if we are in non-gui mode, tell valkyrie we are done */
-  emit finished();
-
   return success;
 }
 
@@ -405,10 +385,8 @@ bool Memcheck::parseLogFile( bool checked/*=true*/ )
    [valkyrie:merge] is what we need to know */
 bool Memcheck::mergeLogFiles()
 {
-  if ( usingGui ) {
-    /* tell valkyrie what we are doing */
-    emit setRunMode( Valkyrie::modeMergeLogs );
-  }
+  /* tell valkyrie what we are doing */
+  emit setRunMode( Valkyrie::modeMergeLogs );
 
   fileSaved = false;
   emitRunning( true );
@@ -550,16 +528,13 @@ bool Memcheck::mergeLogFiles()
   delete masterLogFile;
   masterLogFile = 0;
 
-  /* load the result, if in gui-mode */
-  if ( usingGui && fileSaved ) {
+  /* load the result */
+  if ( fileSaved ) {
     parseLogFile();
     emit message( fname );
   }
 
   emitRunning( false );
-
-  /* if we are in non-gui mode, tell valkyrie we are done */
-  emit finished();
 
   return true;
 }
@@ -570,10 +545,8 @@ bool Memcheck::mergeLogFiles()
    then MainWindow::run() calls valkyrie->runTool().  */
 bool Memcheck::run( QStringList flags )
 {
-  if ( usingGui ) {
-    /* tell valkyrie what we are doing */
-    emit setRunMode( Valkyrie::modeParseOutput );
-  }
+  /* tell valkyrie what we are doing */
+  emit setRunMode( Valkyrie::modeParseOutput );
 
 #if 0
   for ( unsigned int i=0; i<flags.count(); i++ )
@@ -616,9 +589,7 @@ bool Memcheck::run( QStringList flags )
 
 /* slot, connected to proc's signal readyReadStd***().
    read and process the data, which might be output in chunks.
-   output is auto-saved to a logfile in ~/.valkyrie-X.X.X/logs/
-   Note: In non-gui mode, and client program output on the same log_fd
-   as valgrind/valkyrie will get saved to the logfile. */
+   output is auto-saved to a logfile in ~/.valkyrie-X.X.X/logs/ */
 void Memcheck::parseOutput()
 {
   statusMsg( "Memcheck", "Parsing output ... " );
@@ -639,11 +610,9 @@ void Memcheck::parseOutput()
     data = proc->readLineFDout();
     //printf("MC::parseOutput(): FDout(%d): '%s'\n", log_fd, data.latin1() );
     logStream << data << "\n";
-    if ( usingGui ) {
-      source.setData( data );
-      ok = reader.parseContinue();
-      if ( !ok ) break;
-    }
+    source.setData( data );
+    ok = reader.parseContinue();
+    if (!ok) break;
   }
 
   /* If log_fd != stdout/stderr, read from them here */
@@ -710,8 +679,6 @@ void Memcheck::processDone()
   saveParsedOutput( fname );
 
   emitRunning( false );
-  /* if we are in non-gui mode, tell valkyrie we are done */
-  emit finished();
 }
 
 
@@ -738,7 +705,7 @@ void Memcheck::saveParsedOutput( QString& fname )
                         "<p>Over-write existing file '%s' ?</p>", 
                         fname.latin1() );
       if ( ok == MsgBox::vkNo ) {
-        // TODO: Allow user to enter new logfile if in gui-mode
+        // TODO: Allow user to enter new logfile
         statusMsg( "Saved to default", saveFname );
         return;
       }
@@ -792,12 +759,10 @@ void Memcheck::setupProc( bool init )
 }
 
 
-/* connect this lot up if we are in gui mode; reset source and parser,
+/* connect this lot up, reset source and parser,
    and tell the reader we are parsing incrementally */
 void Memcheck::setupParser( bool init )
 {
-  if ( !usingGui ) return;
-
   if ( init ) {                   /* starting up */
     view()->clear();
     xmlParser->reset();
@@ -850,16 +815,6 @@ void Memcheck::loadClientOutput( const QString& client_output, int log_fd/*=-1*/
   if (log_fd == -1)
     log_fd = vkConfig->rdInt( "log-fd", "valgrind" );
 
-  //printf("client output (log_fd=%d): '%s'\n", log_fd, data.latin1() );
-
-  if ( usingGui ) {
-    this->view()->loadClientOutput(client_output, log_fd);
-  } else {
-    if (log_fd == 1) {
-      fprintf( stdout, "%s\n", client_output.latin1() );
-    } else {    /* any other fd -> stderr */
-      fprintf( stderr, "%s\n", client_output.latin1() );
-    }
-  }
+  this->view()->loadClientOutput(client_output, log_fd);
 }
 

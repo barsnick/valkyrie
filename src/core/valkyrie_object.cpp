@@ -100,12 +100,6 @@ Valkyrie::Valkyrie()
           "valkyrie",  '\0',               "binary-flags", 
           "",          "",                 "", 
           "Binary flags:", "",             urlNone );
-  addOpt( USE_GUI,     Option::ARG_BOOL,   Option::NONE,
-          "valkyrie",  '\0',               "gui", 
-          "<yes|no>",  "yes|no",           "yes",
-          "xxxxxxx",
-          "use the graphical interface",
-          urlNone );
   addOpt( VIEW_LOG,    Option::ARG_STRING, Option::LEDIT, 
           "valkyrie",  '\0',               "view-log", 
           "<file>",    "",                 "",
@@ -143,10 +137,6 @@ int Valkyrie::checkOptArg( int optid, const char* argval,
     case SRC_EDITOR:
     case VG_EXEC:
       argVal = binaryCheck( &errval, argval );
-      break;
-
-    case USE_GUI:
-      opt->isValidArg( &errval, argval );
       break;
 
     case VIEW_LOG:
@@ -191,27 +181,20 @@ int Valkyrie::checkOptArg( int optid, const char* argval,
 }
 
 
-/* set usingGui + get ptrs to all tools. 
-   if usingGui=true, create a list of tool-only objects.
-   if usingGui=false, connect tool objects up to quit slot */
+/* get ptrs to all tools. */
 void Valkyrie::init()
 {
-  usingGui = vkConfig->rdBool( "gui","valkyrie" );
-
   valgrind   = (Valgrind*)vkConfig->vkObject( "valgrind" );
 
   ToolList toolList = vkConfig->toolList();
 
   for ( ToolObject* tool=toolList.first(); tool; tool=toolList.next() ) {
-    if ( !usingGui ) {
-      connect( tool, SIGNAL( finished() ), this, SLOT( quit() ) );
-    }
     connect( tool, SIGNAL( fatal() ), this, SLOT( quit() ) );
   }
 }
 
 
-/* slot: called by a tools when it has finished() its task */
+/* slot: called by tools, if they have a fatal() accident */
 void Valkyrie::quit()
 { exit(0); }
 
@@ -331,12 +314,9 @@ QString Valkyrie::currentFlags( ToolObject* tool_obj )
 
 
 /* called from MainWin when user clicks stopButton */
-void Valkyrie::stopTool( ToolObject* activeTool/*=0*/ )
+void Valkyrie::stopTool( ToolObject* activeTool )
 {
-  if ( activeTool == 0 ) {
-    activeTool = vkConfig->tool();
-    vk_assert( activeTool != 0 );
-  }
+  vk_assert( activeTool != 0 );
 
   bool success = activeTool->stop( runMode );
 
@@ -344,15 +324,10 @@ void Valkyrie::stopTool( ToolObject* activeTool/*=0*/ )
 }
 
 
-/* If called from MainWin, then activeTool is set.
-   If called from main(), then activeTool == 0, 
-   so find out which tool is supposed to be running.  */
-bool Valkyrie::runTool( ToolObject* activeTool/*=0*/ )
+/* Run the tool for this runMode */
+bool Valkyrie::runTool( ToolObject* activeTool )
 {
-  if ( activeTool == 0 ) {
-    activeTool = vkConfig->tool();
-    vk_assert( activeTool != 0 );
-  }
+  vk_assert( activeTool != 0 );
 
   bool success = true;
 
@@ -360,10 +335,7 @@ bool Valkyrie::runTool( ToolObject* activeTool/*=0*/ )
   switch ( runMode ) {
 
   case modeNotSet:       /* no flags given on cmd-line */
-    if ( !usingGui ) {
-      vkInfo( 0, "Error", "</p>You haven't told me what to do.</p>" );
-      quit();
-    } break;
+    break;
     
   /* run valgrind --tool=tool_name, with all flags */
   case modeParseOutput:

@@ -109,7 +109,6 @@ int Massif::checkOptArg( int optid, const char* argval,
 /* returns the ToolView window (memcheckView) for this tool */
 ToolView* Massif::createView( QWidget* parent )
 {
-  usingGui = true;
   m_view = new MassifView( parent, this);
   view()->setState( is_Running );
   return m_view;
@@ -120,10 +119,7 @@ void Massif::emitRunning( bool run )
 {
   is_Running = run;
   emit running( is_Running );
-
-  if ( usingGui ) {
-    view()->setState( is_Running );
-  }
+  view()->setState( is_Running );
 }
 
 

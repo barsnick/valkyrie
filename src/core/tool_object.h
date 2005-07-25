@@ -58,8 +58,6 @@ signals:
   void setRunMode( Valkyrie::RunMode );
   void running( bool );
   void message( QString );
-  /* connected to valkyrie's quit() slot when in non-gui mode */
-  void finished();
   void fatal();
 
 protected:

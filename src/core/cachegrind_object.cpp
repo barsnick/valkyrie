@@ -147,11 +147,6 @@ int Cachegrind::checkOptArg( int optid, const char* argval,
       if ( errval == PARSED_OK ) {
         aList[i] = srcdir;
       } else {
-        if ( !use_gui ) {
-          vkPrint( "Parse error [--include=%s] : invalid dir path\n"
-                   "The offending directory is '%s'", 
-                   argVal.latin1(), tmp.latin1() );
-        }
         errval = PERROR_DEFAULT;
         break;
       } 
@@ -174,7 +169,6 @@ int Cachegrind::checkOptArg( int optid, const char* argval,
 /* returns the ToolView window (memcheckView) for this tool */
 ToolView* Cachegrind::createView( QWidget* parent )
 {
-  usingGui = true;
   m_view = new CachegrindView( parent, this );
   view()->setState( is_Running );
   return m_view;
@@ -185,10 +179,7 @@ void Cachegrind::emitRunning( bool run )
 {
   is_Running = run;
   emit running( is_Running );
-
-  if ( usingGui ) {
-    view()->setState( is_Running );
-  }
+  view()->setState( is_Running );
 }
 
 

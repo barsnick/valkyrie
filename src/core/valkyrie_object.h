@@ -32,9 +32,9 @@ public:
   Valkyrie();
   ~Valkyrie();
 
-  void init();        /* set usingGui + get ptrs to all tools */
-  bool runTool( ToolObject* activeTool=0 );
-  void stopTool( ToolObject* activeTool=0 );
+  void init();        /* get ptrs to all tools */
+  bool runTool( ToolObject* activeTool );
+  void stopTool( ToolObject* activeTool );
 
   /* modeNotSet:      no cmd-line options given
    * modeParseLog:    read <logfile> from disk
@@ -57,8 +57,8 @@ public:
     VG_EXEC,      /* path to valgrind executable (/usr/bin/valgrind) */
     VG_SUPPS_DIR, /* path to supp. files dir [def = /usr/lib/valgrind/] */
     /* FIRST_CMD_OPT */
-    BINARY, BIN_FLAGS, VIEW_LOG, MERGE_LOGS, USE_GUI,
-    LAST_CMD_OPT  = USE_GUI
+    BINARY, BIN_FLAGS, VIEW_LOG, MERGE_LOGS,
+    LAST_CMD_OPT  = MERGE_LOGS
   };
 
   OptionsPage* createOptionsPage( OptionsWindow* parent ) {
