@@ -112,6 +112,18 @@ void HandBook::closeEvent( QCloseEvent* )
 { hide(); }
 
 
+void HandBook::showYourself()
+{
+  if ( !isVisible() ) {
+    show();
+  } else if ( isMinimized() ) {
+    showNormal();
+  } else {
+    raise();
+  }
+}
+
+
 /* Sets the name of the displayed document to url */
 void HandBook::openUrl( const QString& url )
 { browser->setSource( url ); }

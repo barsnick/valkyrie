@@ -29,8 +29,11 @@ public:
   void save();
   void openUrl( const QString& url );
 
+public slots:
+  void showYourself();
+
 protected:
-  void closeEvent( QCloseEvent *ce );
+  void closeEvent( QCloseEvent* ce );
 
 private slots:
   void setBackwardAvailable( bool );

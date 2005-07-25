@@ -482,7 +482,7 @@ void MainWindow::mkMenuBar()
   helpButton->setAutoRaise( true );
   helpButton->setAccel( ALT+Key_H );
   QPopupMenu* helpMenu = new QPopupMenu( helpButton );
-  helpMenu->insertItem( "Handbook", handBook, SLOT(show()), Key_F1 );
+  helpMenu->insertItem( "Handbook", handBook, SLOT(showYourself()), Key_F1 );
   helpMenu->insertSeparator();
   helpMenu->insertItem( "About Valkyrie", this, 
                         SLOT(showAboutInfo(int)), 0, HelpAbout::ABOUT_VK );
