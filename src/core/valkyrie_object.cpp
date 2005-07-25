@@ -69,7 +69,7 @@ Valkyrie::Valkyrie()
           "Use default system font",  "",  urlNone );
   addOpt( FONT_USER,   Option::NOT_POPT,   Option::LEDIT, 
           "valkyrie",  '\0',               "user-font", 
-          "",          "",  "Luxi Sans,11,-1,5,50,0,0,0,0,0", 
+          "",          "",  "Luxi Sans,10,-1,5,50,0,0,0,0,0", 
           "",          "",                 urlNone );
   addOpt( SRC_EDITOR,  Option::NOT_POPT,   Option::LEDIT, 
           "valkyrie",  '\0',               "src-editor", 
