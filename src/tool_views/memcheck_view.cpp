@@ -66,7 +66,7 @@ MemcheckView::MemcheckView( QWidget* parent, Memcheck* mc )
   lView->addColumn( "" );
   lView->header()->setStretchEnabled( true, 0 );
   lView->header()->hide();
-  QFont lview_fnt( "Adobe Courier", 10, QFont::Normal, false );
+  QFont lview_fnt( "Adobe Courier", 9, QFont::Normal, false );
   lview_fnt.setStyleHint( QFont::TypeWriter );
   lView->setFont( lview_fnt );
 
@@ -628,6 +628,7 @@ OutputItem::OutputItem( QListView* parent, XmlOutput* output )
   : XmlOutputItem( parent ) 
 {
   xmlOutput = output;
+  setMultiLinesEnabled( true );
   setText( xmlOutput->displayString() );
 }
 

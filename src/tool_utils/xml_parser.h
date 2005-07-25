@@ -66,7 +66,7 @@ public:
 
 public:
   int num_errs, num_leaks, num_blocks;
-  QString state, time, object;
+  QString state, stime, etime, object;
 };
 
 

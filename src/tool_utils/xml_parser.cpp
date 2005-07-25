@@ -39,7 +39,8 @@ Preamble::Preamble() : XmlOutput( PREAMBLE )
 TopStatus::TopStatus() : XmlOutput( STATUS ) 
 {
   state      = "";
-  time       = "";
+  stime      = "";
+  etime      = "";
   object     = "";
   num_errs   = 0;
   num_leaks  = 0;
@@ -49,13 +50,58 @@ TopStatus::TopStatus() : XmlOutput( STATUS )
 /* format output for displaying in listview */
 void TopStatus::printDisplay() 
 {
-  display = QString("Valgrind: %1 (%2) '%3'   Errors: %4   Leaked bytes: %5 in %6 blocks")
-    .arg( state )
-    .arg( time )
-    .arg( object )
-    .arg( num_errs )
-    .arg( num_leaks )
-    .arg( num_blocks );
+	QTextStream ts( &display, IO_WriteOnly );
+	ts << "Valgrind: " << state << " '" << object << "'  ";
+
+	int syear, smonth, sday, shours, smins, ssecs, smsecs;
+	sscanf( stime.ascii(), "%d-%d-%d %d:%d:%d.%4d", 
+					&syear, &smonth, &sday, &shours, &smins, &ssecs, &smsecs );
+	QDate sta_date( syear, smonth, sday );
+	QTime sta_time( shours, smins, ssecs, smsecs );
+
+	/* start date */
+	ts << sta_date.toString( "MMM/d/yy  " );
+	/* start time */
+	ts << sta_time.toString( "hh:mm:ss.zzz" );
+
+  if ( !etime.isEmpty() ) {     /* finished */
+    ts << " - ";
+
+		int eyear, emonth, eday, ehours, emins, esecs, emsecs;
+		sscanf( etime.ascii(), "%d-%d-%d %d:%d:%d.%4d", 
+						&eyear, &emonth, &eday, &ehours, &emins, &esecs, &emsecs );
+		QDate end_date( eyear, emonth, eday );
+    QTime end_time( ehours, emins, esecs, emsecs );
+
+		/* end date, but only if > start_date */
+		if ( end_date > sta_date )
+			ts << end_date.toString( "MMM/d/yy  " );
+		/* end time */
+		ts << end_time.toString( "hh:mm:ss.zzz" );
+		/* elapsed time */
+		ts << " (";
+		if ( end_date > sta_date ) {
+			QDate elap_date( end_date.year()  - sta_date.year(),
+											 end_date.month() - sta_date.month(),
+											 end_date.day()   - sta_date.day() );
+			ts << elap_date.toString( "MMM/d/yy  " );
+		}
+
+    /* elapsed date-time:  86,400,000 msecs in 1 day */
+    int elapsed_date_msecs = sta_date.daysTo( end_date ) * 86400000;
+		/* elapsed time-time */
+		int elapsed_time_msecs = sta_time.msecsTo( end_time );
+    /* add everything together */
+    int elapsed_msecs    = elapsed_date_msecs + elapsed_time_msecs;
+		printf(" elapsed_dt_msecs = %d, elapsed_tm_msecs = %d, elapsed_msecs = %d\n", elapsed_date_msecs, elapsed_time_msecs, elapsed_msecs);
+		QTime time_a;    /* 00:00:00.000 */
+    QTime elapsed_time = time_a.addMSecs( elapsed_msecs );
+		ts << elapsed_time.toString( "hh:mm:ss.zzz" ) << ")";
+	}
+
+	/* errors, leaks */
+	ts << "\nErrors: " << num_errs << "    "
+		 << "Leaked Bytes: " << num_leaks << " in " << num_blocks << " blocks";
 }
 
 
@@ -715,12 +761,14 @@ bool XMLParser::endElement( const QString&, const QString&,
         info->endStatus   = content;
       break;
     case TIME:
-      topStatus->time = content;
-      if ( ! statusPopped )
+      //RM: topStatus->time = content;
+      if ( ! statusPopped ) {
+        topStatus->stime = content;
         info->startTime = content;
-      else
+      } else {
+        topStatus->etime = content;
         info->endTime   = content;
-      break;
+      } break;
     case STATUS:
       if ( statusPopped ) {
         emit updateStatus();
