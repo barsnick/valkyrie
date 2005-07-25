@@ -41,7 +41,7 @@ public:
   /* creates and returns the ToolView window for a tool object */
   virtual ToolView* createView( QWidget* parent ) = 0;
   /* called by MainWin::closeToolView() */
-  virtual bool isDone() = 0;
+  virtual bool isDone( Valkyrie::RunMode ) = 0;
   virtual void deleteView();
 
   ToolView* view() { return m_view; }

@@ -184,7 +184,7 @@ void Cachegrind::emitRunning( bool run )
 
 
 /* called by MainWin::closeToolView() */
-bool Cachegrind::isDone()
+bool Cachegrind::isDone( Valkyrie::RunMode rmode )
 {
   vk_assert( view() != 0 );
 
@@ -195,10 +195,10 @@ bool Cachegrind::isDone()
                       "<p>The current process is not yet finished.</p>"
                       "<p>Do you want to abort it ?</p>" );
     if ( ok == MsgBox::vkYes ) {
-      bool stopped = stop( Valkyrie::modeNotSet );     /* abort */
+      bool stopped = stop( rmode );        /* abort */
       vk_assert( stopped );         // TODO: what todo if couldn't stop?
     } else if ( ok == MsgBox::vkNo ) {
-      return false;                                    /* continue */
+      return false;                        /* continue */
     }
   }
 

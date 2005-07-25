@@ -33,7 +33,7 @@ public:
   /* returns the ToolView window (memcheckView) for this tool */
   ToolView* createView( QWidget* parent );
   /* called by MainWin::closeToolView() */
-  bool isDone();
+  bool isDone( Valkyrie::RunMode );
 
   bool start( Valkyrie::RunMode rm );
   bool stop( Valkyrie::RunMode rm );

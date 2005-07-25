@@ -318,7 +318,7 @@ void MainWindow::closeEvent( QCloseEvent *ce )
 {
   ToolList tools = vkConfig->toolList();
   for ( ToolObject* tool = tools.first(); tool; tool = tools.next() ) {
-    if ( tool->view() != 0 && !tool->isDone() ) {
+    if ( tool->view() != 0 && !tool->isDone( valkyrie->runmode() ) ) {
       ce->ignore();
       return;
     }
@@ -344,7 +344,7 @@ void MainWindow::closeToolView()
   ToolObject* currTool = currView->tool();
 
   /* process might still be running, or whatever ... */
-  if ( !currTool->isDone() ) return;
+  if ( !currTool->isDone( valkyrie->runmode() ) ) return;
 
   /* remove view from stack (doesn't delete) */
   viewStack->removeView( currView );

@@ -27,7 +27,7 @@ public:
   /* returns the ToolView window (cachegrindView) for this tool */
   ToolView* createView( QWidget* parent );
   /* called by MainWin::closeToolView() */
-  bool isDone();
+  bool isDone( Valkyrie::RunMode rm );
 
   bool start( Valkyrie::RunMode rm );
   bool stop( Valkyrie::RunMode rm );

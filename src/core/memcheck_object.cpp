@@ -153,7 +153,7 @@ void Memcheck::statusMsg( QString hdr, QString msg )
 
 
 /* called by MainWin::closeToolView() */
-bool Memcheck::isDone()
+bool Memcheck::isDone( Valkyrie::RunMode rmode )
 {
   vk_assert( view() != 0 );
 
@@ -164,11 +164,11 @@ bool Memcheck::isDone()
                       "<p>The current process is not yet finished.</p>"
                       "<p>Do you want to abort it ?</p>" );
     if ( ok == MsgBox::vkYes ) {
-      bool stopped = stop( Valkyrie::modeNotSet );     /* abort */
+      bool stopped = stop( rmode );         /* abort */
       vk_assert( stopped );
       // TODO: what todo if can't /  won't stop?
     } else if ( ok == MsgBox::vkNo ) {
-      return false;                                    /* continue */
+      return false;                         /* continue */
     }
   }
 
@@ -215,11 +215,12 @@ bool Memcheck::start( Valkyrie::RunMode rm )
   return ok;
 }
 
+
 bool Memcheck::stop( Valkyrie::RunMode rm )
 {
-  if (!is_Running) return true;
+  if ( !is_Running ) return true;
 
-  switch (rm) {
+  switch ( rm ) {
   case Valkyrie::modeParseLog:
     VK_DEBUG("TODO: %s::stop(parse log)", name().latin1() );
     break;
@@ -229,8 +230,8 @@ bool Memcheck::stop( Valkyrie::RunMode rm )
     break;
 
   case Valkyrie::modeParseOutput:
-    proc->tryTerminate();   /* First ask nicely. */
-    /* If proc still running after msec_timeout, terminate with prejudice */
+    proc->tryTerminate();   /* first ask nicely. */
+    /* if proc still running after msec_timeout, terminate with prejudice */
     QTimer::singleShot( 2000, proc, SLOT( kill() ) );   // TODO: move N to config
     break;
 
@@ -249,8 +250,7 @@ bool Memcheck::stop( Valkyrie::RunMode rm )
    However, when a file is set via the open-file-dialog in the gui, or
    is contained with in a list of logfiles-to-merge, then perms +
    format checks must be made
-   Returns absolute path of log_file, or QString::null on error
-*/
+   Returns absolute path of log_file, or QString::null on error */
 QString Memcheck::validateFile( QString log_file ) 
 {
   int errval = PARSED_OK;

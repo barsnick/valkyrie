@@ -43,6 +43,7 @@ public:
    */
   enum RunMode { modeNotSet=0, modeParseLog, modeMergeLogs, modeParseOutput };
   void setRunMode( Valkyrie::RunMode rm );
+  RunMode runmode() { return runMode; }
 
   /* returns a '\n' separated list of current relevant flags */
   QString currentFlags( ToolObject* tool_obj );
