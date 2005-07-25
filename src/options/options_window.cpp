@@ -120,6 +120,7 @@ OptionsWindow::OptionsWindow( QWidget* parent )
 
   /* category chooser */
   categories = new Categories( splitter );
+  splitter->setResizeMode( categories, QSplitter::FollowSizeHint );
   connect( categories, SIGNAL( clicked( QListBoxItem *) ),
            this,       SLOT( categoryClicked( QListBoxItem *) ) );
 
