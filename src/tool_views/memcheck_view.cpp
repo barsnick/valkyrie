@@ -219,7 +219,7 @@ void MemcheckView::mkToolBar()
            this,          SLOT( openAllItems(bool) ) );
   QToolTip::add( openAllButton, 
                  "Open / Close all errors (and their call chains)" );
-  ContextHelp::add( openAllButton, urlValkyrie::Dummy );
+  ContextHelp::add( openAllButton, urlDummy );
 
   /* open-one item button ---------------------------------------------- */
   openOneButton = new QToolButton( mcToolBar, "tb_open_one" );
@@ -229,7 +229,7 @@ void MemcheckView::mkToolBar()
            this,          SLOT( openOneItem() ) );
   QToolTip::add( openOneButton, 
                  "Open / Close the selected item" );
-  ContextHelp::add( openOneButton, urlValkyrie::Dummy );
+  ContextHelp::add( openOneButton, urlDummy );
 
   /* show src path button ---------------------------------------------- */
   srcPathButton = new QToolButton( mcToolBar, "tb_src_path" );
@@ -239,7 +239,7 @@ void MemcheckView::mkToolBar()
            this,          SLOT( showSrcPath() ) );
   QToolTip::add( srcPathButton, 
                  "Show file paths (for current frame)" );
-  ContextHelp::add( srcPathButton, urlValkyrie::Dummy );
+  ContextHelp::add( srcPathButton, urlDummy );
 
   /* fake motif-style separator ---------------------------------------- */
   QLabel* sep_lbl = new QLabel( mcToolBar, "lbl_sep" );
@@ -258,7 +258,7 @@ void MemcheckView::mkToolBar()
   openlogButton->setPopup( logMenu );
   openlogButton->setPopupDelay( 1 );
   QToolTip::add( openlogButton, "Parse and view log file(s)" );
-  ContextHelp::add( openlogButton, urlValkyrie::Dummy );
+  ContextHelp::add( openlogButton, urlDummy );
 
   /* save-log button --------------------------------------------------- */
   savelogButton = new QToolButton( mcToolBar, "tb_save_log" );
@@ -270,7 +270,7 @@ void MemcheckView::mkToolBar()
   connect( savelogButton, SIGNAL( clicked() ), 
            this,          SLOT( saveLogFile() ) );
   QToolTip::add( savelogButton, "Save output to a log file" );
-  ContextHelp::add( savelogButton, urlValkyrie::Dummy );
+  ContextHelp::add( savelogButton, urlDummy );
 
   /* suppressions editor button ---------------------------------------- */
   suppedButton = new QToolButton( mcToolBar, "tb_supp_ed" );
@@ -282,7 +282,7 @@ void MemcheckView::mkToolBar()
   connect( suppedButton, SIGNAL( clicked() ), 
            this,         SLOT( showSuppEditor() ) );
   QToolTip::add( suppedButton, "Open the Suppressions Editor" );
-  ContextHelp::add( suppedButton, urlValkyrie::Dummy );
+  ContextHelp::add( suppedButton, urlDummy );
   suppedButton->setEnabled( false );
   // TODO: implement suppressionsEditor
 }

@@ -54,53 +54,53 @@ Valkyrie::Valkyrie()
   addOpt( TOOLTIP,     Option::NOT_POPT,   Option::CHECK, 
           "valkyrie",  '\0',               "show-tooltips", 
           "",          "true|false",       "true", 
-          "Show tooltips",      "",          urlNone );
+          "Show tooltips",      "",        urlValkyrie::toolTips );
   addOpt( PALETTE,     Option::NOT_POPT,   Option::CHECK, 
           "valkyrie",  '\0',               "use-vk-palette", 
           "",          "true|false",       "true", 
-          "Use valkyrie's palette",   "",  urlNone );
+          "Use valkyrie's palette",   "",  urlValkyrie::palette );
   addOpt( ICONTXT,     Option::NOT_POPT,   Option::CHECK, 
           "valkyrie",  '\0',               "show-butt-text", 
           "",          "true|false",       "true", 
-          "Show toolbar text labels",  "", urlNone );
+          "Show toolbar text labels",  "", urlValkyrie::toolLabels );
   addOpt( FONT_SYSTEM,  Option::NOT_POPT,   Option::CHECK,
           "valkyrie",   '\0',               "use-system-font", 
           "",          "true|false",       "true", 
-          "Use default system font",  "",  urlNone );
+          "Use default system font",  "",  urlValkyrie::userFont );
   addOpt( FONT_USER,   Option::NOT_POPT,   Option::LEDIT, 
           "valkyrie",  '\0',               "user-font", 
           "",          "",  "Luxi Sans,10,-1,5,50,0,0,0,0,0", 
-          "",          "",                 urlNone );
+          "",          "",                 urlValkyrie::userFont );
   addOpt( SRC_EDITOR,  Option::NOT_POPT,   Option::LEDIT, 
           "valkyrie",  '\0',               "src-editor", 
           "",          "",                 "/usr/bin/emacs", 
-          "Src Editor:",   "",     urlNone );
+          "Src Editor:",   "",             urlValkyrie::srcEditor );
   addOpt( SRC_LINES,   Option::NOT_POPT,   Option::SPINBOX, 
           "valkyrie",  '\0',               "src-lines",
           "",          "1|10",             "2", 
           "Extra lines shown above/below the target line:", "",
-          urlNone );
+          urlValkyrie::srcLines );
   /* path to valgrind executable (found by configure) */
   addOpt( VG_EXEC,     Option::NOT_POPT,   Option::LEDIT, 
           "valkyrie",  '\0',               "vg-exec",
           "",          "",                 "",
-          "Valgrind:", "",                 urlNone );
+          "Valgrind:", "",                 urlValkyrie::vgDir );
   /* path to a supp files dir. this is initially found by configure,
      but can be changed later via valkyrie's Option page to point to
      another suppression files dir */
-  addOpt( VG_SUPPS_DIR,   Option::NOT_POPT,   Option::LEDIT, 
+  addOpt( VG_SUPPS_DIR,   Option::NOT_POPT, Option::LEDIT, 
           "valkyrie",  '\0',               "vg-supps-dir",
           "",          "",                 "",
-          "Supps.Dir:",  "",                 urlNone );
+          "Supps.Dir:",  "",               urlValkyrie::suppDir );
   addOpt( BINARY,      Option::NOT_POPT,   Option::LEDIT,
           "valkyrie",  '\0',               "binary", 
           "",          "",                 "", 
-          "Binary:",   "",                 urlNone );
+          "Binary:",   "",                 urlValkyrie::binary );
   addOpt( BIN_FLAGS,   Option::NOT_POPT,   Option::LEDIT,
           "valkyrie",  '\0',               "binary-flags", 
           "",          "",                 "", 
-          "Binary flags:", "",             urlNone );
-  addOpt( VIEW_LOG,    Option::ARG_STRING, Option::LEDIT, 
+          "Binary flags:", "",             urlValkyrie::binFlags );
+  addOpt( VIEW_LOG,    Option::ARG_STRING, Option::NONE, 
           "valkyrie",  '\0',               "view-log", 
           "<file>",    "",                 "",
           "View logfile:", "parse and view a valgrind logfile",

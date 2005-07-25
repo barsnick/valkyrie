@@ -13,14 +13,34 @@
 #define __VK_HELP_URLS_H
 
 
-/* placeholder so we can grep to find missing links */
+/* not every flag/option has context-sensitive help */
 extern const char* urlNone;
+/* placeholder so we can grep to find missing links */
+extern const char* urlDummy;
 
 
-/* MainWindow ---------------------------------------------------------- */
+/* Valkyrie ------------------------------------------------------------ */
 namespace urlValkyrie { 
+	/* Mainwindow */
+  extern const char* fileMenu;
+  extern const char* toolMenu;
+  extern const char* optionsMenu;
+  extern const char* runButton;
+  extern const char* stopButton;
+  extern const char* statusMsg;
+  extern const char* tviewButtons;
+	/* valkyrie object herself */
   extern const char* FlagsButton;
-  extern const char* Dummy;
+  extern const char* toolTips;
+  extern const char* toolLabels;
+  extern const char* userFont;
+  extern const char* palette;
+  extern const char* srcLines;
+  extern const char* srcEditor;
+  extern const char* binary;
+  extern const char* binFlags;
+  extern const char* vgDir;
+  extern const char* suppDir;
 }
 
 

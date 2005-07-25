@@ -12,14 +12,36 @@
 #include "html_urls.h"
 
 
+/* not every flag/option has context-sensitive help */
+const char* urlNone  = "";
 /* placeholder so we can grep to find missing links */
-const char* urlNone = "";
+const char* urlDummy = "dummy.html#dummy";
 
 
-/* MainWindow ---------------------------------------------------------- */
+/* Valkyrie ------------------------------------------------------------ */
 namespace urlValkyrie { 
+
+	/* Mainwindow */
+  const char* fileMenu     = "mainwindow.html#file_menu";
+  const char* toolMenu     = "mainwindow.html#tool_menu";
+  const char* optionsMenu  = "mainwindow.html#options_menu";
+  const char* runButton    = "mainwindow.html#run_button";
+  const char* stopButton   = "mainwindow.html#stop_button";
+  const char* statusMsg    = "mainwindow.html#status_msg";
+  const char* tviewButtons = "mainwindow.html#tview_buttons";
+
+	/* valkyrie object herself */
   const char* FlagsButton = "context_help.html#flags_button";
-  const char* Dummy       = "dummy.html#dummy";
+  const char* toolTips    = "context_help.html#tool_tips";
+  const char* toolLabels  = "context_help.html#tool_label";
+  const char* userFont    = "context_help.html#user_font";
+  const char* palette     = "context_help.html#palette";
+  const char* srcLines    = "context_help.html#src_lines";
+  const char* srcEditor   = "context_help.html#src_editor";
+  const char* binary      = "context_help.html#binary";
+  const char* binFlags    = "context_help.html#bin_flags";
+  const char* vgDir       = "context_help.html#valgrind_dir";
+  const char* suppDir     = "context_help.html#supps_dir";
 }
 
 
