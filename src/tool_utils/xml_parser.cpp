@@ -879,6 +879,8 @@ bool XMLParser::endElement( const QString&, const QString&,
       VK_DEBUG( "no such tag '%s'", endTag.latin1() );
       vk_assert_never_reached();
       break;
+	  default:
+      break;
   }
 
   /* reset content, so we can detect client output before a start tag */
