@@ -117,6 +117,17 @@ bool LogFile::save( QString fname )
   stream << "<pid>"  << info->pid  << "</pid>\n";
   stream << "<ppid>" << info->ppid << "</ppid>\n";
   stream << "<tool>" << info->tool << "</tool>\n\n";
+  /* logfilequalifier */
+  if ( ! info->logQualList.isEmpty() ) {
+    stream << "<logfilequalifier>\n";
+    stream << "<var>"   << info->logQualList[0] << "<var>\n";
+    stream << "<value>" << info->logQualList[1] << "<value>\n";
+    stream << "</logfilequalifier>\n";
+  }
+  /* usercomment */
+  if ( ! info->userComment.isEmpty() ) {
+    stream << "<usercomment>" << info->userComment << "</usercomment>\n";
+  }
 
   /* args stuff */
   stream << "<args>\n";

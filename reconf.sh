@@ -18,6 +18,6 @@ bakClean -r
 rm -f ./bin/valkyrie
 make clean
 #./configure $OPTS --vg-exec=$VALG_EXEC --vg-supp=$VALG_SUPP
-./configure --prefix=/home/de/Programs/valkyrie/trunk/Inst --qt-dir=/usr/lib/qt-3.3 --vg-exec=/home/de/Programs/valgrind/Inst/bin --vg-supp=/home/de/Programs/valgrind/Inst/lib/valgrind
+./configure --qt-dir=/usr/lib/qt-3.3 --vg-dir=/home/de/Programs/valgrind/Inst 
 make
 #./bin/valkyrie

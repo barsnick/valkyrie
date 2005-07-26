@@ -532,42 +532,45 @@ XMLParser::XMLParser( QObject* parent, bool esc_ents/*=false*/  )
   escEntities = esc_ents;
 
   /* init our pretend-namespace */
-  tagtypeMap["valgrindoutput"]  = VGOUTPUT;
-  tagtypeMap["protocolversion"] = PROTOCOL;
-  tagtypeMap["preamble"]        = PREAMBLE;
-  tagtypeMap["pid"]             = PID;
-  tagtypeMap["ppid"]            = PPID;
-  tagtypeMap["tool"]            = TOOL;
-  tagtypeMap["usercomment"]     = USERCOMMENT;
-  tagtypeMap["args"]            = ARGS;
-  tagtypeMap["vargv"]           = VARGV;
-  tagtypeMap["argv"]            = ARGV;
-  tagtypeMap["exe"]             = EXE;
-  tagtypeMap["arg"]             = ARG;
-  tagtypeMap["status"]          = STATUS;
-  tagtypeMap["state"]           = STATE;
-  tagtypeMap["time"]            = TIME;
-  tagtypeMap["error"]           = ERROR;
-  tagtypeMap["unique"]          = UNIQUE;
-  tagtypeMap["tid"]             = TID;
-  tagtypeMap["kind"]            = KIND;
-  tagtypeMap["what"]            = WHAT;
-  tagtypeMap["stack"]           = STACK;
-  tagtypeMap["frame"]           = FRAME;
-  tagtypeMap["ip"]              = IP;
-  tagtypeMap["obj"]             = OBJ;
-  tagtypeMap["fn"]              = FN;
-  tagtypeMap["dir"]             = SRCDIR;
-  tagtypeMap["file"]            = SRCFILE;
-  tagtypeMap["line"]            = LINE;
-  tagtypeMap["auxwhat"]         = AUXWHAT;
-  tagtypeMap["errorcounts"]     = ERRORCOUNTS;
-  tagtypeMap["pair"]            = PAIR;
-  tagtypeMap["count"]           = COUNT;
-  tagtypeMap["suppcounts"]      = SUPPCOUNTS;
-  tagtypeMap["name"]            = NAME;
-  tagtypeMap["leakedbytes"]     = LEAKEDBYTES;
-  tagtypeMap["leakedblocks"]    = LEAKEDBLOCKS;
+  tagtypeMap["valgrindoutput"]   = VGOUTPUT;
+  tagtypeMap["protocolversion"]  = PROTOCOL;
+  tagtypeMap["preamble"]         = PREAMBLE;
+  tagtypeMap["pid"]              = PID;
+  tagtypeMap["ppid"]             = PPID;
+  tagtypeMap["tool"]             = TOOL;
+  tagtypeMap["logfilequalifier"] = LOGFILEQUAL;
+  tagtypeMap["var"]              = VAR;
+  tagtypeMap["value"]            = VALUE;
+  tagtypeMap["usercomment"]      = USERCOMMENT;
+  tagtypeMap["args"]             = ARGS;
+  tagtypeMap["vargv"]            = VARGV;
+  tagtypeMap["argv"]             = ARGV;
+  tagtypeMap["exe"]              = EXE;
+  tagtypeMap["arg"]              = ARG;
+  tagtypeMap["status"]           = STATUS;
+  tagtypeMap["state"]            = STATE;
+  tagtypeMap["time"]             = TIME;
+  tagtypeMap["error"]            = ERROR;
+  tagtypeMap["unique"]           = UNIQUE;
+  tagtypeMap["tid"]              = TID;
+  tagtypeMap["kind"]             = KIND;
+  tagtypeMap["what"]             = WHAT;
+  tagtypeMap["stack"]            = STACK;
+  tagtypeMap["frame"]            = FRAME;
+  tagtypeMap["ip"]               = IP;
+  tagtypeMap["obj"]              = OBJ;
+  tagtypeMap["fn"]               = FN;
+  tagtypeMap["dir"]              = SRCDIR;
+  tagtypeMap["file"]             = SRCFILE;
+  tagtypeMap["line"]             = LINE;
+  tagtypeMap["auxwhat"]          = AUXWHAT;
+  tagtypeMap["errorcounts"]      = ERRORCOUNTS;
+  tagtypeMap["pair"]             = PAIR;
+  tagtypeMap["count"]            = COUNT;
+  tagtypeMap["suppcounts"]       = SUPPCOUNTS;
+  tagtypeMap["name"]             = NAME;
+  tagtypeMap["leakedbytes"]      = LEAKEDBYTES;
+  tagtypeMap["leakedblocks"]     = LEAKEDBLOCKS;
 
   /* init the 3-letter acronyms for kinds of errors */
   acronymMap["InvalidFree"]         = "IVF";
@@ -719,7 +722,6 @@ bool XMLParser::endElement( const QString&, const QString&,
       inPreamble = false;
       stack.push( preamble );
       break;
-
     case PID:
       info->pid  = content.toInt();  
       break;
@@ -729,10 +731,15 @@ bool XMLParser::endElement( const QString&, const QString&,
     case TOOL:
       info->tool = content;
       break;
-	  case USERCOMMENT:
+    case VAR:
+      info->logQualList << content;
+      break;
+    case VALUE:
+      info->logQualList << content;
+      break;
+    case USERCOMMENT:
       info->userComment = content;
       break;
-
     case ARGS:
       stack.push( info );
       break;
@@ -749,7 +756,8 @@ bool XMLParser::endElement( const QString&, const QString&,
       if ( inVargV ) {
         info->vgInfoList << content;
       } else {
-        /* get the name of the executable to display in TopStatus */
+        /* get the name of the executable to display in TopStatus.
+           'exe' is also used in logfile.cpp */
         int pos = content.findRev( '/' );
         QString tmp = (pos == -1) ? content 
                                   : content.right( content.length() - pos-1 );

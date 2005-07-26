@@ -700,36 +700,29 @@ void OutputItem::setOpen( bool open )
 
     switch ( xmlOutput->itemType ) {
 
-#if 1
       case XmlOutput::INFO: {
         Info* info = (Info*)xmlOutput;
         OutputItem* after = this;
         OutputItem* item;
-				/* we may / may not have a user comment */
+        /* may / may not have log-file-qualifier */
+        if ( ! info->logQualList.isEmpty() ) {
+          OutputItem* qual_item = new OutputItem(this, after, "logfilequalifier");
+          for ( unsigned int i=0; i<info->logQualList.count(); i++ ) {
+            item = new OutputItem( qual_item, after, info->logQualList[i] );
+            after = item;
+          }
+          qual_item->setOpen( true );
+          after = qual_item;
+        }
+        /* may / may not have a user comment */
         if ( ! info->userComment.isEmpty() ) {
-					OutputItem* comment_item = new OutputItem( this, after, "comment" );
-					item = new OutputItem( comment_item, after, info->userComment );
-					comment_item->setOpen( true );
-					after = item;
-				}
-				/* args and friends */
-				OutputItem* args_item = new OutputItem( this, after, "args" );
-				for ( unsigned int i=0; i<info->vgInfoList.count(); i++ ) {
-          item = new OutputItem( args_item, after, info->vgInfoList[i] );
-          after = item;
+          OutputItem* comment_item = new OutputItem( this, after, "usercomment" );
+          item = new OutputItem( comment_item, after, info->userComment );
+          comment_item->setOpen( true );
+          after = comment_item;
         }
-        for ( unsigned int i=0; i<info->exInfoList.count(); i++ ) {
-          item = new OutputItem( args_item, after, info->exInfoList[i] );
-          after = item;
-        }
-        args_item->setOpen( true );
-      } break;
-#else
-      case XmlOutput::INFO: {
-        OutputItem* after = this;
+        /* args and friends */
         OutputItem* args_item = new OutputItem( this, after, "args" );
-        Info* info = (Info*)xmlOutput;
-        OutputItem* item;
         for ( unsigned int i=0; i<info->vgInfoList.count(); i++ ) {
           item = new OutputItem( args_item, after, info->vgInfoList[i] );
           after = item;
@@ -740,7 +733,7 @@ void OutputItem::setOpen( bool open )
         }
         args_item->setOpen( true );
       } break;
-#endif
+
       /* 'J is the biz' stuff */
       case XmlOutput::PREAMBLE: {
         Preamble* preamble = (Preamble*)xmlOutput;

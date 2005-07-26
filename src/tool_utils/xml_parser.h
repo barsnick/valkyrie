@@ -81,11 +81,12 @@ public:
 public:
   int protocolVersion;
   int pid, ppid;
+  QString exe;
   QString tool;
   QString userComment;
-  QString exe;
   QString startStatus, endStatus;
   QString startTime, endTime;
+  QStringList logQualList; /* log-file-qualifier */
   QStringList vgInfoList;  /* valgrind args */
   QStringList exInfoList;  /* executable args */
 };
@@ -262,7 +263,8 @@ private:
   QString acronym( QString kind );
 
   enum TagType {     /* mapping of tags to enum values */
-    NONE=0, VGOUTPUT, PROTOCOL, PREAMBLE, PID, PPID, TOOL, USERCOMMENT,
+    NONE=0, VGOUTPUT, PROTOCOL, PREAMBLE, PID, PPID, TOOL, 
+    LOGFILEQUAL, VAR, VALUE, USERCOMMENT,
     ARGS, VARGV, ARGV, EXE, ARG, 
     STATUS, STATE, TIME,
     ERROR, UNIQUE, TID, KIND, WHAT, STACK, FRAME, IP, OBJ, FN, 
