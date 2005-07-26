@@ -111,12 +111,10 @@ bool LogFile::save( QString fname )
     stream << "  <line>" << preamble->lines[i] << "</line>\n";
   stream << "</preamble>\n\n";
 
-  /* pid, ppid, tool, usercomment */
+  /* pid, ppid, tool */
   stream << "<pid>"  << info->pid  << "</pid>\n";
   stream << "<ppid>" << info->ppid << "</ppid>\n";
   stream << "<tool>" << info->tool << "</tool>\n\n";
-  if ( !info->userComment.isEmpty() )
-    stream << "<usercomment>" << info->userComment << "<usercomment>\n";
 
   /* args stuff */
   stream << "<args>\n";

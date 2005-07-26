@@ -822,7 +822,7 @@ INCLUDEPATH += vk_logmerge \
 
 # Input
 HEADERS += vk_logmerge/vk_logmerge.h \
-           src/tool_utils/logfile.h \
+           vk_logmerge/logfile.h \
            src/tool_utils/xml_parser.h \
            src/vk_utils.h \
            src/vk_include.h \
@@ -831,7 +831,7 @@ HEADERS += vk_logmerge/vk_logmerge.h \
 
 SOURCES += vk_logmerge/vklm_main.cpp \
            vk_logmerge/vk_logmerge.cpp \
-           src/tool_utils/logfile.cpp \
+           vk_logmerge/logfile.cpp \
            src/tool_utils/xml_parser.cpp \
            src/vk_utils.cpp \
            src/options/vk_option.cpp
