@@ -224,15 +224,15 @@ void LogFile::merge( LogFile* slaveLog )
 
   /* check the same tool was used */
   if ( info->tool != slaveLog->info->tool )
-    printf("Error: different tool used to generate output\n");
+    fprintf(stderr, "Error: different tool used to generate output\n");
 
   /* check the same binary was used */
   if ( info->exe != slaveLog->info->exe )
-    printf("Error: different executable used to generate output\n");
+    fprintf(stderr, "Error: different executable used to generate output\n");
 
   /* check we do actually have some errors to merge */
   if ( errorList.isEmpty() || slaveLog->errorList.isEmpty() ) 
-    printf("Error: no errors in master/slave to merge\n");
+    fprintf(stderr, "Error: no errors in master/slave to merge\n");
 
   /* start the tests */
   bool same;
