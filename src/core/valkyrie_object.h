@@ -58,7 +58,7 @@ public:
     VG_EXEC,      /* path to valgrind executable (/usr/bin/valgrind) */
     VG_SUPPS_DIR, /* path to supp. files dir [def = /usr/lib/valgrind/] */
     /* FIRST_CMD_OPT */
-    BINARY, BIN_FLAGS, VIEW_LOG, MERGE_LOGS,
+    BINARY, BIN_FLAGS, VIEW_LOG, MERGE_EXEC, MERGE_LOGS,
     LAST_CMD_OPT  = MERGE_LOGS
   };
 
