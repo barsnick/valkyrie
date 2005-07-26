@@ -93,7 +93,7 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
                    optionWidget( Valgrind::EM_WARNS,   cgroup2, false ) );
 
   itemList.insert( Valgrind::SMC_CHECK,                   /* combobox */
-                   optionWidget( Valgrind::SMC_CHECK,  cgroup2, false ) );
+                   optionWidget( Valgrind::SMC_CHECK,  cgroup2, true ) );
   itemList.insert( Valgrind::WEIRD,                       /* combobox */
                    optionWidget( Valgrind::WEIRD,      cgroup2, true ) );
 
