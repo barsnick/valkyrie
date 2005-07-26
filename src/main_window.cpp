@@ -112,8 +112,8 @@ void MainWindow::showToolView( int tvid, bool auto_run/*=false*/ )
                this,       SLOT(updateButtons(bool)) );
       connect( nextTool, SIGNAL(message(QString)),
                this,       SLOT(setStatus(QString)) );
-      connect( this,       SIGNAL(toolbarLabelsToggled(bool)),
-               nextView, SLOT(toggleToolbarLabels(bool)) );
+      connect( this,     SIGNAL(toolbarLabelsToggled(bool)),
+               nextView,   SLOT(toggleToolbarLabels(bool)) );
     }
   }
 

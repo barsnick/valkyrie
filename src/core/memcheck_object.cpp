@@ -543,8 +543,17 @@ void Memcheck::processDone()
 {
   statusMsg( "Memcheck", "Parsing complete" );
   /* did valgrind exit normally ? */
-  if ( proc->normalExit() )
-    ;//VK_DEBUG("normalExit() == true");
+  if ( proc->normalExit() ) {
+    // - then we can trust exitStatus()
+    int ret = proc->exitStatus();
+    if (ret != 0) { // process exited with error
+      vkError( view(), "Process Run Error",
+               "<p>Process exited with error: %d</p>", ret );
+    }
+  } else {
+    vkError( view(), "Process Run Error",
+             "<p>Process crashed or was killed.</p>" );
+  }
 
   /* grab the process id in case we need it later */
   long currentPid = proc->processIdentifier();
