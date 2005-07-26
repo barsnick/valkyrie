@@ -59,6 +59,9 @@ extern "C" {
 #endif // Q_C_CALLBACKS
 
 
+//#define VK_PROCESS_DEBUG
+
+
 
 /* class VKMembuf
    - Reimplementation of QMembuf, from qt/kernel/qinternal_p.h
