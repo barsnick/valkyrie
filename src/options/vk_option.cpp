@@ -80,21 +80,15 @@ QString checkFile( int* err_val, const char* fname )
   QString file_name = fname;
   QString absPath = QString::null;
 
-  if ( file_name[0] == '/' ) {
-    /* if 'file_name' starts with a '/', it is already an absolute path */
-    absPath = file_name;
-  } else if ( file_name.find('/') != -1 ) {
-    /* if 'file_name' contains one or more slashes, it is a file
-       path relative to the current directory.  */
-    absPath = QDir::current().absFilePath( file_name );
+  if ( QFile::exists(file_name) ) {
+    absPath = QFileInfo( file_name ).absFilePath();
   } else {
-    /* no '/' found, so the file_name path needs to be determined
-       using the $PATH environment variable */
+    /* else try to find in $PATH environment variable */
     char* pEnv = getenv( "PATH" );
     QStringList paths( QStringList::split(QChar(':'), pEnv) );
     for ( QStringList::Iterator p = paths.begin(); p != paths.end(); ++p ) {
-      QDir dir( *p + "/" + file_name );
-      QString candidate = dir.absPath();
+      QDir dir( *p );
+      QString candidate = dir.absPath() + "/" + file_name;
       if ( QFile::exists(candidate) ) {
         absPath = candidate;
         break;
@@ -102,12 +96,9 @@ QString checkFile( int* err_val, const char* fname )
     }
   }
 
-  absPath = QDir::cleanDirPath( absPath );
-  QFileInfo fi( absPath );
-  if ( !fi.exists() ) {
+  if ( ! QFile::exists(absPath) ) {
     *err_val = PERROR_BADFILE;
   }
-
   return absPath;
 }
 
