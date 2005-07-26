@@ -676,10 +676,20 @@ void Memcheck::setupParser( bool init )
     connect( xmlParser,    SIGNAL(updateStatus()),
              this->view(), SLOT(updateStatus()) );
     connect( xmlParser,    SIGNAL(loadClientOutput(const QString&)),
-       this,         SLOT(loadClientOutput(const QString&)) );
+             this,         SLOT(loadClientOutput(const QString&)) );
 
     source.setData( "" );
-    reader.parse( &source, true );
+    bool ok = reader.parse( &source, true );
+    if ( !ok ) {
+      /* if we get here, it means either:
+         a) Output from valgrind run is bad
+         b) Output from vk_logmerge run is bad
+          - neither should happen, so die.
+         Not very nice, but output-to-date is saved in the auto-log file.
+         TODO: do sthng nicer here - but rem not to block this function!
+       */
+      vk_assert_never_reached();
+    }
   } else {                        /* closing down */
     disconnect( xmlParser,    SIGNAL(loadItem(XmlOutput *)),
                 this->view(), SLOT(loadItem(XmlOutput *)) );
@@ -688,7 +698,7 @@ void Memcheck::setupParser( bool init )
     disconnect( xmlParser,    SIGNAL(updateStatus()),
                 this->view(), SLOT(updateStatus()) );
     disconnect( xmlParser,    SIGNAL(loadClientOutput(const QString&)),
-    this,         SLOT(loadClientOutput(const QString&)) );
+                this,         SLOT(loadClientOutput(const QString&)) );
   }
 
 }

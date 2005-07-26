@@ -603,7 +603,7 @@ void XMLParser::reset( bool reinit/*=true*/ )
   inSuppCounts  = false;
   inPair        = false;
 
-   if ( reinit ) {
+  if ( reinit ) {
     info      = new Info();
     topStatus = new TopStatus();
   }
