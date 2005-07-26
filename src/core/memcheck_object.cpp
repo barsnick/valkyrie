@@ -301,21 +301,20 @@ bool Memcheck::parseLog( QString log_filename )
   source.setData( inputData );
   bool ok = reader.parse( &source, true );
 
-  while ( !stream.atEnd() ) {
+  while ( ok && !stream.atEnd() ) {
     lineNumber++;
     inputData = stream.readLine();
     source.setData( inputData );
     ok = reader.parseContinue();
-    if ( !ok ) {
-      vkError( view(), "Parse Error",
-               "<p>Parsing failed on line no %d: '%s'</p>", 
-               lineNumber, inputData.latin1() );
-      break;
-    }
   }
 
   logFile.close();
 
+  if ( !ok ) {
+    vkError( view(), "Parse Error",
+             "<p>Parsing failed on line no %d: '%s'</p>", 
+             lineNumber, inputData.latin1() );
+  }
   return ok;
 }
 
