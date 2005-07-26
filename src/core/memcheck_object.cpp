@@ -475,7 +475,6 @@ void Memcheck::parseOutput()
 {
   statusMsg( "Memcheck", "Parsing output ... " );
 
-  bool ok = true;
   QString data;
   int lineNumber = 0;
 
