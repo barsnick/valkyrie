@@ -403,7 +403,7 @@ void MainWindow::mkMenuBar()
                         SLOT(closeAllWindows()), CTRL+Key_X );
   int id = mainMenu->insertItem( "&File", fileMenu, -1, index );
   mainMenu->setAccel( ALT+Key_F, id );
-  ContextHelp::add( fileMenu, urlDummy );
+  ContextHelp::add( fileMenu, urlValkyrie::fileMenu );
 
   /* toolview menu ----------------------------------------------------- */
   index++;
@@ -418,7 +418,7 @@ void MainWindow::mkMenuBar()
   tools.clear();
   id = mainMenu->insertItem( "&Tools", toolsMenu, -1, index );
   mainMenu->setAccel( ALT+Key_T, id );
-  ContextHelp::add( toolsMenu, urlDummy );
+  ContextHelp::add( toolsMenu, urlValkyrie::toolMenu );
 
   /* options / preferences et al --------------------------------------- */
   index++;
@@ -431,7 +431,7 @@ void MainWindow::mkMenuBar()
   }
   id = mainMenu->insertItem( "O&ptions", prefsMenu, -1, index );
   mainMenu->setAccel( ALT+Key_P, id );
-  ContextHelp::add( prefsMenu, urlDummy );
+  ContextHelp::add( prefsMenu, urlValkyrie::optionsMenu );
 
   /* spacer between popup menus and tool-buttons ----------------------- */
   index++;
@@ -452,7 +452,7 @@ void MainWindow::mkMenuBar()
            this,      SLOT( run() ) );
   QToolTip::add( runButton, "Run valgrind with specified executable" );
   mainMenu->insertItem( runButton, -1, index );
-  ContextHelp::add( runButton, urlDummy );
+  ContextHelp::add( runButton, urlValkyrie::runButton );
 
   /* stop button ------------------------------------------------------- */
   index++;
@@ -467,7 +467,7 @@ void MainWindow::mkMenuBar()
            SLOT( stop() ) );
   QToolTip::add( stopButton, "Terminate program execution immediately" );
   mainMenu->insertItem( stopButton, -1, index );
-  ContextHelp::add( stopButton, urlDummy );
+  ContextHelp::add( stopButton, urlValkyrie::stopButton );
 
   index++;
   mainMenu->insertSeparator( index );
@@ -546,7 +546,7 @@ void MainWindow::mkStatusBar()
   int status_height = fontMetrics().height();
   statusMsg->setFixedHeight( status_height );
   msgLayout->addWidget( statusMsg );
-  ContextHelp::add( statusMsg, urlDummy );
+  ContextHelp::add( statusMsg, urlValkyrie::statusMsg );
 
 
   /* hbox for the bottom row */
@@ -559,7 +559,7 @@ void MainWindow::mkStatusBar()
   viewButtGroup->hide();
   connect( viewButtGroup, SIGNAL(clicked(int)), 
            this,          SLOT(showToolView(int)) );
-  ContextHelp::add( viewButtGroup, urlDummy );
+  ContextHelp::add( viewButtGroup, urlValkyrie::tviewButtons );
 
   /* set the buttons to all be the same width */
   int butt_width = fontMetrics().width( "XMemcheckX" );
