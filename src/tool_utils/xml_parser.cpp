@@ -111,6 +111,7 @@ Info::Info() : XmlOutput( INFO )
   pid  = -1;
   ppid = -1;
   tool = "";
+  userComment = "";
   startStatus = "";
   endStatus   = "";
   startTime   = "";
@@ -537,6 +538,7 @@ XMLParser::XMLParser( QObject* parent, bool esc_ents/*=false*/  )
   tagtypeMap["pid"]             = PID;
   tagtypeMap["ppid"]            = PPID;
   tagtypeMap["tool"]            = TOOL;
+  tagtypeMap["usercomment"]     = USERCOMMENT;
   tagtypeMap["args"]            = ARGS;
   tagtypeMap["vargv"]           = VARGV;
   tagtypeMap["argv"]            = ARGV;
@@ -717,6 +719,7 @@ bool XMLParser::endElement( const QString&, const QString&,
       inPreamble = false;
       stack.push( preamble );
       break;
+
     case PID:
       info->pid  = content.toInt();  
       break;
@@ -725,6 +728,9 @@ bool XMLParser::endElement( const QString&, const QString&,
       break;
     case TOOL:
       info->tool = content;
+      break;
+	  case USERCOMMENT:
+      info->userComment = content;
       break;
 
     case ARGS:
