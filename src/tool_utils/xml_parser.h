@@ -82,6 +82,7 @@ public:
   int protocolVersion;
   int pid, ppid;
   QString tool;
+  QString userComment;
   QString exe;
   QString startStatus, endStatus;
   QString startTime, endTime;
@@ -261,7 +262,7 @@ private:
   QString acronym( QString kind );
 
   enum TagType {     /* mapping of tags to enum values */
-    NONE=0, VGOUTPUT, PROTOCOL, PREAMBLE, PID, PPID, TOOL, 
+    NONE=0, VGOUTPUT, PROTOCOL, PREAMBLE, PID, PPID, TOOL, USERCOMMENT,
     ARGS, VARGV, ARGV, EXE, ARG, 
     STATUS, STATE, TIME,
     ERROR, UNIQUE, TID, KIND, WHAT, STACK, FRAME, IP, OBJ, FN, 
