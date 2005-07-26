@@ -80,6 +80,7 @@ private:
   bool parseLog( QString logfile );
   QString validateFile( QString log_file );
   void statusMsg(  QString hdr, QString msg );
+  bool queryFileSave();
 
   void setupProc( bool init, int log_fd=-1 );
   void setupParser( bool init );

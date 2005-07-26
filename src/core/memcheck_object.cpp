@@ -171,6 +171,17 @@ bool Memcheck::isDone( Valkyrie::RunMode rmode )
     }
   }
 
+  if (!queryFileSave())
+    return false;     // not saved: procrastinate.
+
+  return true;
+}
+
+/* if current output not saved, ask user if want to save
+   returns false if not saved, but user wants to procrastinate.
+*/
+bool Memcheck::queryFileSave()
+{
   /* currently loaded / parsed stuff is saved to tmp file - ask user
      if they want to save it to a 'real' file */
   if ( !fileSaved ) {
@@ -190,7 +201,6 @@ bool Memcheck::isDone( Valkyrie::RunMode rmode )
       fileSaved = true;
     }
   }
-
   return true;
 }
 
@@ -429,6 +439,10 @@ bool Memcheck::runProcess( QStringList flags, int log_fd,
   for ( unsigned int i=0; i<flags.count(); i++ )
     printf("flag[%d] --> %s\n", i, flags[i].latin1() );
 #endif
+
+  /* last process output wasn't saved */
+  if (!queryFileSave())
+    return false;    // not saved: procrastinate
 
   fileSaved = false;
   emitRunning( true );
