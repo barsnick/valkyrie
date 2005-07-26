@@ -419,7 +419,8 @@ void VkConfig::insertData( const EntryKey &ekey,
    over-ridden by the user via the Options dialog.*/
 void VkConfig::updatePaths()
 {
-  wrEntry( VG_EXEC_PATH, "vg-exec",  "valkyrie" );
+  wrEntry( MERGE_EXEC,   "merge-exec",   "valkyrie" );
+  wrEntry( VG_EXEC_PATH, "vg-exec",      "valkyrie" );
   wrEntry( VG_SUPP_DIR,  "vg-supps-dir", "valkyrie" );
 
   /* find and store valgrind's suppressions files */

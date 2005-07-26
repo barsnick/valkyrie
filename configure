@@ -68,6 +68,8 @@ VG_DIR=             # path to valgrind's install dir
 VG_EXEC_PATH=       # path to valgrind executable
 VG_SUPP_DIR=        # path to valgrind's suppressions dir
 
+MERGE_EXEC=         # path to vk_logmerge
+
 #MYSQL_LIB=          # path to MySQL library ( -lmysqlclient )
 #MYSQL_INC=          # path to MySQL include directory
 
@@ -416,6 +418,10 @@ fi
 [ -f $VK_CACHE ] && rm -f $VK_CACHE
 
 
+# CAB: Kludging this for now...
+MERGE_EXEC="$relpath/bin/vk_logmerge"
+
+
 #-------------------------------------------------------------------
 # we have all the info we need to generate vk_include.h at this point.
 # note: if the #includes are changed in any way, update vk_utils.cpp
@@ -450,9 +456,13 @@ cat > $vk_include_h <<_INC_EOF
 #define VK_DBASE_DIR  "/dbase/"
 #define VK_LOGS_DIR   "/logs/"
 #define VK_SUPPS_DIR  "/suppressions/"
+
 /* valgrind paths ------------------------------------------------------ */
 #define VG_EXEC_PATH  "$VG_EXEC_PATH"
 #define VG_SUPP_DIR   "$VG_SUPP_DIR"
+
+/* other executables --------------------------------------------------- */
+#define MERGE_EXEC    "$MERGE_EXEC"
 
 /* names --------------------------------------------------------------- */
 #define Vk_Name      "$vk_name"

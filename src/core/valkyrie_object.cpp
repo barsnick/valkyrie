@@ -105,6 +105,11 @@ Valkyrie::Valkyrie()
           "<file>",    "",                 "",
           "View logfile:", "parse and view a valgrind logfile",
           urlNone );
+  /* path to vk_logmerge executable (found by configure) */
+  addOpt( MERGE_EXEC,  Option::NOT_POPT,   Option::LEDIT,
+          "valkyrie",  '\0',               "merge-exec",
+          "",          "",                 "",
+          "Log Merger:", "",               urlNone );
   addOpt( MERGE_LOGS,  Option::ARG_STRING, Option::NONE, 
           "valkyrie",  '\0',               "merge", 
           "<loglist>", "",                 "",
