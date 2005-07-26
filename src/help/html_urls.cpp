@@ -14,14 +14,12 @@
 
 /* not every flag/option has context-sensitive help */
 const char* urlNone  = "";
-/* placeholder so we can grep to find missing links */
-const char* urlDummy = "dummy.html#dummy";
 
 
 /* Valkyrie ------------------------------------------------------------ */
 namespace urlValkyrie { 
 
-	/* Mainwindow */
+  /* Mainwindow */
   const char* fileMenu     = "mainwindow.html#file_menu";
   const char* toolMenu     = "mainwindow.html#tool_menu";
   const char* optionsMenu  = "mainwindow.html#options_menu";
@@ -30,24 +28,66 @@ namespace urlValkyrie {
   const char* statusMsg    = "mainwindow.html#status_msg";
   const char* tviewButtons = "mainwindow.html#tview_buttons";
 
-	/* valkyrie object herself */
-  const char* FlagsButton = "context_help.html#flags_button";
-  const char* toolTips    = "context_help.html#tool_tips";
-  const char* toolLabels  = "context_help.html#tool_label";
-  const char* userFont    = "context_help.html#user_font";
-  const char* palette     = "context_help.html#palette";
-  const char* srcLines    = "context_help.html#src_lines";
-  const char* srcEditor   = "context_help.html#src_editor";
-  const char* binary      = "context_help.html#binary";
-  const char* binFlags    = "context_help.html#bin_flags";
-  const char* vgDir       = "context_help.html#valgrind_dir";
-  const char* suppDir     = "context_help.html#supps_dir";
+  /* valkyrie's options page */
+  const char* FlagsButton  = "context_help.html#flags_button";
+  const char* toolTips     = "context_help.html#tool_tips";
+  const char* toolLabels   = "context_help.html#tool_label";
+  const char* userFont     = "context_help.html#user_font";
+  const char* palette      = "context_help.html#palette";
+  const char* srcLines     = "context_help.html#src_lines";
+  const char* srcEditor    = "context_help.html#src_editor";
+  const char* binary       = "context_help.html#binary";
+  const char* binFlags     = "context_help.html#bin_flags";
+  const char* vgDir        = "context_help.html#valgrind_dir";
+  const char* suppDir      = "context_help.html#supps_dir";
+
+  /* valgrind`s options page: tab Suppressions */
+  const char* allSupps = "context_help.html#all_supps";
+  const char* defSupps = "context_help.html#def_supps";
+  const char* selSupps = "context_help.html#sel_supps";
+
+  /* MemcheckView toolbuttons */
+  const char* openAllButton = "";
+  const char* openOneButton = "";
+  const char* srcPathButton = "";
+  const char* openLogButton = "";
+  const char* saveLogButton = "";
+  const char* suppEdButton  = "";
 }
 
 
 /* Valgrind core ------------------------------------------------------- */
 namespace urlVgCore { 
-  const char* Alignment = "manual-core.flags.html#alignment";
+  /* valgrind's options page: tab Core */
+  const char* mainTool   = "manual-core.flags.html#tool_name";
+  const char* verbosity  = "manual-core.flags.html#verbosity";
+  const char* xmlOutput  = "manual-core.flags.html#xml_output";
+  const char* xmlComment = "manual-core.flags.html#xml_user_comment";
+  const char* traceChild = "manual-core.flags.html#trace_children";
+  const char* trackFds   = "manual-core.flags.html#track_fds";
+  const char* timeStamp  = "manual-core.flags.html#time_stamp";
+  const char* freeGlibc    = "manual-core.flags.html#free_glibc";
+  const char* pointerCheck = "manual-core.flags.html#pointer_check";
+  const char* showEmWarns  = "manual-core.flags.html#show_emwarns";
+  const char* smcSupport   = "manual-core.flags.html#smc_support";
+  const char* weirdHacks   = "manual-core.flags.html#weird_hacks";
+  /* valgrind's options page: tab Error Reporting */
+  const char* genSuppressions = "manual-core.flags.html#gen_supps";
+  const char* autoDemangle    = "manual-core.flags.html#auto_demangle";
+  const char* errorLimit      = "manual-core.flags.html#error_limit";
+  const char* stackTraces     = "manual-core.flags.html#stack_traces";
+  const char* numCallers      = "manual-core.flags.html#num_callers";
+  const char* maxSFrames      = "manual-core.flags.html#max_frames";
+  const char* startDebugger   = "manual-core.flags.html#attach_debugger";
+  const char* whichDebugger   = "manual-core.flags.html#which_debugger";
+  const char* inputFd         = "manual-core.flags.html#input_fd";
+  const char* logToFd         = "manual-core.flags.html#log2fd";
+  const char* logToFilePid    = "manual-core.flags.html#log2file_pid";
+  const char* logToFile       = "manual-core.flags.html#log2file";
+  const char* logToSocket     = "manual-core.flags.html#log2socket";
+  const char* logFileQual     = "manual-core.flags.html#log2file_qualifier";
+  /* only used by Memcheck and Massif */
+  const char* Alignment       = "manual-core.flags.html#alignment";
 }
 
 

@@ -15,13 +15,11 @@
 
 /* not every flag/option has context-sensitive help */
 extern const char* urlNone;
-/* placeholder so we can grep to find missing links */
-extern const char* urlDummy;
 
 
 /* Valkyrie ------------------------------------------------------------ */
 namespace urlValkyrie { 
-	/* Mainwindow */
+  /* Mainwindow */
   extern const char* fileMenu;
   extern const char* toolMenu;
   extern const char* optionsMenu;
@@ -29,7 +27,7 @@ namespace urlValkyrie {
   extern const char* stopButton;
   extern const char* statusMsg;
   extern const char* tviewButtons;
-	/* valkyrie object herself */
+  /* valkyrie's options page */
   extern const char* FlagsButton;
   extern const char* toolTips;
   extern const char* toolLabels;
@@ -41,11 +39,51 @@ namespace urlValkyrie {
   extern const char* binFlags;
   extern const char* vgDir;
   extern const char* suppDir;
+  /* valgrind's options page: tab Suppressions */
+  extern const char* allSupps;
+  extern const char* defSupps;
+  extern const char* selSupps;
+  /* MemcheckView tool buttons */
+  extern const char* openAllButton;
+  extern const char* openOneButton;
+  extern const char* srcPathButton;
+  extern const char* openLogButton;
+  extern const char* saveLogButton;
+  extern const char* suppEdButton;
 }
 
 
 /* Valgrind core ------------------------------------------------------- */
-namespace urlVgCore { 
+namespace urlVgCore {
+  /* valgrind's options page: tab Core */
+  extern const char* mainTool;
+  extern const char* verbosity;
+  extern const char* xmlOutput;
+  extern const char* xmlComment;
+  extern const char* traceChild;
+  extern const char* trackFds;
+  extern const char* timeStamp;
+  extern const char* freeGlibc;
+  extern const char* pointerCheck;
+  extern const char* showEmWarns;
+  extern const char* smcSupport;
+  extern const char* weirdHacks;
+  /* valgrind's options page: tab Error Reporting */
+  extern const char* genSuppressions;
+  extern const char* autoDemangle;
+  extern const char* errorLimit;
+  extern const char* stackTraces;
+  extern const char* numCallers;
+  extern const char* maxSFrames;
+  extern const char* startDebugger;
+  extern const char* whichDebugger;
+  extern const char* inputFd;
+  extern const char* logToFd;
+  extern const char* logToFilePid;
+  extern const char* logToFile;
+  extern const char* logToSocket;
+  extern const char* logFileQual;
+  /* only used by Memcheck and Massif */
   extern const char* Alignment;
 }
 
