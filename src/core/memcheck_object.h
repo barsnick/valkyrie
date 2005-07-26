@@ -75,9 +75,11 @@ private:
   QString validateFile( QString log_file );
   void statusMsg(  QString hdr, QString msg );
 
-  void setupProc( bool init );
+  void setupProc( bool init, int log_fd=-1 );
   void setupParser( bool init );
   bool setupFileStream( bool init );
+
+  bool runProcess( QStringList flags, int log_fd, QString fbasename );
 
 private:
   XMLParser* xmlParser;

@@ -282,7 +282,7 @@ QString Memcheck::validateFile( QString log_file )
 }
 
 
-/* called by mergeLogFiles() and parseLogFile().
+/* called by parseLogFile().
    opens a logfile and feeds the contents to the parser. 
    the logfile's existence, perms and format have all been
    pre-validated, so no need to re-check. */
@@ -384,157 +384,19 @@ bool Memcheck::mergeLogFiles()
 {
   /* tell valkyrie what we are doing */
   emit setRunMode( Valkyrie::modeMergeLogs );
-
-  fileSaved = false;
-  emitRunning( true );
-
-  QString log_list = vkConfig->rdEntry( "merge", "valkyrie" );
-  QFile logFile( log_list );
-  if ( !logFile.open( IO_ReadOnly ) ) {
-    emitRunning( false );
-    vkError( this->view(), "Open File Error", 
-             "<p>Unable to open logfile '%s'</p>", log_list.latin1() );
-    return false;
-  }
-  QFileInfo fi( log_list );
-  statusMsg( "Merging", fi.fileName() );
-  qApp->processEvents();
-
-  /* iterate through the list of files, validating each one as we go.
-     if a file is valid, bung it in the list, else skip it.
-     if we bomb out > 5 times, offer a chance to cancel the operation. */
-  QString temp;
-  QStringList logFileList;
-  int max_errs = 5;
-
-  QTextStream stream( &logFile );
-  while ( !stream.atEnd() ) {
-    temp = stream.readLine().simplifyWhiteSpace();
-    /* skip empty lines */
-    if ( temp.isEmpty() )
-      continue;
-    /* check re file perms and format */
-    temp = validateFile( temp );
-    if ( !temp.isNull() ) {
-      logFileList << temp;
-    } else {
-      max_errs = max_errs - 1;
-    }
-    if ( max_errs <= 0 ) {
-      int val = vkQuery( this->view(), 2, "Invalid Files",
-                "<p>This doesn't look like a valid list of logfiles.</p>"
-                "<p>Would you like to cancel the operation?</p>" );
-      if ( val == MsgBox::vkYes ) {        /* abort */
-        logFile.close();
-        statusMsg( "Merge aborted", "(" + fi.fileName()+ ")" );
-        fileSaved = true;                  /* nothing to save */
-        emitRunning( false );
-        return true;
-      } else if ( val == MsgBox::vkNo ) {  /* continue */
-        max_errs = 500;
-      }
-    }   
-  }
-  logFile.close();
-
-  /* check there's a minimum of two files-to-merge */
-  if ( logFileList.count() < 2 ) {
-    emitRunning( false );
-    vkError( this->view(), "Merge LogFiles Error", 
-             "<p>The minimum number of files required is 2.</p>"
-             "<p>The file '%s' contains %d valid xml logfiles.</p>", 
-             log_list.latin1(), logFileList.count() );
-    return false;
-  }
-
-  /* create a 'master' LogFile, and parse the contents of file #1 into it.
-     subsequent files are parsed one-by-one, and compared with the
-     'master'; duplicates are merged where found, and stuff like
-     <errcounts> and <suppcounts> are incremented to reflect any
-     merges.  the 'master' contains the final output */
-  LogFile* masterLogFile = new LogFile( logFileList[0] );
-  xmlParser->reset();
-  source.reset();
-  connect( xmlParser,     SIGNAL(loadItem(XmlOutput *)), 
-           masterLogFile, SLOT(loadItem(XmlOutput *)) );
-
-  fi.setFile( logFileList[0] );
-  QString master_fname = fi.fileName();
-  /* parse the first xml_logfile into the master */
-  parseLog( logFileList[0] );
-
-  /* disconnect the master so it no longer communicates with the parser */
-  disconnect( xmlParser,     SIGNAL(loadItem(XmlOutput *)), 
-              masterLogFile, SLOT(loadItem(XmlOutput *)) );
-
-  /* loop over the rest of the files in the list, and merge one-by-one */
-  QString slave_fname;
-  LogFile* slaveLogFile;
-  for ( unsigned int i=1; i<logFileList.count(); i++ ) {
-
-    /* reset everything */
-    fi.setFile( logFileList[i] );
-    slave_fname = fi.fileName();    
-    xmlParser->reset();
-    source.reset();
-
-    /* create a new LogFile */
-    slaveLogFile = new LogFile( logFileList[i] );
-    connect( xmlParser,    SIGNAL(loadItem(XmlOutput *)), 
-             slaveLogFile, SLOT(loadItem(XmlOutput *)) );
-
-    /* parse the next file in the list into logFile */
-    parseLog( logFileList[i] );
-
-    /* tell user we are merging the slave into the master */
-    statusMsg( "Merging",  master_fname + " <- " + slave_fname );
-
-    qApp->processEvents();
-
-    masterLogFile->merge( slaveLogFile );
-
-    /* disconnect the logFile from the parser */
-    disconnect( xmlParser,    SIGNAL(loadItem(XmlOutput *)), 
-                slaveLogFile, SLOT(loadItem(XmlOutput *)) );
-
-    /* delete the slave and free memory */
-    delete slaveLogFile;
-    slaveLogFile = 0;
-  }
-
-  /* create a unique filename for saving the merged files to */
-  QString fname = vk_mkstemp( "merged", vkConfig->logsDir(), ".xml" );
-  /* fallback in case mkstemp bombs out */
-  if ( fname.isNull() )
-    fname = vkConfig->logsDir() + fi.baseName(true) + "-merged.xml";
-
-  fileSaved = masterLogFile->save( fname );
-  if ( fileSaved ) vkConfig->wrEntry( fname, "view-log", "valkyrie" );
-  else             vkConfig->wrEntry( "", "view-log", "valkyrie" );
-  if (!fileSaved) {
-    vkError( 0, "I/O Error",
-             "<p>Failed to open file '%s' for writing</p>",
-             fname.latin1() );
-  }
-
-  QString msg = "("+fi.fileName()+")";
-  if ( !fileSaved ) msg += "<p> unable to save result</p>";
-  else              msg += "<p>Output saved to '" +fname+ "'</p>";
-  statusMsg( "Merge Complete", msg );
-
-  /* delete the master and free memory, as we are done */
-  delete masterLogFile;
-  masterLogFile = 0;
-
-  /* load the result */
-  if ( fileSaved ) {
-    parseLogFile();
-    emit message( fname );
-  }
-
-  emitRunning( false );
-
-  return true;
+ 
+  QString fname_logList = vkConfig->rdEntry( "merge", "valkyrie" );
+  statusMsg( "Merging", fname_logList );
+ 
+  QStringList flags;
+  flags << vkConfig->rdEntry( "merge-exec","valkyrie");
+  flags << "-f";
+  flags << fname_logList;
+ 
+  /* read from stdout */
+  int log_fd =  1;
+ 
+  return runProcess( flags, log_fd, "mc_merged" );
 }
 
 
@@ -546,6 +408,25 @@ bool Memcheck::run( QStringList flags )
   /* tell valkyrie what we are doing */
   emit setRunMode( Valkyrie::modeParseOutput );
 
+  /* Read from log_fd */
+  int log_fd =  vkConfig->rdInt( "log-fd", "valgrind" );
+
+  return runProcess( flags, log_fd, "mc_output" );
+}
+
+
+/* Run a VKProcess, as given by 'flags'.
+   Listens to output on 'log_fd', loading this output to the toolView
+   via xmlParser::loadItem(XmlOutput*).
+   Output to stdout, stderr is also gathered and sent to toolView via
+   loadClientOutput().
+   Note: 'log_fd' takes precedence over stdout/stderr, so if the fd's
+   overlap, output will be taken from 'log_fd', not stdout/stderr.
+   Auto-saves log_fd output to a unique fname starting with 'fbasename'.
+*/
+bool Memcheck::runProcess( QStringList flags, int log_fd,
+                           QString fbasename )
+{
 #if 0
   for ( unsigned int i=0; i<flags.count(); i++ )
     printf("flag[%d] --> %s\n", i, flags[i].latin1() );
@@ -555,7 +436,7 @@ bool Memcheck::run( QStringList flags )
   emitRunning( true );
 
   /* init the auto-save filename and stream */
-  saveFname = vk_mkstemp( "mc_output", vkConfig->logsDir(), ".xml" );
+  saveFname = vk_mkstemp( fbasename, vkConfig->logsDir(), ".xml" );
   //printf("saveFname = %s\n", saveFname.latin1() );
   logFile.setName( saveFname );
   if ( ! setupFileStream( true ) ) {
@@ -569,7 +450,7 @@ bool Memcheck::run( QStringList flags )
 
   setupParser( true );
   /* fork a new process in non-blocking mode */
-  setupProc( true );
+  setupProc( true, log_fd );
 
   /* stuff the cmd-line flags/non-default opts into the process */
   proc->setArguments( flags );
@@ -597,12 +478,11 @@ void Memcheck::parseOutput()
   QString data;
   int lineNumber = 0;
 
-  int log_fd = vkConfig->rdInt( "log-fd", "valgrind" );
-  vk_assert( log_fd == proc->getFDout() );                // Sanity check
+  //  int log_fd = proc->getFDout();
 
   // TODO: proc->readLineXXX() doesn't respect client output formatting
 
-  /* FDout takes precedence over stdout/stderr,
+  /* FDout: takes precedence over stdout/stderr,
      so even if FDout == 1|2, we'll still get the data here. */
   while ( proc->canReadLineFDout() ) {
     lineNumber++;
@@ -614,32 +494,29 @@ void Memcheck::parseOutput()
     if (!ok) break;
   }
 
-  /* If log_fd != stdout/stderr, read from them here */
-  if ( log_fd != 1 ) {                    /* stdout */
-    /* Anything from stdout will now be from client prog */
-    while ( proc->canReadLineStdout() ) {
-      data = proc->readLineStdout();
-      //printf("\nMC::parseOutput(): Stdout: '%s'\n", data.latin1() );
-      loadClientOutput( data, 1 );
-    }
-  }
-  if ( log_fd != 2 ) {                    /* stderr */
-  /* if valgrind failed to start, may output to stderr;
-     else will be client prog output. */
-    while ( proc->canReadLineStderr() ) {
-      data = proc->readLineStderr();
-      //printf("\nMC::parseOutput(): Stderr: '%s'\n", data.latin1() );
-      loadClientOutput( data, 2 );
-    }
+  /* Stdout: anything read here will be from client prog */
+  while ( proc->canReadLineStdout() ) {
+    data = proc->readLineStdout();
+    //printf("\nMC::parseOutput(): Stdout: '%s'\n", data.latin1() );
+    loadClientOutput( data, 1 );
   }
 
-#if 1
+  /* Stderr: if valgrind failed to start, may output to stderr;
+     else will be client prog output. */
+  while ( proc->canReadLineStderr() ) {
+    data = proc->readLineStderr();
+    //printf("\nMC::parseOutput(): Stderr: '%s'\n", data.latin1() );
+    loadClientOutput( data, 2 );
+  }
+
+#if 0
   if ( !ok ) {
+    /* TODO: SEGFAULTS! */
     vkError( this->view(), "Parse Error", 
              "<p>Parsing failed on line #%d: '%s'</p>", 
              lineNumber, data.latin1() );
-#endif
   }
+#endif
 
 }
 
@@ -724,13 +601,15 @@ void Memcheck::saveParsedOutput( QString& fname )
 
 
 /* fork a new process in non-blocking mode; connect the pipes:
-   log_fd || stdout || stderr */
-void Memcheck::setupProc( bool init )
+   log_fd || stdout || stderr
+   on init, sets proc to use file descriptor log_fd
+*/
+void Memcheck::setupProc( bool init, int log_fd/*=-1*/ )
 {
   if ( init ) {                   /* starting up */
     vk_assert( proc == 0 );
+    vk_assert( log_fd >= 1 );
     proc = new VKProcess( this, "mc_proc" );
-    int log_fd = vkConfig->rdInt( "log-fd", "valgrind" );
     proc->setCommunication( VKProcess::Stdin  | VKProcess::Stdout | 
                             VKProcess::Stderr | VKProcess::FDin   |
                             VKProcess::FDout );
@@ -744,6 +623,7 @@ void Memcheck::setupProc( bool init )
     connect( proc, SIGNAL( readyReadStderr() ),
              this, SLOT( parseOutput() ) );
   } else {                        /* closing down */
+    vk_assert( log_fd == -1 );    /* just ensure proper use */
     disconnect( proc, SIGNAL( processExited() ),
                 this, SLOT( processDone() ) );
     disconnect( proc, SIGNAL( readyReadFDout() ),
