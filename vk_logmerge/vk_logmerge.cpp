@@ -40,7 +40,7 @@ QString VKLogMerge::validateFile( QString& log_file )
   /* check this is a valid file, and has the right perms */
   QString ret_file = fileCheck( &errval, log_file.latin1(), true, false );
   if ( errval != PARSED_OK ) {
-    fprintf(stderr ,"File Error: %s: \n\"%s\"", 
+    fprintf(stderr ,"File Error (%s): '%s'\n", 
             parseErrString(errval), 
             escapeEntities(log_file).latin1() );
     return QString::null;
@@ -49,13 +49,14 @@ QString VKLogMerge::validateFile( QString& log_file )
   /* check the file is readable, and the format is xml */
   bool is_xml = XMLParser::xmlFormatCheck( &errval, log_file );
   if ( errval != PARSED_OK ) {
-    fprintf(stderr, "File Error: %s: \n\"%s\"", 
-	    parseErrString(errval), log_file.latin1() );
+    fprintf(stderr, "File Error (%s): '%s'\n", 
+            parseErrString(errval),
+            log_file.latin1() );
     return QString::null;
   }
 
   if ( !is_xml ) {
-    fprintf(stderr, "File Format Error: File '%s' not in xml format.",
+    fprintf(stderr, "File Format Error: File '%s' not in xml format.\n",
 	    log_file.latin1() );
     return QString::null;
   }
@@ -89,7 +90,7 @@ bool VKLogMerge::parseLog( QString log_filename )
     source.setData( inputData );
     ok = reader.parseContinue();
     if ( !ok ) {
-      fprintf(stderr, "Parse Error: Parsing failed on line no %d: '%s'</p>", 
+      fprintf(stderr, "Parse Error: Parsing failed on line no %d: '%s'\n", 
 	      lineNumber, inputData.latin1() );
       break;
     }
