@@ -13,7 +13,6 @@
 #include "vk_config.h"
 #include "html_urls.h"
 #include "vk_messages.h"
-#include "logfile.h"
 
 #include <qapplication.h>
 #include <qtimer.h>
@@ -437,7 +436,6 @@ bool Memcheck::runProcess( QStringList flags, int log_fd,
   /* init the auto-save filename and stream */
   saveFname = vk_mkstemp( fbasename, vkConfig->logsDir(), ".xml" );
   //printf("saveFname = %s\n", saveFname.latin1() );
-  logFile.setName( saveFname );
   if ( ! setupFileStream( true ) ) {
     emitRunning( false );
     setupFileStream( false );
@@ -676,10 +674,11 @@ bool Memcheck::setupFileStream( bool init )
   bool ok = true;
 
   if ( init ) {
+    QFile logFile( saveFname );
     ok = logFile.open( IO_WriteOnly );
     logStream.setDevice( &logFile );
   } else {
-    logFile.close();
+    logStream.device()->close();
     logStream.unsetDevice();
   }
   

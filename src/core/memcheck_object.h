@@ -86,7 +86,6 @@ private:
   QXmlSimpleReader reader;
   QXmlInputSource source;
 
-  QFile logFile;
   QString saveFname;
   QTextStream logStream;
 };
