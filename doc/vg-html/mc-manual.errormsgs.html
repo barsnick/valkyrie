@@ -3,10 +3,10 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>3.3. Explanation of error messages from Memcheck</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
 <link rel="home" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="mc-manual.html" title="3. Memcheck: a heavyweight memory checker">
-<link rel="previous" href="mc-manual.flags.html" title="3.2. Command-line flags specific to memcheck">
+<link rel="previous" href="mc-manual.flags.html" title="3.2. Command-line flags specific to Memcheck">
 <link rel="next" href="mc-manual.suppfiles.html" title="3.4. Writing suppressions files">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -285,13 +285,24 @@ overlap.  Memcheck checks for this.</p>
 </pre>
 <p>You don't want the two blocks to overlap because one of
 them could get partially trashed by the copying.</p>
+<p>You might think that Memcheck is being overly pedantic reporting
+this in the case where <tt class="computeroutput">dst</tt> is less
+than <tt class="computeroutput">src</tt>.  For example, the obvious way
+to implement <tt class="computeroutput">memcpy()</tt> is by copying
+from the first byte to the last.  However, the optimisation guides of
+some architectures recommend copying from the last byte down to the first.
+Also, some implementations of <tt class="computeroutput">memcpy()</tt>
+zero <tt class="computeroutput">dst</tt> before copying, because zeroing
+the destination's cache line(s) can improve performance.</p>
+<p>The moral of the story is:  if you want to write truly portable code,
+don't make any assumptions about the language implementation.</p>
 </div>
 </div>
 <div>
 <br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
 <tr>
 <td rowspan="2" width="40%" align="left">
-<a accesskey="p" href="mc-manual.flags.html">&lt;&lt; 3.2. Command-line flags specific to memcheck</a> </td>
+<a accesskey="p" href="mc-manual.flags.html">&lt;&lt; 3.2. Command-line flags specific to Memcheck</a> </td>
 <td width="20%" align="center"><a accesskey="u" href="mc-manual.html">Up</a></td>
 <td rowspan="2" width="40%" align="right"> <a accesskey="n" href="mc-manual.suppfiles.html">3.4. Writing suppressions files &gt;&gt;</a>
 </td>

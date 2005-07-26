@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>4. NEWS</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
 <link rel="home" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="dist.html" title="Distribution Documents">
 <link rel="previous" href="dist.install.html" title="3. INSTALL">
@@ -25,6 +25,90 @@
 </div>
 <div class="literallayout"><p><br>
       <br>
+[[TODO: fix all the TODO items!]]<br>
+<br>
+Release 3.0.0 ([[TODO: add release date]])<br>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>
+3.0.0 is a major overhaul of Valgrind.  The most significant<br>
+user-visible change is that Valgrind now supports architectures other<br>
+than x86.  The new architectures it supports are AMD64 and PPC32, and<br>
+the infrastructure is present for other architectures to be added later.<br>
+<br>
+The AMD64 support works well, but has some shortcomings:<br>
+<br>
+- It generally won't be as solid as the x86 version.  For example,<br>
+  support for more obscure instructions and system calls may be missing.<br>
+  We will fix these as they arise.<br>
+<br>
+- Address space may be limited;  see the point about<br>
+  position-independent executables below.<br>
+<br>
+- If Valgrind is built on an AMD64 machine, it will only run 64-bit<br>
+  executables.  If you want to run 32-bit x86 executables under Valgrind<br>
+  on an AMD64, you will need to build Valgrind on an x86 machine and<br>
+  copy it to the AMD64 machine.  And it probably won't work if you do<br>
+  something tricky like exec'ing a 32-bit program from a 64-bit program<br>
+  while using --trace-children=yes.  We hope to improve this situation<br>
+  in the future.<br>
+<br>
+The PPC32 support is very basic.  It may not work reliably even for<br>
+small programs, but it's a start.  Many thanks to Paul Mackerras for his<br>
+great work that enabled this support.<br>
+<br>
+Other user-visible changes:<br>
+<br>
+- No longer building Valgrind as a position-indendependent executable<br>
+  (PIE) by default, as it caused too many problems.<br>
+<br>
+  Without PIE enabled, AMD64 programs will only be able to access 2GB of<br>
+  address space.  We will fix this eventually, but not for the moment.<br>
+  <br>
+  Use --enable-pie at configure-time to turn this on.<br>
+<br>
+- Support for programs that use stack-switching has been improved.  Use<br>
+  the --max-stackframe flag for simple cases, and the<br>
+  VALGRIND_STACK_REGISTER, VALGRIND_STACK_DEREGISTER and<br>
+  VALGRIND_STACK_CHANGE client requests for trickier cases.<br>
+<br>
+- Support for programs that use self-modifying code has been improved,<br>
+  in particular programs that put temporary code fragments on the stack.<br>
+  This helps for C programs compiled with GCC that use nested functions,<br>
+  and also Ada programs.  This is controlled with the --smc-check<br>
+  flag, although the default setting should work in most cases.<br>
+<br>
+- Output can now be printed in XML format.  This should make it easier<br>
+  for other tools (such as GUI front-ends) to use Valgrind output as<br>
+  input.  The --xml flag controls this.  [[TODO: describe the related<br>
+  CLOs added (eg. --log-file-qualifier)]]<br>
+<br>
+- Programs that allocate many heap blocks may run faster, due to<br>
+  improvements in certain data structures.<br>
+<br>
+- Addrcheck is currently not working.  We hope to get it working again<br>
+  soon.  Helgrind is still not working, as was the case for the 2.4.0<br>
+  release.<br>
+<br>
+- [[TODO: add more here]]<br>
+<br>
+Changes that are not user-visible:<br>
+<br>
+- The JITter has been completely rewritten, and is now in a separate<br>
+  library, called Vex.  This enabled a lot of the user-visible changes,<br>
+  such as new architecture support.  It may run slower than the old<br>
+  JITter; feedback about this would be useful.<br>
+<br>
+- The code has been modularized significantly, and should be easier to<br>
+  navigate and understand.<br>
+<br>
+- Lots of code has been rewritten.<br>
+<br>
+- [[TODO: add more here]]<br>
+<br>
+BUGS FIXED<br>
+<br>
+[[TODO: add the full list here (once the RCs are out of the way?)]]<br>
+<br>
+<br>
 Stable release 2.4.0 (March 2005) -- CHANGES RELATIVE TO 2.2.0<br>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>
 2.4.0 brings many significant changes and bug fixes.  The most<br>

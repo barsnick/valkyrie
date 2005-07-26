@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Valgrind Quick Start Guide</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
 <link rel="home" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="index.html" title="Valgrind Documentation">
 <link rel="previous" href="index.html" title="Valgrind Documentation">
@@ -24,8 +24,9 @@
 <div></div>
 <hr>
 </div>
-<p>The Valgrind distribution has multiple tools.  The memory checking
-tool (called Memcheck) can detect many common memory errors such as:
+<p>The Valgrind distribution has multiple tools.  The most popular is the
+memory checking tool (called Memcheck) which can detect many common memory
+errors such as:
 </p>
 <div class="itemizedlist"><ul type="disc">
 <li><p>touching memory you shouldn't (eg. overrunning heap block 
@@ -37,8 +38,8 @@ tool (called Memcheck) can detect many common memory errors such as:
 </ul></div>
 <p>What follows is the minimum information you need to start detecting
 memory errors in your program with Memcheck.  Note that this guide applies
-to Valgrind version 2.4.0;  some of the information is not quite right for
-earlier versions.</p>
+to Valgrind version 2.4.0 and later;  some of the information is not quite
+right for earlier versions.</p>
 <div class="sect1" lang="en">
 <div class="titlepage">
 <div><div><h2 class="title" style="clear: both">

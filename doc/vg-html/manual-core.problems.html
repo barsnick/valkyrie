@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>2.11. If You Have Problems</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
 <link rel="home" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="manual-core.html" title="2. Using and understanding the Valgrind core">
 <link rel="previous" href="manual-core.install.html" title="2.10. Building and Installing">
@@ -31,11 +31,11 @@ known not to work on it.</p>
 They are permanently enabled, and I have no plans to disable
 them.  If one of these breaks, please mail us!</p>
 <p>If you get an assertion failure on the expression
-<tt class="computeroutput">chunkSane(ch)</tt> in
-<tt class="computeroutput">vg_free()</tt> in
-<tt class="filename">vg_malloc.c</tt>, this may have happened because
+<tt class="computeroutput">blockSane(ch)</tt> in
+<tt class="computeroutput">VG_(free)()</tt> in
+<tt class="filename">m_mallocfree.c</tt>, this may have happened because
 your program wrote off the end of a malloc'd block, or before its
-beginning.  Valgrind should have emitted a proper message to that
+beginning.  Valgrind hopefully will have emitted a proper message to that
 effect before dying in this way.  This is a known problem which
 we should fix.</p>
 <p>Read the 

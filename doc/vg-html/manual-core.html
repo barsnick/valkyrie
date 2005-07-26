@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>2. Using and understanding the Valgrind core</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
 <link rel="home" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="manual.html" title="Valgrind User Manual">
 <link rel="previous" href="manual-intro.navigation.html" title="1.2. How to navigate this manual">
@@ -37,7 +37,7 @@
 <dt><span class="sect2"><a href="manual-core.flags.html#manual-core.basicopts">2.6.2. Basic Options</a></span></dt>
 <dt><span class="sect2"><a href="manual-core.flags.html#manual-core.erropts">2.6.3. Error-related options</a></span></dt>
 <dt><span class="sect2"><a href="manual-core.flags.html#manual-core.mallocopts">2.6.4. malloc()-related Options</a></span></dt>
-<dt><span class="sect2"><a href="manual-core.flags.html#manual-core.rareopts">2.6.5. Rare Options</a></span></dt>
+<dt><span class="sect2"><a href="manual-core.flags.html#manual-core.rareopts">2.6.5. Uncommon Options</a></span></dt>
 <dt><span class="sect2"><a href="manual-core.flags.html#manual-core.debugopts">2.6.6. Debugging Valgrind Options</a></span></dt>
 <dt><span class="sect2"><a href="manual-core.flags.html#manual-core.defopts">2.6.7. Setting default Options</a></span></dt>
 </dl></dd>
@@ -82,12 +82,14 @@ heavyweight memory-checking tool Memcheck, issue the
 command:</p>
 <pre class="programlisting">
 valgrind --tool=memcheck ls -l</pre>
+<p>(Memcheck is the default, so if you want to use it you can
+actually omit the <tt class="computeroutput">--tool</tt> flag.</p>
 <p>Regardless of which tool is in use, Valgrind takes control
 of your program before it starts.  Debugging information is read
 from the executable and associated libraries, so that error
 messages and other outputs can be phrased in terms of source code
 locations (if that is appropriate).</p>
-<p>Your program is then run on a synthetic x86 CPU provided by
+<p>Your program is then run on a synthetic CPU provided by
 the Valgrind core.  As new code is executed for the first time,
 the core hands the code to the selected tool.  The tool adds its
 own instrumentation code to this and hands the result back to the

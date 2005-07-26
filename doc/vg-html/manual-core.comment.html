@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>2.3. The commentary</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
 <link rel="home" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="manual-core.html" title="2. Using and understanding the Valgrind core">
 <link rel="previous" href="manual-core.started.html" title="2.2. Getting started">
@@ -70,6 +70,12 @@ places:</p>
    without the trailing
    <tt class="computeroutput">.pid12345</tt>part, you can instead use
    <tt class="computeroutput">--log-file-exactly=filename</tt>.
+   </p>
+<p>You can also use the
+   <tt class="computeroutput">--log-file-qualifier=&lt;VAR&gt;</tt> option
+   to specify the filename via the environment variable
+   <tt class="computeroutput">$VAR</tt>.  This is rarely needed, but
+   very useful in certain circumstances (eg. when running MPI programs).
    </p>
 </li>
 <li>

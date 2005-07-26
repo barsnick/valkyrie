@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>3.2. Writing a Tool</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
 <link rel="home" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="writing-tools.html" title="3. Writing a New Valgrind Tool">
 <link rel="previous" href="writing-tools.html" title="3. Writing a New Valgrind Tool">
@@ -167,26 +167,11 @@ memory checker.</p>
 <a name="writing-tools.gettingcode"></a>3.2.4. Getting the code</h3></div></div>
 <div></div>
 </div>
-<p>To write your own tool, you'll need to check out a copy of
-Valgrind from the CVS repository, rather than using a packaged
-distribution.  This is because it contains several extra files
-needed for writing tools.</p>
-<p>To check out the code from the CVS repository, first login:</p>
-<pre class="programlisting">
-cvs -d:pserver:anonymous@cvs.valgrind.sourceforge.net:/cvsroot/valgrind
-login</pre>
-<p>Then checkout the code.  To get a copy of the current
-development version (recommended for the brave only):</p>
-<pre class="programlisting">
-cvs -z3 -d:pserver:anonymous@cvs.valgrind.sourceforge.net:/cvsroot/valgrind 
-co valgrind</pre>
-<p>To get a copy of the stable released branch:</p>
-<pre class="programlisting">
-cvs -z3 -d:pserver:anonymous@cvs.valgrind.sourceforge.net:/cvsroot/valgrind
-co -r &lt;TAG&gt; valgrind</pre>
-<p>where &lt;<tt class="computeroutput">TAG</tt>&gt; has the
-form <tt class="computeroutput">VALGRIND_X_Y_Z</tt> for version
-X.Y.Z.</p>
+<p>To write your own tool, you'll need the Valgrind source code.
+A normal source distribution should do, although you might want to
+check out the latest code from the Subversion repository.  See the
+information about how to do so at <a href="http://www.valgrind.org/" target="_top">the
+Valgrind website</a>.</p>
 </div>
 <div class="sect2" lang="en">
 <div class="titlepage">

@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>2.10. Building and Installing</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
 <link rel="home" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="manual-core.html" title="2. Using and understanding the Valgrind core">
 <link rel="previous" href="manual-core.signals.html" title="2.9. Handling of Signals">
@@ -28,20 +28,22 @@
 <tt class="computeroutput">make</tt>, <tt class="computeroutput">make
 install</tt> mechanism, and we have attempted to
 ensure that it works on machines with kernel 2.4 or 2.6 and glibc
-2.2.X or 2.3.X.</p>
+2.2.X, 2.3.X, 2.4.X.</p>
 <p>There are two options (in addition to the usual
 <tt class="computeroutput">--prefix=</tt> which affect how Valgrind is built:
 </p>
 <div class="itemizedlist"><ul type="disc">
 <li>
 <p><tt class="computeroutput">--enable-pie</tt></p>
-<p>&gt;PIE stands for "position-independent executable".  This is
-  enabled by default if your toolchain supports it.  PIE allows Valgrind
-  to place itself as high as possible in memory, giving your program as
-  much address space as possible.  It also allows Valgrind to run under
-  itself.  If PIE is disabled, Valgrind loads at a default address which
-  is suitable for most systems.  This is also useful for debugging
-  Valgrind itself.</p>
+<p>PIE stands for "position-independent executable".
+  PIE allows Valgrind to place itself as high as possible in memory,
+  giving your program as much address space as possible.  It also allows
+  Valgrind to run under itself.  If PIE is disabled, Valgrind loads at a
+  default address which is suitable for most systems.  This is also
+  useful for debugging Valgrind itself.  It's not on by default because
+  it caused problems for some people.  Note that not all toolchaines
+  support PIEs, you need fairly recent version of the compiler, linker,
+  etc.</p>
 </li>
 <li>
 <p><tt class="computeroutput">--enable-tls</tt></p>

@@ -1,9 +1,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>3.2. Command-line flags specific to memcheck</title>
+<title>3.2. Command-line flags specific to Memcheck</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
 <link rel="home" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="mc-manual.html" title="3. Memcheck: a heavyweight memory checker">
 <link rel="previous" href="mc-manual.html" title="3. Memcheck: a heavyweight memory checker">
@@ -20,22 +20,23 @@
 <div class="sect1" lang="en">
 <div class="titlepage">
 <div><div><h2 class="title" style="clear: both">
-<a name="mc-manual.flags"></a>3.2. Command-line flags specific to memcheck</h2></div></div>
+<a name="mc-manual.flags"></a>3.2. Command-line flags specific to Memcheck</h2></div></div>
 <div></div>
 </div>
 <div class="itemizedlist">
 <a name="leakcheck"></a><ul type="disc">
 <li>
-<p><tt class="computeroutput">--leak-check=no</tt>
-    [default]</p>
-<p><tt class="computeroutput">--leak-check=yes</tt></p>
+<p><tt class="computeroutput">--leak-check=no</tt></p>
+<p><tt class="computeroutput">--leak-check=summary</tt> [default]</p>
+<p><tt class="computeroutput">--leak-check=full</tt></p>
 <p>When enabled, search for memory leaks when the client
     program finishes.  A memory leak means a malloc'd block,
     which has not yet been free'd, but to which no pointer can be
     found.  Such a block can never be free'd by the program,
-    since no pointer to it exists.  Leak checking is disabled by
-    default because it tends to generate dozens of error
-    messages.</p>
+    since no pointer to it exists.  If set to
+    <tt class="computeroutput">summary</tt>, it says how many leaks occurred.
+    If set to <tt class="computeroutput">all</tt>, it gives details of each
+    individual leak.</p>
 </li>
 <li>
 <p><a name="showreach"></a><tt class="computeroutput">--show-reachable=no</tt>
@@ -137,16 +138,8 @@
 <p><tt class="computeroutput">--avoid-strlen-errors=yes</tt> [default]</p>
 <p>Enable or disable a heuristic for dealing with highly-optimized 
     versions of strlen.  These versions of strlen can cause spurious errors 
-    to be reported by memcheck, so it's usually a good idea to leave this
+    to be reported by Memcheck, so it's usually a good idea to leave this
     enabled.</p>
-</li>
-<li>
-<p><a name="cleanup"></a><tt class="computeroutput">--cleanup=no</tt></p>
-<p><tt class="computeroutput">--cleanup=yes</tt> [default]</p>
-<p><span><b class="command">This is a flag to help debug valgrind itself.
-    It is of no use to end-users.</b></span> When enabled, various
-    improvments are applied to the post-instrumented intermediate
-    code, aimed at removing redundant value checks.</p>
 </li>
 </ul>
 </div>

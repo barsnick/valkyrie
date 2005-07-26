@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>5. Cachegrind: a cache profiler</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.64.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
 <link rel="home" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="manual.html" title="Valgrind User Manual">
 <link rel="previous" href="ac-manual.html" title="4. Addrcheck: a lightweight memory checker">
@@ -40,10 +40,10 @@
 </dl></dd>
 <dt><span class="sect1"><a href="cg-manual.annopts.html">5.3. cg_annotate options</a></span></dt>
 <dd><dl>
-<dt><span class="sect2"><a href="cg-manual.annopts.html#id2597291">5.3.1. Warnings</a></span></dt>
-<dt><span class="sect2"><a href="cg-manual.annopts.html#id2601886">5.3.2. Things to watch out for</a></span></dt>
-<dt><span class="sect2"><a href="cg-manual.annopts.html#id2619763">5.3.3. Accuracy</a></span></dt>
-<dt><span class="sect2"><a href="cg-manual.annopts.html#id2629230">5.3.4. Todo</a></span></dt>
+<dt><span class="sect2"><a href="cg-manual.annopts.html#id4829074">5.3.1. Warnings</a></span></dt>
+<dt><span class="sect2"><a href="cg-manual.annopts.html#id4830776">5.3.2. Things to watch out for</a></span></dt>
+<dt><span class="sect2"><a href="cg-manual.annopts.html#id4844448">5.3.3. Accuracy</a></span></dt>
+<dt><span class="sect2"><a href="cg-manual.annopts.html#id4835554">5.3.4. Todo</a></span></dt>
 </dl></dd>
 </dl>
 </div>
@@ -70,7 +70,7 @@ misses.  In particular, it records:</p>
 <li><p>L2 unified cache reads and read misses, writes and
     writes misses.</p></li>
 </ul></div>
-<p>On a modern x86 machine, an L1 miss will typically cost
+<p>On a modern machine, an L1 miss will typically cost
 around 10 cycles, and an L2 miss can cost as much as 200
 cycles. Detailed cache profiling can be very useful for improving
 the performance of your program.</p>
