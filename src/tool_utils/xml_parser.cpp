@@ -705,6 +705,28 @@ bool XMLParser::startElement( const QString&, const QString&,
 }
 
 
+/* TODO: return false if we don't have what we expect at every point.
+
+Optional tags:
+  <logfilequalifier>      only if '--log-file-qualifier=' given on cmd-line
+  <usercomment>           only if '--xml-user-comment=' given on cmd-line
+
+  <args>
+    <vargv>
+      <arg>               only if valgrind is run with cmd-line flags
+    <argv>
+      <arg>               only if flags given to executable
+
+  <error>                 only if there are any
+    <leakedbytes>         only if there are any
+    <leakedblocks>        only if there are any
+    <auxwhat>             only if there are any
+    <stack>
+      <frame>
+        <ip>              is the *only* guaranteed tag here.
+
+All other tags are non-optional.
+*/
 bool XMLParser::endElement( const QString&, const QString&, 
                             const QString& endTag )
 {
@@ -769,30 +791,35 @@ bool XMLParser::endElement( const QString&, const QString&,
 
     case STATE:
       topStatus->state  = content;
-      if ( ! statusPopped ) 
+      if ( ! statusPopped )         // first status tag
         info->startStatus = content;
-      else
+      else                          // second status tag
         info->endStatus   = content;
       break;
     case TIME:
-      if ( ! statusPopped ) {
+      if ( ! statusPopped ) {       // first status tag
         topStatus->stime = content;
         info->startTime = content;
-      } else {
+      } else {                      // second status tag
         topStatus->etime = content;
         info->endTime   = content;
       } break;
     case STATUS:
-      if ( statusPopped ) {
+      if ( statusPopped ) {         // second status tag
+        if (topStatus->etime.isEmpty() || info->endStatus.isEmpty())
+          return false;
         emit updateStatus();
-      } else {
+      } else {                      // first status tag
+        if (topStatus->stime.isEmpty() || info->startStatus.isEmpty())
+          return false;
         emit loadItem( topStatus );
         statusPopped = true;
         /* pop the others now as well
            - but check we have them first! */
         XmlOutput* xmlInfo     = stack.pop();   /* Info */
         XmlOutput* xmlPreamble = stack.pop();   /* Preamble */
-        if (!xmlInfo || !xmlPreamble) return false;
+        if (!xmlInfo || !xmlPreamble)
+          return false;
         emit loadItem( xmlInfo );
         emit loadItem( xmlPreamble );
       } break;
