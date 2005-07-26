@@ -452,6 +452,8 @@ void MemcheckView::updateStatus()
 
 void MemcheckView::loadItem( XmlOutput * output )
 {
+  vk_assert( output );
+
   /* xmlParser emits loadItem() for ErrCounts: used when merging
      to file, but not when displaying stuff in the listview. */
   if ( output->itemType == XmlOutput::ERR_COUNTS )

@@ -712,7 +712,7 @@ bool XMLParser::endElement( const QString&, const QString&,
       break;
     case PROTOCOL:
       if ( content != "1" ) 
-        printf("Fatal Error: wrong protocol version\n");
+        fprintf(stderr, "Fatal Error: wrong protocol version\n");
       info->protocolVersion = content.toInt();
       break;
     case PREAMBLE:
@@ -781,8 +781,11 @@ bool XMLParser::endElement( const QString&, const QString&,
         emit loadItem( topStatus );
         statusPopped = true;
         /* pop the others now as well */
-        emit loadItem( stack.pop() );   /* Info */
-        emit loadItem( stack.pop() );   /* Preamble */
+        /* just in case anything went wrong, check we have them first! */
+        XmlOutput* xmlout = stack.pop();     /* Info */
+        if (xmlout) emit loadItem( xmlout );
+        xmlout = stack.pop();                /* Preamble */
+        if (xmlout) emit loadItem( xmlout );
       } break;
 
     case ERROR:

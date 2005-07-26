@@ -47,6 +47,8 @@ LogFile::LogFile( QString fname ) : QObject( 0, fname )
 
 void LogFile::loadItem(XmlOutput* output ) 
 { 
+  vk_assert( output );
+
   switch ( output->itemType ) {
     case XmlOutput::STATUS:
       topStatus = (TopStatus*)output;
