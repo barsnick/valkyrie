@@ -217,22 +217,28 @@ bool LogFile::compareFrames( Frame* mFrame, Frame* sFrame )
      discarded from the slave's error list.
    - finally, we append whatever is left in the slave error list onto
      the master error list. */
-void LogFile::merge( LogFile* slaveLog )
+bool LogFile::merge( LogFile* slaveLog )
 {
   /* list of slaveLog errors for deletion*/
   QPtrList<Error> deleteList;
 
   /* check the same tool was used */
-  if ( info->tool != slaveLog->info->tool )
+  if ( info->tool != slaveLog->info->tool ) {
     fprintf(stderr, "Error: different tool used to generate output\n");
+    return false;
+  }
 
   /* check the same binary was used */
-  if ( info->exe != slaveLog->info->exe )
+  if ( info->exe != slaveLog->info->exe ) {
     fprintf(stderr, "Error: different executable used to generate output\n");
+    return false;
+  }
 
   /* check we do actually have some errors to merge */
-  if ( errorList.isEmpty() || slaveLog->errorList.isEmpty() ) 
+  if ( errorList.isEmpty() || slaveLog->errorList.isEmpty() ) {
     fprintf(stderr, "Error: no errors in master/slave to merge\n");
+    return false;
+  }
 
   /* start the tests */
   bool same;
@@ -437,5 +443,7 @@ void LogFile::merge( LogFile* slaveLog )
      the slaveLog itself is deleted. */
   sl_leakList.clear();
   ms_leakList.clear();
+
+  return true;
 }
 

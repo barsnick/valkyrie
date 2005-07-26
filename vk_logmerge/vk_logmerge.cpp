@@ -206,11 +206,15 @@ bool VKLogMerge::mergeLogFiles( QString& log_list, QString& fname_out )
     /* tell user we are merging the slave into the master */
     fprintf(stderr, "Merging %s <- %s\n", master_fname.latin1(), slave_fname.latin1());
 
-    masterLogFile->merge( slaveLogFile );
+    bool merge_ok = masterLogFile->merge( slaveLogFile );
 
     /* delete the slave and free memory */
     delete slaveLogFile;
     slaveLogFile = 0;
+
+    if (!merge_ok) {   /* failed merge on slave file: skipped file */
+      fprintf(stderr, "Skipping merge of slave file: %s\n", slave_fname.latin1());
+    }
   }
 
   bool fileSaved = masterLogFile->save( fname_out );

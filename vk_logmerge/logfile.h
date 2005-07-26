@@ -28,7 +28,7 @@ public:
   ~LogFile();
 
   bool save( QString fname );
-  void merge( LogFile* slaveLog );
+  bool merge( LogFile* slaveLog );
 
 public slots:
   void loadItem( XmlOutput * );
