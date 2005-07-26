@@ -41,8 +41,14 @@ public:
   int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
   enum mcOpts { 
-    PARTIAL,    FREELIST, LEAK_CHECK, LEAK_RES,
-    SHOW_REACH, GCC_296,  ALIGNMENT,  STRLEN,
+    LEAK_CHECK,
+    LEAK_RES,
+    SHOW_REACH,
+    PARTIAL,
+    FREELIST,
+    GCC_296,
+    ALIGNMENT,
+    STRLEN,
     LAST_CMD_OPT  = STRLEN
   };
 

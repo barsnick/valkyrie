@@ -47,18 +47,18 @@ Cachegrind::Cachegrind()
           "File to read:",
           "Which <cachegrind.out.pid> file to read (required)",
           urlCachegrind::Pid );
-  addOpt( SORT,         Option::ARG_STRING, Option::LEDIT, 
-          "cachegrind", '\0',               "sort", 
-          "<A,B,C>",    "",                 "event column order",
-          "Sort columns by:",
-          "sort columns by events A,B,C",
-          urlCachegrind::Sort );
   addOpt( SHOW,         Option::ARG_STRING, Option::LEDIT, 
           "cachegrind", '\0',               "show",
           "<A,B,C>",    "",                 "all",
           "Show figures for events:",
           "only show figures for events A,B,C",
           urlCachegrind::Show );
+  addOpt( SORT,         Option::ARG_STRING, Option::LEDIT, 
+          "cachegrind", '\0',               "sort", 
+          "<A,B,C>",    "",                 "event column order",
+          "Sort columns by:",
+          "sort columns by events A,B,C",
+          urlCachegrind::Sort );
   addOpt( THRESH,       Option::ARG_UINT,   Option::SPINBOX, 
           "cachegrind", '\0',               "threshold", 
           "<%>",        "0|100",            "99",
@@ -69,7 +69,7 @@ Cachegrind::Cachegrind()
           "cachegrind", '\0',               "auto",
           "<yes|no>",   "yes|no",           "no",
           "Automatically annotate all relevant source files",
-          "Annotate all source files containing functions that helped reach the event count threshold",
+          "annotate all source files containing functions that helped reach the event count threshold",
           urlCachegrind::Auto );
   addOpt( CONTEXT,      Option::ARG_UINT,   Option::SPINBOX, 
           "cachegrind", '\0',               "context",
@@ -79,9 +79,9 @@ Cachegrind::Cachegrind()
           urlCachegrind::Context );
   addOpt( INCLUDE,      Option::ARG_STRING, Option::LEDIT, 
           "cachegrind", 'I',                "include", 
-          "<dir1,dir2>", "",                "",
+          "<dir>",      "",                 "",
           "Source dirs:",
-          "List of directories to search for source files",
+          "add <dir> to list of directories to search for source files",
           urlCachegrind::Include );
 }
 

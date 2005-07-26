@@ -126,7 +126,9 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
 
 
 /* called when user clicks "Apply" or "Ok" button.  
-   also called when Cancel button is clicked, to reset toggled values */
+   also called when Cancel button is clicked, to reset toggled values.
+   Note: _never_ have a default in the switch case here, in order to
+   catch 'forgotten' args. Any cases not handled should be listed. */
 bool CachegrindOptionsPage::applyOptions( int optId, bool undo/*=false*/ )
 { 
   bool retval = true;
@@ -134,10 +136,6 @@ bool CachegrindOptionsPage::applyOptions( int optId, bool undo/*=false*/ )
   if ( undo ) return retval;   /* nothing to do */
 
   switch ( optId ) {
-
-    case Cachegrind::SHOW:
-    case Cachegrind::SORT:
-      break;
 
     case Cachegrind::I1_CACHE:
     case Cachegrind::D1_CACHE:
@@ -153,6 +151,13 @@ bool CachegrindOptionsPage::applyOptions( int optId, bool undo/*=false*/ )
         retval = false;
       }
     } break;
+
+    case Cachegrind::SHOW:
+    case Cachegrind::SORT:
+    case Cachegrind::THRESH:
+    case Cachegrind::AUTO:
+    case Cachegrind::CONTEXT:
+      break;
 
   }
 

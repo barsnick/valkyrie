@@ -27,20 +27,39 @@ public:
   int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
   enum vgOpts {
-    TOOL,
+    TOOL,           // --tool
     /* common options relevant to all tools */
-    VERBOSITY,
-    XML_OUTPUT,   /* this may apply to more tools later */
-    TRACE_CH,   TRACK_FDS,  TIME_STAMP,
+    VERBOSITY,      // --verbosity
+    TRACE_CH,       // --trace-children
+    TRACK_FDS,      // --track-fds
+    TIME_STAMP,     // --time-stamp
+    LOG_FD,         // --log-fd
+    LOG_PID,        // --log-file
+    LOG_FILE,       // --log-file-exactly
+    LOG_QUAL,       // --log-file-qualifier
+    LOG_SOCKET,     // --log-socket
     /* uncommon options relevant to all tools */
-    RUN_LIBC,  WEIRD, PTR_CHECK, ELAN_HACKS, EM_WARNS,
+    RUN_LIBC,       // --run-libc-freeres
+    WEIRD,          // --weird-hacks
+    PTR_CHECK,      // --pointercheck
+    EM_WARNS,       // --show-emwarns
+    SMC_CHECK,      // --smc-check
     /* options relevant to error-reporting tools */
-    LOG_FD,   LOG_PID,     LOG_FILE,    LOG_SOCKET,
-    DEMANGLE, NUM_CALLERS, ERROR_LIMIT, SHOW_BELOW,
-    SUPPS_SEL,  /* the currently selected suppression(s) */
-    SUPPS_ALL,  /* list of all supp. files ever found, inc. paths */
-    SUPPS_DEF,  /* as above, but never gets changed -> defaults */
-    GEN_SUPP, DB_ATTACH, DB_COMMAND, INPUT_FD, MAX_SFRAME,
+    XML_OUTPUT,     // --xml
+    XML_COMMENT,    // -- xml-user-comment
+    DEMANGLE,       // --demangle
+    NUM_CALLERS,    // --num-callers
+    ERROR_LIMIT,    // --error-limit
+    SHOW_BELOW,     // --show-below-main
+    /* suppressions hackery */
+    SUPPS_SEL,      /* the currently selected suppression(s) */
+    SUPPS_ALL,      /* list of all supp. files ever found, inc. paths */
+    SUPPS_DEF,      // --suppressions 
+    GEN_SUPP,       // --gen-suppressions
+    DB_ATTACH,      // --db-attach
+    DB_COMMAND,     // --db-command
+    INPUT_FD,       // --input-fd
+    MAX_SFRAME,     // --max-stackframe
     LAST_CMD_OPT = MAX_SFRAME
   };
 

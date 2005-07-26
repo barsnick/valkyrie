@@ -82,7 +82,9 @@ MassifOptionsPage::MassifOptionsPage( QWidget* parent, VkObject* obj )
 
 
 /* Called when user clicks "Apply" or "Ok" button.  
-   Also called when Cancel button is clicked, to reset toggled values */
+   Also called when Cancel button is clicked, to reset toggled values.
+   Note: _never_ have a default in the switch case here, in order to
+   catch 'forgotten' args. Any cases not handled should be listed. */
 bool MassifOptionsPage::applyOptions( int, bool )
 { 
   VK_DEBUG( "nothing implemented in here yet" );

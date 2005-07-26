@@ -89,18 +89,20 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
                    optionWidget( Valgrind::RUN_LIBC,   cgroup2, false ) );
   itemList.insert( Valgrind::PTR_CHECK,                   /* checkbox */
                    optionWidget( Valgrind::PTR_CHECK,  cgroup2, false ) );
-  itemList.insert( Valgrind::ELAN_HACKS,                  /* checkbox */
-                   optionWidget( Valgrind::ELAN_HACKS, cgroup2, false ) );
   itemList.insert( Valgrind::EM_WARNS,                    /* checkbox */
                    optionWidget( Valgrind::EM_WARNS,   cgroup2, false ) );
+
+  itemList.insert( Valgrind::SMC_CHECK,                   /* combobox */
+                   optionWidget( Valgrind::SMC_CHECK,  cgroup2, false ) );
   itemList.insert( Valgrind::WEIRD,                       /* combobox */
                    optionWidget( Valgrind::WEIRD,      cgroup2, true ) );
 
-  cgrid2->addWidget( itemList[Valgrind::RUN_LIBC  ]->widget(),  1, 0 );
-  cgrid2->addWidget( itemList[Valgrind::PTR_CHECK ]->widget(),  2, 0 );
-  cgrid2->addWidget( itemList[Valgrind::ELAN_HACKS]->widget(),  3, 0 );
-  cgrid2->addWidget( itemList[Valgrind::EM_WARNS  ]->widget(),  4, 0 );
-  cgrid2->addLayout( itemList[Valgrind::WEIRD     ]->hlayout(), 5, 0 );
+  cgrid2->addWidget( itemList[Valgrind::RUN_LIBC ]->widget(),  1, 0 );
+  cgrid2->addWidget( itemList[Valgrind::PTR_CHECK]->widget(),  2, 0 );
+  cgrid2->addWidget( itemList[Valgrind::EM_WARNS ]->widget(),  3, 0 );
+
+  cgrid2->addLayout( itemList[Valgrind::SMC_CHECK]->hlayout(), 4, 0 );
+  cgrid2->addLayout( itemList[Valgrind::WEIRD    ]->hlayout(), 5, 0 );
 
   core_vbox->addStretch( space );
 
@@ -118,7 +120,6 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
   rows = 14;  cols = 2;
   QGridLayout* egrid1 = new QGridLayout( egroup1, rows, cols, margin, space );
   egrid1->setRowSpacing( 0, topSpace );   /* blank top row */
-  //egrid1->setColStretch( 1, 10 );         /* push widgets to the left */
 
   itemList.insert( Valgrind::GEN_SUPP,                  /* checkbox */
                    optionWidget( Valgrind::GEN_SUPP,    egroup1, false ) );

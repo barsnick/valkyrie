@@ -52,6 +52,7 @@ Massif::Massif()
           "Specify <fn> as an alloc function:",
           "specify <fn> as an alloc function", 
           urlMassif::AllocFn );
+  /* TODO: generate xml format for output */
   addOpt( FORMAT,      Option::ARG_STRING,   Option::COMBO,  
           "massif",    '\0',                 "format",
           "<text|html|xml>", "text|html|xml", "text",
@@ -77,10 +78,6 @@ int Massif::checkOptArg( int optid, const char* argval,
 
   switch ( optid ) {
 
-    /* how on earth can this be checked ? */
-    case ALLOC_FN:
-      break;
-
     case HEAP:
     case HEAP_ADMIN:
     case STACKS:
@@ -94,6 +91,9 @@ int Massif::checkOptArg( int optid, const char* argval,
       opt->isPowerOfTwo( &errval, argval ); 
       break;
 
+    /* how on earth can this be checked ? */
+    case ALLOC_FN:
+      break;
   }
 
   /* if this option has been called from the cmd-line, save its value
@@ -142,8 +142,8 @@ bool Massif::isDone( Valkyrie::RunMode rmode )
     }
   }
 
+  /* currently loaded / parsed stuff isn't saved to disk */
   if ( !fileSaved ) {
-    /* currently loaded / parsed stuff isn't saved to disk */
     int ok = vkQuery( this->view(), "Unsaved File", 
                       "&Save;&Discard;&Cancel",
                       "<p>The current output is not saved."
@@ -161,7 +161,7 @@ bool Massif::isDone( Valkyrie::RunMode rmode )
 
 bool Massif::start( Valkyrie::RunMode rm )
 {
-  vk_assert(!is_Running);
+  vk_assert( !is_Running );
   bool ok = false;
   
   switch ( rm ) {
@@ -175,9 +175,9 @@ bool Massif::start( Valkyrie::RunMode rm )
 
 bool Massif::stop( Valkyrie::RunMode rm )
 {
-  if (!is_Running) return true;
+  if ( !is_Running ) return true;
 
-  switch (rm) {
+  switch ( rm ) {
 
   default:
     vk_assert_never_reached();

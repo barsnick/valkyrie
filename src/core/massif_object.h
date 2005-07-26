@@ -35,8 +35,13 @@ public:
   int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
   enum msOpts {
-    HEAP,     HEAP_ADMIN, STACKS,    DEPTH,
-    ALLOC_FN, FORMAT,     ALIGNMENT,
+    HEAP,
+    HEAP_ADMIN,
+    STACKS,
+    DEPTH,
+    ALLOC_FN,
+    FORMAT,
+    ALIGNMENT,
     LAST_CMD_OPT  = ALIGNMENT
   };
 

@@ -219,7 +219,7 @@ void MemcheckView::mkToolBar()
            this,          SLOT( openAllItems(bool) ) );
   QToolTip::add( openAllButton, 
                  "Open / Close all errors (and their call chains)" );
-  ContextHelp::add( openAllButton, urlDummy );
+  ContextHelp::add( openAllButton, urlValkyrie::openAllButton );
 
   /* open-one item button ---------------------------------------------- */
   openOneButton = new QToolButton( mcToolBar, "tb_open_one" );
@@ -229,7 +229,7 @@ void MemcheckView::mkToolBar()
            this,          SLOT( openOneItem() ) );
   QToolTip::add( openOneButton, 
                  "Open / Close the selected item" );
-  ContextHelp::add( openOneButton, urlDummy );
+  ContextHelp::add( openOneButton, urlValkyrie::openOneButton );
 
   /* show src path button ---------------------------------------------- */
   srcPathButton = new QToolButton( mcToolBar, "tb_src_path" );
@@ -239,7 +239,7 @@ void MemcheckView::mkToolBar()
            this,          SLOT( showSrcPath() ) );
   QToolTip::add( srcPathButton, 
                  "Show file paths (for current frame)" );
-  ContextHelp::add( srcPathButton, urlDummy );
+  ContextHelp::add( srcPathButton, urlValkyrie::srcPathButton );
 
   /* fake motif-style separator ---------------------------------------- */
   QLabel* sep_lbl = new QLabel( mcToolBar, "lbl_sep" );
@@ -258,7 +258,7 @@ void MemcheckView::mkToolBar()
   openlogButton->setPopup( logMenu );
   openlogButton->setPopupDelay( 1 );
   QToolTip::add( openlogButton, "Parse and view log file(s)" );
-  ContextHelp::add( openlogButton, urlDummy );
+  ContextHelp::add( openlogButton, urlValkyrie::openLogButton );
 
   /* save-log button --------------------------------------------------- */
   savelogButton = new QToolButton( mcToolBar, "tb_save_log" );
@@ -270,7 +270,7 @@ void MemcheckView::mkToolBar()
   connect( savelogButton, SIGNAL( clicked() ), 
            this,          SLOT( saveLogFile() ) );
   QToolTip::add( savelogButton, "Save output to a log file" );
-  ContextHelp::add( savelogButton, urlDummy );
+  ContextHelp::add( savelogButton, urlValkyrie::saveLogButton );
 
   /* suppressions editor button ---------------------------------------- */
   suppedButton = new QToolButton( mcToolBar, "tb_supp_ed" );
@@ -282,7 +282,7 @@ void MemcheckView::mkToolBar()
   connect( suppedButton, SIGNAL( clicked() ), 
            this,         SLOT( showSuppEditor() ) );
   QToolTip::add( suppedButton, "Open the Suppressions Editor" );
-  ContextHelp::add( suppedButton, urlDummy );
+  ContextHelp::add( suppedButton, urlValkyrie::suppEdButton );
   suppedButton->setEnabled( false );
   // TODO: implement suppressionsEditor
 }
@@ -698,6 +698,31 @@ void OutputItem::setOpen( bool open )
 
     switch ( xmlOutput->itemType ) {
 
+#if 1
+      case XmlOutput::INFO: {
+        Info* info = (Info*)xmlOutput;
+        OutputItem* after = this;
+        OutputItem* item;
+				/* we may / may not have a user comment */
+        if ( ! info->userComment.isEmpty() ) {
+					OutputItem* comment_item = new OutputItem( this, after, "comment" );
+					item = new OutputItem( comment_item, after, info->userComment );
+					comment_item->setOpen( true );
+					after = item;
+				}
+				/* args and friends */
+				OutputItem* args_item = new OutputItem( this, after, "args" );
+				for ( unsigned int i=0; i<info->vgInfoList.count(); i++ ) {
+          item = new OutputItem( args_item, after, info->vgInfoList[i] );
+          after = item;
+        }
+        for ( unsigned int i=0; i<info->exInfoList.count(); i++ ) {
+          item = new OutputItem( args_item, after, info->exInfoList[i] );
+          after = item;
+        }
+        args_item->setOpen( true );
+      } break;
+#else
       case XmlOutput::INFO: {
         OutputItem* after = this;
         OutputItem* args_item = new OutputItem( this, after, "args" );
@@ -713,7 +738,7 @@ void OutputItem::setOpen( bool open )
         }
         args_item->setOpen( true );
       } break;
-
+#endif
       /* 'J is the biz' stuff */
       case XmlOutput::PREAMBLE: {
         Preamble* preamble = (Preamble*)xmlOutput;

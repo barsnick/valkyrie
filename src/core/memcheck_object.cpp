@@ -38,20 +38,8 @@ Memcheck::Memcheck()
   reader.setContentHandler( xmlParser );
   reader.setErrorHandler( xmlParser );
   
-
-  /* initialise memcheck-specific options */
-  addOpt( PARTIAL,     Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",  '\0',               "partial-loads-ok",
-          "<yes|no>",  "yes|no",           "yes",
-          "Ignore errors on partially invalid addresses",
-          "too hard to explain here; see manual",
-          urlMemcheck::Partial );
-  addOpt( FREELIST,    Option::ARG_UINT,   Option::LEDIT, 
-          "memcheck",  '\0',               "freelist-vol",
-          "<number>",  "",                 "1000000",
-          "Volume of freed blocks queue:",
-          "volume of freed blocks queue",
-          urlMemcheck::Freelist );
+	/* these opts should be kept in exactly the same order as valgrind
+		 outputs them, as it makes keeping up-to-date a lot easier. */
   addOpt( LEAK_CHECK,  Option::ARG_STRING, Option::COMBO, 
           "memcheck",  '\0',               "leak-check",
           "<no|summary|full>",  "no|summary|full",  "summary",
@@ -70,6 +58,18 @@ Memcheck::Memcheck()
           "Show reachable blocks in leak check",
           "show reachable blocks in leak check?",  
           urlMemcheck::Showreach );
+  addOpt( PARTIAL,     Option::ARG_BOOL,   Option::CHECK, 
+          "memcheck",  '\0',               "partial-loads-ok",
+          "<yes|no>",  "yes|no",           "yes",
+          "Ignore errors on partially invalid addresses",
+          "too hard to explain here; see manual",
+          urlMemcheck::Partial );
+  addOpt( FREELIST,    Option::ARG_UINT,   Option::LEDIT, 
+          "memcheck",  '\0',               "freelist-vol",
+          "<number>",  "",                 "1000000",
+          "Volume of freed blocks queue:",
+          "volume of freed blocks queue",
+          urlMemcheck::Freelist );
   addOpt( GCC_296,     Option::ARG_BOOL,   Option::CHECK, 
           "memcheck",  '\0',               "workaround-gcc296-bugs",
           "<yes|no>",  "yes|no",           "no",
