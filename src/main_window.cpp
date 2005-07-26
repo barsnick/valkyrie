@@ -187,7 +187,10 @@ void MainWindow::showOptionsWindow( int view_id )
 
 /* slot, connected to tool object signal runMode(Valkyrie::RunMode) */
 void MainWindow::updateVkMode( Valkyrie::RunMode rm )
-{ valkyrie->setRunMode( rm ); }
+{
+  valkyrie->setRunMode( rm );
+  updateFlagsWidget();
+}
 
 
 /* slot, connected to a tool object's signal running(bool) */
