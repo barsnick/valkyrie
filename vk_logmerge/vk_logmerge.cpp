@@ -84,20 +84,19 @@ bool VKLogMerge::parseLog( QString log_filename )
   source.setData( inputData );
   bool ok = reader.parse( &source, true );
 
-  while ( !stream.atEnd() ) {
+  while ( ok && !stream.atEnd() ) {
     lineNumber++;
     inputData = stream.readLine();
     source.setData( inputData );
     ok = reader.parseContinue();
-    if ( !ok ) {
-      fprintf(stderr, "Parse Error: Parsing failed on line no %d: '%s'\n", 
-	      lineNumber, inputData.latin1() );
-      break;
-    }
   }
 
   logFile.close();
 
+  if ( !ok ) {
+    fprintf(stderr, "Parse Error: Parsing failed on line no %d: '%s'\n", 
+	    lineNumber, inputData.latin1() );
+  }
   return ok;
 }
 
@@ -161,11 +160,18 @@ bool VKLogMerge::mergeLogFiles( QString& log_list, QString& fname_out )
   fi.setFile( logFileList[0] );
   QString master_fname = fi.fileName();
   /* parse the first xml_logfile into the master */
-  parseLog( logFileList[0] );
+  bool parse_ok = parseLog( logFileList[0] );
 
   /* disconnect the master so it no longer communicates with the parser */
   disconnect( xmlParser,     SIGNAL(loadItem(XmlOutput *)), 
               masterLogFile, SLOT(loadItem(XmlOutput *)) );
+
+  if (!parse_ok) {   /* failed parse on master file: die */
+    fprintf(stderr, "Failed merge.\n");
+    delete masterLogFile;
+    masterLogFile = 0;
+    return false;
+  }
 
   /* loop over the rest of the files in the list, and merge one-by-one */
   QString slave_fname;
@@ -184,16 +190,23 @@ bool VKLogMerge::mergeLogFiles( QString& log_list, QString& fname_out )
              slaveLogFile, SLOT(loadItem(XmlOutput *)) );
 
     /* parse the next file in the list into logFile */
-    parseLog( logFileList[i] );
+    parse_ok = parseLog( logFileList[i] );
+
+    /* disconnect the logFile from the parser */
+    disconnect( xmlParser,    SIGNAL(loadItem(XmlOutput *)), 
+                slaveLogFile, SLOT(loadItem(XmlOutput *)) );
+
+    if (!parse_ok) {   /* failed merge on slave file: skip file */
+      fprintf(stderr, "Skipping merge of slave file: %s\n", slave_fname.latin1());
+      delete slaveLogFile;
+      slaveLogFile = 0;
+      continue;
+    }
 
     /* tell user we are merging the slave into the master */
     fprintf(stderr, "Merging %s <- %s\n", master_fname.latin1(), slave_fname.latin1());
 
     masterLogFile->merge( slaveLogFile );
-
-    /* disconnect the logFile from the parser */
-    disconnect( xmlParser,    SIGNAL(loadItem(XmlOutput *)), 
-                slaveLogFile, SLOT(loadItem(XmlOutput *)) );
 
     /* delete the slave and free memory */
     delete slaveLogFile;
