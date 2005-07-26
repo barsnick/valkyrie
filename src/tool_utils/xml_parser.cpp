@@ -780,12 +780,13 @@ bool XMLParser::endElement( const QString&, const QString&,
       } else {
         emit loadItem( topStatus );
         statusPopped = true;
-        /* pop the others now as well */
-        /* just in case anything went wrong, check we have them first! */
-        XmlOutput* xmlout = stack.pop();     /* Info */
-        if (xmlout) emit loadItem( xmlout );
-        xmlout = stack.pop();                /* Preamble */
-        if (xmlout) emit loadItem( xmlout );
+        /* pop the others now as well
+           - but check we have them first! */
+        XmlOutput* xmlInfo     = stack.pop();   /* Info */
+        XmlOutput* xmlPreamble = stack.pop();   /* Preamble */
+        if (!xmlInfo || !xmlPreamble) return false;
+        emit loadItem( xmlInfo );
+        emit loadItem( xmlPreamble );
       } break;
 
     case ERROR:
@@ -888,7 +889,7 @@ bool XMLParser::endElement( const QString&, const QString&,
       VK_DEBUG( "no such tag '%s'", endTag.latin1() );
       vk_assert_never_reached();
       break;
-	  default:
+    default:
       break;
   }
 
