@@ -466,7 +466,11 @@ bool Memcheck::runProcess( QStringList flags, int log_fd,
 
 /* slot, connected to proc's signal readyReadStd***().
    read and process the data, which might be output in chunks.
-   output is auto-saved to a logfile in ~/.valkyrie-X.X.X/logs/ */
+   output is auto-saved to a logfile in ~/.valkyrie-X.X.X/logs/
+   Note: This function must not block, else vkprocess can finish
+   and be deleted before this unblocks and returns to vkprocess,
+   leading to a segfault.
+*/
 void Memcheck::parseOutput()
 {
   statusMsg( "Memcheck", "Parsing output ... " );
@@ -487,8 +491,16 @@ void Memcheck::parseOutput()
     //printf("MC::parseOutput(): FDout(%d): '%s'\n", log_fd, data.latin1() );
     logStream << data << "\n";
     source.setData( data );
-    ok = reader.parseContinue();
-    if (!ok) break;
+    bool ok = reader.parseContinue();
+    if ( !ok ) {
+      /* if we get here, it means either:
+         a) Output from valgrind run is bad
+         b) Output from vk_logmerge run is bad
+          - neither should happen.
+         TODO: do sthng nicer here - but rem not to block this function!
+       */
+      vk_assert_never_reached();
+    }
   }
 
   /* Stdout: anything read here will be from client prog */
@@ -505,16 +517,6 @@ void Memcheck::parseOutput()
     //printf("\nMC::parseOutput(): Stderr: '%s'\n", data.latin1() );
     loadClientOutput( data, 2 );
   }
-
-#if 0
-  if ( !ok ) {
-    /* TODO: SEGFAULTS! */
-    vkError( this->view(), "Parse Error", 
-             "<p>Parsing failed on line #%d: '%s'</p>", 
-             lineNumber, data.latin1() );
-  }
-#endif
-
 }
 
 
