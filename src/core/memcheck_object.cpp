@@ -674,12 +674,14 @@ bool Memcheck::setupFileStream( bool init )
   bool ok = true;
 
   if ( init ) {
-    QFile logFile( saveFname );
-    ok = logFile.open( IO_WriteOnly );
-    logStream.setDevice( &logFile );
+    QFile* logFile = new QFile( saveFname );
+    ok = logFile->open( IO_WriteOnly );
+    logStream.setDevice( logFile );
   } else {
-    logStream.device()->close();
+    QFile* logFile = (QFile*)logStream.device();
     logStream.unsetDevice();
+    logFile->close();
+    delete logFile;
   }
   
   return ok;
