@@ -496,7 +496,8 @@ void Memcheck::parseOutput()
       /* if we get here, it means either:
          a) Output from valgrind run is bad
          b) Output from vk_logmerge run is bad
-          - neither should happen.
+          - neither should happen, so die.
+         Not very nice, but output-to-date is saved in the auto-log file.
          TODO: do sthng nicer here - but rem not to block this function!
        */
       vk_assert_never_reached();
