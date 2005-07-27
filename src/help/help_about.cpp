@@ -49,9 +49,7 @@ bool TextEdit::load()
   switch( tabId ) {
     case HelpAbout::ABOUT_VK:
     case HelpAbout::SUPPORT:
-      /* TODO: remove this after xml-ing the valkyrie docs */
-      setText( ts.read().arg(vkConfig->vkCopyright())
-                        .arg(vkConfig->vkAuthor()) );
+      setText( ts.read() );
       break;
     case HelpAbout::ABOUT_QT:
       setText( ts.read().arg(qVersion()) );
