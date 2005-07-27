@@ -60,7 +60,6 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   mEntryMap.clear();
   sep       = ',';         /* separator for lists of strings */
   mDirty    = false;
-  newConfigFile = false;   /* set to true in mkConfigFile() */
 
   mPackagePath = PREFIX;
   vkdocPath    = mPackagePath + VK_DOC_PATH;
@@ -141,13 +140,6 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
     vkFatal( 0, "Config Creation Failed",
              "<p>Initialisation of Config failed.</p>" );
     break;
-  }
-
-  /* If we've just created valkyrierc, write the vg-exec-path and
-     vg-supp-dir paths found by 'configure' to valkyrierc. 
-     These values can be over-ridden by the user via the Options dialog.*/
-  if ( newConfigFile ) {
-    updatePaths();
   }
 
 }
@@ -821,7 +813,7 @@ logfile=\n\n";
     outF.close();
   }
 
-  newConfigFile = true;
+  //newConfigFile = true;
 }
 
 

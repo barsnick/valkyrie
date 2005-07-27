@@ -159,7 +159,6 @@ private:
 private:
   QChar sep;
   bool mDirty;
-  bool newConfigFile;
 
   QCString vk_name;
   QCString vk_Name;
