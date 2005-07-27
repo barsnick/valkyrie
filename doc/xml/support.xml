@@ -1,0 +1,29 @@
+<?xml version="1.0"?> <!-- -*- sgml -*- -->
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
+[
+  <!ENTITY % vk-entities SYSTEM "vk-entities.xml"> %vk-entities;
+]>
+
+<article>
+
+  <artheader>
+    <title>Valkyrie Support</title>
+  </artheader>
+
+<para>Valkyrie is developed and maintained by the Valgrind Developers, 
+and is therefore always in sync with Valgrind.</para>
+
+<para>If you have a feature request, or would like support for a
+Valgrind tool extended, contact &vk-author; at 
+<ulink url="mailto:&vk-email;">&vk-email;</ulink></para>
+
+
+<informaltable class="nav" width="100%">
+<tbody><tr>
+  <td align="center">Copyright (c) &vk-lifespan; &vk-author; &lt;&ow-url;&gt;</td>
+</tr></tbody>
+</informaltable>
+
+</article>
+
