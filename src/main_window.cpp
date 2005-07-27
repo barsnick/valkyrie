@@ -508,6 +508,7 @@ void MainWindow::mkMenuBar()
   helpButton->setPopupDelay( 1 );
   QToolTip::add( helpButton, "Show help manual / information" );
   mainMenu->insertItem( helpButton, -1, index );
+  ContextHelp::add( helpButton, urlValkyrie::helpMenu );
 
   /* application-wide context help button ------------------------------ */
   index++;

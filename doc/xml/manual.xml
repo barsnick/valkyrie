@@ -14,8 +14,11 @@
   <xi:include href="mainwindow.xml"   parse="xml" 
       xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-  <xi:include href="optionsdlg.xml"   parse="xml" 
+  <xi:include href="options_dlg.xml"   parse="xml" 
       xmlns:xi="http://www.w3.org/2001/XInclude" />
-
+<!--
+  <xi:include href="memcheck_view.xml"   parse="xml" 
+      xmlns:xi="http://www.w3.org/2001/XInclude" />
+-->
 
 </book>

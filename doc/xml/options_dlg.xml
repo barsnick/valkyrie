@@ -119,8 +119,8 @@ reflect the split between Core options, Error Reporting options, and
 suppressions.</para>
 
 <para>To access valgrind`s manual for help on any of these options, 
-click on the <xref linkend="context_help"/> toolbutton and then click 
-on the relevant widget.</para>
+click on the <xref linkend="mainwin.context_help"/> toolbutton and then 
+click on the relevant widget.</para>
 
 <glosslist>
   <glossentry>
@@ -140,7 +140,7 @@ on the relevant widget.</para>
 
   
  
-<sect1 id="toolg-opts" xreflabel="Valgrind Tool Options Pages">
+<sect1 id="tool-opts" xreflabel="Valgrind Tool Options Pages">
 <title>Valgrind Tool Options Pages</title>
 
 <para>There is an option page for each tool which is supported by 
@@ -148,8 +148,8 @@ Valkyrie.  Currently, this is only Memcheck; although the pages for
 Cachegrind and Massif have been implemented, they are not functional.</para>
 
 <para>To access valgrind`s manual for help on any of these options, click 
-on the <xref linkend="context_help"/> toolbutton and then click on the 
-relevant widget on a Tool`s Options page.</para>
+on the <xref linkend="mainwin.context_help"/> toolbutton and then click on 
+the relevant widget on a Tool`s Options page.</para>
 
 </sect1>
 

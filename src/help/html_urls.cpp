@@ -21,25 +21,26 @@ namespace urlValkyrie {
 
   /* Mainwindow */
   const char* fileMenu     = "mainwindow.html#file_menu";
-  const char* toolMenu     = "mainwindow.html#tool_menu";
+  const char* toolMenu     = "mainwindow.html#tools_menu";
   const char* optionsMenu  = "mainwindow.html#options_menu";
   const char* runButton    = "mainwindow.html#run_button";
   const char* stopButton   = "mainwindow.html#stop_button";
+  const char* helpMenu     = "mainwindow.html#help_menu";
   const char* statusMsg    = "mainwindow.html#status_msg";
   const char* tviewButtons = "mainwindow.html#tview_buttons";
+  const char* FlagsButton  = "mainwindow.html#flags_widget";
 
   /* valkyrie's options page */
-  const char* FlagsButton  = "context_help.html#flags_button";
-  const char* toolTips     = "context_help.html#tool_tips";
-  const char* toolLabels   = "context_help.html#tool_label";
-  const char* userFont     = "context_help.html#user_font";
-  const char* palette      = "context_help.html#palette";
-  const char* srcLines     = "context_help.html#src_lines";
-  const char* srcEditor    = "context_help.html#src_editor";
-  const char* binary       = "context_help.html#binary";
-  const char* binFlags     = "context_help.html#bin_flags";
-  const char* vgDir        = "context_help.html#valgrind_dir";
-  const char* suppDir      = "context_help.html#supps_dir";
+  const char* toolTips     = "options_dlg.html#tool_tips";
+  const char* toolLabels   = "options_dlg.html#tool_label";
+  const char* userFont     = "options_dlg.html#user_font";
+  const char* palette      = "options_dlg.html#palette";
+  const char* srcLines     = "options_dlg.html#src_lines";
+  const char* srcEditor    = "options_dlg.html#src_editor";
+  const char* binary       = "options_dlg.html#binary";
+  const char* binFlags     = "options_dlg.html#bin_flags";
+  const char* vgDir        = "options_dlg.html#valgrind_dir";
+  const char* suppDir      = "options_dlg.html#supps_dir";
 
   /* valgrind`s options page: tab Suppressions */
   const char* allSupps = "context_help.html#all_supps";

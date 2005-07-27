@@ -10,12 +10,11 @@
 # -------------------------------------------------------------------
 
 top_dir   = ../../
-doc_dir   = ../
-build_dir = .
-img_dir   = $(doc_dir)/images
-html_dir  = $(doc_dir)
-lib_dir   = $(build_dir)/lib
-xml_dir   = $(build_dir)
+html_dir  = ..
+xml_dir   = .
+img_dir   = $(html_dir)/images
+lib_dir   = $(xml_dir)/lib
+
 # manual -> index.xml
 MANUAL    = $(xml_dir)/index.xml
 # list of 'about' pages for about dialog
@@ -44,13 +43,13 @@ XSL_HTML_SINGLE  = $(lib_dir)/vk-html-single.xsl
 default:
 	@echo ""
 	@echo "Choose a target from:"
-	@echo "valid: validate all xml docs"
-	@echo "html:  generate chunked html output for all docs"
-	@echo "about: generate the 'about' html files"
-	@echo "clean: remove all generated html files"
+	@echo "valid:      validate all xml docs"
+	@echo "manual:     generate chunked html for the manual"
+	@echo "standalone: generate the 'about' html files"
+	@echo "clean:      remove all generated html files"
 	@echo ""
 
-all: html about
+all: manual standalone
 
 
 valid:
@@ -58,21 +57,21 @@ valid:
 
 
 # single html files for the 'about' dialog
-about:
-	@echo "Generating single 'about' files..." ; \
+standalone:
+	@echo "Generating standalone 'about' files..." ; \
   file_list='$(ABOUT_FILES)'; \
   for file in $$file_list; do \
 	  echo "  processing file: $$file.xml" ; \
-    $(XSLTPROC) $(XSLTPROC_FLAGS) -o ../$$file.html $(XSL_HTML_SINGLE) $$file.xml ; \
+    $(XSLTPROC) $(XSLTPROC_FLAGS) -o $(html_dir)/$$file.html $(XSL_HTML_SINGLE) $$file.xml ; \
 	done
 
 # chunked html
-html:
+manual:
 	@echo "Generating chunked manual files..."
 	export XML_CATALOG_FILES=$(XML_CATALOG_FILES)
 	cp $(lib_dir)/valkyrie.css $(html_dir)
-	$(XSLTPROC) $(XSLTPROC_FLAGS) -o $(html_dir) $(XSL_HTML_CHUNKED) $(MANUAL)
+	$(XSLTPROC) $(XSLTPROC_FLAGS) -o $(html_dir)/ $(XSL_HTML_CHUNKED) $(MANUAL)
 
 
 clean:
-	rm -rf $(doc_dir)*.html
+	rm -rf $(html_dir)/*.html
