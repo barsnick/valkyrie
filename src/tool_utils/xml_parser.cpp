@@ -510,26 +510,34 @@ void Error::print2File( QTextStream& stream )
 
 
 /* class XMLParser ----------------------------------------------------- */
-/* Beware leaks: the parser *never* deletes any XmlOutput items; 
-   this is the sole responsibility of the caller */
+/* Beware wandering pointers: emitted ptrs are deleted in ~XMLParser() 
+   so make sure xmlParser isn't destroyed until we're _sure_ we don't
+   need the ptrs anymore */
 
 XMLParser::~XMLParser() 
 { 
   tagtypeMap.clear();
   acronymMap.clear();
+
+  if (topStatus)  { delete topStatus;  topStatus  = 0; }
+  if (preamble)   { delete preamble;   preamble   = 0; }
+  if (info)       { delete info;       info       = 0; }
+  if (verror)     { delete verror;     verror     = 0; }
+  if (errCounts)  { delete errCounts;  errCounts  = 0; }
+  if (suppCounts) { delete suppCounts; suppCounts = 0; }
 }
 
 
 XMLParser::XMLParser( QObject* parent, bool esc_ents/*=false*/  ) 
   : QObject( parent, "xml_parser" )
 {
+  escEntities = esc_ents;
+  topStatus   = 0;
+  preamble    = 0;
   info        = 0;
   verror      = 0;
-  suppCounts  = 0;
   errCounts   = 0;
-  preamble    = 0;
-  topStatus   = 0;
-  escEntities = esc_ents;
+  suppCounts  = 0;
 
   /* init our pretend-namespace */
   tagtypeMap["valgrindoutput"]   = VGOUTPUT;
@@ -604,6 +612,14 @@ void XMLParser::reset( bool reinit/*=true*/ )
   inPair        = false;
 
   if ( reinit ) {
+    /* delete all our pointers - and hope no-one outside tries to ref them! */
+    if (topStatus)  { delete topStatus;  topStatus  = 0; }
+    if (preamble)   { delete preamble;   preamble   = 0; }
+    if (info)       { delete info;       info       = 0; }
+    if (verror)     { delete verror;     verror     = 0; }
+    if (errCounts)  { delete errCounts;  errCounts  = 0; }
+    if (suppCounts) { delete suppCounts; suppCounts = 0; }
+
     info      = new Info();
     topStatus = new TopStatus();
   }
@@ -736,8 +752,10 @@ bool XMLParser::endElement( const QString&, const QString&,
     case VGOUTPUT:   /* ignore */
       break;
     case PROTOCOL:
-      if ( content != "1" ) 
+      if ( content != "1" ) {
         fprintf(stderr, "Fatal Error: wrong protocol version\n");
+	return false;
+      }
       info->protocolVersion = content.toInt();
       break;
     case PREAMBLE:
