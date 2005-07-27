@@ -89,6 +89,7 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
   LeWidget* binFlgsLedit = ((LeWidget*)itemList[Valkyrie::BIN_FLAGS]);
   connect(binFlgsLedit, SIGNAL(returnPressed()), this, SIGNAL(apply()));
 
+#if 0
   itemList.insert( Valkyrie::VG_EXEC,         /* ledit + button */
                    optionWidget(Valkyrie::VG_EXEC, group1, false ) );
   LeWidget* vgbinLedit = ((LeWidget*)itemList[Valkyrie::VG_EXEC]);
@@ -99,27 +100,42 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
   LeWidget* vgsupLedit = ((LeWidget*)itemList[Valkyrie::VG_SUPPS_DIR]);
   vgsupLedit->addButton( group1, this, SLOT(getSuppDir()) );
   vgsupLedit->setReadOnly( true );   /* don't allow direct editing */
+#else
+  itemList.insert( Valkyrie::VG_EXEC,                   /* ledit    */
+                   optionWidget(Valkyrie::VG_EXEC,      group1, true ) );
+  ((LeWidget*)itemList[Valkyrie::VG_EXEC])->setReadOnly( true );
+  itemList.insert( Valkyrie::VG_SUPPS_DIR,              /* ledit    */
+                   optionWidget(Valkyrie::VG_SUPPS_DIR, group1, true ) );
+  ((LeWidget*)itemList[Valkyrie::VG_SUPPS_DIR])->setReadOnly( true );
+#endif
 
   /* 2nd grid layout for group1 */
   rows = 0;
   cols = 2;
   QGridLayout* grid2 = new QGridLayout( gvbox, rows, cols, space );
   grid2->addMultiCellLayout( 
-                    itemList[Valkyrie::SRC_LINES]->hlayout(), 0,0, 0,1 );
-  grid2->addWidget( editLedit->button(),                      1, 0 );
-  grid2->addWidget( editLedit->widget(),                      1, 1 );
+                    itemList[Valkyrie::SRC_LINES]->hlayout(),  0,0, 0,1 );
+  grid2->addWidget( editLedit->button(),                       1, 0 );
+  grid2->addWidget( editLedit->widget(),                       1, 1 );
 
   grid2->setRowSpacing( 2, topSpace );
-  grid2->addWidget( binLedit->button(),                       3, 0 );
-  grid2->addWidget( binLedit->widget(),                       3, 1 );
-  grid2->addWidget( itemList[Valkyrie::BIN_FLAGS]->label(),   4, 0 );
-  grid2->addWidget( itemList[Valkyrie::BIN_FLAGS]->widget(),  4, 1 );
+  grid2->addWidget( binLedit->button(),                        3, 0 );
+  grid2->addWidget( binLedit->widget(),                        3, 1 );
+  grid2->addWidget( itemList[Valkyrie::BIN_FLAGS]->label(),    4, 0 );
+  grid2->addWidget( itemList[Valkyrie::BIN_FLAGS]->widget(),   4, 1 );
 
   grid2->setRowSpacing( 5, topSpace );
-  grid2->addWidget( vgbinLedit->button(),                     6, 0 );
-  grid2->addWidget( vgbinLedit->widget(),                     6, 1 );
-  grid2->addWidget( vgsupLedit->button(),                     7, 0 );
-  grid2->addWidget( vgsupLedit->widget(),                     7, 1 );
+#if 0
+  grid2->addWidget( vgbinLedit->button(),                      6, 0 );
+  grid2->addWidget( vgbinLedit->widget(),                      6, 1 );
+  grid2->addWidget( vgsupLedit->button(),                      7, 0 );
+  grid2->addWidget( vgsupLedit->widget(),                      7, 1 );
+#else
+  grid2->addWidget( itemList[Valkyrie::VG_EXEC]->label(),       6, 0 );
+  grid2->addWidget( itemList[Valkyrie::VG_EXEC]->widget(),      6, 1 );
+  grid2->addWidget( itemList[Valkyrie::VG_SUPPS_DIR]->label(),  7, 0 );
+  grid2->addWidget( itemList[Valkyrie::VG_SUPPS_DIR]->widget(), 7, 1 );
+#endif
 
   vbox->addStretch( space );
   vk_assert( itemList.count() <= numItems );
@@ -240,7 +256,8 @@ void ValkyrieOptionsPage::getBinary()
   }
 }
 
-
+#if 0
+// RM: 
 void ValkyrieOptionsPage::getSuppDir()
 {
   /* VG_EXEC is guaranteed to never be empty, so start up the file
@@ -282,10 +299,11 @@ void ValkyrieOptionsPage::getSuppDir()
     }
   }
 }
+#endif
 
-
-/* allows user to specify which valgrind version to use.  the guts of
-this fn are essentially the same as the one in config.tests/valgrind.test */
+#if 0
+/* RM: allows user to specify which valgrind version to use.  the guts
+   of this fn are essentially the same as the one in config.tests/valgrind.test */
 void ValkyrieOptionsPage::getVgExec()
 {
   QString vg_exec_path = QFileDialog::getOpenFileName( "/home", 
@@ -325,5 +343,5 @@ void ValkyrieOptionsPage::getVgExec()
   } 
 
 }
-
+#endif
 

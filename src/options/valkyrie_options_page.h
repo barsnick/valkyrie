@@ -26,8 +26,8 @@ private slots:
   void fontClicked(bool);
   void checkEditor();
   void getBinary();
-  void getVgExec();
-  void getSuppDir();
+  // void getVgExec();
+  // void getSuppDir();
 };
 
 
