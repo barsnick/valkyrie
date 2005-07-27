@@ -19,7 +19,8 @@ xml_dir   = $(build_dir)
 # manual -> index.xml
 MANUAL    = $(xml_dir)/index.xml
 # list of 'about' pages for about dialog
-ABOUT_FILES = about_vk.xml about_qt.xml support.xml $(top_dir)LICENSE.GPL
+ABOUT_FILES = about_qt about_vk support
+# $(top_dir)LICENSE.GPL
 
 # validation stuff
 XMLLINT = xmllint
@@ -35,8 +36,9 @@ XSLTPROC_FLAGS = --nonet --xinclude
 # catalog
 XML_CATALOG_FILES = /etc/xml/catalog
 
-# stylesheet
-XSL_HTML_CHUNK_STYLE  = $(lib_dir)/vk-html-chunk.xsl
+# stylesheets
+XSL_HTML_CHUNKED = $(lib_dir)/vk-html-chunk.xsl
+XSL_HTML_SINGLE  = $(lib_dir)/vk-html-single.xsl
 
 
 default:
@@ -44,26 +46,32 @@ default:
 	@echo "Choose a target from:"
 	@echo "valid: validate all xml docs"
 	@echo "html:  generate chunked html output for all docs"
-	@echo "clean:  remove all generated html files"
+	@echo "about: generate the 'about' html files"
+	@echo "clean: remove all generated html files"
 	@echo ""
+
+all: html about
+
 
 valid:
 	$(XMLLINT) $(XMLLINT_FLAGS) $(xml_dir)/index.xml
 
-all: html
 
-html:
-  # chunked html
-	@echo "Generating chunked manual files..."
-	export XML_CATALOG_FILES=$(XML_CATALOG_FILES)
-	cp $(lib_dir)/valkyrie.css $(html_dir)
-	$(XSLTPROC) $(XSLTPROC_FLAGS) -o $(html_dir) $(XSL_HTML_CHUNK_STYLE) $(MANUAL)
-  # single html files for the 'about' dialog
+# single html files for the 'about' dialog
+about:
 	@echo "Generating single 'about' files..." ; \
   file_list='$(ABOUT_FILES)'; \
   for file in $$file_list; do \
-	  echo "  processing file: $$file" ; \
+	  echo "  processing file: $$file.xml" ; \
+    $(XSLTPROC) $(XSLTPROC_FLAGS) -o ../$$file.html $(XSL_HTML_SINGLE) $$file.xml ; \
 	done
+
+# chunked html
+html:
+	@echo "Generating chunked manual files..."
+	export XML_CATALOG_FILES=$(XML_CATALOG_FILES)
+	cp $(lib_dir)/valkyrie.css $(html_dir)
+	$(XSLTPROC) $(XSLTPROC_FLAGS) -o $(html_dir) $(XSL_HTML_CHUNKED) $(MANUAL)
 
 
 clean:

@@ -185,7 +185,7 @@ the flags which are relevant to the current process.</para>
 <para>Example: if <computeroutput>valkyrie --view-log=log-file</computeroutput>
 was given on the command line, then this window would show:</para>
 <programlisting><![CDATA[
---view-log=<log-to-view
+  --view-log=<log-to-view
 ]]></programlisting>
 
 <para>Example: if <computeroutput>valkyrie /bin/ls -lF</computeroutput> 

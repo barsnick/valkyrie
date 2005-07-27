@@ -1,6 +1,6 @@
 <!-- misc. strings -->
-<!ENTITY ow-url      "http://www.open-works.co.uk/">
-<!ENTITY vk-url      "http://www.open-works.co.uk/projects/valkyrie.html">
+<!ENTITY ow-url      "www.open-works.co.uk">
+<!ENTITY vk-url      "www.open-works.co.uk/projects/valkyrie.html">
 <!ENTITY vk-author   "OpenWorks LLP">
 <!ENTITY vk-email    "info@open-works.co.uk">
 <!ENTITY vk-lifespan "2000-2005">
