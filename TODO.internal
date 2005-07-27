@@ -76,6 +76,10 @@ Memcheck:
    - what to do if we can't stop sthng running?
    - implement stop for parse/merge log files
 
+ - 'client stderr/stdout' labels -> 'stderr/stdout'
+   for e.g. vk_logmerge, output is not from a 'client'
+
+
 XMLParser:
 ---------
  - client program output:
