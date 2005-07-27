@@ -84,7 +84,7 @@ MainWindow::MainWindow( Valkyrie* valk ) : QMainWindow( 0, "mainWindow" )
 }
 
 
-void MainWindow::showToolView( int tvid, bool auto_run/*=false*/ )
+void MainWindow::showToolView( int tvid )
 {
   if ( viewStack->visible() != 0 ) {
     /* already loaded and visible */
@@ -122,15 +122,6 @@ void MainWindow::showToolView( int tvid, bool auto_run/*=false*/ )
   }
 
   viewStack->raiseView( tvid );
-
-  /* if what-to-do was specified on the cmd-line, do it.
-     otherwise, hang around and look boo'ful */
-  if ( auto_run ) {
-    qApp->processEvents();
-    /* don't do anything if runMode == modeNotSet */
-    valkyrie->runTool( nextTool );
-  }
-
   setToggles( tvid );
 }
 

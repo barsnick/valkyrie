@@ -158,7 +158,11 @@ int main ( int argc, char* argv[] )
   vkWin->show();
   /* start up with the tool currently set in vkConfig (either the
      default, the last-used, or whatever was set on the cmd-line) */
-  vkWin->showToolView( vkConfig->toolId(), true );
+  vkWin->showToolView( vkConfig->toolId() );
+  qApp->processEvents();
+
+  /* start a run if specified on the cmd-line */
+  vkWin->run( valkyrie->runmode() );
 
   res = app->exec();
 
