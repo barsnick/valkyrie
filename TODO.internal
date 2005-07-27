@@ -7,7 +7,8 @@ Pre-Release
   and see if we can do without them where poss.
 - grep on FIXME, and fix
 - grep on TODO, and do
-
+- Fix 'updatePaths' in vk_config.cpp
+  currently overwriting any user changes to vg-exec, vg-supps-dir, merge-exec
 
 configure:
 ----------
