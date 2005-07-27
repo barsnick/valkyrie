@@ -492,7 +492,7 @@ void Memcheck::parseOutput()
   QString data;
   int lineNumber = 0;
 
-  //  int log_fd = proc->getFDout();
+  int log_fd = proc->getFDout();
 
   // TODO: proc->readLineXXX() doesn't respect client output formatting
 
@@ -501,11 +501,13 @@ void Memcheck::parseOutput()
   while ( proc->canReadLineFDout() ) {
     lineNumber++;
     data = proc->readLineFDout();
-    //printf("MC::parseOutput(): FDout(%d): '%s'\n", log_fd, data.latin1() );
+//    printf("MC::parseOutput(fd=%d): '%s'\n", log_fd, data.latin1() );
     logStream << data << "\n";
     source.setData( data );
     bool ok = reader.parseContinue();
     if ( !ok ) {
+      fprintf(stderr, "\nMemcheck::parseOutput(fd=%d): '%s'\n",
+                      log_fd, data.latin1() );
       /* if we get here, it means either:
          a) Output from valgrind run is bad
          b) Output from vk_logmerge run is bad

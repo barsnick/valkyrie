@@ -312,6 +312,7 @@ QStringList Valgrind::modifiedFlags()
     switch ( opt->key ) {
 
       /* we never want these included */
+      case TOOL:
       case SUPPS_ALL:
       case SUPPS_DEF:
         break;
