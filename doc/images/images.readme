@@ -1,0 +1,50 @@
+------------------------------------------------------------
+#1: Font -> Logo 
+------------------------------------------------------------
+Basic blue colour is:
+51-102-153
+#336699
+Hue:   210
+Sat:   67
+Value: 60
+Basic font is:
+Bitstream Charter Bold Italic 100 pt 
+Hinting=yes, Force=yes, AntiAliasing=yes
+
+
+#1 open bzip2-logo.xcf in gimp
+Copy the 'bzip2' layer
+Layer -> Image size.
+Cut & paste to re-center the text.
+
+#2 (see http://gug.sunsite.dk/tutorials/itext2/)
+Layer -> Transparency -> Alpha to Selection.
+  Select -> Save to Channel; 
+  Select -> Shrink: 4px
+
+Layer -> New: transparent; name "highlight"
+  Select "highlight" layer
+  Make #ffffff the fg color in the Toolbox
+  Bucket fill on "highlight" layer.
+  Select -> None.
+
+Filters -> Blur -> Gaussian Blur (IIR)
+  Do a 6px blur on the "highlight" layer.
+  Change layer mode to 'Overlay'.
+  Duplicate layer "highlight".
+
+Dialogs -> Channels: select "Selection Mask copy" layer.
+  Repeat the blur:  Filters-> Repeat "Gaussian Blur (IIR)"
+  Close Channels dialog.
+
+Layer -> New: transparent; name "black"
+  Select layer "black"
+  Make #000000 the fg color in the Toolbox
+  Bucket fill on "black" layer.
+  Change "black" layer mode to 'Screen', 
+  and make sure it is at the top of the stack.
+
+Select "black" layer.
+  Filters -> Light Effects -> Lighting Effects
+  ... ... (see ~/HOWTOs/itext.html)
+
