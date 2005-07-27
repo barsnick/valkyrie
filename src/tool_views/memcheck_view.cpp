@@ -192,13 +192,7 @@ void MemcheckView::openMergeFile()
    a (different) filename to save the currently loaded logfile to. */
 void MemcheckView::saveLogFile()
 {
-  logFilename = vkConfig->rdEntry( "view-log", "valkyrie" );
-  QFileInfo fi( logFilename );
-  QString fname = QFileDialog::getSaveFileName( fi.dirPath(), 
-                  "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)", 
-                  this, "fdlg", "Save Log File As" );
-
-  tool()->saveParsedOutput( fname );
+  tool()->fileSaveDialog( "" );
 }
 
 

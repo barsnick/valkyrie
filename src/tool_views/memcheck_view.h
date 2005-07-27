@@ -132,8 +132,6 @@ private slots:
   void launchEditor(  QListViewItem*, const QPoint&, int );
 
 private:
-  QString logFilename;
-
   QListView* lView;
   QTextEdit* stdoutTedit;
   QTextEdit* stderrTedit;

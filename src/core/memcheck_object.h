@@ -61,7 +61,7 @@ public:
     return (OptionsPage*)new MemcheckOptionsPage( parent, this );
   }
 
-  void saveParsedOutput( QString& fname );
+  bool fileSaveDialog( QString fname );
 
 public slots:
   void loadClientOutput( const QString&, int log_fd=-1 );
@@ -81,6 +81,7 @@ private:
   QString validateFile( QString log_file );
   void statusMsg(  QString hdr, QString msg );
   bool queryFileSave();
+  bool saveParsedOutput( QString& fname );
 
   void setupProc( bool init, int log_fd=-1 );
   void setupParser( bool init );

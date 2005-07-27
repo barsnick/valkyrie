@@ -16,6 +16,7 @@
 
 #include <qapplication.h>
 #include <qtimer.h>
+#include <qurloperator.h>
 
 
 /* class Memcheck ------------------------------------------------------ */
@@ -191,13 +192,18 @@ bool Memcheck::queryFileSave()
                       " and will be deleted.<br/>"
                       "Do you want to save it ?</p>" );
     if ( ok == MsgBox::vkYes ) {            /* save */
-      VK_DEBUG("TODO: save();\n");
+
+      if ( !fileSaveDialog( "" ) ) {
+        /* user clicked Cancel, but we already have the
+           auto-fname saved anyway, so get outta here. */
+	return false;
+      }
+
     } else if ( ok == MsgBox::vkCancel ) {  /* procrastinate */
       return false;
     } else {                                /* discard */
       //printf("removing tmp file '%s'\n", saveFname.latin1() );
-      QFile file( saveFname );
-      file.remove();
+      QFile::remove( saveFname );
       fileSaved = true;
     }
   }
@@ -569,52 +575,95 @@ void Memcheck::processDone()
     }
   }
 
-  /* Save output to logfile <fname> */
-  saveParsedOutput( fname );
+  if ( !fname.isEmpty() ) {
+    /* Save output to logfile <fname> */
+    fileSaveDialog( fname );
+    /* ignoring return value: either saved ok, or user clicked Cancel
+       if the latter, we have the auto-fname saved anyway. */
+  }
 
   emitRunning( false );
 }
 
+/* brings up a fileSaveDialog until successfully saved,
+   or user pressed Cancel.
+   if fname.isEmpty, ask user for a name first.
+   returns false on user pressing Cancel, else true.
+*/
+bool Memcheck::fileSaveDialog( QString fname )
+{
+  QFileDialog dlg;
+  dlg.setShowHiddenFiles( true );
+  QString flt = "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)";
+  QString cptn = "Save Log File As";
 
-void Memcheck::saveParsedOutput( QString& fname )
-{ 
-  if ( fname.isEmpty() || fname == saveFname ) {
-    /* nothing to do: log already saved to saveFname */
-    statusMsg( "Saved to default", saveFname );
-  } else {
-    QFileInfo fi( fname );
-    if ( fname[0] != '/' && fname[0] != '.' ) {
-      /* CAB: TODO: Not sure about this...
-          - normally, even if no './' is given, it is still implied... */
-      /* no abs or rel path given, so save in default dir */
-      fname = vkConfig->logsDir() + fname;
-    } else {
-      /* found a path: make sure it's the absolute version */
-      fname = fi.dirPath( true ) + "/" + fi.fileName();
-    }
-    fi.setFile( fname );
-    /* if this filename already exists, check if we should over-write it */
-    if ( fi.exists() ) {
-      int ok = vkQuery( this->view(), 2, "Overwrite File",
-                        "<p>Over-write existing file '%s' ?</p>", 
-                        fname.latin1() );
-      if ( ok == MsgBox::vkNo ) {
-        // TODO: Allow user to enter new logfile
-        statusMsg( "Saved to default", saveFname );
-        return;
-      }
-    }
+  /* Ask fname if don't have one already */
+  if ( fname.isEmpty() ) {
+    /* start dlg in dir of last saved logfile */
+    QString start_path = QFileInfo( saveFname ).dirPath();
+    fname = dlg.getSaveFileName( start_path, flt, this->view(), "fsdlg", cptn );
+    if ( fname.isEmpty() )
+      return false;
+  }
 
-    /* save (rename, actually) the auto-named log-file */
-    QDir dir( fi.dir() );
-    if ( dir.rename( saveFname, fname ) ) {
-      statusMsg( "Saved", fname );
-    } else {
-      vkInfo( this->view(), "Save Failed", 
-              "<p>Failed to save file to '%s'",  fname.latin1() );
-      statusMsg( "Saved to default", saveFname );
+  /* try to save file until succeed, or user Cancels */
+  while ( !saveParsedOutput( fname ) ) {
+    QString start_path = QFileInfo( fname ).dirPath();
+    fname = dlg.getSaveFileName( start_path, flt, this->view(), "fsdlg", cptn );
+    if ( fname.isEmpty() )
+      return false;
+  }
+
+  return true;
+}
+
+bool Memcheck::saveParsedOutput( QString& fname )
+{
+  //printf("saveParsedOutput(%s)\n", fname.latin1() );
+  vk_assert( !fname.isEmpty() );
+
+  if ( fname.find('/') == -1 ) {
+    /* no abs or rel path given, so save in default dir */
+    /* TODO: Not sure about this...
+       - normally, even if no './' is given, it is still implied... */
+    fname = vkConfig->logsDir() + fname;
+  }
+  /* make sure path is absolute */
+  fname = QFileInfo( fname ).absFilePath();
+
+  /* if this filename already exists, check if we should over-write it */
+  if ( QFile::exists( fname ) ) {
+    int ok = vkQuery( this->view(), 2, "Overwrite File",
+                      "<p>Over-write existing file '%s' ?</p>", 
+                      fname.latin1() );
+    if ( ok == MsgBox::vkNo ) {
+      /* nogo: return and try again */
+      return false;
     }
   }
+
+  bool ok;
+  if (!fileSaved) {
+    /* first save after a run, so just rename auto-saveFname => fname */
+    //printf("renaming: '%s' -> '%s'\n", saveFname.latin1(), fname.latin1() );
+    ok = QDir().rename( saveFname, fname );
+  } else {
+    /* we've saved once already: must now copy saveFname => fname */
+    //printf("copying: '%s' -> '%s'\n", saveFname.latin1(), fname.latin1() );
+    QUrlOperator *op = new QUrlOperator();
+    op->copy( saveFname, fname, false, false ); 
+    /* TODO: check copied ok */
+    ok = true;
+  }
+  if (ok) {
+    saveFname = fname;
+    fileSaved = true;
+  } else {
+    vkInfo( this->view(), "Save Failed", 
+	    "<p>Failed to save file to '%s'",  fname.latin1() );
+  }
+  statusMsg( "Saved", saveFname );
+  return true;
 }
 
 
