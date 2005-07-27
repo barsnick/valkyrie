@@ -11,7 +11,7 @@
   <chapter id="license.gpl" xreflabel=" The GNU General Public License">
     <title>The GNU General Public License</title>
       <literallayout>
-      <xi:include href="../../COPYING" 
+      <xi:include href="../../LICENSE.GPL" 
           parse="text"  
           xmlns:xi="http://www.w3.org/2001/XInclude" />
       </literallayout>
@@ -20,7 +20,7 @@
   <chapter id="license.gfdl" xreflabel="The GNU Free Documentation License">
     <title>The GNU Free Documentation License</title>
       <literallayout>
-      <xi:include href="../../COPYING.DOCS" 
+      <xi:include href="../../LICENSE.DOCS" 
           parse="text"  
           xmlns:xi="http://www.w3.org/2001/XInclude" />
       </literallayout>

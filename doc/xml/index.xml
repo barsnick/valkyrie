@@ -10,10 +10,13 @@
 
   <setinfo>
     <title>Valkyrie Documentation</title>
+    <subtitle>A front end for Valgrind</subtitle>
     <releaseinfo>&rel-type; &rel-version; &rel-date;</releaseinfo>
     <copyright>
       <year>&vk-lifespan;</year>
-      <holder>&vk-author;</holder>
+      <holder>
+        <ulink url="http://www.open-works.co.uk/">&vk-author;</ulink>
+      </holder>
     </copyright>
 
     <legalnotice>
@@ -30,10 +33,6 @@
 
   <!-- User Manual -->
   <xi:include href="manual.xml" parse="xml"  
-      xmlns:xi="http://www.w3.org/2001/XInclude" />
-
-  <!-- Distribution Docs -->
-  <xi:include href="dist-docs.xml" parse="xml"  
       xmlns:xi="http://www.w3.org/2001/XInclude" />
 
   <!-- GNU Licenses -->

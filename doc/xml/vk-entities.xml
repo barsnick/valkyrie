@@ -1,10 +1,11 @@
-<!-- stuff ... -->
-<!ENTITY vk-url      "http://www.valgrind.org/">
-<!ENTITY vk-author   "Donna Robinson, Cerion Armour-Brown">
-<!ENTITY vk-email    "donna@open-works.co.uk, cerion@open-works.co.uk">
+<!-- misc. strings -->
+<!ENTITY ow-url      "http://www.open-works.co.uk/">
+<!ENTITY vk-url      "http://www.open-works.co.uk/projects/valkyrie.html">
+<!ENTITY vk-author   "OpenWorks LLP">
+<!ENTITY vk-email    "info@open-works.co.uk">
 <!ENTITY vk-lifespan "2000-2005">
 
-<!-- and nonsense -->
+<!-- valkyrie release + version stuff -->
 <!ENTITY rel-type    "Development release">
 <!ENTITY rel-version "0.9.0">
 <!ENTITY rel-date    "July 25 2005">

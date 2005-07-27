@@ -8,22 +8,14 @@
     <title>Valkyrie User Manual</title>
   </bookinfo>
 
-  <xi:include href="intro.xml" parse="xml" 
+  <xi:include href="introduction.xml" parse="xml" 
+      xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+  <xi:include href="mainwindow.xml"  parse="xml" 
       xmlns:xi="http://www.w3.org/2001/XInclude" />
 <!--
-  <xi:include href="manual-core.xml"  parse="xml" 
-      xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="mc-manual.xml"    parse="xml" 
-      xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="ac-manual.xml"    parse="xml" 
-      xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="cg-manual.xml"    parse="xml" 
-      xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="ms-manual.xml"    parse="xml" 
-      xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="hg-manual.xml"    parse="xml" 
-      xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="nl-manual.xml"    parse="xml" 
+  <xi:include href="optionsdlg.xml"    parse="xml" 
       xmlns:xi="http://www.w3.org/2001/XInclude" />
 -->
+
 </book>

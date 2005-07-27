@@ -1,0 +1,206 @@
+<?xml version="1.0"?> <!-- -*- sgml -*- -->
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+
+<chapter id="mainwin" xreflabel="The Main Window">
+<title>The Main Window</title>
+
+<para>The main window is composed of several elements, explanations for
+which are below.  </para>
+
+
+<sect1 id="mainwin.menubar" xreflabel="The MenuBar">
+<title>The MenuBar</title>
+
+
+<sect2 id="mainwin.filemenu" xreflabel="The File Menu">
+<title>The File Menu</title>
+
+<itemizedlist>
+  <listitem>
+    <para><command>File->Run:</command></para>
+    <para>This options is disabled unless a ToolView is open.</para>
+    <para>Selecting this option will run valgrind on whatever executable 
+    you last specified.  If no executable has been set, a dialog will pop 
+    up asking you to enter the path/to/executable.</para>
+    <para>The "Run" toolbutton is a shortcut to this menu option.</para>
+  </listitem>
+
+  <listitem>
+    <para><command>File->Stop:</command></para>
+    <para>This option will be disabled unless a process is in the middle of 
+    being run.</para>
+    <para>Selecting this option will cause a dialog to pop up asking if you 
+    are sure you want to abort the run; selecting "Abort" will terminate the
+    current process.</para>
+    <para>The "Stop" toolbutton is a shortcut to this menu options.</para>
+  </listitem>
+
+  <listitem>
+    <para><command>File->Close:</command></para>
+    <para>This option will be disabled unless a "ToolView" is open.</para>
+    <para>Selecting this will close the current ToolView.  If the ToolView
+    contains an unsaved file, or if a process is in the middle of being run,
+    a dialog will pop up asking for confirmation.</para>
+  </listitem>
+
+  <listitem>
+    <para><command>File->Exit:</command></para>
+    <para>Exits valkyrie.  If a process is in the middle of being run, 
+    or a ToolView contains unsaved data, a dialog will pop up asking for 
+    confirmation.</para>
+  </listitem>
+
+</itemizedlist>
+
+</sect2>
+
+
+<sect2 id="mainwin.toolsmenu" xreflabel="The Tools Menu">
+<title>The Tools Menu</title>
+
+<itemizedlist>
+  <listitem>
+    <para>This menu shows which valgrind tools are available.  The currently 
+    selected tool is greyed out.</para>
+    <para>The "ToolView Buttons" provide a quick way of switching between 
+    views. The currently selected toolbutton is depressed.</para>
+  </listitem>
+</itemizedlist>
+
+</sect2>
+
+
+<sect2 id="mainwin.optionsmenu" xreflabel="The Options Menu">
+<title>The Options Menu</title>
+
+<itemizedlist>
+  <listitem>
+    <para>This menu contains links to a dialog where preferences, options and 
+    flags may be set for valkyrie, valgrind, and (supported) valgrind tools.
+    Any flag which may be given on the command-line for valkyrie or valgrind
+    is available to be set in this dialog.  The settings are saved, so if you
+    want to repeat runs, there is no need to re-specify the options.  Also see 
+    "Context Help" below.</para>
+    <para>For detailed information on this dialog, see "Options Dialog".</para>
+  </listitem>
+</itemizedlist>
+
+</sect2>
+
+  
+
+<sect2 id="mainwin.helpmenu" xreflabel="The Help Menu">
+<title>The Help Menu</title>
+
+<itemizedlist>
+
+  <listitem>
+    <para><command>Handbook</command></para>
+    <para>You can access the HandBook at any time.  It contains the manuals 
+    for both valgrind and valkyrie.  See also "Context Help" below.</para>
+  </listitem>
+
+  <listitem>
+    <para><command>About Dialog</command></para>
+    <para>This is a small dialog with brief "about" information.</para>
+  </listitem>
+
+</itemizedlist>
+
+</sect2>
+
+
+
+<sect2 id="mainwin.ctxthelp" xreflabel="Context Help">
+<title>Context Help</title>
+
+<itemizedlist>
+  <listitem>
+    <para>When clicked, the cursor will change its shape; then, clicking 
+    on any widget anywhere within Valkyrie will bring up the "Handbook" 
+    at the relevant page, providing instant help without having to trawl 
+    through the manual.</para>
+    <para>A useful feature is the context help which is available for the 
+    "Options" dialog box.  Clicking on any widget in the Options dialog 
+    will show you the relevant section of either valgrind's or valkyrie's 
+    manual.</para>
+  </listitem>
+</itemizedlist>
+
+</sect2>
+
+</sect1>
+
+  
+
+  
+  
+<sect1 id="mainwin.toolbar" xreflabel="The ToolBar">
+<title>The ToolBar</title>
+
+<para>There is no default toolbar; therefore, if no ToolView is 
+loaded, no toolbar will be visible.</para>
+
+<para>Clicking on a "ToolView" button will load the relevant ToolView,
+and its toolbar will then appear.  See the "individual sections" of the
+manual for information on the toolbars.</para>
+
+</sect1>
+
+
+
+<sect1 id="mainwin.toolview" xreflabel="Tool Views">
+<title>Tool Views</title>
+
+<para>The current ToolView resides in the large central area.  Each ToolView 
+has its own specific window with different functionality.  For example, 
+MemcheckView has three tabs:</para>
+
+<itemizedlist>
+  <listitem>
+    <para>The first tab "valgrind output" shows the parsed output 
+    from either a log file or from valgrind, in a tree view.</para>
+  </listitem>
+  <listitem>
+    <para>The second tab "client stdout" shows any output from the 
+    client program which was sent to stdout</para>
+  </listitem>
+  <listitem>
+    <para>The third tab "client stderr" shows any output from the 
+    client program which was sent to stderr.</para>
+  </listitem>
+</itemizedlist>
+
+</sect1>
+
+
+
+<sect1 id="mainwin.flagswidget" xreflabel="Flags Widget">
+<title>Flags Widget</title>
+
+<para>Clicking this button will cause a small window to appear, showing 
+the flags which are relevant to the current process.</para>
+
+<para>Example: if <computeroutput>valkyrie --view-log=log-file</computeroutput>
+was given on the command line, then this window would show:</para>
+<programlisting><![CDATA[
+--view-log=<log-to-view
+]]></programlisting>
+
+<para>Example: if <computeroutput>valkyrie /bin/ls -lF</computeroutput> 
+was given on the command line, then this window would show:</para>
+<programlisting>
+    /path/to/valgrind 
+    --tool=memcheck 
+    --xml=yes 
+    /bin/ls -lF
+</programlisting>
+
+<para>Note: valkyrie only sends flags to valgrind which are not the 
+defaults.</para>
+
+</sect1>
+
+
+</chapter>
