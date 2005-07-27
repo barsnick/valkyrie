@@ -677,6 +677,7 @@ bool XMLParser::startElement( const QString&, const QString&,
   if ( !content.isEmpty() ) {
     // TODO: content has lost its spaces/formatting.
     emit loadClientOutput( content );
+    content = "";
   }
 
   switch ( ttype ) {
