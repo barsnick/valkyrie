@@ -66,9 +66,6 @@ options/valkyrie_options_page.cpp:
 options/*
    perhaps a startup check that no tool duplicates an option
 
-vkObjects
- - ObjectId should be at most: VALKYRIE, VALGRIND, TOOL
-   Then ToolObject could have ToolId: MEMCHECK, CACHEGRIND, MASSIF
 
 
 
@@ -78,8 +75,6 @@ Memcheck:
    - move delay-time-before-killing to config
    - what to do if we can't stop sthng running?
    - implement stop for parse/merge log files
- - parseOutput(): 
-   - proc->readLineXXX() doesn't respect client output formatting
 
 XMLParser:
 ---------
