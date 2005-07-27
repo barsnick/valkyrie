@@ -48,34 +48,34 @@ Below are some examples of common usage.</para>
 
   <listitem>
     <para><computeroutput>valkyrie --view-log=log-file</computeroutput></para>
-    <para>will start up the graphic user interface, with 'log-file-to-view' in
-    the process of being loaded.</para>
+    <para>will start up the graphical user interface, with 
+    <emphasis>log-file-to-view</emphasis> in the process of being loaded.</para>
   </listitem>
 
   <listitem>
     <para><computeroutput>valkyrie --merge=log-file-list</computeroutput></para>
-    <para>will start up the user interface, with 'log-file-list' in the
-    process of being merged.</para>
+    <para>will start up the user interface, with <emphasis>log-file-list</emphasis>
+    in the process of being merged.</para>
   </listitem>
 
   <listitem>
     <para><computeroutput>valkyrie /bin/ls -lF</computeroutput></para>
     <para>will start up the user interface.  This command differs from the 
-    above two in that Valgrind is being called to run the executable 'ls'.
-    The Valgrind tool used is either the default (Memcheck) in the case of 
-    a first-time run, or whichever tool you have specified as being the 
-    default.</para>
+    above two in that Valgrind is being called to run the executable 
+    <emphasis>ls</emphasis>.  The Valgrind tool used is either the default 
+    (Memcheck) in the case of a first-time run, or whichever tool you have 
+    specified as being the default.</para>
   </listitem>
 
   <listitem>
     <para>You can, of course, give any Valgrind flag(s) on the command line:</para>
-    <para><computeroutput>valkyrie --tool=name --pointercheck=yes --log-file=<log-file> /bin/ls -lF</computeroutput></para>
+    <para><computeroutput>valkyrie --tool=name --pointercheck=yes --log-file=log-file /bin/ls -lF</computeroutput></para>
   </listitem>
 
 </itemizedlist>
 
-<para>See the Options pages for more information on setting and saving 
-various flags, options and preferences.</para>
+<para>See the <xref linkend="options_dlg"/> pages for more information on 
+setting and saving various flags, options and preferences.</para>
 
 <para>Below are two example screenshots of the result of running
 <computeroutput>valkyrie /bin/ls -lF</computeroutput>

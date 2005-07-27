@@ -2,101 +2,157 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
   "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
 
-<chapter id="options" xreflabel="Options Dialog">
+<chapter id="options_dlg" xreflabel="Options Dialog">
 <title>Options Dialog</title>
 
 
-The Options dialog has a separate "pane" for each Valgrind tool, as well
-as for Valkyrie and Valgrind.  Any flag or option which can be set on
-the command line for Valgrind or any Valgrind tool is available.
+<para>The Options dialog has a separate "pane" for each Valgrind tool, 
+as well as for Valkyrie and Valgrind.  Any flag or option which can be 
+set on the command line for Valgrind or any Valgrind tool is available.</para>
 
-On first-time startup, all options are set to their defaults.  If you 
-subsequently change any of these, for example by giving the following on 
-the command line:
+<para>On first-time startup, all options are set to their defaults.  
+If you subsequently change any of these, for example by giving the 
+following on the command line:</para>
+<programlisting>
   ./bin/valkyrie --show-reachable=yes /bin/ls -lF
-then the value of the argument will be saved, and the option will then
-be set to this value until you specifically change it again.
+</programlisting>
+<para>then the value of the argument will be saved, and the option will 
+then be set to this value until you specifically change it again.</para>
 
-Note: choosing "Reset Defaults" will reset the default values for
-*all* the options pages, not just the current one.
-
-
-
-- Valkyrie Options Page
-
-Show tooltips
-  Whether tooltips should be shown when the mouse pointer hovers over a widget.
-  Applied application-wide.
-
-Show toolbar text labels
-  Whether text labels should be shown next to buttons.  Applied application-wide.
-
-Use default system font
-  Whether Valkyrie should use your default window font or not.
-  Clicking "Choose" will bring up a font dialog to allow you to select
-  an alternative font.  Applied application-wide.
-
-Use Valkyrie's palette
-  Whether Valkyrie should use your default window palette (aka "theme") or
-  use her own.  Applied application-wide.
-
-Extra lines shown above/below the target line
-  Memcheck-specific.  This value specifies the number of source code lines to 
-  be shown above and below the target source line when displaying errors
-  in Memcheck ToolView.  Note that changing this value will not take effect
-  until the next run.
-
-Source editor:
-  Memcheck-specific.  Specify the /path/to/your/favourite/editor.
-  The editor is launched when a stack frame is double-clicked within 
-  Memcheck ToolView.
-
-Binary:
-  Change the name of the executable to run to /path/to/your/executable.
-  If you started Valkyrie on the command line with "valkyrie /path/to/exe"
-  then "/path/to/exe" is stored here.
-
-Binary flags:
-  Change the flags relevant to your executable. If you started Valkyrie
-  on the command line with "valkyrie /path/to/your/exe --your-flags" then 
-  "--your-flags" is stored here.
-
-Valgrind:
-  This is the /path/to/valgrind which you specified when you configured 
-  and built Valkyrie.  It is shown here purely for information purposes.
-
-Supps Dir:
-  This is the /path/to/valgrind/suppressions/dir which you specified
-  when you configured and built Valkyrie.  It is shown here purely for
-  information purposes.
-
-  If you want to add/remove/change the suppression files, see
-  <Suppression Files>.
+<para>Note: choosing "Reset Defaults" will reset the default values for
+<command>all</command> the options pages, not just the current one.</para>
 
 
 
-- Valgrind Options Page
+<sect1 id="vk-opts" xreflabel="Valkyrie Options Page">
+<title>Valkyrie Options Page</title>
 
-  Valgrind's options page has been divided into three areas which reflect
-  the split between Core options, Error Reporting options, and suppressions.
+<glosslist>
 
-  To access Valgrind's manual for help on any of these options, click on
-  the <Context Help> toolbutton and then click on the relevant widget.
+  <glossentry>
+    <glossterm>Show tooltips:</glossterm>
+    <glossdef><para>Whether tooltips should be shown when the mouse 
+    pointer hovers over a widget.  Applied application-wide.</para>
+    </glossdef>
+  </glossentry>
 
-  Suppressions tab
-  On first-time install, the bottom listbox contains Valgrind's default 
-  suppression files.  The top listbox only contains one file "default.supp".
+  <glossentry>
+    <glossterm>Show toolbar text labels:</glossterm>
+    <glossdef><para>Whether text labels should be shown next to buttons.  
+    Applied application-wide.</para></glossdef>
+  </glossentry>
 
-  Right-clicking on either the top or bottom listbox will bring up a popup 
-  menu allowing you to modify the list of files.
+  <glossentry>
+    <glossterm>Use default system font:</glossterm>
+    <glossdef><para>Whether Valkyrie should use your default window font 
+    or not.  Clicking "Choose" will bring up a font dialog to allow you to 
+    select an alternative font.  Applied application-wide.</para></glossdef>
+  </glossentry>
+
+  <glossentry>
+    <glossterm>Use valkyrie`s palette</glossterm>
+    <glossdef><para>Whether Valkyrie should use your default window palette 
+    (aka "theme") or use her own.  Applied application-wide.</para></glossdef>
+  </glossentry>
+
+  <glossentry>
+    <glossterm>Extra lines shown above/below the target line:</glossterm>
+    <glossdef><para>Memcheck-specific.  This value specifies the number of 
+    source code lines to be shown above and below the target source line when 
+    displaying errors in Memcheck ToolView.  Note that changing this value 
+    will not take effect until the next run.</para></glossdef>
+  </glossentry>
+
+  <glossentry>
+    <glossterm>Source editor</glossterm>
+    <glossdef><para>Memcheck-specific.  Specify the 
+    <computeroutput>/path/to/your/favourite/editor</computeroutput>.
+    The editor is launched when a stack frame is double-clicked within 
+    Memcheck ToolView.</para></glossdef>
+  </glossentry>
+
+  <glossentry>
+    <glossterm>Binary:</glossterm>
+    <glossdef><para>Change the name of the executable to run to 
+    <emphasis>/path/to/your/executable</emphasis>.  If you started Valkyrie on 
+    the command line with <computeroutput>valkyrie /path/to/exe</computeroutput> 
+    then <emphasis>/path/to/exe</emphasis> is stored here.</para></glossdef>
+  </glossentry>
+
+  <glossentry>
+    <glossterm>Binary flags:</glossterm>
+    <glossdef><para>Change the flags relevant to your executable. If you 
+    started Valkyrie on the command line with <computeroutput>valkyrie 
+    /path/to/your/exe --your-flags</computeroutput> then 
+    <emphasis>--your-flags</emphasis> is stored here.</para></glossdef>
+  </glossentry>
+
+  <glossentry>
+    <glossterm>Valgrind:</glossterm>
+    <glossdef><para>This is the <emphasis>/path/to/valgrind</emphasis> which 
+    you specified when you configured and built Valkyrie.  It is shown here 
+    purely for information purposes.</para></glossdef>
+  </glossentry>
+
+  <glossentry>
+    <glossterm>Supps Dir:</glossterm>
+    <glossdef><para>This is the 
+    <emphasis>/path/to/valgrind/suppressions/dir</emphasis> 
+    which you specified when you configured and built Valkyrie.  It is 
+    shown here purely for information purposes.</para>
+    <para>If you want to add/remove/change suppression files, see the 
+    <xref linkend="valgrind-opts"/>.</para></glossdef>
+  </glossentry>
+
+</glosslist>
+
+</sect1>
+
+
+
+
+<sect1 id="valgrind-opts" xreflabel="Valgrind Options Page">
+<title>Valgrind Options Page</title>
+
+<para>Valgrind`s options page has been divided into three areas which 
+reflect the split between Core options, Error Reporting options, and 
+suppressions.</para>
+
+<para>To access valgrind`s manual for help on any of these options, 
+click on the <xref linkend="context_help"/> toolbutton and then click 
+on the relevant widget.</para>
+
+<glosslist>
+  <glossentry>
+  <glossterm>Suppressions tab</glossterm>
+
+  <glossdef><para>On first-time install, the bottom listbox contains 
+  Valgrind`s default suppression files.  The top listbox only contains 
+  one file "default.supp".</para>
+
+  <para>Right-clicking on either the top or bottom listbox will bring up a 
+  popup menu allowing you to modify the list of files.</para></glossdef>
+
+  </glossentry>
+</glosslist>
+
+</sect1>
+
   
  
-- Valgrind Tool Options Pages
+<sect1 id="toolg-opts" xreflabel="Valgrind Tool Options Pages">
+<title>Valgrind Tool Options Pages</title>
 
-  There is an option page for each tool which is supported by Valkyrie.
-  Currently, this is only Memcheck; although the pages for Cachegrind and 
-  Massif have been implemented, they are not functional.
+<para>There is an option page for each tool which is supported by 
+Valkyrie.  Currently, this is only Memcheck; although the pages for 
+Cachegrind and Massif have been implemented, they are not functional.</para>
 
-  To access Valgrind's manual for help on any of these options, click on
-  the <Context Help> toolbutton and then click on the relevant widget
-  on a Tool's Options page.
+<para>To access valgrind`s manual for help on any of these options, click 
+on the <xref linkend="context_help"/> toolbutton and then click on the 
+relevant widget on a Tool`s Options page.</para>
+
+</sect1>
+
+
+</chapter>
+

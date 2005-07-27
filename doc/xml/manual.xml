@@ -11,11 +11,11 @@
   <xi:include href="introduction.xml" parse="xml" 
       xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-  <xi:include href="mainwindow.xml"  parse="xml" 
+  <xi:include href="mainwindow.xml"   parse="xml" 
       xmlns:xi="http://www.w3.org/2001/XInclude" />
-<!--
-  <xi:include href="optionsdlg.xml"    parse="xml" 
+
+  <xi:include href="optionsdlg.xml"   parse="xml" 
       xmlns:xi="http://www.w3.org/2001/XInclude" />
--->
+
 
 </book>
