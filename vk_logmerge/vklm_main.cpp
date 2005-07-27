@@ -17,7 +17,7 @@ QString program_name;
 void usage()
 {
   QString fname = QFileInfo(program_name).fileName();
-  fprintf(stderr, "%s, a valgrind log file merger.  Version 1.0.0rc, 25-July-2005.\n\n", fname.latin1());
+  fprintf(stderr, "%s, a valgrind log file merger.  Version 0.9.0, 25-July-2005.\n\n", fname.latin1());
   fprintf(stderr, "usage: %s [-h] -f log_list [-o outfile]\n", fname.latin1());
   fprintf(stderr, "\
   -h\t\tprint this message\n\
