@@ -211,7 +211,7 @@ bool Memcheck::start( Valkyrie::RunMode rm )
   
   switch ( rm ) {
     case Valkyrie::modeParseLog:
-      ok = this->parseLogFile();
+      ok = this->parseLogFile( false );
       break;
 
     case Valkyrie::modeMergeLogs:
@@ -439,10 +439,6 @@ bool Memcheck::runProcess( QStringList flags, int log_fd,
   for ( unsigned int i=0; i<flags.count(); i++ )
     printf("flag[%d] --> %s\n", i, flags[i].latin1() );
 #endif
-
-  /* last process output wasn't saved */
-  if (!queryFileSave())
-    return false;    // not saved: procrastinate
 
   fileSaved = false;
   emitRunning( true );

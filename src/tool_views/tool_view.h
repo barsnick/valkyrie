@@ -32,6 +32,11 @@ public:
 public slots:
   virtual void toggleToolbarLabels(bool) = 0;
 
+signals:
+  /* start appropriate process for given runmode */
+  void run( Valkyrie::RunMode rm );
+
+
 protected:
   /* keep a ptr to parent tool so we can ask it to do stuff */
   ToolObject* m_tool;

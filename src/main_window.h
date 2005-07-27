@@ -50,6 +50,8 @@ public slots:
   void showToolView( int tvid, bool auto_run=false ); 
   /* connected to optionsWin signal flagsChanged() */
   void updateFlagsWidget();
+  /* start appropriate process for given runmode */
+  void run( Valkyrie::RunMode rm );
 
 signals:
   void toolbarLabelsToggled(bool);
@@ -60,7 +62,7 @@ protected:
   void closeEvent( QCloseEvent* ce );
 
 private slots:
-  void run();
+  void runValgrind();
   void stop();
 
   void showFlagsWidget( bool show );

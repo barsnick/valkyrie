@@ -164,7 +164,7 @@ void MemcheckView::openLogFile()
     return;
 
   vkConfig->wrEntry( log_file, "view-log", "valkyrie" );
-  tool()->parseLogFile( false );
+  run( Valkyrie::modeParseLog );
 #endif
 }
 
@@ -184,7 +184,7 @@ void MemcheckView::openMergeFile()
 
   vkConfig->wrEntry( merge_file, "merge", "valkyrie" );
   /* returns the filename the merge has been saved to */
-  tool()->mergeLogFiles();
+  run( Valkyrie::modeMergeLogs );
 }
 
 

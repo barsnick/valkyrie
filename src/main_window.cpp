@@ -114,6 +114,10 @@ void MainWindow::showToolView( int tvid, bool auto_run/*=false*/ )
                this,       SLOT(setStatus(QString)) );
       connect( this,     SIGNAL(toolbarLabelsToggled(bool)),
                nextView,   SLOT(toggleToolbarLabels(bool)) );
+
+      /* view starts tool processes via this signal */
+      connect( nextView, SIGNAL(run(Valkyrie::RunMode)),
+               this,       SLOT(run(Valkyrie::RunMode)) );
     }
   }
 
@@ -140,9 +144,29 @@ void MainWindow::stop()
   valkyrie->stopTool( viewStack->visible()->tool() );
 }
 
+/* start appropriate process for given runmode */
+void MainWindow::run( Valkyrie::RunMode rm )
+{
+  /* don't come in here if there's no current view */
+  if ( viewStack->visible() == 0 )
+    return;
+
+  ToolObject* currTool = viewStack->visible()->tool();
+
+  /* last process might not be done ... */
+  if ( !currTool->isDone( valkyrie->runmode() ) )
+    return;
+
+  valkyrie->setRunMode( rm );
+
+  if ( !valkyrie->runTool( currTool ) ) {
+    vkError( this, "Run Tool",
+             "Failed to complete execution." );
+  }
+}
 
 /* run valgrind --tool=<current_tool> + flags + executable */
-void MainWindow::run()
+void MainWindow::runValgrind()
 {
   /* don't come in here if there's no current view */
   if ( viewStack->visible() == 0 )
@@ -158,14 +182,7 @@ void MainWindow::run()
     return;
   }
 
-  valkyrie->setRunMode( Valkyrie::modeParseOutput );
-  if ( valkyrie->runTool( viewStack->visible()->tool() ) ) {
-    printf("TODO: toggle buttons to reflect running state\n");
-  } else {
-    vkError( this, "Run Valgrind",
-             "Failed to start the executable running." );
-  }
-
+  run( Valkyrie::modeParseOutput );
 }
 
 
@@ -395,7 +412,7 @@ void MainWindow::mkMenuBar()
   /* file menu --------------------------------------------------------- */
   index++;
   fileMenu = new QPopupMenu( this, "file_menu" );
-  fileMenu->insertItem( "&Run", this, SLOT(run()), 
+  fileMenu->insertItem( "&Run", this, SLOT(runValgrind()), 
                         CTRL+Key_R, FILE_RUN );
   fileMenu->insertItem( "S&top", this, SLOT(stop()), 
                         CTRL+Key_T, FILE_STOP );
@@ -452,7 +469,7 @@ void MainWindow::mkMenuBar()
   runButton->setAutoRaise( true );
   runButton->setAccel( CTRL+Key_R );
   connect( runButton, SIGNAL( clicked() ), 
-           this,      SLOT( run() ) );
+           this,      SLOT( runValgrind() ) );
   QToolTip::add( runButton, "Run valgrind with specified executable" );
   mainMenu->insertItem( runButton, -1, index );
   ContextHelp::add( runButton, urlValkyrie::runButton );
