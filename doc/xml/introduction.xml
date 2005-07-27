@@ -10,7 +10,7 @@
 
 <para>Valkyrie is a graphical front-end to the Valgrind suite of tools for 
 debugging and profiling Linux executables.  She has been specifically 
-developed to support valgrind version 3.0.0 or higher.  Currently, the 
+developed to support Valgrind version 3.0.0 or higher.  Currently, the 
 only supported Valgrind tool is Memcheck, but work is under way for 
 Cachegrind and Massif.</para>
 
@@ -29,10 +29,10 @@ a single-processor machine, for the same binary, <command>vk_logmerge</command>
 merges the log files together, discarding duplicates, and outputs the result 
 in a single file.  As input, <command>vk_logmerge</command> expects a file 
 containing the list of log-files to be merged, with each entry on a separate 
-line.  Log files can be merged from within valkyrie, or you can use it in 
+line.  Log files can be merged from within Valkyrie, or you can use it in 
 non-gui mode by invoking it thus:</para>
 <programlisting><![CDATA[
-  ./vk_logmerge -f <log-file-list> -o <output-file>
+  vk_logmerge -f <log-file-list> [-o <output-file>]
 ]]></programlisting>
 
 <para>Issue the command:</para>
@@ -48,8 +48,8 @@ Below are some examples of common usage.</para>
 
   <listitem>
     <para><computeroutput>valkyrie --view-log=log-file</computeroutput></para>
-    <para>will start up the user interface, with 'log-file-to-view' in the 
-    process of being loaded.</para>
+    <para>will start up the graphic user interface, with 'log-file-to-view' in
+    the process of being loaded.</para>
   </listitem>
 
   <listitem>
@@ -61,15 +61,15 @@ Below are some examples of common usage.</para>
   <listitem>
     <para><computeroutput>valkyrie /bin/ls -lF</computeroutput></para>
     <para>will start up the user interface.  This command differs from the 
-    above two in that valgrind is being called to run the executable 'ls'.
-    The valgrind tool used is either the default (Memcheck) in the case of 
+    above two in that Valgrind is being called to run the executable 'ls'.
+    The Valgrind tool used is either the default (Memcheck) in the case of 
     a first-time run, or whichever tool you have specified as being the 
     default.</para>
   </listitem>
 
   <listitem>
-    <para>You can, of course, give any valgrind flag(s) on the command line:</para>
-    <para><computeroutput>valkyrie --tool=name --pointercheck=yes --log-file=log-file> /bin/ls -lF</computeroutput></para>
+    <para>You can, of course, give any Valgrind flag(s) on the command line:</para>
+    <para><computeroutput>valkyrie --tool=name --pointercheck=yes --log-file=<log-file> /bin/ls -lF</computeroutput></para>
   </listitem>
 
 </itemizedlist>
@@ -82,10 +82,10 @@ various flags, options and preferences.</para>
 </para>
 
 <para>The first shows an error opened up for scrutiny.  If the file in which
-the error occurred has read or write permissions, and valgrind was able 
-to determine the /path/to/the/file, a suitable icon will be displayed.
-Double-clicking on this stack frame will launch an editor with the 
-file loaded at the line where the error occurred.</para>
+the error occurred has read or write permissions, and Valgrind was able 
+to determine the /path/to/the/file, a text-edit icon will be displayed.
+Double-clicking on this icon will launch an editor with the file loaded 
+at the line where the error occurred.</para>
 
 <mediaobject id="screenshot-1">
   <imageobject>
@@ -114,21 +114,22 @@ captured from either stdout and stderr.</para>
 
 
 
-<sect1 id="intro.name" xreflabel="Why 'valkyrie' ">
+<sect1 id="intro.name" xreflabel="Why 'Valkyrie' ">
 <title>Why Valkyrie is thusly named</title>
 
-<para>The term "valkyrie" has its origins in Nordic myth. The Valkyries 
+<para>The term "Valkyrie" has its origins in Nordic myth. The Valkyries 
 were warrior maidens who attended Odin, ruler of the gods. They rode 
-through the air in brilliant armor, directed and oversaw the battles of 
-the Norsemen (Vikings), and distributed death lots among the warriors.
-When warriors perished, the Valkyries conducted the bravest souls to 
-the great hall of Odin, Valhalla (Hall of the Slain), which was the
-foremost resting place in Asgard (the Place of the Nordic Gods).</para>
+through the air wearing brilliant armour, directed and oversaw the 
+battles of the Norsemen (Vikings), and distributed death lots among the 
+warriors. When warriors perished, the Valkyries conducted the bravest 
+souls to the great hall of Odin, Valhalla (Hall of the Slain), which 
+was the foremost resting place in Asgard (the Place of the Nordic 
+Gods).</para>
 
-<para>Since "valgrind" is the name of the Gate to Valhalla (see the 
+<para>Since "Valgrind" is the name of the Gate to Valhalla (see the 
 <ulink url="vg-html/faq.background.html#faq.whence">Valgrind FAQ</ulink>) 
 through which the warriors deemed worthy of entry pass, and the warriors 
-are accompanied by valkyries ... ...</para>
+are accompanied by Valkyries ...</para>
 
 
 </sect1>

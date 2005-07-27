@@ -19,8 +19,8 @@ which are below.  </para>
 <itemizedlist>
   <listitem>
     <para><command>File->Run:</command></para>
-    <para>This options is disabled unless a ToolView is open.</para>
-    <para>Selecting this option will run valgrind on whatever executable 
+    <para>This option is disabled unless a ToolView is open.</para>
+    <para>Selecting this option will run Valgrind on whatever executable 
     you last specified.  If no executable has been set, a dialog will pop 
     up asking you to enter the path/to/executable.</para>
     <para>The "Run" toolbutton is a shortcut to this menu option.</para>
@@ -46,7 +46,7 @@ which are below.  </para>
 
   <listitem>
     <para><command>File->Exit:</command></para>
-    <para>Exits valkyrie.  If a process is in the middle of being run, 
+    <para>Exits Valkyrie.  If a process is in the middle of being run, 
     or a ToolView contains unsaved data, a dialog will pop up asking for 
     confirmation.</para>
   </listitem>
@@ -61,7 +61,7 @@ which are below.  </para>
 
 <itemizedlist>
   <listitem>
-    <para>This menu shows which valgrind tools are available.  The currently 
+    <para>This menu shows which Valgrind tools are available.  The currently 
     selected tool is greyed out.</para>
     <para>The "ToolView Buttons" provide a quick way of switching between 
     views. The currently selected toolbutton is depressed.</para>
@@ -77,8 +77,8 @@ which are below.  </para>
 <itemizedlist>
   <listitem>
     <para>This menu contains links to a dialog where preferences, options and 
-    flags may be set for valkyrie, valgrind, and (supported) valgrind tools.
-    Any flag which may be given on the command-line for valkyrie or valgrind
+    flags may be set for Valkyrie, Valgrind, and (supported) Valgrind tools.
+    Any flag which may be given on the command-line for Valkyrie or Valgrind
     is available to be set in this dialog.  The settings are saved, so if you
     want to repeat runs, there is no need to re-specify the options.  Also see 
     "Context Help" below.</para>
@@ -98,7 +98,7 @@ which are below.  </para>
   <listitem>
     <para><command>Handbook</command></para>
     <para>You can access the HandBook at any time.  It contains the manuals 
-    for both valgrind and valkyrie.  See also "Context Help" below.</para>
+    for both Valgrind and Valkyrie.  See also "Context Help" below.</para>
   </listitem>
 
   <listitem>
@@ -123,7 +123,7 @@ which are below.  </para>
     through the manual.</para>
     <para>A useful feature is the context help which is available for the 
     "Options" dialog box.  Clicking on any widget in the Options dialog 
-    will show you the relevant section of either valgrind's or valkyrie's 
+    will show you the relevant section of either Valgrind's or Valkyrie's 
     manual.</para>
   </listitem>
 </itemizedlist>
@@ -143,8 +143,8 @@ which are below.  </para>
 loaded, no toolbar will be visible.</para>
 
 <para>Clicking on a "ToolView" button will load the relevant ToolView,
-and its toolbar will then appear.  See the "individual sections" of the
-manual for information on the toolbars.</para>
+and its toolbar will then appear.  See the appropriate tool's section of 
+the manual for information on its toolbars.</para>
 
 </sect1>
 
@@ -160,7 +160,7 @@ MemcheckView has three tabs:</para>
 <itemizedlist>
   <listitem>
     <para>The first tab "valgrind output" shows the parsed output 
-    from either a log file or from valgrind, in a tree view.</para>
+    from either a log file or from Valgrind, in a tree view.</para>
   </listitem>
   <listitem>
     <para>The second tab "client stdout" shows any output from the 
@@ -179,8 +179,10 @@ MemcheckView has three tabs:</para>
 <sect1 id="mainwin.flagswidget" xreflabel="Flags Widget">
 <title>Flags Widget</title>
 
-<para>Clicking this button will cause a small window to appear, showing 
-the flags which are relevant to the current process.</para>
+<para>The button to open/close the flags widget is on the bottom right 
+corner, with an icon of a flag.  Clicking this button will cause a small 
+window to appear, showing the flags which are relevant to the current 
+process.</para>
 
 <para>Example: if <computeroutput>valkyrie --view-log=log-file</computeroutput>
 was given on the command line, then this window would show:</para>
@@ -197,7 +199,7 @@ was given on the command line, then this window would show:</para>
     /bin/ls -lF
 </programlisting>
 
-<para>Note: valkyrie only sends flags to valgrind which are not the 
+<para>Note: Valkyrie only sends flags to Valgrind which are not the 
 defaults.</para>
 
 </sect1>

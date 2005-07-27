@@ -6,9 +6,9 @@
 <title>Options Dialog</title>
 
 
-The Options dialog has a separate "pane" for each valgrind tool, as well
+The Options dialog has a separate "pane" for each Valgrind tool, as well
 as for Valkyrie and Valgrind.  Any flag or option which can be set on
-the command line for valgrind or any valgrind tool is available.
+the command line for Valgrind or any Valgrind tool is available.
 
 On first-time startup, all options are set to their defaults.  If you 
 subsequently change any of these, for example by giving the following on 
@@ -32,12 +32,12 @@ Show toolbar text labels
   Whether text labels should be shown next to buttons.  Applied application-wide.
 
 Use default system font
-  Whether valkyrie should use your default window font or not.
+  Whether Valkyrie should use your default window font or not.
   Clicking "Choose" will bring up a font dialog to allow you to select
   an alternative font.  Applied application-wide.
 
-Use valkyrie's palette
-  Whether valkyrie should use your default window palette (aka "theme") or
+Use Valkyrie's palette
+  Whether Valkyrie should use your default window palette (aka "theme") or
   use her own.  Applied application-wide.
 
 Extra lines shown above/below the target line
@@ -53,21 +53,21 @@ Source editor:
 
 Binary:
   Change the name of the executable to run to /path/to/your/executable.
-  If you started valkyrie on the command line with "valkyrie /path/to/exe"
+  If you started Valkyrie on the command line with "valkyrie /path/to/exe"
   then "/path/to/exe" is stored here.
 
 Binary flags:
-  Change the flags relevant to your executable. If you started valkyrie
+  Change the flags relevant to your executable. If you started Valkyrie
   on the command line with "valkyrie /path/to/your/exe --your-flags" then 
   "--your-flags" is stored here.
 
 Valgrind:
   This is the /path/to/valgrind which you specified when you configured 
-  and built valkyrie.  It is shown here purely for information purposes.
+  and built Valkyrie.  It is shown here purely for information purposes.
 
 Supps Dir:
   This is the /path/to/valgrind/suppressions/dir which you specified
-  when you configured and built valkyrie.  It is shown here purely for
+  when you configured and built Valkyrie.  It is shown here purely for
   information purposes.
 
   If you want to add/remove/change the suppression files, see
@@ -80,11 +80,11 @@ Supps Dir:
   Valgrind's options page has been divided into three areas which reflect
   the split between Core options, Error Reporting options, and suppressions.
 
-  To access valgrind's manual for help on any of these options, click on
+  To access Valgrind's manual for help on any of these options, click on
   the <Context Help> toolbutton and then click on the relevant widget.
 
   Suppressions tab
-  On first-time install, the bottom listbox contains valgrind's default 
+  On first-time install, the bottom listbox contains Valgrind's default 
   suppression files.  The top listbox only contains one file "default.supp".
 
   Right-clicking on either the top or bottom listbox will bring up a popup 
@@ -93,10 +93,10 @@ Supps Dir:
  
 - Valgrind Tool Options Pages
 
-  There is an option page for each tool which is supported by valkyrie.
+  There is an option page for each tool which is supported by Valkyrie.
   Currently, this is only Memcheck; although the pages for Cachegrind and 
   Massif have been implemented, they are not functional.
 
-  To access valgrind's manual for help on any of these options, click on
+  To access Valgrind's manual for help on any of these options, click on
   the <Context Help> toolbutton and then click on the relevant widget
   on a Tool's Options page.
