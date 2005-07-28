@@ -39,6 +39,7 @@ public:
   QWidget* widget();
   QString currValue();
   QString initValue();
+  void setEnabled( bool enable );
 
   virtual void reset() = 0;
   virtual void resetDefault() = 0;

@@ -28,7 +28,7 @@ namespace urlValkyrie {
   extern const char* helpMenu;
   extern const char* statusMsg;
   extern const char* tviewButtons;
-  extern const char* FlagsButton;
+  extern const char* flagsButton;
   /* valkyrie's options page */
   extern const char* toolTips;
   extern const char* toolLabels;
@@ -40,10 +40,10 @@ namespace urlValkyrie {
   extern const char* binFlags;
   extern const char* vgDir;
   extern const char* suppDir;
-  /* valgrind's options page: tab Suppressions */
-  extern const char* allSupps;
-  extern const char* defSupps;
-  extern const char* selSupps;
+  /* valgrind's options page */
+  extern const char* coreTab;
+  extern const char* errorTab;
+  extern const char* suppsTab;
   /* MemcheckView tool buttons */
   extern const char* openAllButton;
   extern const char* openOneButton;

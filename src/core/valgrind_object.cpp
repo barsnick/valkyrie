@@ -157,19 +157,19 @@ Valgrind::Valgrind()
           "",          "",                 "",
           /*"default.supp;xfree-3.supp;xfree-4.supp;glibc-2.1.supp|glibc-2.2.supp;glibc-2.3.supp",*/
           "Available error-suppression file(s):",
-          "",          urlValkyrie::allSupps );
+          "",          urlValkyrie::suppsTab );
   /* need to keep a list of suppression files found by configure
      which is never changed; only used to reset default values */
   addOpt( SUPPS_DEF,   Option::NOT_POPT,   Option::NONE, 
           "valgrind",  '\0',               "supps-def",
           "",          "",                 "",
-          "",          "",                 urlValkyrie::defSupps );
+          "",          "",                 urlValkyrie::suppsTab );
   addOpt( SUPPS_SEL,    Option::ARG_STRING, Option::LISTBOX,
           "valgrind",   '\0',              "suppressions",
           "<file1,...>", "",               "default.supp",
           "Selected error-suppression file(s):",
           "suppress errors described in suppressions file(s)", 
-           urlValkyrie::selSupps );
+           urlValkyrie::suppsTab );
   /*--------------------------------------------------------------- */
   addOpt( GEN_SUPP,    Option::ARG_BOOL,   Option::CHECK, 
           "valgrind",  '\0',               "gen-suppressions",

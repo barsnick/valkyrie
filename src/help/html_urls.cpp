@@ -28,24 +28,24 @@ namespace urlValkyrie {
   const char* helpMenu     = "mainwindow.html#help_menu";
   const char* statusMsg    = "mainwindow.html#status_msg";
   const char* tviewButtons = "mainwindow.html#tview_buttons";
-  const char* FlagsButton  = "mainwindow.html#flags_widget";
+  const char* flagsButton  = "mainwindow.html#flags_widget";
 
   /* valkyrie's options page */
-  const char* toolTips     = "options_dlg.html#tool_tips";
-  const char* toolLabels   = "options_dlg.html#tool_label";
-  const char* userFont     = "options_dlg.html#user_font";
-  const char* palette      = "options_dlg.html#palette";
-  const char* srcLines     = "options_dlg.html#src_lines";
-  const char* srcEditor    = "options_dlg.html#src_editor";
-  const char* binary       = "options_dlg.html#binary";
-  const char* binFlags     = "options_dlg.html#bin_flags";
-  const char* vgDir        = "options_dlg.html#valgrind_dir";
-  const char* suppDir      = "options_dlg.html#supps_dir";
+  const char* toolTips     = "options_valkyrie.html#tool_tips";
+  const char* toolLabels   = "options_valkyrie.html#tool_label";
+  const char* userFont     = "options_valkyrie.html#user_font";
+  const char* palette      = "options_valkyrie.html#palette";
+  const char* srcLines     = "options_valkyrie.html#src_lines";
+  const char* srcEditor    = "options_valkyrie.html#src_editor";
+  const char* binary       = "options_valkyrie.html#binary";
+  const char* binFlags     = "options_valkyrie.html#bin_flags";
+  const char* vgDir        = "options_valkyrie.html#valgrind_dir";
+  const char* suppDir      = "options_valkyrie.html#supps_dir";
 
   /* valgrind`s options page: tab Suppressions */
-  const char* allSupps = "context_help.html#all_supps";
-  const char* defSupps = "context_help.html#def_supps";
-  const char* selSupps = "context_help.html#sel_supps";
+  const char* coreTab  = "options_valgrind.html#core_tab";
+  const char* errorTab = "options_valgrind.html#error_tab";
+  const char* suppsTab = "options_valgrind.html#supps_tab";
 
   /* MemcheckView toolbuttons */
   const char* openAllButton = "";

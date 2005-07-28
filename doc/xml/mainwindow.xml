@@ -9,15 +9,15 @@
 which are below.</para>
 
 
-<sect1 id="mainwin.menubar" xreflabel="The MenuBar">
+<sect1 id="menubar" xreflabel="The MenuBar">
 <title>The MenuBar</title>
 
 
-<sect2 id="mainwin.file_menu" xreflabel="The File Menu">
+<sect2 id="file_menu" xreflabel="The File Menu">
 <title>The File Menu</title>
 
 <itemizedlist>
-  <listitem id="mainwin.run_button">
+  <listitem id="run_button">
     <para><command>File->Run:</command></para>
     <para>This option is disabled unless a ToolView is open.</para>
     <para>Selecting this option will run Valgrind on whatever executable 
@@ -26,7 +26,7 @@ which are below.</para>
     <para>The "Run" toolbutton is a shortcut to this menu option.</para>
   </listitem>
 
-  <listitem id="mainwin.stop_button">
+  <listitem id="stop_button">
     <para><command>File->Stop:</command></para>
     <para>This option will be disabled unless a process is in the middle of 
     being run.</para>
@@ -56,7 +56,7 @@ which are below.</para>
 </sect2>
 
 
-<sect2 id="mainwin.tools_menu" xreflabel="The Tools Menu">
+<sect2 id="tools_menu" xreflabel="The Tools Menu">
 <title>The Tools Menu</title>
 
 <itemizedlist id="tview_buttons">
@@ -72,7 +72,7 @@ which are below.</para>
 </sect2>
 
 
-<sect2 id="mainwin.options_menu" xreflabel="The Options Menu">
+<sect2 id="options_menu" xreflabel="The Options Menu">
 <title>The Options Menu</title>
 
 <itemizedlist>
@@ -82,9 +82,9 @@ which are below.</para>
     Any flag which may be given on the command-line for Valkyrie or Valgrind
     is available to be set in this dialog.  The settings are saved, so if you
     want to repeat runs, there is no need to re-specify the options.  Also see 
-    <xref linkend="mainwin.context_help"/> below.</para>
+    <xref linkend="context_help"/> below.</para>
     <para>For detailed information on this dialog, see the 
-    <xref linkend="options_dlg"/> page.</para>
+    <xref linkend="options_dialog"/> page.</para>
   </listitem>
 </itemizedlist>
 
@@ -92,7 +92,7 @@ which are below.</para>
 
   
 
-<sect2 id="mainwin.help_menu" xreflabel="The Help Menu">
+<sect2 id="help_menu" xreflabel="The Help Menu">
 <title>The Help Menu</title>
 
 <itemizedlist>
@@ -101,7 +101,7 @@ which are below.</para>
     <para><command>Handbook</command></para>
     <para>You can access the HandBook at any time.  It contains the manuals 
     for both Valgrind and Valkyrie.  See also 
-    <xref linkend="mainwin.context_help"/> below.</para>
+    <xref linkend="context_help"/> below.</para>
   </listitem>
 
   <listitem>
@@ -115,7 +115,7 @@ which are below.</para>
 
 
 
-<sect2 id="mainwin.context_help" xreflabel="Context Help">
+<sect2 id="context_help" xreflabel="Context Help">
 <title>Context Help</title>
 
 <itemizedlist>
@@ -139,7 +139,7 @@ which are below.</para>
 
   
   
-<sect1 id="mainwin.tool_bar" xreflabel="The ToolBar">
+<sect1 id="mainwindow.tool_bar" xreflabel="The ToolBar">
 <title>The ToolBar</title>
 
 <para>There is no default toolbar; therefore, if no ToolView is 
@@ -153,7 +153,7 @@ the manual for information on its toolbars.</para>
 
 
 
-<sect1 id="mainwin.tool_view" xreflabel="Tool Views">
+<sect1 id="mainwindow.tool_view" xreflabel="Tool Views">
 <title>Tool Views</title>
 
 <para>The current ToolView resides in the large central area.  Each ToolView 
@@ -179,7 +179,7 @@ MemcheckView has three tabs:</para>
 
 
 
-<sect1 id="mainwin.flags_widget" xreflabel="Flags Widget">
+<sect1 id="mainwindow.flags_widget" xreflabel="Flags Widget">
 <title>Flags Widget</title>
 
 <para>The button to open/close the flags widget is on the bottom right 
@@ -209,7 +209,7 @@ defaults.</para>
 
 
 
-<sect1 id="mainwin.status_msg" xreflabel="Status Messages">
+<sect1 id="mainwindow.status_msg" xreflabel="Status Messages">
 <title>Status Messages</title>
 
 <para>Messages are displayed here, showing the current state of play.</para>

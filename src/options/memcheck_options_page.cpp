@@ -72,6 +72,12 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
   grid1->addLayout( itemList[Memcheck::FREELIST]->hlayout(),    9, 0 );
   grid1->addLayout( itemList[Memcheck::ALIGNMENT ]->hlayout(), 10, 0 );
 
+	/* Note: this widget is disabled because valgrind disables them when
+		 generating xml output (see docs/internals/xml_output.txt) */
+  itemList[Memcheck::LEAK_CHECK]->setEnabled( false );
+
+
+
   vbox->addStretch( space );
   vk_assert( itemList.count() <= numItems );
 

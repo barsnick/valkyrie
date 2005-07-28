@@ -72,6 +72,15 @@ void OptionWidget::cancelEdit()
   reset();
 }
 
+void OptionWidget::setEnabled( bool enable )
+{
+	if ( wLabel != 0 )
+		wLabel->setEnabled( enable );
+	if ( widg != 0 ) {
+		widg->setEnabled( enable );
+	}
+}
+
 
 /* default horizontal layout for widgets with labels.
    combos, spinboxes and lineedits have their own way of doings things */
@@ -105,7 +114,7 @@ CkWidget::~CkWidget()
 {
   if ( cbox ) {
     delete cbox;
-    cbox = NULL;
+    cbox = 0;
   }
 }
 
@@ -158,7 +167,7 @@ RbWidget::~RbWidget()
 {
   if ( radio ) {
     delete radio;
-    radio = NULL;
+    radio = 0;
   }
 }
 
@@ -211,18 +220,18 @@ LeWidget::~LeWidget()
 {
   if ( ledit ) {
     delete ledit;
-    ledit = NULL;
+    ledit = 0;
   }
   if ( pb ) {
     delete pb;
-    pb = NULL;
+    pb = 0;
   }
 }
 
 LeWidget::LeWidget( QWidget *parent, Option * vkopt, bool mklabel )
   : OptionWidget( parent, "le_widget", vkopt, mklabel ) 
 {
-  pb     = NULL;
+  pb     = 0;
   ledit  = new QLineEdit( parent, "line_edit" ); 
   widg = ledit;
 
@@ -252,7 +261,7 @@ void LeWidget::addCurrValue( const QString& txt )
   }
 }
 
-void LeWidget::leChanged(const QString& txt)
+void LeWidget::leChanged( const QString& txt )
 {
   currentValue = txt;
   bool edited  = currentValue != vkConfig->rdEntry( opt->cfgKey(),
@@ -276,27 +285,12 @@ void LeWidget::addButton( QWidget* parent, const QObject* receiver,
                           const char* slot, QString txt/*=QString::null*/, 
                           bool /*icon=false*/ )
 {
-#if 1
   QString label = !txt.isNull() ? txt : opt->shortHelp;
   pb = new QPushButton( label, parent );
 
   int pbht = ledit->height() - 8;
   pb->setMaximumHeight( pbht );
   connect( pb, SIGNAL(clicked()), receiver, slot );
-#else
-  int pbht = ledit->height() - 8;
-  if ( !icon ) {
-    pb = new QPushButton( opt->shortHelp, parent );
-  } else {
-    //RM: QPixmap openIcon( vkConfig->pixmap( "fileopen.xpm" ) );
-    if ( !txt.isNull() )
-      pb = new QPushButton( openIcon, txt, parent );
-    else
-      pb = new QPushButton( openIcon, opt->shortHelp, parent );
-  }
-  pb->setMaximumHeight( pbht );
-  connect( pb, SIGNAL(clicked()), receiver, slot );
-#endif
 }
 
 
@@ -305,7 +299,7 @@ void LeWidget::addButton( QWidget* parent, const QObject* receiver,
 QHBoxLayout * LeWidget::hlayout()
 {
   hBox = new QHBoxLayout( 6, "le_hBox" );
-  if ( pb != NULL ) {
+  if ( pb != 0 ) {
     hBox->addWidget( pb );
   } else {
     hBox->addWidget( wLabel );
@@ -321,7 +315,7 @@ CbWidget::~CbWidget()
 {
   if ( combo ) {
     delete combo;
-    combo = NULL;
+    combo = 0;
   }
 }
 
@@ -401,7 +395,7 @@ SpWidget::~SpWidget()
 {
   if ( intspin ) {
     delete intspin;
-    intspin = NULL;
+    intspin = 0;
   }
 }
 
@@ -502,7 +496,7 @@ LbWidget::~LbWidget()
 {
   if ( lbox ) {
     delete lbox;
-    lbox = NULL;
+    lbox = 0;
   }
 }
 

@@ -5,7 +5,7 @@
 <chapter id="introduction" xreflabel="Introduction">
 <title>Introduction</title>
 
-<sect1 id="intro.overview" xreflabel="An Overview of Valkyrie">
+<sect1 id="overview" xreflabel="An Overview of Valkyrie">
 <title>An Overview of Valkyrie</title>
 
 <para>Valkyrie is a graphical front-end to the Valgrind suite of tools for 
@@ -75,8 +75,8 @@ Below are some examples of common usage.</para>
 
 </itemizedlist>
 
-<para>See the <xref linkend="options_dlg"/> pages for more information on 
-setting and saving the various flags, options and preferences.</para>
+<para>See the <xref linkend="options_dialog"/> pages for more information 
+on setting and saving the various flags, options and preferences.</para>
 
 <para>Below are two example screenshots of the result of running
 <computeroutput>valkyrie /bin/ls -lF</computeroutput>

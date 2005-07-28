@@ -407,8 +407,8 @@ void VkConfig::insertData( const EntryKey &ekey,
 
 /* If we've just created valkyrierc, or if we've moved machines, or
    changed some install paths, write the vg-exec-path and vg-supp-dir
-   paths found by 'configure' to valkyrierc.  These values can be
-   over-ridden by the user via the Options dialog.*/
+   paths found by 'configure' to valkyrierc.  These values can never 
+   be over-ridden by the user; only ever set via configure.*/
 void VkConfig::updatePaths()
 {
   wrEntry( MERGE_EXEC,   "merge-exec",   "valkyrie" );

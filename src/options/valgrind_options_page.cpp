@@ -15,6 +15,8 @@
 #include "vk_config.h"
 #include "vk_messages.h"
 #include "vk_utils.h"
+#include "context_help.h"
+#include "html_urls.h"
 
 
 /* this page is different from the others in that it uses three tabs
@@ -41,6 +43,7 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
   /* tab 1: core options ----------------------------------------------- */
   QWidget* tabCore = new QWidget( tabWidget, "tab_core");
   tabWidget->addTab( tabCore, " Core " );
+  ContextHelp::add( tabCore, urlValkyrie::coreTab );
   /* tabCore - vbox */
   QVBoxLayout* core_vbox = new QVBoxLayout( tabCore, 10, 25, "core_vbox" );
 
@@ -175,7 +178,23 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
   egrid1->addLayout( itemList[Valgrind::LOG_SOCKET ]->hlayout(), 13, 0 );
 
   /* FIXME: Disabled LOG_SOCKET pro tem */
-  itemList[Valgrind::LOG_SOCKET]->widget()->setEnabled( false );
+  itemList[Valgrind::LOG_SOCKET]->setEnabled( false );
+
+	/* Note: these widgets are disabled because:
+     (a) only memcheck is supported pro tem, so changing them doesn't
+         make sense, or
+     (b) valgrind disables them when generating xml output (see
+         valgrind/docs/internals/xml_output.txt) */
+	// core tab
+  itemList[Valgrind::VERBOSITY]->setEnabled( false );
+  itemList[Valgrind::XML_OUTPUT]->setEnabled( false );
+  itemList[Valgrind::TRACK_FDS]->setEnabled( false );
+	// error reporting tab
+  itemList[Valgrind::GEN_SUPP]->setEnabled( false );
+  itemList[Valgrind::ERROR_LIMIT]->setEnabled( false );
+  itemList[Valgrind::DB_ATTACH]->setEnabled( false );
+  itemList[Valgrind::DB_COMMAND]->setEnabled( false );
+	dbLedit->button()->setEnabled( false );
 
   erep_vbox->addStretch( space );
 

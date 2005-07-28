@@ -43,7 +43,7 @@ Memcheck::Memcheck()
 		 outputs them, as it makes keeping up-to-date a lot easier. */
   addOpt( LEAK_CHECK,  Option::ARG_STRING, Option::COMBO, 
           "memcheck",  '\0',               "leak-check",
-          "<no|summary|full>",  "no|summary|full",  "summary",
+          "<no|summary|full>",  "no|summary|full",  "full",
           "Search for memory leaks at exit:",
           "search for memory leaks at exit?",
           urlMemcheck::Leakcheck );

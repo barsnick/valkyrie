@@ -16,6 +16,7 @@
 #include <qfiledialog.h>
 
 #include "options_page.h"
+#include "valgrind_object.h"
 #include "memcheck_object.h"
 #include "massif_object.h"
 #include "vk_utils.h"
@@ -128,6 +129,18 @@ void OptionsPage::resetDefaults()
   if ( ok == MsgBox::vkYes ) { 
     QIntDictIterator<OptionWidget> it( itemList );
     for ( ;  it.current(); ++it ) {
+
+			/* never reset these: only set via configure */
+      if ( it.currentKey() == Valkyrie::VG_EXEC || 
+					 it.currentKey() == Valkyrie::VG_SUPPS_DIR ) {
+				continue;
+			}
+			/* need to reset this lot */
+			if ( it.currentKey() == Valgrind::SUPPS_SEL ||
+           it.currentKey() == Valgrind::SUPPS_ALL ) {
+				vkConfig->updatePaths();
+			}
+
       it.current()->resetDefault();
     }
   }

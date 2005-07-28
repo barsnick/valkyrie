@@ -114,6 +114,9 @@ public:
   /* returns an object's id */
   int vkObjectId( VkObject* obj );
 
+  /* write vg-exec-path, vg-supp-dir path and default supp file values */
+  void updatePaths();
+
   /* read fns ---------------------------------------------------------- */
   QString rdEntry( const QString &pKey, const QString &pGroup );
   int     rdInt  ( const QString &pKey, const QString &pGroup );
@@ -153,8 +156,6 @@ private:
   /* creates the various VkObjects and initialises their options,
      ready for cmd-line parsing (if any). */
   void initVkObjects();
-  /* write vg-exec-path, vg-supp-dir path and default supp file values */
-  void updatePaths();
 
 private:
   QChar sep;

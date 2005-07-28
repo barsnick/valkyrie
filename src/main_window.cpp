@@ -608,6 +608,6 @@ void MainWindow::mkStatusBar()
   connect( flagsButton, SIGNAL( toggled(bool) ), 
            this,        SLOT( showFlagsWidget(bool) ) );
   QToolTip::add( flagsButton, "Show non-default flags for current tool" );
-  ContextHelp::add( flagsButton, urlValkyrie::FlagsButton );
+  ContextHelp::add( flagsButton, urlValkyrie::flagsButton );
 }
 

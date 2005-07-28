@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
   "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
 
-<chapter id="options_dlg" xreflabel="Options Dialog">
+<chapter id="options_dialog" xreflabel="Options Dialog">
 <title>Options Dialog</title>
 
 
@@ -14,48 +14,48 @@ set on the command line for Valgrind or any Valgrind tool is available.</para>
 If you subsequently change any of these, for example by giving the 
 following on the command line:</para>
 <programlisting>
-  ./bin/valkyrie --show-reachable=yes /bin/ls -lF
+  valkyrie --show-reachable=yes /bin/ls -lF
 </programlisting>
 <para>then the value of the argument will be saved, and the option will 
 then be set to this value until you specifically change it again.</para>
 
-<para>Note: choosing "Reset Defaults" will reset the default values for
-<command>all</command> the options pages, not just the current one.</para>
+<para>Note: choosing "Reset Defaults" only resets the default values for
+the <command>current</command> option page, not all of them.</para>
 
 
 
-<sect1 id="vk-opts" xreflabel="Valkyrie Options Page">
+<sect1 id="options_valkyrie" xreflabel="Valkyrie Options Page">
 <title>Valkyrie Options Page</title>
 
 <glosslist>
 
-  <glossentry>
+  <glossentry id="tool_tips">
     <glossterm>Show tooltips:</glossterm>
     <glossdef><para>Whether tooltips should be shown when the mouse 
     pointer hovers over a widget.  Applied application-wide.</para>
     </glossdef>
   </glossentry>
 
-  <glossentry>
+  <glossentry id="tool_label">
     <glossterm>Show toolbar text labels:</glossterm>
     <glossdef><para>Whether text labels should be shown next to buttons.  
     Applied application-wide.</para></glossdef>
   </glossentry>
 
-  <glossentry>
+  <glossentry id="user_font">
     <glossterm>Use default system font:</glossterm>
     <glossdef><para>Whether Valkyrie should use your default window font 
     or not.  Clicking "Choose" will bring up a font dialog to allow you to 
     select an alternative font.  Applied application-wide.</para></glossdef>
   </glossentry>
 
-  <glossentry>
+  <glossentry id="palette">
     <glossterm>Use valkyrie`s palette</glossterm>
     <glossdef><para>Whether Valkyrie should use your default window palette 
     (aka "theme") or use her own.  Applied application-wide.</para></glossdef>
   </glossentry>
 
-  <glossentry>
+  <glossentry id="src_lines">
     <glossterm>Extra lines shown above/below the target line:</glossterm>
     <glossdef><para>Memcheck-specific.  This value specifies the number of 
     source code lines to be shown above and below the target source line when 
@@ -63,7 +63,7 @@ then be set to this value until you specifically change it again.</para>
     will not take effect until the next run.</para></glossdef>
   </glossentry>
 
-  <glossentry>
+  <glossentry id="src_editor">
     <glossterm>Source editor</glossterm>
     <glossdef><para>Memcheck-specific.  Specify the 
     <computeroutput>/path/to/your/favourite/editor</computeroutput>.
@@ -71,7 +71,7 @@ then be set to this value until you specifically change it again.</para>
     Memcheck ToolView.</para></glossdef>
   </glossentry>
 
-  <glossentry>
+  <glossentry id="binary">
     <glossterm>Binary:</glossterm>
     <glossdef><para>Change the name of the executable to run to 
     <emphasis>/path/to/your/executable</emphasis>.  If you started Valkyrie on 
@@ -79,7 +79,7 @@ then be set to this value until you specifically change it again.</para>
     then <emphasis>/path/to/exe</emphasis> is stored here.</para></glossdef>
   </glossentry>
 
-  <glossentry>
+  <glossentry id="bin_flags">
     <glossterm>Binary flags:</glossterm>
     <glossdef><para>Change the flags relevant to your executable. If you 
     started Valkyrie on the command line with <computeroutput>valkyrie 
@@ -87,21 +87,21 @@ then be set to this value until you specifically change it again.</para>
     <emphasis>--your-flags</emphasis> is stored here.</para></glossdef>
   </glossentry>
 
-  <glossentry>
+  <glossentry id="valgrind_dir">
     <glossterm>Valgrind:</glossterm>
     <glossdef><para>This is the <emphasis>/path/to/valgrind</emphasis> which 
     you specified when you configured and built Valkyrie.  It is shown here 
     purely for information purposes.</para></glossdef>
   </glossentry>
 
-  <glossentry>
+  <glossentry id="supps_dir">
     <glossterm>Supps Dir:</glossterm>
     <glossdef><para>This is the 
     <emphasis>/path/to/valgrind/suppressions/dir</emphasis> 
     which you specified when you configured and built Valkyrie.  It is 
     shown here purely for information purposes.</para>
     <para>If you want to add/remove/change suppression files, see the 
-    <xref linkend="valgrind-opts"/>.</para></glossdef>
+    <xref linkend="options_valgrind"/>.</para></glossdef>
   </glossentry>
 
 </glosslist>
@@ -111,7 +111,7 @@ then be set to this value until you specifically change it again.</para>
 
 
 
-<sect1 id="valgrind-opts" xreflabel="Valgrind Options Page">
+<sect1 id="options_valgrind" xreflabel="Valgrind Options Page">
 <title>Valgrind Options Page</title>
 
 <para>Valgrind`s options page has been divided into three areas which 
@@ -119,19 +119,61 @@ reflect the split between Core options, Error Reporting options, and
 suppressions.</para>
 
 <para>To access valgrind`s manual for help on any of these options, 
-click on the <xref linkend="mainwin.context_help"/> toolbutton and then 
+click on the <xref linkend="context_help"/> toolbutton and then 
 click on the relevant widget.</para>
 
 <glosslist>
-  <glossentry>
-  <glossterm>Suppressions tab</glossterm>
+
+  <glossentry id="core_tab">
+  <glossterm>Core Tab</glossterm>
+  <glossdef>
+    <para><command>Verbosity level</command>: when generating XML output, 
+    the verbosity level is set to 1.  Also see the next paragraph.</para>
+
+    <para><command>Output in xml format</command>: since Memcheck is currently 
+    the only tool supported by valkyrie, and therefore the flag 
+    <computeroutput>--xml=yes</computeroutput> is always sent to valgrind,
+    changing this flag is disabled.</para>
+  </glossdef>
+  </glossentry>
+
+  <glossentry id="error_tab">
+  <glossterm>Error Reporting Tab</glossterm>
+  <glossdef>
+    <para><command>Print suppressions for errors</command>: currently, 
+    valgrind disables suppression generation when generating XML output, 
+    as that would require user input; therefore changing this flag is 
+    disabled.</para>
+
+		<para><command>Limit the number of errors shown</command>: 
+    valgrind disables error limits when generating XML output; therefore
+    changing this flag is disabled.</para>
+
+    <para><command>Start debugger on error detection</command> and 
+    <command>Debugger</command>: valgrind disabled attached a debugger
+    when generating XML output; therefore changing these flags is 
+    disabled.</para>
+
+  </glossdef>
+  </glossentry>
+
+
+  <glossentry id="supps_tab">
+  <glossterm>Suppressions Tab</glossterm>
 
   <glossdef><para>On first-time install, the bottom listbox contains 
   Valgrind`s default suppression files.  The top listbox only contains 
   one file "default.supp".</para>
 
   <para>Right-clicking on either the top or bottom listbox will bring up a 
-  popup menu allowing you to modify the list of files.</para></glossdef>
+  popup menu allowing you to modify the list of files.</para>
+
+  <para>Note: At the time of writing, Valgrind disallows the automatic 
+  generation of suppressions, ie. the flag 
+  <computeroutput>--gen-suppressions</computeroutput> is ignored.
+  You can read more about suppressions in the 
+  <ulink url="vg-html/manual-core.suppress.html">Valgrind Manual.</ulink>
+  </para></glossdef>
 
   </glossentry>
 </glosslist>
@@ -148,7 +190,7 @@ Valkyrie.  Currently, this is only Memcheck; although the pages for
 Cachegrind and Massif have been implemented, they are not functional.</para>
 
 <para>To access valgrind`s manual for help on any of these options, click 
-on the <xref linkend="mainwin.context_help"/> toolbutton and then click on 
+on the <xref linkend="context_help"/> toolbutton and then click on 
 the relevant widget on a Tool`s Options page.</para>
 
 </sect1>

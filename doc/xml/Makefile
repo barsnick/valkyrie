@@ -49,7 +49,7 @@ default:
 	@echo "clean:      remove all generated html files"
 	@echo ""
 
-all: manual standalone
+all: clean manual standalone
 
 
 valid:

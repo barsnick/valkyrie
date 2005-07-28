@@ -103,10 +103,12 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
 #else
   itemList.insert( Valkyrie::VG_EXEC,                   /* ledit    */
                    optionWidget(Valkyrie::VG_EXEC,      group1, true ) );
-  ((LeWidget*)itemList[Valkyrie::VG_EXEC])->setReadOnly( true );
+  //RM: ((LeWidget*)itemList[Valkyrie::VG_EXEC])->setReadOnly( true );
+  itemList[Valkyrie::VG_EXEC]->setEnabled( false );
   itemList.insert( Valkyrie::VG_SUPPS_DIR,              /* ledit    */
                    optionWidget(Valkyrie::VG_SUPPS_DIR, group1, true ) );
-  ((LeWidget*)itemList[Valkyrie::VG_SUPPS_DIR])->setReadOnly( true );
+  //RM: ((LeWidget*)itemList[Valkyrie::VG_SUPPS_DIR])->setReadOnly( true );
+  itemList[Valkyrie::VG_SUPPS_DIR]->setEnabled( false );
 #endif
 
   /* 2nd grid layout for group1 */
@@ -168,7 +170,8 @@ bool ValkyrieOptionsPage::applyOptions( int optId, bool undo/*=false*/ )
       vkWin->toggleToolbarLabels();
     } break;
 
-    case Valkyrie::FONT_USER: {
+    case Valkyrie::FONT_USER:
+    case Valkyrie::FONT_SYSTEM: {
       QFont fnt; 
       fnt.fromString( itemList[Valkyrie::FONT_USER]->currValue() );
       qApp->setFont( fnt, true );
