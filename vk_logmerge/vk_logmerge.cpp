@@ -8,7 +8,6 @@
  */
 
 #include "vk_logmerge.h"
-#include "logfile.h"
 #include "vk_popt_option.h"
 #include "vk_option.h"
 #include "vk_utils.h"
@@ -19,12 +18,7 @@
 
 VKLogMerge::VKLogMerge( QObject* parent, const char* name )
   : QObject( parent, name )
-{
-  logStream.setEncoding( QTextStream::UnicodeUTF8 );
-  xmlParser = new XMLParser( this, true );
-  reader.setContentHandler( xmlParser );
-  reader.setErrorHandler( xmlParser );
-}
+{ }
 
 VKLogMerge::~VKLogMerge() { }
 
@@ -69,10 +63,18 @@ QString VKLogMerge::validateFile( QString& log_file )
 /* opens a logfile and feeds the contents to the parser. 
    the logfile's existence, perms and format have all been
    pre-validated, so no need to re-check. */
-bool VKLogMerge::parseLog( QString log_filename )
+bool VKLogMerge::parseLog( XMLParser* xmlParser,
+                           LogFile* vkLogFile,
+                           QXmlSimpleReader& reader,
+                           QString& log_filename )
 {
-  QFileInfo fi( log_filename );
-  fprintf(stderr, "Parsing %s\n", fi.fileName().latin1());
+  connect( xmlParser, SIGNAL(loadItem(XmlOutput *)), 
+           vkLogFile,   SLOT(loadItem(XmlOutput *)) );
+
+  QXmlInputSource source;
+
+  QString fname = QFileInfo( log_filename ).fileName();
+  fprintf(stderr, "Parsing %s\n", fname.latin1());
 
   QFile logFile( log_filename );
   logFile.open( IO_ReadOnly );
@@ -97,6 +99,10 @@ bool VKLogMerge::parseLog( QString log_filename )
     fprintf(stderr, "Parse Error: Parsing failed on line no %d: '%s'\n", 
 	    lineNumber, inputData.latin1() );
   }
+
+  /* disconnect the parser so it no longer communicates with the logfile */
+  disconnect( xmlParser, SIGNAL(loadItem(XmlOutput *)), 
+              vkLogFile,   SLOT(loadItem(XmlOutput *)) );
   return ok;
 }
 
@@ -151,73 +157,63 @@ bool VKLogMerge::mergeLogFiles( QString& log_list, QString& fname_out )
      'master'; duplicates are merged where found, and stuff like
      <errcounts> and <suppcounts> are incremented to reflect any
      merges.  the 'master' contains the final output */
-  LogFile* masterLogFile = new LogFile( logFileList[0] );
-  xmlParser->reset();
-  source.reset();
-  connect( xmlParser,     SIGNAL(loadItem(XmlOutput *)), 
-           masterLogFile, SLOT(loadItem(XmlOutput *)) );
+  LogFile masterLogFile( logFileList[0] );
 
-  fi.setFile( logFileList[0] );
-  QString master_fname = fi.fileName();
+  QString master_fname = QFileInfo( logFileList[0] ).fileName();
+
+  /* Note: Need separate XMLParser for masterLogFile,
+     since XMLParser::reset() will delete the object pointers */
+  XMLParser xmlParser_mastr( this, true );
+  xmlParser_mastr.reset();
+  QXmlSimpleReader reader_mastr;
+  reader_mastr.setContentHandler( &xmlParser_mastr );
+  reader_mastr.setErrorHandler( &xmlParser_mastr );
+
   /* parse the first xml_logfile into the master */
-  bool parse_ok = parseLog( logFileList[0] );
-
-  /* disconnect the master so it no longer communicates with the parser */
-  disconnect( xmlParser,     SIGNAL(loadItem(XmlOutput *)), 
-              masterLogFile, SLOT(loadItem(XmlOutput *)) );
+  bool parse_ok = parseLog( &xmlParser_mastr, &masterLogFile, 
+                            reader_mastr, logFileList[0] );
 
   if (!parse_ok) {   /* failed parse on master file: die */
     fprintf(stderr, "Failed merge.\n");
-    delete masterLogFile;
-    masterLogFile = 0;
     return false;
   }
 
   /* loop over the rest of the files in the list, and merge one-by-one */
   QString slave_fname;
-  LogFile* slaveLogFile;
   for ( unsigned int i=1; i<logFileList.count(); i++ ) {
 
-    /* reset everything */
-    fi.setFile( logFileList[i] );
-    slave_fname = fi.fileName();    
-    xmlParser->reset();
-    source.reset();
+    XMLParser xmlParser_slave( this, true );
+    xmlParser_slave.reset();
+    QXmlSimpleReader reader_slave;
+    reader_slave.setContentHandler( &xmlParser_slave );
+    reader_slave.setErrorHandler( &xmlParser_slave );
+
+    /* set filename */
+    slave_fname = QFileInfo( logFileList[i] ).fileName();
 
     /* create a new LogFile */
-    slaveLogFile = new LogFile( logFileList[i] );
-    connect( xmlParser,    SIGNAL(loadItem(XmlOutput *)), 
-             slaveLogFile, SLOT(loadItem(XmlOutput *)) );
+    LogFile slaveLogFile( logFileList[i] );
 
     /* parse the next file in the list into logFile */
-    parse_ok = parseLog( logFileList[i] );
-
-    /* disconnect the logFile from the parser */
-    disconnect( xmlParser,    SIGNAL(loadItem(XmlOutput *)), 
-                slaveLogFile, SLOT(loadItem(XmlOutput *)) );
+    parse_ok = parseLog( &xmlParser_slave, &slaveLogFile, 
+                         reader_slave, logFileList[i] );
 
     if (!parse_ok) {   /* failed merge on slave file: skip file */
       fprintf(stderr, "Skipping merge of slave file: %s\n", slave_fname.latin1());
-      delete slaveLogFile;
-      slaveLogFile = 0;
       continue;
     }
 
     /* tell user we are merging the slave into the master */
     fprintf(stderr, "Merging %s <- %s\n", master_fname.latin1(), slave_fname.latin1());
 
-    bool merge_ok = masterLogFile->merge( slaveLogFile );
-
-    /* delete the slave and free memory */
-    delete slaveLogFile;
-    slaveLogFile = 0;
+    bool merge_ok = masterLogFile.merge( &slaveLogFile );
 
     if (!merge_ok) {   /* failed merge on slave file: skipped file */
       fprintf(stderr, "Skipping merge of slave file: %s\n", slave_fname.latin1());
     }
   }
 
-  bool fileSaved = masterLogFile->save( fname_out );
+  bool fileSaved = masterLogFile.save( fname_out );
 
   fprintf(stderr, "Merge Complete\n");
   if ( fileSaved ) {
@@ -227,10 +223,6 @@ bool VKLogMerge::mergeLogFiles( QString& log_list, QString& fname_out )
   } else {
     fprintf(stderr, "Failed to save result\n");
   }
-
-  /* delete the master and free memory, and we're done */
-  delete masterLogFile;
-  masterLogFile = 0;
 
   return true;
 }

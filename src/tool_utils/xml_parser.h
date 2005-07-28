@@ -245,6 +245,10 @@ public:
   static bool xmlFormatCheck( int* err_val, QString fpath );
 
 signals:
+  /* Note: loadItem() emits XmlOutput*, but we cleanup ourselves,
+     on reset and deconstruction.
+     Objects using the pointers must not delete them, and must be 
+     careful not to reference any deleted pointers */
   void loadItem( XmlOutput * );
   void updateErrors( ErrCounts* );
   void updateStatus();

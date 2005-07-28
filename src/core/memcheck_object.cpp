@@ -472,7 +472,8 @@ bool Memcheck::runProcess( QStringList flags, int log_fd,
     setupProc( false );
     setupParser( false );
     setupFileStream( false );
-    vkError( this->view(), "Error", "<p>Process failed to start</p>" );
+    vkError( this->view(), "Error", "<p>Process failed to start: <br>%s</p>",
+                           flags.join(" ").latin1() );
     return false;
   }
 

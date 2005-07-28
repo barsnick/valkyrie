@@ -19,17 +19,9 @@
 /* class Logfile ------------------------------------------------------- */
 LogFile::~LogFile() 
 { 
-  if ( topStatus )  { delete topStatus;  topStatus  = 0; }
-  if ( preamble )   { delete preamble;   preamble   = 0; }
-  if ( info )       { delete info;       info       = 0; }
-  if ( errCounts )  { delete errCounts;  errCounts  = 0; }
-  if ( suppCounts ) { delete suppCounts; suppCounts = 0; }
-
-  errorList.setAutoDelete( true );
-  errorList.clear(); 
-
-  leakErrorList.setAutoDelete( true );
-  leakErrorList.clear();
+  /* Note: We don't delete our pointers!
+     We receive ptrs via ::loadItem(), but XMLParser remains the parent,
+     and cleans up after itself. */
 }
 
 
@@ -40,8 +32,6 @@ LogFile::LogFile( QString fname ) : QObject( 0, fname )
   info       = 0;
   errCounts  = 0;
   suppCounts = 0;
-
-  leakErrorList.setAutoDelete( true );
 }
 
 
@@ -232,8 +222,8 @@ bool LogFile::compareFrames( Frame* mFrame, Frame* sFrame )
      the master error list. */
 bool LogFile::merge( LogFile* slaveLog )
 {
-  /* list of slaveLog errors for deletion*/
-  QPtrList<Error> deleteList;
+  /* list of duplicate errors */
+  QPtrList<Error> dupErrList;
 
   /* check the same tool was used */
   if ( info->tool != slaveLog->info->tool ) {
@@ -295,7 +285,7 @@ bool LogFile::merge( LogFile* slaveLog )
          compare this slaveError with any more masterErrors, so skip
          to the next slaveError */
       if ( same == true ) {
-        deleteList.append( slaveError );
+        dupErrList.append( slaveError );
         break;
       }
 
@@ -303,13 +293,12 @@ bool LogFile::merge( LogFile* slaveLog )
   }      /* end of for slaveLog->errorList() */
 
   /* remove all the found duplicates from slaveLog->errorList, at the
-     same time incrementing masterLog->errorCounts w.r.t. the slaveLog
-     error-to-be-deleted.  
+     same time incrementing masterLog->errorCounts for that dup.
      also remove the relevant slaveLog->errorCounts pair from the
      slaveLog->errorCounts list. */
-  for ( Error* del_error = deleteList.first(); 
-        del_error; del_error = deleteList.next() ) {
-    int index = slaveLog->errorList.findRef( del_error );
+  for ( Error* dup_error = dupErrList.first(); 
+        dup_error; dup_error = dupErrList.next() ) {
+    int index = slaveLog->errorList.findRef( dup_error );
     if ( index == -1 ) 
       VK_DEBUG("Error: couldn't find error in slaveLog list");
     Error* sl_error = slaveLog->errorList.take( index );
@@ -324,12 +313,6 @@ bool LogFile::merge( LogFile* slaveLog )
       slaveLog->errCounts->remove( count, sl_error->unique );
     }
   }
-
-  /* having 'taken' (ie. removed but not deleted) all the duplicates
-     from the slaveLog error list, delete them now for real */
-  deleteList.setAutoDelete( true );
-  deleteList.clear();
-  deleteList.setAutoDelete( false );
 
   /* append whatever is left in slaveLog->errorList onto
      masterLog->errorList */
@@ -346,10 +329,6 @@ bool LogFile::merge( LogFile* slaveLog )
      merely increment the masterLog's 'count' value; otherwise, append
      the not-found 'pair' onto the masterLog's suppcounts list */
   suppCounts->updateList( slaveLog->suppCounts );
-
-  /* now remove all errors from the slaveLog errorList so they don't
-     get deleted twice when the slaveLog is deleted */
-  slaveLog->errorList.clear();
 
   /* last, but not least, update masterLog->leakErrorList
      w.r.t. slaveLog->leakErrorList */
@@ -406,7 +385,7 @@ bool LogFile::merge( LogFile* slaveLog )
   /* remove all the found duplicates from slaveLog->leakErrorList, at
      the same time updating 'what', and incrementing 'leakedBytes' and
      'leakedBlocks' in masterLog->leakErrorList w.r.t. the slaveLog
-     leakError-to-be-deleted (good grief, charlie brown ...) */
+     leakError-to-be-removed (good grief, charlie brown ...) */
   for ( unsigned int i=0; i<sl_leakList.count(); i++ ) {
 
     Error* rem_error = sl_leakList.at(i);
@@ -450,12 +429,6 @@ bool LogFile::merge( LogFile* slaveLog )
     }
     ms_error->what = ms_what.join( " " );
   }
-
-  /* clear the two lists - we are done.  don't bother deleting the
-     contents of the slave's leakErrorLists as this will be done when
-     the slaveLog itself is deleted. */
-  sl_leakList.clear();
-  ms_leakList.clear();
 
   return true;
 }
