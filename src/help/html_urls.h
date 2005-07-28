@@ -25,10 +25,11 @@ namespace urlValkyrie {
   extern const char* optionsMenu;
   extern const char* runButton;
   extern const char* stopButton;
+  extern const char* helpMenu;
   extern const char* statusMsg;
   extern const char* tviewButtons;
-  /* valkyrie's options page */
   extern const char* FlagsButton;
+  /* valkyrie's options page */
   extern const char* toolTips;
   extern const char* toolLabels;
   extern const char* userFont;
