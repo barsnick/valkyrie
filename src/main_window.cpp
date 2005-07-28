@@ -398,6 +398,8 @@ void MainWindow::mkMenuBar()
 
   QMenuBar* mainMenu = new QMenuBar( this, "main menubar" );
   mainMenu->setStyle( new QMotifStyle() );
+  ContextHelp::add( mainMenu, urlValkyrie::menuBar );
+
   int index = -1;
 
   /* file menu --------------------------------------------------------- */
@@ -433,16 +435,16 @@ void MainWindow::mkMenuBar()
 
   /* options / preferences et al --------------------------------------- */
   index++;
-  QPopupMenu* prefsMenu = new QPopupMenu( this, "prefs_menu" );
+  QPopupMenu* optsMenu = new QPopupMenu( this, "prefs_menu" );
   VkObjectList objList = vkConfig->vkObjList();
   for ( VkObject* obj = objList.first(); obj; obj = objList.next() ) {
-    prefsMenu->insertItem( obj->title(), this, 
+    optsMenu->insertItem( obj->title(), this, 
                            SLOT(showOptionsWindow(int)),
                            0, vkConfig->vkObjectId( obj ) );
   }
-  id = mainMenu->insertItem( "O&ptions", prefsMenu, -1, index );
+  id = mainMenu->insertItem( "O&ptions", optsMenu, -1, index );
   mainMenu->setAccel( ALT+Key_P, id );
-  ContextHelp::add( prefsMenu, urlValkyrie::optionsMenu );
+  ContextHelp::add( optsMenu, urlValkyrie::optionsMenu );
 
   /* spacer between popup menus and tool-buttons ----------------------- */
   index++;
@@ -540,6 +542,7 @@ void MainWindow::mkStatusBar()
   flagsLabel->setAlignment( AlignLeft );
   flagsLabel->setTextFormat( Qt::PlainText );
   flagsLabel->setText( vkConfig->rdEntry( "vg-exec", "valkyrie" ) );
+  ContextHelp::add( flagsLabel, urlValkyrie::flagsWidget );
   flagsLabel->hide();
 
 
@@ -571,7 +574,7 @@ void MainWindow::mkStatusBar()
   viewButtGroup->hide();
   connect( viewButtGroup, SIGNAL(clicked(int)), 
            this,          SLOT(showToolView(int)) );
-  ContextHelp::add( viewButtGroup, urlValkyrie::tviewButtons );
+  //RM: ContextHelp::add( viewButtGroup, urlValkyrie::tviewButtons );
 
   /* set the buttons to all be the same width */
   int butt_width = fontMetrics().width( "XMemcheckX" );
@@ -594,6 +597,7 @@ void MainWindow::mkStatusBar()
     tvButton->setFixedHeight( butt_height );
     viewButtGroup->insert( tvButton, vkConfig->vkObjectId( tool ) );
     bot_row->addWidget( tvButton );
+    ContextHelp::add( tvButton, urlValkyrie::toolMenu );
   }
   tools.clear();
 
@@ -608,6 +612,6 @@ void MainWindow::mkStatusBar()
   connect( flagsButton, SIGNAL( toggled(bool) ), 
            this,        SLOT( showFlagsWidget(bool) ) );
   QToolTip::add( flagsButton, "Show non-default flags for current tool" );
-  ContextHelp::add( flagsButton, urlValkyrie::flagsButton );
+  ContextHelp::add( flagsButton, urlValkyrie::flagsWidget );
 }
 

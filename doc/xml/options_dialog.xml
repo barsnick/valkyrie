@@ -6,9 +6,9 @@
 <title>Options Dialog</title>
 
 
-<para>The Options dialog has a separate "pane" for each Valgrind tool, 
-as well as for Valkyrie and Valgrind.  Any flag or option which can be 
-set on the command line for Valgrind or any Valgrind tool is available.</para>
+<para>The Options dialog has a separate "pane" for Valkyrie and Valgrind,
+as well as for each Valgrind tool.  Any flag or option which can be 
+set on the command line is available for modification via this dialog.</para>
 
 <para>On first-time startup, all options are set to their defaults.  
 If you subsequently change any of these, for example by giving the 
@@ -24,39 +24,40 @@ the <command>current</command> option page, not all of them.</para>
 
 
 
-<sect1 id="options_valkyrie" xreflabel="Valkyrie Options Page">
+<sect1 id="valkyrie" xreflabel="Valkyrie Options Page">
 <title>Valkyrie Options Page</title>
 
 <glosslist>
 
   <glossentry id="tool_tips">
-    <glossterm>Show tooltips:</glossterm>
+    <glossterm><command>Show tooltips:</command></glossterm>
     <glossdef><para>Whether tooltips should be shown when the mouse 
     pointer hovers over a widget.  Applied application-wide.</para>
     </glossdef>
   </glossentry>
 
   <glossentry id="tool_label">
-    <glossterm>Show toolbar text labels:</glossterm>
+    <glossterm><command>Show toolbar text labels:</command></glossterm>
     <glossdef><para>Whether text labels should be shown next to buttons.  
     Applied application-wide.</para></glossdef>
   </glossentry>
 
   <glossentry id="user_font">
-    <glossterm>Use default system font:</glossterm>
+    <glossterm><command>Use default system font:</command></glossterm>
     <glossdef><para>Whether Valkyrie should use your default window font 
     or not.  Clicking "Choose" will bring up a font dialog to allow you to 
     select an alternative font.  Applied application-wide.</para></glossdef>
   </glossentry>
 
   <glossentry id="palette">
-    <glossterm>Use valkyrie`s palette</glossterm>
+    <glossterm><command>Use valkyrie`s palette:</command></glossterm>
     <glossdef><para>Whether Valkyrie should use your default window palette 
     (aka "theme") or use her own.  Applied application-wide.</para></glossdef>
   </glossentry>
 
   <glossentry id="src_lines">
-    <glossterm>Extra lines shown above/below the target line:</glossterm>
+    <glossterm><command>Extra lines shown above/below the target 
+               line:</command></glossterm>
     <glossdef><para>Memcheck-specific.  This value specifies the number of 
     source code lines to be shown above and below the target source line when 
     displaying errors in Memcheck ToolView.  Note that changing this value 
@@ -64,7 +65,7 @@ the <command>current</command> option page, not all of them.</para>
   </glossentry>
 
   <glossentry id="src_editor">
-    <glossterm>Source editor</glossterm>
+    <glossterm><command>Source editor:</command></glossterm>
     <glossdef><para>Memcheck-specific.  Specify the 
     <computeroutput>/path/to/your/favourite/editor</computeroutput>.
     The editor is launched when a stack frame is double-clicked within 
@@ -72,7 +73,7 @@ the <command>current</command> option page, not all of them.</para>
   </glossentry>
 
   <glossentry id="binary">
-    <glossterm>Binary:</glossterm>
+    <glossterm><command>Binary:</command></glossterm>
     <glossdef><para>Change the name of the executable to run to 
     <emphasis>/path/to/your/executable</emphasis>.  If you started Valkyrie on 
     the command line with <computeroutput>valkyrie /path/to/exe</computeroutput> 
@@ -80,7 +81,7 @@ the <command>current</command> option page, not all of them.</para>
   </glossentry>
 
   <glossentry id="bin_flags">
-    <glossterm>Binary flags:</glossterm>
+    <glossterm><command>Binary flags:</command></glossterm>
     <glossdef><para>Change the flags relevant to your executable. If you 
     started Valkyrie on the command line with <computeroutput>valkyrie 
     /path/to/your/exe --your-flags</computeroutput> then 
@@ -88,14 +89,14 @@ the <command>current</command> option page, not all of them.</para>
   </glossentry>
 
   <glossentry id="valgrind_dir">
-    <glossterm>Valgrind:</glossterm>
+    <glossterm><command>Valgrind:</command></glossterm>
     <glossdef><para>This is the <emphasis>/path/to/valgrind</emphasis> which 
     you specified when you configured and built Valkyrie.  It is shown here 
     purely for information purposes.</para></glossdef>
   </glossentry>
 
   <glossentry id="supps_dir">
-    <glossterm>Supps Dir:</glossterm>
+    <glossterm><command>Supps Dir:</command></glossterm>
     <glossdef><para>This is the 
     <emphasis>/path/to/valgrind/suppressions/dir</emphasis> 
     which you specified when you configured and built Valkyrie.  It is 
@@ -122,66 +123,95 @@ suppressions.</para>
 click on the <xref linkend="context_help"/> toolbutton and then 
 click on the relevant widget.</para>
 
+
+<sect2 id="core_tab" xreflabel="Core Tab">
+<title>Core Tab</title>
+
 <glosslist>
 
-  <glossentry id="core_tab">
-  <glossterm>Core Tab</glossterm>
-  <glossdef>
-    <para><command>Verbosity level</command>: when generating XML output, 
-    the verbosity level is set to 1.  Also see the next paragraph.</para>
+  <glossentry id="verbosity">
+    <glossterm><command>Verbosity level:</command></glossterm>
+    <glossdef><para><command>Verbosity level</command>: when generating 
+      XML output, the verbosity level is set to 1.  Also see the next 
+      entry.</para>
+    </glossdef>
+  </glossentry>
 
-    <para><command>Output in xml format</command>: since Memcheck is currently 
-    the only tool supported by valkyrie, and therefore the flag 
-    <computeroutput>--xml=yes</computeroutput> is always sent to valgrind,
-    changing this flag is disabled.</para>
+  <glossentry id="xml_format">
+  <glossterm><command>Output in xml format:</command></glossterm>
+  <glossdef><para>Since Memcheck is currently the only tool supported by 
+    valkyrie, and therefore the flag <computeroutput>--xml=yes</computeroutput> 
+    is always sent to valgrind, changing this flag is disabled.</para>
   </glossdef>
   </glossentry>
 
-  <glossentry id="error_tab">
-  <glossterm>Error Reporting Tab</glossterm>
-  <glossdef>
-    <para><command>Print suppressions for errors</command>: currently, 
-    valgrind disables suppression generation when generating XML output, 
-    as that would require user input; therefore changing this flag is 
+  <glossentry id="track_fds">
+  <glossterm><command>Track open file descriptors:</command></glossterm>
+  <glossdef><para>As before, valgrind disables file descriptor leak
+    checking when generating xml output; therefore this flag is 
     disabled.</para>
-
-		<para><command>Limit the number of errors shown</command>: 
-    valgrind disables error limits when generating XML output; therefore
-    changing this flag is disabled.</para>
-
-    <para><command>Start debugger on error detection</command> and 
-    <command>Debugger</command>: valgrind disabled attached a debugger
-    when generating XML output; therefore changing these flags is 
-    disabled.</para>
-
   </glossdef>
   </glossentry>
 
-
-  <glossentry id="supps_tab">
-  <glossterm>Suppressions Tab</glossterm>
-
-  <glossdef><para>On first-time install, the bottom listbox contains 
-  Valgrind`s default suppression files.  The top listbox only contains 
-  one file "default.supp".</para>
-
-  <para>Right-clicking on either the top or bottom listbox will bring up a 
-  popup menu allowing you to modify the list of files.</para>
-
-  <para>Note: At the time of writing, Valgrind disallows the automatic 
-  generation of suppressions, ie. the flag 
-  <computeroutput>--gen-suppressions</computeroutput> is ignored.
-  You can read more about suppressions in the 
-  <ulink url="vg-html/manual-core.suppress.html">Valgrind Manual.</ulink>
-  </para></glossdef>
-
-  </glossentry>
 </glosslist>
 
-</sect1>
+</sect2>
 
-  
+
+<sect2 id="error_tab" xreflabel="Error Reporting Tab">
+<title>Error Reporting Tab</title>
+
+<glosslist>
+
+  <glossentry id="error_supps">
+  <glossterm><command>Print suppressions for errors:</command></glossterm>
+  <glossdef><para>Currently, valgrind disables suppression generation when 
+    generating XML output, as that would require user input; therefore 
+    changing this flag is disabled.</para>
+  </glossdef>
+  </glossentry>
+
+  <glossentry id="error_limit">
+  <glossterm><command>Limit the number of errors shown:</command></glossterm>
+  <glossdef><para>valgrind disables error limits when generating XML output; 
+    therefore changing this flag is disabled.</para>
+  </glossdef>
+  </glossentry>
+
+  <glossentry id="error_db">
+  <glossterm><command>Start debugger on error detection</command> and
+             <command>Debugger:</command></glossterm>
+  <glossdef><para>valgrind disables attaching a debugger when generating 
+    XML output; therefore changing these flags is disabled.</para>
+  </glossdef>
+  </glossentry>
+
+</glosslist>
+
+</sect2>
+
+
+<sect2 id="supps_tab" xreflabel="Suppressions Tab">
+<title>Suppressions Tab</title>
+
+<para>On first-time install, the bottom listbox contains valgrind`s default 
+suppression files.  The top listbox only contains one file "default.supp".</para>
+
+<para>Right-clicking on either the top or bottom listbox will bring up a 
+popup menu allowing you to modify the list of files.</para>
+
+<para>Note: At the time of writing, Valgrind disallows the automatic 
+generation of suppressions, ie. the flag 
+<computeroutput>--gen-suppressions</computeroutput> is ignored.  You can read 
+more about suppressions in the 
+<ulink url="vg-html/manual-core.suppress.html">Valgrind Manual.</ulink></para>
+
+</sect2>
+
+</sect1>  
  
+
+
 <sect1 id="tool-opts" xreflabel="Valgrind Tool Options Pages">
 <title>Valgrind Tool Options Pages</title>
 

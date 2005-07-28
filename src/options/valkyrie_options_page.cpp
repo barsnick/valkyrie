@@ -16,6 +16,8 @@
 #include "vk_utils.h"
 #include "main_window.h"
 #include "vk_messages.h"
+#include "context_help.h"
+#include "html_urls.h"
 
 
 ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
@@ -29,6 +31,7 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
 
   /* general prefs */
   QGroupBox* group1 = new QGroupBox( " Valkyrie Options ", this, "group1");
+  ContextHelp::add( group1, urlValkyrie::optsPage );
   vbox->addWidget( group1, space );
 
   /* vbox layout for group1; margin = 10; spacing = 25 */

@@ -20,6 +20,7 @@ extern const char* urlNone;
 /* Valkyrie ------------------------------------------------------------ */
 namespace urlValkyrie { 
   /* Mainwindow */
+  extern const char* menuBar;
   extern const char* fileMenu;
   extern const char* toolMenu;
   extern const char* optionsMenu;
@@ -27,9 +28,9 @@ namespace urlValkyrie {
   extern const char* stopButton;
   extern const char* helpMenu;
   extern const char* statusMsg;
-  extern const char* tviewButtons;
-  extern const char* flagsButton;
+  extern const char* flagsWidget;
   /* valkyrie's options page */
+  extern const char* optsPage;
   extern const char* toolTips;
   extern const char* toolLabels;
   extern const char* userFont;

@@ -2,14 +2,13 @@ Installing Valkyrie Version 0.9.0  (25 July 2005)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Before you build valkyrie, you must run the 'configure' script to set
-platform information, paths and other settings.  You can use the
---platform option to specify the operating system and compiler you are
-using.  Note that valkyrie uses the Qt mkspecs/ files to do this, so 
-you need to ensure this directory is available [/usr/lib/qt3/mkspecs/].
+platform information, paths and other settings.  
+Note that valkyrie uses the Qt mkspecs/ files to do this, so you need 
+to ensure this directory is available eg. /usr/lib/qt3/mkspecs/.
 
 Example:
 
-  ./configure --shared --thread=yes --qt-dir=/usr/lib/qt3 --vg-exec=/path/to/valgrind/bin/valgrind --vg-supp=/path/to/valgrind/lib/valgrind/
+  ./configure --qt-dir=$QTDIR --vg-dir=/path/to/valgrind/tree
 
 
 
@@ -23,11 +22,11 @@ choose to install Valkyrie.
 
 1. Unpack the archive if you have not done so already:
 
-     cd /usr/local
+     cd /path/to/install/to
      bzip2 -d valkyrie-X.X.X.tar.bz2  # uncompress the archive
      tar xvf valkyrie-X.X.X.tar       # unpack it
 
-   This creates the directory /usr/local/valkyrie-X.X.X containing 
+   This creates the directory /install/path/valkyrie-X.X.X containing 
    the files from the archive.
 
 
@@ -38,7 +37,7 @@ choose to install Valkyrie.
      ln -s valkyrie-X.X.X valkyrie
 
    The rest of this file assumes that Valkyrie is installed in
-   /usr/local/valkyrie.
+   /install/path/valkyrie.
 
 
 3. Configuring:
@@ -67,8 +66,8 @@ choose to install Valkyrie.
    you've set. (See ./configure -h for more information). 
 
 
-4. The documentation is installed in /usr/local/valkyrie/doc/html/.
-   The main page is /usr/local/valkyrie/doc/html/index.html
+4. The documentation is installed in /path/to/valkyrie/doc/
+   The main page is /path/to/valkyrie/doc/index.html
 
 
 That's all.  Valkyrie is now installed.  See if it works.  

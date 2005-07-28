@@ -20,27 +20,28 @@ const char* urlNone  = "";
 namespace urlValkyrie { 
 
   /* Mainwindow */
+  const char* menuBar      = "mainwindow.html#menu_bar";
   const char* fileMenu     = "mainwindow.html#file_menu";
   const char* toolMenu     = "mainwindow.html#tools_menu";
   const char* optionsMenu  = "mainwindow.html#options_menu";
   const char* runButton    = "mainwindow.html#run_button";
   const char* stopButton   = "mainwindow.html#stop_button";
   const char* helpMenu     = "mainwindow.html#help_menu";
-  const char* statusMsg    = "mainwindow.html#status_msg";
-  const char* tviewButtons = "mainwindow.html#tview_buttons";
-  const char* flagsButton  = "mainwindow.html#flags_widget";
+  const char* statusMsg    = "mainwindow.status_msg.html";
+  const char* flagsWidget  = "mainwindow.flags_widget.html";
 
   /* valkyrie's options page */
-  const char* toolTips     = "options_valkyrie.html#tool_tips";
-  const char* toolLabels   = "options_valkyrie.html#tool_label";
-  const char* userFont     = "options_valkyrie.html#user_font";
-  const char* palette      = "options_valkyrie.html#palette";
-  const char* srcLines     = "options_valkyrie.html#src_lines";
-  const char* srcEditor    = "options_valkyrie.html#src_editor";
-  const char* binary       = "options_valkyrie.html#binary";
-  const char* binFlags     = "options_valkyrie.html#bin_flags";
-  const char* vgDir        = "options_valkyrie.html#valgrind_dir";
-  const char* suppDir      = "options_valkyrie.html#supps_dir";
+  const char* optsPage     = "options_dialog.html#valkyrie";
+  const char* toolTips     = "options_dialog.html#tool_tips";
+  const char* toolLabels   = "options_dialog.html#tool_label";
+  const char* userFont     = "options_dialog.html#user_font";
+  const char* palette      = "options_dialog.html#palette";
+  const char* srcLines     = "options_dialog.html#src_lines";
+  const char* srcEditor    = "options_dialog.html#src_editor";
+  const char* binary       = "options_dialog.html#binary";
+  const char* binFlags     = "options_dialog.html#bin_flags";
+  const char* vgDir        = "options_dialog.html#valgrind_dir";
+  const char* suppDir      = "options_dialog.html#supps_dir";
 
   /* valgrind`s options page: tab Suppressions */
   const char* coreTab  = "options_valgrind.html#core_tab";

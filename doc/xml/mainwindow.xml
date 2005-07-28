@@ -9,7 +9,7 @@
 which are below.</para>
 
 
-<sect1 id="menubar" xreflabel="The MenuBar">
+<sect1 id="menu_bar" xreflabel="The MenuBar">
 <title>The MenuBar</title>
 
 
@@ -125,9 +125,9 @@ which are below.</para>
     at the relevant page, providing instant help without having to trawl 
     through the manual.</para>
     <para>A useful feature is the context help which is available for the 
-    "Options" dialog box.  Clicking on any widget in the Options dialog 
-    will show you the relevant section of either Valgrind's or Valkyrie's 
-    manual.</para>
+    <xref linkend="options_dialog"/> box.  Clicking on any widget in the 
+    Options dialog will show you the relevant section of either Valgrind's 
+    or Valkyrie's manual.</para>
   </listitem>
 </itemizedlist>
 
@@ -145,7 +145,7 @@ which are below.</para>
 <para>There is no default toolbar; therefore, if no ToolView is 
 loaded, no toolbar will be visible.</para>
 
-<para>Clicking on a "ToolView" button will load the relevant ToolView,
+<para>Clicking on a ToolView button will load the relevant ToolView,
 and its toolbar will then appear.  See the appropriate tool`s section of 
 the manual for information on its toolbars.</para>
 
