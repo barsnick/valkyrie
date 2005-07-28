@@ -52,9 +52,9 @@ Example:
   machine for the same binary (with eg. different input data)
 
   Invoking valkyrie like this:
-    valkyrie --gui=no --merge=<loglist-file>
+    valkyrie --merge=<log-file-list>
 
-  (where <loglist-file> is a file containing a list of logfiles, 
+  where <log-file-list> is a file containing a list of xml logfiles, 
   each on a separate line)
 
   valkyrie will:
@@ -63,11 +63,11 @@ Example:
     - save the single merged logfile to disk in xml format
 
   If you invoke valkyrie like this:
-    valkyrie --merge=<loglist-file>  
+    valkyrie --merge=<log-file-list>  
 
   Then the merged result will be auto-saved, and displayed in the GUI.
 
 
 
-Any problems encountered with valkyrie should be reported to
+Please report any problems encountered with valkyrie to
 <info@open-works.co.uk>
