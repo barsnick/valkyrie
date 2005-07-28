@@ -467,6 +467,8 @@ bool Memcheck::runProcess( QStringList flags, int log_fd,
   proc->setArguments( flags );
 
   if ( ! proc->start() ) {
+    emitRunning( false );
+    fileSaved = true;
     setupProc( false );
     setupParser( false );
     setupFileStream( false );
