@@ -1,0 +1,115 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>3.2. Valgrind Options Page</title>
+<link rel="stylesheet" href="valkyrie.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
+<link rel="home" href="index.html" title="Valkyrie Documentation">
+<link rel="up" href="options_dialog.html" title="3. Options Dialog">
+<link rel="previous" href="options_dialog.html" title="3. Options Dialog">
+<link rel="next" href="tool-opts.html" title="3.3. Valgrind Tool Options Pages">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="options_dialog.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="25px" align="center" valign="middle"><a accesskey="u" href="options_dialog.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
+<td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
+<th align="center" valign="middle">3. Options Dialog</th>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="tool-opts.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+</tr></table></div>
+<div class="sect1" lang="en">
+<div class="titlepage">
+<div><div><h2 class="title" style="clear: both">
+<a name="options_valgrind"></a>3.2. Valgrind Options Page</h2></div></div>
+<div></div>
+</div>
+<p>Valgrind`s options page has been divided into three areas which 
+reflect the split between Core options, Error Reporting options, and 
+suppressions.</p>
+<p>To access valgrind`s manual for help on any of these options, 
+click on the <a href="mainwindow.html#context_help">Context Help</a> toolbutton and then 
+click on the relevant widget.</p>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="core_tab"></a>3.2.1. Core Tab</h3></div></div>
+<div></div>
+</div>
+<div class="glosslist"><dl>
+<dt>
+<a name="verbosity"></a><span><b class="command">Verbosity level:</b></span>
+</dt>
+<dd><p><span><b class="command">Verbosity level</b></span>: when generating 
+      XML output, the verbosity level is set to 1.  Also see the next 
+      entry.</p></dd>
+<dt>
+<a name="xml_format"></a><span><b class="command">Output in xml format:</b></span>
+</dt>
+<dd><p>Since Memcheck is currently the only tool supported by 
+    valkyrie, and therefore the flag <tt class="computeroutput">--xml=yes</tt> 
+    is always sent to valgrind, changing this flag is disabled.</p></dd>
+<dt>
+<a name="track_fds"></a><span><b class="command">Track open file descriptors:</b></span>
+</dt>
+<dd><p>As before, valgrind disables file descriptor leak
+    checking when generating xml output; therefore this flag is 
+    disabled.</p></dd>
+</dl></div>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="error_tab"></a>3.2.2. Error Reporting Tab</h3></div></div>
+<div></div>
+</div>
+<div class="glosslist"><dl>
+<dt>
+<a name="error_supps"></a><span><b class="command">Print suppressions for errors:</b></span>
+</dt>
+<dd><p>Currently, valgrind disables suppression generation when 
+    generating XML output, as that would require user input; therefore 
+    changing this flag is disabled.</p></dd>
+<dt>
+<a name="error_limit"></a><span><b class="command">Limit the number of errors shown:</b></span>
+</dt>
+<dd><p>valgrind disables error limits when generating XML output; 
+    therefore changing this flag is disabled.</p></dd>
+<dt>
+<a name="error_db"></a><span><b class="command">Start debugger on error detection</b></span> and
+             <span><b class="command">Debugger:</b></span>
+</dt>
+<dd><p>valgrind disables attaching a debugger when generating 
+    XML output; therefore changing these flags is disabled.</p></dd>
+</dl></div>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage">
+<div><div><h3 class="title">
+<a name="supps_tab"></a>3.2.3. Suppressions Tab</h3></div></div>
+<div></div>
+</div>
+<p>On first-time install, the bottom listbox contains valgrind`s default 
+suppression files.  The top listbox only contains one file "default.supp".</p>
+<p>Right-clicking on either the top or bottom listbox will bring up a 
+popup menu allowing you to modify the list of files.</p>
+<p>Note: At the time of writing, Valgrind disallows the automatic 
+generation of suppressions, ie. the flag 
+<tt class="computeroutput">--gen-suppressions</tt> is ignored.  You can read 
+more about suppressions in the 
+<a href="vg-html/manual-core.suppress.html" target="_top">Valgrind Manual.</a></p>
+</div>
+</div>
+<div>
+<br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
+<tr>
+<td rowspan="2" width="40%" align="left">
+<a accesskey="p" href="options_dialog.html">&lt;&lt; 3. Options Dialog</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="options_dialog.html">Up</a></td>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="tool-opts.html">3.3. Valgrind Tool Options Pages &gt;&gt;</a>
+</td>
+</tr>
+<tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>
+</table>
+</div>
+</body>
+</html>
