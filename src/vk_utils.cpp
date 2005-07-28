@@ -65,12 +65,12 @@ void vk_assert_never_reached_fail( const char* file,
 }
 
 
-/* prints a debugging message with file+line info to stdout ------------ */
+/* prints a debugging message with file+line info to stderr ------------ */
 void vk_print( const char* file, const char* fn, unsigned int line, 
                const char* prefix, const char* msg, ... )
 {
 #if DEBUG_ON
-  fprintf( stdout, "\n%s: %s : %s #%d:\n\t", prefix, file, fn, line );
+  fprintf( stderr, "\n%s: %s : %s #%d:\n\t", prefix, file, fn, line );
   va_list ap;
   va_start( ap, msg );
   vfprintf( stdout, msg, ap );
