@@ -156,9 +156,18 @@ int main ( int argc, char* argv[] )
   vkWin->move( vkConfig->rdInt("x-pos", "MainWin"),
                vkConfig->rdInt("y-pos", "MainWin") );
   vkWin->show();
-  /* start up with the tool currently set in vkConfig (either the
-     default, the last-used, or whatever was set on the cmd-line) */
-  vkWin->showToolView( vkConfig->toolId() );
+
+  if ( valkyrie->runmode() == Valkyrie::modeParseLog ||
+       valkyrie->runmode() == Valkyrie::modeMergeLogs ) {
+    /* these modes currently only makes sense for memcheck,
+       so override the default/given tool */
+    int mc_id = vkConfig->vkObjectId( vkConfig->vkObject( "memcheck" ) );
+    vkWin->showToolView( mc_id );
+  } else {
+    /* start up with the tool currently set in vkConfig (either the
+       default, the last-used, or whatever was set on the cmd-line) */
+    vkWin->showToolView( vkConfig->toolId() );
+  }
   qApp->processEvents();
 
   /* start a run if specified on the cmd-line */
