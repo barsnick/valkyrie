@@ -1,6 +1,6 @@
 /* --------------------------------------------------------------------- 
- * Implementation of class LogFile                           logfile.cpp
- * Small class to parse an xml logfile into data structures,
+ * Implementation of class VGLog                               vglog.cpp
+ * Small class to parse a valgrind xml logfile into data structures,
  * nuke duplicates, and print the results to stdout or to file.
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind
@@ -10,14 +10,14 @@
  */
 
 
-#include "logfile.h"
+#include "vglog.h"
 #include "vk_utils.h"
 
 #include <qfileinfo.h>
 
 
-/* class Logfile ------------------------------------------------------- */
-LogFile::~LogFile() 
+/* class VGLog --------------------------------------------------------- */
+VGLog::~VGLog() 
 { 
   /* Note: We don't delete our pointers!
      We receive ptrs via ::loadItem(), but XMLParser remains the parent,
@@ -25,7 +25,7 @@ LogFile::~LogFile()
 }
 
 
-LogFile::LogFile( QString fname ) : QObject( 0, fname )
+VGLog::VGLog( QString fname ) : QObject( 0, fname )
 { 
   topStatus  = 0;
   preamble   = 0;
@@ -35,7 +35,7 @@ LogFile::LogFile( QString fname ) : QObject( 0, fname )
 }
 
 
-void LogFile::loadItem(XmlOutput* output ) 
+void VGLog::loadItem(XmlOutput* output ) 
 { 
   vk_assert( output );
 
@@ -73,7 +73,7 @@ void LogFile::loadItem(XmlOutput* output )
 
 
 
-bool LogFile::save( QString fname )
+bool VGLog::save( QString fname )
 {
   QFile outFile;
   if (!fname.isEmpty()) {
@@ -174,7 +174,7 @@ bool LogFile::save( QString fname )
 }
 
 
-bool LogFile::compareFrames( Frame* mFrame, Frame* sFrame )
+bool VGLog::compareFrames( Frame* mFrame, Frame* sFrame )
 {
   bool same;
 
@@ -220,7 +220,7 @@ bool LogFile::compareFrames( Frame* mFrame, Frame* sFrame )
      discarded from the slave's error list.
    - finally, we append whatever is left in the slave error list onto
      the master error list. */
-bool LogFile::merge( LogFile* slaveLog )
+bool VGLog::merge( VGLog* slaveLog )
 {
   /* list of duplicate errors */
   QPtrList<Error> dupErrList;

@@ -1,6 +1,6 @@
 /* --------------------------------------------------------------------- 
- * Definition of class LogFile                                 logfile.h
- * Small class to parse an xml logfile into data structures,
+ * Definition of class VGLog                                     vglog.h
+ * Small class to parse a valgrind xml logfile into data structures,
  * nuke duplicates, and print the results to stdout or to file.
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind
@@ -9,8 +9,8 @@
  * See the file LICENSE.GPL for the full license details.
  */
 
-#ifndef __VK_LOGFILE_H
-#define __VK_LOGFILE_H
+#ifndef __VK_VGLOG_H
+#define __VK_VGLOG_H
 
 
 #include <qstringlist.h>
@@ -19,16 +19,16 @@
 #include "xml_parser.h"
 
 
-/* definition of class LogFile ----------------------------------------- */
-class LogFile : public QObject
+/* definition of class VGLog ----------------------------------------- */
+class VGLog : public QObject
 {
   Q_OBJECT
 public:
-  LogFile( QString fname );
-  ~LogFile();
+  VGLog( QString fname );
+  ~VGLog();
 
   bool save( QString fname );
-  bool merge( LogFile* slaveLog );
+  bool merge( VGLog* slaveLog );
 
 public slots:
   void loadItem( XmlOutput * );

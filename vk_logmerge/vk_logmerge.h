@@ -10,7 +10,7 @@
 #ifndef __VK_LOGMERGE_OBJECT_H
 #define __VK_LOGMERGE_OBJECT_H
 
-#include "logfile.h"
+#include "vglog.h"
 #include "xml_parser.h"
 
 /* class VKLogMerge ------------------------------------------------------ */
@@ -24,8 +24,8 @@ public:
   bool mergeLogFiles( QString& log_list, QString& fname_out );
 
 private:
-  bool parseLog( XMLParser* xmlParser, LogFile* vkLogFile,
-                 QXmlSimpleReader& reader, QString& logfile );
+  bool parseLog( XMLParser* xmlParser, VGLog* vgLog,
+                 QXmlSimpleReader& reader, QString& log_fname );
   QString validateFile( QString& log_file );
 };
 
