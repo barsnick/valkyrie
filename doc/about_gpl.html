@@ -1,0 +1,437 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ASCII">
+<title>The GNU General Public License</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
+<style type="text/css" media="screen">/* valkyrie colours:
+   #0f5499  dark blue       h1, h2, h3, h4
+   #336699  medium blue     links
+   #339999  turquoise       link hover colour
+   #202020  almost black    general text
+   #761596  purple          md5sum text
+   #626262  dark gray       pre border
+   #eeeeee  very light gray pre background
+   #f2f2f9  very light blue nav table background
+   #3366cc  medium blue     nav table border
+*/
+
+/* default link colours */
+a, a:link, a:visited, a:active { color: #336699; }
+a:hover { color: #339999; }
+
+body { font: 80%/126% sans-serif; }
+h1, h2, h3, h4 { color: #0f5499; }
+
+dt { color: #336699; font-weight: bold }
+dd { 
+ margin-left: 1.5em; 
+ padding-bottom: 0.8em;
+}
+
+/* -- ruler -- */
+div.hr_blue { 
+  height:  3px; 
+  background:#ffffff url("images/hr_blue.png") repeat-x; }
+div.hr_blue hr { display:none; }
+
+/* release styles */
+#release p { margin-top: 0.4em; }
+#release .md5sum { color: #761596; }
+
+
+/* ------ styles for manual ------ */
+
+/* -- lists -- */
+ul  { 
+ margin:     0px 4px 16px 16px;
+ padding:    0px;
+ list-style: url("images/li-blue.png"); 
+}
+ul li { 
+ margin-bottom: 10px;
+}
+ul ul { 
+ list-style-type:  none; 
+ list-style-image: none; 
+ margin-left:      0px; 
+}
+
+/* header / footer nav tables */
+table.nav {
+ color:      #0f5499;
+ border:     solid 1px #3366cc;
+ background:       #f2f2f9;
+ background-color: #f2f2f9;
+ margin-bottom:    0.5em;
+}
+
+/* don't have underlined links in chunked nav menus */
+table.nav a { text-decoration: none; }
+table.nav a:hover { text-decoration: underline; }
+table.nav td { font-size: 85%; }
+
+code, tt, pre { font-size: 120%; }
+code, tt { color: #761596; }
+
+pre.programlisting, pre.screen {
+ color:      #000000;
+ padding:    0.5em;
+ background: #eeeeee;
+ border:     1px solid #626262;
+ background-color: #eeeeee;
+ margin: 4px 0px 4px 0px; 
+}
+</style>
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article" lang="en">
+<div class="titlepage">
+<div><div><h1 class="title">
+<a name="id4626398"></a>The GNU General Public License</h1></div></div>
+<div></div>
+<hr>
+</div>
+<div class="literallayout"><p><br>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;GNU&#160;GENERAL&#160;PUBLIC&#160;LICENSE<br>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Version&#160;2,&#160;June&#160;1991<br>
+<br>
+&#160;Copyright&#160;(C)&#160;1989,&#160;1991&#160;Free&#160;Software&#160;Foundation,&#160;Inc.<br>
+&#160;&#160;&#160;&#160;&#160;59&#160;Temple&#160;Place,&#160;Suite&#160;330,&#160;Boston,&#160;MA&#160;&#160;02111-1307&#160;&#160;USA<br>
+&#160;Everyone&#160;is&#160;permitted&#160;to&#160;copy&#160;and&#160;distribute&#160;verbatim&#160;copies<br>
+&#160;of&#160;this&#160;license&#160;document,&#160;but&#160;changing&#160;it&#160;is&#160;not&#160;allowed.<br>
+<br>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Preamble<br>
+<br>
+&#160;&#160;The&#160;licenses&#160;for&#160;most&#160;software&#160;are&#160;designed&#160;to&#160;take&#160;away&#160;your<br>
+freedom&#160;to&#160;share&#160;and&#160;change&#160;it.&#160;&#160;By&#160;contrast,&#160;the&#160;GNU&#160;General&#160;Public<br>
+License&#160;is&#160;intended&#160;to&#160;guarantee&#160;your&#160;freedom&#160;to&#160;share&#160;and&#160;change&#160;free<br>
+software--to&#160;make&#160;sure&#160;the&#160;software&#160;is&#160;free&#160;for&#160;all&#160;its&#160;users.&#160;&#160;This<br>
+General&#160;Public&#160;License&#160;applies&#160;to&#160;most&#160;of&#160;the&#160;Free&#160;Software<br>
+Foundation's&#160;software&#160;and&#160;to&#160;any&#160;other&#160;program&#160;whose&#160;authors&#160;commit&#160;to<br>
+using&#160;it.&#160;&#160;(Some&#160;other&#160;Free&#160;Software&#160;Foundation&#160;software&#160;is&#160;covered&#160;by<br>
+the&#160;GNU&#160;Library&#160;General&#160;Public&#160;License&#160;instead.)&#160;&#160;You&#160;can&#160;apply&#160;it&#160;to<br>
+your&#160;programs,&#160;too.<br>
+<br>
+&#160;&#160;When&#160;we&#160;speak&#160;of&#160;free&#160;software,&#160;we&#160;are&#160;referring&#160;to&#160;freedom,&#160;not<br>
+price.&#160;&#160;Our&#160;General&#160;Public&#160;Licenses&#160;are&#160;designed&#160;to&#160;make&#160;sure&#160;that&#160;you<br>
+have&#160;the&#160;freedom&#160;to&#160;distribute&#160;copies&#160;of&#160;free&#160;software&#160;(and&#160;charge&#160;for<br>
+this&#160;service&#160;if&#160;you&#160;wish),&#160;that&#160;you&#160;receive&#160;source&#160;code&#160;or&#160;can&#160;get&#160;it<br>
+if&#160;you&#160;want&#160;it,&#160;that&#160;you&#160;can&#160;change&#160;the&#160;software&#160;or&#160;use&#160;pieces&#160;of&#160;it<br>
+in&#160;new&#160;free&#160;programs;&#160;and&#160;that&#160;you&#160;know&#160;you&#160;can&#160;do&#160;these&#160;things.<br>
+<br>
+&#160;&#160;To&#160;protect&#160;your&#160;rights,&#160;we&#160;need&#160;to&#160;make&#160;restrictions&#160;that&#160;forbid<br>
+anyone&#160;to&#160;deny&#160;you&#160;these&#160;rights&#160;or&#160;to&#160;ask&#160;you&#160;to&#160;surrender&#160;the&#160;rights.<br>
+These&#160;restrictions&#160;translate&#160;to&#160;certain&#160;responsibilities&#160;for&#160;you&#160;if&#160;you<br>
+distribute&#160;copies&#160;of&#160;the&#160;software,&#160;or&#160;if&#160;you&#160;modify&#160;it.<br>
+<br>
+&#160;&#160;For&#160;example,&#160;if&#160;you&#160;distribute&#160;copies&#160;of&#160;such&#160;a&#160;program,&#160;whether<br>
+gratis&#160;or&#160;for&#160;a&#160;fee,&#160;you&#160;must&#160;give&#160;the&#160;recipients&#160;all&#160;the&#160;rights&#160;that<br>
+you&#160;have.&#160;&#160;You&#160;must&#160;make&#160;sure&#160;that&#160;they,&#160;too,&#160;receive&#160;or&#160;can&#160;get&#160;the<br>
+source&#160;code.&#160;&#160;And&#160;you&#160;must&#160;show&#160;them&#160;these&#160;terms&#160;so&#160;they&#160;know&#160;their<br>
+rights.<br>
+<br>
+&#160;&#160;We&#160;protect&#160;your&#160;rights&#160;with&#160;two&#160;steps:&#160;(1)&#160;copyright&#160;the&#160;software,&#160;and<br>
+(2)&#160;offer&#160;you&#160;this&#160;license&#160;which&#160;gives&#160;you&#160;legal&#160;permission&#160;to&#160;copy,<br>
+distribute&#160;and/or&#160;modify&#160;the&#160;software.<br>
+<br>
+&#160;&#160;Also,&#160;for&#160;each&#160;author's&#160;protection&#160;and&#160;ours,&#160;we&#160;want&#160;to&#160;make&#160;certain<br>
+that&#160;everyone&#160;understands&#160;that&#160;there&#160;is&#160;no&#160;warranty&#160;for&#160;this&#160;free<br>
+software.&#160;&#160;If&#160;the&#160;software&#160;is&#160;modified&#160;by&#160;someone&#160;else&#160;and&#160;passed&#160;on,&#160;we<br>
+want&#160;its&#160;recipients&#160;to&#160;know&#160;that&#160;what&#160;they&#160;have&#160;is&#160;not&#160;the&#160;original,&#160;so<br>
+that&#160;any&#160;problems&#160;introduced&#160;by&#160;others&#160;will&#160;not&#160;reflect&#160;on&#160;the&#160;original<br>
+authors'&#160;reputations.<br>
+<br>
+&#160;&#160;Finally,&#160;any&#160;free&#160;program&#160;is&#160;threatened&#160;constantly&#160;by&#160;software<br>
+patents.&#160;&#160;We&#160;wish&#160;to&#160;avoid&#160;the&#160;danger&#160;that&#160;redistributors&#160;of&#160;a&#160;free<br>
+program&#160;will&#160;individually&#160;obtain&#160;patent&#160;licenses,&#160;in&#160;effect&#160;making&#160;the<br>
+program&#160;proprietary.&#160;&#160;To&#160;prevent&#160;this,&#160;we&#160;have&#160;made&#160;it&#160;clear&#160;that&#160;any<br>
+patent&#160;must&#160;be&#160;licensed&#160;for&#160;everyone's&#160;free&#160;use&#160;or&#160;not&#160;licensed&#160;at&#160;all.<br>
+<br>
+&#160;&#160;The&#160;precise&#160;terms&#160;and&#160;conditions&#160;for&#160;copying,&#160;distribution&#160;and<br>
+modification&#160;follow.<br>
+<br>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;GNU&#160;GENERAL&#160;PUBLIC&#160;LICENSE<br>
+&#160;&#160;&#160;TERMS&#160;AND&#160;CONDITIONS&#160;FOR&#160;COPYING,&#160;DISTRIBUTION&#160;AND&#160;MODIFICATION<br>
+<br>
+&#160;&#160;0.&#160;This&#160;License&#160;applies&#160;to&#160;any&#160;program&#160;or&#160;other&#160;work&#160;which&#160;contains<br>
+a&#160;notice&#160;placed&#160;by&#160;the&#160;copyright&#160;holder&#160;saying&#160;it&#160;may&#160;be&#160;distributed<br>
+under&#160;the&#160;terms&#160;of&#160;this&#160;General&#160;Public&#160;License.&#160;&#160;The&#160;"Program",&#160;below,<br>
+refers&#160;to&#160;any&#160;such&#160;program&#160;or&#160;work,&#160;and&#160;a&#160;"work&#160;based&#160;on&#160;the&#160;Program"<br>
+means&#160;either&#160;the&#160;Program&#160;or&#160;any&#160;derivative&#160;work&#160;under&#160;copyright&#160;law:<br>
+that&#160;is&#160;to&#160;say,&#160;a&#160;work&#160;containing&#160;the&#160;Program&#160;or&#160;a&#160;portion&#160;of&#160;it,<br>
+either&#160;verbatim&#160;or&#160;with&#160;modifications&#160;and/or&#160;translated&#160;into&#160;another<br>
+language.&#160;&#160;(Hereinafter,&#160;translation&#160;is&#160;included&#160;without&#160;limitation&#160;in<br>
+the&#160;term&#160;"modification".)&#160;&#160;Each&#160;licensee&#160;is&#160;addressed&#160;as&#160;"you".<br>
+<br>
+Activities&#160;other&#160;than&#160;copying,&#160;distribution&#160;and&#160;modification&#160;are&#160;not<br>
+covered&#160;by&#160;this&#160;License;&#160;they&#160;are&#160;outside&#160;its&#160;scope.&#160;&#160;The&#160;act&#160;of<br>
+running&#160;the&#160;Program&#160;is&#160;not&#160;restricted,&#160;and&#160;the&#160;output&#160;from&#160;the&#160;Program<br>
+is&#160;covered&#160;only&#160;if&#160;its&#160;contents&#160;constitute&#160;a&#160;work&#160;based&#160;on&#160;the<br>
+Program&#160;(independent&#160;of&#160;having&#160;been&#160;made&#160;by&#160;running&#160;the&#160;Program).<br>
+Whether&#160;that&#160;is&#160;true&#160;depends&#160;on&#160;what&#160;the&#160;Program&#160;does.<br>
+<br>
+&#160;&#160;1.&#160;You&#160;may&#160;copy&#160;and&#160;distribute&#160;verbatim&#160;copies&#160;of&#160;the&#160;Program's<br>
+source&#160;code&#160;as&#160;you&#160;receive&#160;it,&#160;in&#160;any&#160;medium,&#160;provided&#160;that&#160;you<br>
+conspicuously&#160;and&#160;appropriately&#160;publish&#160;on&#160;each&#160;copy&#160;an&#160;appropriate<br>
+copyright&#160;notice&#160;and&#160;disclaimer&#160;of&#160;warranty;&#160;keep&#160;intact&#160;all&#160;the<br>
+notices&#160;that&#160;refer&#160;to&#160;this&#160;License&#160;and&#160;to&#160;the&#160;absence&#160;of&#160;any&#160;warranty;<br>
+and&#160;give&#160;any&#160;other&#160;recipients&#160;of&#160;the&#160;Program&#160;a&#160;copy&#160;of&#160;this&#160;License<br>
+along&#160;with&#160;the&#160;Program.<br>
+<br>
+You&#160;may&#160;charge&#160;a&#160;fee&#160;for&#160;the&#160;physical&#160;act&#160;of&#160;transferring&#160;a&#160;copy,&#160;and<br>
+you&#160;may&#160;at&#160;your&#160;option&#160;offer&#160;warranty&#160;protection&#160;in&#160;exchange&#160;for&#160;a&#160;fee.<br>
+<br>
+&#160;&#160;2.&#160;You&#160;may&#160;modify&#160;your&#160;copy&#160;or&#160;copies&#160;of&#160;the&#160;Program&#160;or&#160;any&#160;portion<br>
+of&#160;it,&#160;thus&#160;forming&#160;a&#160;work&#160;based&#160;on&#160;the&#160;Program,&#160;and&#160;copy&#160;and<br>
+distribute&#160;such&#160;modifications&#160;or&#160;work&#160;under&#160;the&#160;terms&#160;of&#160;Section&#160;1<br>
+above,&#160;provided&#160;that&#160;you&#160;also&#160;meet&#160;all&#160;of&#160;these&#160;conditions:<br>
+<br>
+&#160;&#160;&#160;&#160;a)&#160;You&#160;must&#160;cause&#160;the&#160;modified&#160;files&#160;to&#160;carry&#160;prominent&#160;notices<br>
+&#160;&#160;&#160;&#160;stating&#160;that&#160;you&#160;changed&#160;the&#160;files&#160;and&#160;the&#160;date&#160;of&#160;any&#160;change.<br>
+<br>
+&#160;&#160;&#160;&#160;b)&#160;You&#160;must&#160;cause&#160;any&#160;work&#160;that&#160;you&#160;distribute&#160;or&#160;publish,&#160;that&#160;in<br>
+&#160;&#160;&#160;&#160;whole&#160;or&#160;in&#160;part&#160;contains&#160;or&#160;is&#160;derived&#160;from&#160;the&#160;Program&#160;or&#160;any<br>
+&#160;&#160;&#160;&#160;part&#160;thereof,&#160;to&#160;be&#160;licensed&#160;as&#160;a&#160;whole&#160;at&#160;no&#160;charge&#160;to&#160;all&#160;third<br>
+&#160;&#160;&#160;&#160;parties&#160;under&#160;the&#160;terms&#160;of&#160;this&#160;License.<br>
+<br>
+&#160;&#160;&#160;&#160;c)&#160;If&#160;the&#160;modified&#160;program&#160;normally&#160;reads&#160;commands&#160;interactively<br>
+&#160;&#160;&#160;&#160;when&#160;run,&#160;you&#160;must&#160;cause&#160;it,&#160;when&#160;started&#160;running&#160;for&#160;such<br>
+&#160;&#160;&#160;&#160;interactive&#160;use&#160;in&#160;the&#160;most&#160;ordinary&#160;way,&#160;to&#160;print&#160;or&#160;display&#160;an<br>
+&#160;&#160;&#160;&#160;announcement&#160;including&#160;an&#160;appropriate&#160;copyright&#160;notice&#160;and&#160;a<br>
+&#160;&#160;&#160;&#160;notice&#160;that&#160;there&#160;is&#160;no&#160;warranty&#160;(or&#160;else,&#160;saying&#160;that&#160;you&#160;provide<br>
+&#160;&#160;&#160;&#160;a&#160;warranty)&#160;and&#160;that&#160;users&#160;may&#160;redistribute&#160;the&#160;program&#160;under<br>
+&#160;&#160;&#160;&#160;these&#160;conditions,&#160;and&#160;telling&#160;the&#160;user&#160;how&#160;to&#160;view&#160;a&#160;copy&#160;of&#160;this<br>
+&#160;&#160;&#160;&#160;License.&#160;&#160;(Exception:&#160;if&#160;the&#160;Program&#160;itself&#160;is&#160;interactive&#160;but<br>
+&#160;&#160;&#160;&#160;does&#160;not&#160;normally&#160;print&#160;such&#160;an&#160;announcement,&#160;your&#160;work&#160;based&#160;on<br>
+&#160;&#160;&#160;&#160;the&#160;Program&#160;is&#160;not&#160;required&#160;to&#160;print&#160;an&#160;announcement.)<br>
+<br>
+These&#160;requirements&#160;apply&#160;to&#160;the&#160;modified&#160;work&#160;as&#160;a&#160;whole.&#160;&#160;If<br>
+identifiable&#160;sections&#160;of&#160;that&#160;work&#160;are&#160;not&#160;derived&#160;from&#160;the&#160;Program,<br>
+and&#160;can&#160;be&#160;reasonably&#160;considered&#160;independent&#160;and&#160;separate&#160;works&#160;in<br>
+themselves,&#160;then&#160;this&#160;License,&#160;and&#160;its&#160;terms,&#160;do&#160;not&#160;apply&#160;to&#160;those<br>
+sections&#160;when&#160;you&#160;distribute&#160;them&#160;as&#160;separate&#160;works.&#160;&#160;But&#160;when&#160;you<br>
+distribute&#160;the&#160;same&#160;sections&#160;as&#160;part&#160;of&#160;a&#160;whole&#160;which&#160;is&#160;a&#160;work&#160;based<br>
+on&#160;the&#160;Program,&#160;the&#160;distribution&#160;of&#160;the&#160;whole&#160;must&#160;be&#160;on&#160;the&#160;terms&#160;of<br>
+this&#160;License,&#160;whose&#160;permissions&#160;for&#160;other&#160;licensees&#160;extend&#160;to&#160;the<br>
+entire&#160;whole,&#160;and&#160;thus&#160;to&#160;each&#160;and&#160;every&#160;part&#160;regardless&#160;of&#160;who&#160;wrote&#160;it.<br>
+<br>
+Thus,&#160;it&#160;is&#160;not&#160;the&#160;intent&#160;of&#160;this&#160;section&#160;to&#160;claim&#160;rights&#160;or&#160;contest<br>
+your&#160;rights&#160;to&#160;work&#160;written&#160;entirely&#160;by&#160;you;&#160;rather,&#160;the&#160;intent&#160;is&#160;to<br>
+exercise&#160;the&#160;right&#160;to&#160;control&#160;the&#160;distribution&#160;of&#160;derivative&#160;or<br>
+collective&#160;works&#160;based&#160;on&#160;the&#160;Program.<br>
+<br>
+In&#160;addition,&#160;mere&#160;aggregation&#160;of&#160;another&#160;work&#160;not&#160;based&#160;on&#160;the&#160;Program<br>
+with&#160;the&#160;Program&#160;(or&#160;with&#160;a&#160;work&#160;based&#160;on&#160;the&#160;Program)&#160;on&#160;a&#160;volume&#160;of<br>
+a&#160;storage&#160;or&#160;distribution&#160;medium&#160;does&#160;not&#160;bring&#160;the&#160;other&#160;work&#160;under<br>
+the&#160;scope&#160;of&#160;this&#160;License.<br>
+<br>
+&#160;&#160;3.&#160;You&#160;may&#160;copy&#160;and&#160;distribute&#160;the&#160;Program&#160;(or&#160;a&#160;work&#160;based&#160;on&#160;it,<br>
+under&#160;Section&#160;2)&#160;in&#160;object&#160;code&#160;or&#160;executable&#160;form&#160;under&#160;the&#160;terms&#160;of<br>
+Sections&#160;1&#160;and&#160;2&#160;above&#160;provided&#160;that&#160;you&#160;also&#160;do&#160;one&#160;of&#160;the&#160;following:<br>
+<br>
+&#160;&#160;&#160;&#160;a)&#160;Accompany&#160;it&#160;with&#160;the&#160;complete&#160;corresponding&#160;machine-readable<br>
+&#160;&#160;&#160;&#160;source&#160;code,&#160;which&#160;must&#160;be&#160;distributed&#160;under&#160;the&#160;terms&#160;of&#160;Sections<br>
+&#160;&#160;&#160;&#160;1&#160;and&#160;2&#160;above&#160;on&#160;a&#160;medium&#160;customarily&#160;used&#160;for&#160;software&#160;interchange;&#160;or,<br>
+<br>
+&#160;&#160;&#160;&#160;b)&#160;Accompany&#160;it&#160;with&#160;a&#160;written&#160;offer,&#160;valid&#160;for&#160;at&#160;least&#160;three<br>
+&#160;&#160;&#160;&#160;years,&#160;to&#160;give&#160;any&#160;third&#160;party,&#160;for&#160;a&#160;charge&#160;no&#160;more&#160;than&#160;your<br>
+&#160;&#160;&#160;&#160;cost&#160;of&#160;physically&#160;performing&#160;source&#160;distribution,&#160;a&#160;complete<br>
+&#160;&#160;&#160;&#160;machine-readable&#160;copy&#160;of&#160;the&#160;corresponding&#160;source&#160;code,&#160;to&#160;be<br>
+&#160;&#160;&#160;&#160;distributed&#160;under&#160;the&#160;terms&#160;of&#160;Sections&#160;1&#160;and&#160;2&#160;above&#160;on&#160;a&#160;medium<br>
+&#160;&#160;&#160;&#160;customarily&#160;used&#160;for&#160;software&#160;interchange;&#160;or,<br>
+<br>
+&#160;&#160;&#160;&#160;c)&#160;Accompany&#160;it&#160;with&#160;the&#160;information&#160;you&#160;received&#160;as&#160;to&#160;the&#160;offer<br>
+&#160;&#160;&#160;&#160;to&#160;distribute&#160;corresponding&#160;source&#160;code.&#160;&#160;(This&#160;alternative&#160;is<br>
+&#160;&#160;&#160;&#160;allowed&#160;only&#160;for&#160;noncommercial&#160;distribution&#160;and&#160;only&#160;if&#160;you<br>
+&#160;&#160;&#160;&#160;received&#160;the&#160;program&#160;in&#160;object&#160;code&#160;or&#160;executable&#160;form&#160;with&#160;such<br>
+&#160;&#160;&#160;&#160;an&#160;offer,&#160;in&#160;accord&#160;with&#160;Subsection&#160;b&#160;above.)<br>
+<br>
+The&#160;source&#160;code&#160;for&#160;a&#160;work&#160;means&#160;the&#160;preferred&#160;form&#160;of&#160;the&#160;work&#160;for<br>
+making&#160;modifications&#160;to&#160;it.&#160;&#160;For&#160;an&#160;executable&#160;work,&#160;complete&#160;source<br>
+code&#160;means&#160;all&#160;the&#160;source&#160;code&#160;for&#160;all&#160;modules&#160;it&#160;contains,&#160;plus&#160;any<br>
+associated&#160;interface&#160;definition&#160;files,&#160;plus&#160;the&#160;scripts&#160;used&#160;to<br>
+control&#160;compilation&#160;and&#160;installation&#160;of&#160;the&#160;executable.&#160;&#160;However,&#160;as&#160;a<br>
+special&#160;exception,&#160;the&#160;source&#160;code&#160;distributed&#160;need&#160;not&#160;include<br>
+anything&#160;that&#160;is&#160;normally&#160;distributed&#160;(in&#160;either&#160;source&#160;or&#160;binary<br>
+form)&#160;with&#160;the&#160;major&#160;components&#160;(compiler,&#160;kernel,&#160;and&#160;so&#160;on)&#160;of&#160;the<br>
+operating&#160;system&#160;on&#160;which&#160;the&#160;executable&#160;runs,&#160;unless&#160;that&#160;component<br>
+itself&#160;accompanies&#160;the&#160;executable.<br>
+<br>
+If&#160;distribution&#160;of&#160;executable&#160;or&#160;object&#160;code&#160;is&#160;made&#160;by&#160;offering<br>
+access&#160;to&#160;copy&#160;from&#160;a&#160;designated&#160;place,&#160;then&#160;offering&#160;equivalent<br>
+access&#160;to&#160;copy&#160;the&#160;source&#160;code&#160;from&#160;the&#160;same&#160;place&#160;counts&#160;as<br>
+distribution&#160;of&#160;the&#160;source&#160;code,&#160;even&#160;though&#160;third&#160;parties&#160;are&#160;not<br>
+compelled&#160;to&#160;copy&#160;the&#160;source&#160;along&#160;with&#160;the&#160;object&#160;code.<br>
+<br>
+&#160;&#160;4.&#160;You&#160;may&#160;not&#160;copy,&#160;modify,&#160;sublicense,&#160;or&#160;distribute&#160;the&#160;Program<br>
+except&#160;as&#160;expressly&#160;provided&#160;under&#160;this&#160;License.&#160;&#160;Any&#160;attempt<br>
+otherwise&#160;to&#160;copy,&#160;modify,&#160;sublicense&#160;or&#160;distribute&#160;the&#160;Program&#160;is<br>
+void,&#160;and&#160;will&#160;automatically&#160;terminate&#160;your&#160;rights&#160;under&#160;this&#160;License.<br>
+However,&#160;parties&#160;who&#160;have&#160;received&#160;copies,&#160;or&#160;rights,&#160;from&#160;you&#160;under<br>
+this&#160;License&#160;will&#160;not&#160;have&#160;their&#160;licenses&#160;terminated&#160;so&#160;long&#160;as&#160;such<br>
+parties&#160;remain&#160;in&#160;full&#160;compliance.<br>
+<br>
+&#160;&#160;5.&#160;You&#160;are&#160;not&#160;required&#160;to&#160;accept&#160;this&#160;License,&#160;since&#160;you&#160;have&#160;not<br>
+signed&#160;it.&#160;&#160;However,&#160;nothing&#160;else&#160;grants&#160;you&#160;permission&#160;to&#160;modify&#160;or<br>
+distribute&#160;the&#160;Program&#160;or&#160;its&#160;derivative&#160;works.&#160;&#160;These&#160;actions&#160;are<br>
+prohibited&#160;by&#160;law&#160;if&#160;you&#160;do&#160;not&#160;accept&#160;this&#160;License.&#160;&#160;Therefore,&#160;by<br>
+modifying&#160;or&#160;distributing&#160;the&#160;Program&#160;(or&#160;any&#160;work&#160;based&#160;on&#160;the<br>
+Program),&#160;you&#160;indicate&#160;your&#160;acceptance&#160;of&#160;this&#160;License&#160;to&#160;do&#160;so,&#160;and<br>
+all&#160;its&#160;terms&#160;and&#160;conditions&#160;for&#160;copying,&#160;distributing&#160;or&#160;modifying<br>
+the&#160;Program&#160;or&#160;works&#160;based&#160;on&#160;it.<br>
+<br>
+&#160;&#160;6.&#160;Each&#160;time&#160;you&#160;redistribute&#160;the&#160;Program&#160;(or&#160;any&#160;work&#160;based&#160;on&#160;the<br>
+Program),&#160;the&#160;recipient&#160;automatically&#160;receives&#160;a&#160;license&#160;from&#160;the<br>
+original&#160;licensor&#160;to&#160;copy,&#160;distribute&#160;or&#160;modify&#160;the&#160;Program&#160;subject&#160;to<br>
+these&#160;terms&#160;and&#160;conditions.&#160;&#160;You&#160;may&#160;not&#160;impose&#160;any&#160;further<br>
+restrictions&#160;on&#160;the&#160;recipients'&#160;exercise&#160;of&#160;the&#160;rights&#160;granted&#160;herein.<br>
+You&#160;are&#160;not&#160;responsible&#160;for&#160;enforcing&#160;compliance&#160;by&#160;third&#160;parties&#160;to<br>
+this&#160;License.<br>
+<br>
+&#160;&#160;7.&#160;If,&#160;as&#160;a&#160;consequence&#160;of&#160;a&#160;court&#160;judgment&#160;or&#160;allegation&#160;of&#160;patent<br>
+infringement&#160;or&#160;for&#160;any&#160;other&#160;reason&#160;(not&#160;limited&#160;to&#160;patent&#160;issues),<br>
+conditions&#160;are&#160;imposed&#160;on&#160;you&#160;(whether&#160;by&#160;court&#160;order,&#160;agreement&#160;or<br>
+otherwise)&#160;that&#160;contradict&#160;the&#160;conditions&#160;of&#160;this&#160;License,&#160;they&#160;do&#160;not<br>
+excuse&#160;you&#160;from&#160;the&#160;conditions&#160;of&#160;this&#160;License.&#160;&#160;If&#160;you&#160;cannot<br>
+distribute&#160;so&#160;as&#160;to&#160;satisfy&#160;simultaneously&#160;your&#160;obligations&#160;under&#160;this<br>
+License&#160;and&#160;any&#160;other&#160;pertinent&#160;obligations,&#160;then&#160;as&#160;a&#160;consequence&#160;you<br>
+may&#160;not&#160;distribute&#160;the&#160;Program&#160;at&#160;all.&#160;&#160;For&#160;example,&#160;if&#160;a&#160;patent<br>
+license&#160;would&#160;not&#160;permit&#160;royalty-free&#160;redistribution&#160;of&#160;the&#160;Program&#160;by<br>
+all&#160;those&#160;who&#160;receive&#160;copies&#160;directly&#160;or&#160;indirectly&#160;through&#160;you,&#160;then<br>
+the&#160;only&#160;way&#160;you&#160;could&#160;satisfy&#160;both&#160;it&#160;and&#160;this&#160;License&#160;would&#160;be&#160;to<br>
+refrain&#160;entirely&#160;from&#160;distribution&#160;of&#160;the&#160;Program.<br>
+<br>
+If&#160;any&#160;portion&#160;of&#160;this&#160;section&#160;is&#160;held&#160;invalid&#160;or&#160;unenforceable&#160;under<br>
+any&#160;particular&#160;circumstance,&#160;the&#160;balance&#160;of&#160;the&#160;section&#160;is&#160;intended&#160;to<br>
+apply&#160;and&#160;the&#160;section&#160;as&#160;a&#160;whole&#160;is&#160;intended&#160;to&#160;apply&#160;in&#160;other<br>
+circumstances.<br>
+<br>
+It&#160;is&#160;not&#160;the&#160;purpose&#160;of&#160;this&#160;section&#160;to&#160;induce&#160;you&#160;to&#160;infringe&#160;any<br>
+patents&#160;or&#160;other&#160;property&#160;right&#160;claims&#160;or&#160;to&#160;contest&#160;validity&#160;of&#160;any<br>
+such&#160;claims;&#160;this&#160;section&#160;has&#160;the&#160;sole&#160;purpose&#160;of&#160;protecting&#160;the<br>
+integrity&#160;of&#160;the&#160;free&#160;software&#160;distribution&#160;system,&#160;which&#160;is<br>
+implemented&#160;by&#160;public&#160;license&#160;practices.&#160;&#160;Many&#160;people&#160;have&#160;made<br>
+generous&#160;contributions&#160;to&#160;the&#160;wide&#160;range&#160;of&#160;software&#160;distributed<br>
+through&#160;that&#160;system&#160;in&#160;reliance&#160;on&#160;consistent&#160;application&#160;of&#160;that<br>
+system;&#160;it&#160;is&#160;up&#160;to&#160;the&#160;author/donor&#160;to&#160;decide&#160;if&#160;he&#160;or&#160;she&#160;is&#160;willing<br>
+to&#160;distribute&#160;software&#160;through&#160;any&#160;other&#160;system&#160;and&#160;a&#160;licensee&#160;cannot<br>
+impose&#160;that&#160;choice.<br>
+<br>
+This&#160;section&#160;is&#160;intended&#160;to&#160;make&#160;thoroughly&#160;clear&#160;what&#160;is&#160;believed&#160;to<br>
+be&#160;a&#160;consequence&#160;of&#160;the&#160;rest&#160;of&#160;this&#160;License.<br>
+<br>
+&#160;&#160;8.&#160;If&#160;the&#160;distribution&#160;and/or&#160;use&#160;of&#160;the&#160;Program&#160;is&#160;restricted&#160;in<br>
+certain&#160;countries&#160;either&#160;by&#160;patents&#160;or&#160;by&#160;copyrighted&#160;interfaces,&#160;the<br>
+original&#160;copyright&#160;holder&#160;who&#160;places&#160;the&#160;Program&#160;under&#160;this&#160;License<br>
+may&#160;add&#160;an&#160;explicit&#160;geographical&#160;distribution&#160;limitation&#160;excluding<br>
+those&#160;countries,&#160;so&#160;that&#160;distribution&#160;is&#160;permitted&#160;only&#160;in&#160;or&#160;among<br>
+countries&#160;not&#160;thus&#160;excluded.&#160;&#160;In&#160;such&#160;case,&#160;this&#160;License&#160;incorporates<br>
+the&#160;limitation&#160;as&#160;if&#160;written&#160;in&#160;the&#160;body&#160;of&#160;this&#160;License.<br>
+<br>
+&#160;&#160;9.&#160;The&#160;Free&#160;Software&#160;Foundation&#160;may&#160;publish&#160;revised&#160;and/or&#160;new&#160;versions<br>
+of&#160;the&#160;General&#160;Public&#160;License&#160;from&#160;time&#160;to&#160;time.&#160;&#160;Such&#160;new&#160;versions&#160;will<br>
+be&#160;similar&#160;in&#160;spirit&#160;to&#160;the&#160;present&#160;version,&#160;but&#160;may&#160;differ&#160;in&#160;detail&#160;to<br>
+address&#160;new&#160;problems&#160;or&#160;concerns.<br>
+<br>
+Each&#160;version&#160;is&#160;given&#160;a&#160;distinguishing&#160;version&#160;number.&#160;&#160;If&#160;the&#160;Program<br>
+specifies&#160;a&#160;version&#160;number&#160;of&#160;this&#160;License&#160;which&#160;applies&#160;to&#160;it&#160;and&#160;"any<br>
+later&#160;version",&#160;you&#160;have&#160;the&#160;option&#160;of&#160;following&#160;the&#160;terms&#160;and&#160;conditions<br>
+either&#160;of&#160;that&#160;version&#160;or&#160;of&#160;any&#160;later&#160;version&#160;published&#160;by&#160;the&#160;Free<br>
+Software&#160;Foundation.&#160;&#160;If&#160;the&#160;Program&#160;does&#160;not&#160;specify&#160;a&#160;version&#160;number&#160;of<br>
+this&#160;License,&#160;you&#160;may&#160;choose&#160;any&#160;version&#160;ever&#160;published&#160;by&#160;the&#160;Free&#160;Software<br>
+Foundation.<br>
+<br>
+&#160;&#160;10.&#160;If&#160;you&#160;wish&#160;to&#160;incorporate&#160;parts&#160;of&#160;the&#160;Program&#160;into&#160;other&#160;free<br>
+programs&#160;whose&#160;distribution&#160;conditions&#160;are&#160;different,&#160;write&#160;to&#160;the&#160;author<br>
+to&#160;ask&#160;for&#160;permission.&#160;&#160;For&#160;software&#160;which&#160;is&#160;copyrighted&#160;by&#160;the&#160;Free<br>
+Software&#160;Foundation,&#160;write&#160;to&#160;the&#160;Free&#160;Software&#160;Foundation;&#160;we&#160;sometimes<br>
+make&#160;exceptions&#160;for&#160;this.&#160;&#160;Our&#160;decision&#160;will&#160;be&#160;guided&#160;by&#160;the&#160;two&#160;goals<br>
+of&#160;preserving&#160;the&#160;free&#160;status&#160;of&#160;all&#160;derivatives&#160;of&#160;our&#160;free&#160;software&#160;and<br>
+of&#160;promoting&#160;the&#160;sharing&#160;and&#160;reuse&#160;of&#160;software&#160;generally.<br>
+<br>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;NO&#160;WARRANTY<br>
+<br>
+&#160;&#160;11.&#160;BECAUSE&#160;THE&#160;PROGRAM&#160;IS&#160;LICENSED&#160;FREE&#160;OF&#160;CHARGE,&#160;THERE&#160;IS&#160;NO&#160;WARRANTY<br>
+FOR&#160;THE&#160;PROGRAM,&#160;TO&#160;THE&#160;EXTENT&#160;PERMITTED&#160;BY&#160;APPLICABLE&#160;LAW.&#160;&#160;EXCEPT&#160;WHEN<br>
+OTHERWISE&#160;STATED&#160;IN&#160;WRITING&#160;THE&#160;COPYRIGHT&#160;HOLDERS&#160;AND/OR&#160;OTHER&#160;PARTIES<br>
+PROVIDE&#160;THE&#160;PROGRAM&#160;"AS&#160;IS"&#160;WITHOUT&#160;WARRANTY&#160;OF&#160;ANY&#160;KIND,&#160;EITHER&#160;EXPRESSED<br>
+OR&#160;IMPLIED,&#160;INCLUDING,&#160;BUT&#160;NOT&#160;LIMITED&#160;TO,&#160;THE&#160;IMPLIED&#160;WARRANTIES&#160;OF<br>
+MERCHANTABILITY&#160;AND&#160;FITNESS&#160;FOR&#160;A&#160;PARTICULAR&#160;PURPOSE.&#160;&#160;THE&#160;ENTIRE&#160;RISK&#160;AS<br>
+TO&#160;THE&#160;QUALITY&#160;AND&#160;PERFORMANCE&#160;OF&#160;THE&#160;PROGRAM&#160;IS&#160;WITH&#160;YOU.&#160;&#160;SHOULD&#160;THE<br>
+PROGRAM&#160;PROVE&#160;DEFECTIVE,&#160;YOU&#160;ASSUME&#160;THE&#160;COST&#160;OF&#160;ALL&#160;NECESSARY&#160;SERVICING,<br>
+REPAIR&#160;OR&#160;CORRECTION.<br>
+<br>
+&#160;&#160;12.&#160;IN&#160;NO&#160;EVENT&#160;UNLESS&#160;REQUIRED&#160;BY&#160;APPLICABLE&#160;LAW&#160;OR&#160;AGREED&#160;TO&#160;IN&#160;WRITING<br>
+WILL&#160;ANY&#160;COPYRIGHT&#160;HOLDER,&#160;OR&#160;ANY&#160;OTHER&#160;PARTY&#160;WHO&#160;MAY&#160;MODIFY&#160;AND/OR<br>
+REDISTRIBUTE&#160;THE&#160;PROGRAM&#160;AS&#160;PERMITTED&#160;ABOVE,&#160;BE&#160;LIABLE&#160;TO&#160;YOU&#160;FOR&#160;DAMAGES,<br>
+INCLUDING&#160;ANY&#160;GENERAL,&#160;SPECIAL,&#160;INCIDENTAL&#160;OR&#160;CONSEQUENTIAL&#160;DAMAGES&#160;ARISING<br>
+OUT&#160;OF&#160;THE&#160;USE&#160;OR&#160;INABILITY&#160;TO&#160;USE&#160;THE&#160;PROGRAM&#160;(INCLUDING&#160;BUT&#160;NOT&#160;LIMITED<br>
+TO&#160;LOSS&#160;OF&#160;DATA&#160;OR&#160;DATA&#160;BEING&#160;RENDERED&#160;INACCURATE&#160;OR&#160;LOSSES&#160;SUSTAINED&#160;BY<br>
+YOU&#160;OR&#160;THIRD&#160;PARTIES&#160;OR&#160;A&#160;FAILURE&#160;OF&#160;THE&#160;PROGRAM&#160;TO&#160;OPERATE&#160;WITH&#160;ANY&#160;OTHER<br>
+PROGRAMS),&#160;EVEN&#160;IF&#160;SUCH&#160;HOLDER&#160;OR&#160;OTHER&#160;PARTY&#160;HAS&#160;BEEN&#160;ADVISED&#160;OF&#160;THE<br>
+POSSIBILITY&#160;OF&#160;SUCH&#160;DAMAGES.<br>
+<br>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;END&#160;OF&#160;TERMS&#160;AND&#160;CONDITIONS<br>
+<br>
+&#160;&#160;&#160;&#160;&#160;&#160;How&#160;to&#160;Apply&#160;These&#160;Terms&#160;to&#160;Your&#160;New&#160;Programs<br>
+<br>
+&#160;&#160;If&#160;you&#160;develop&#160;a&#160;new&#160;program,&#160;and&#160;you&#160;want&#160;it&#160;to&#160;be&#160;of&#160;the&#160;greatest<br>
+possible&#160;use&#160;to&#160;the&#160;public,&#160;the&#160;best&#160;way&#160;to&#160;achieve&#160;this&#160;is&#160;to&#160;make&#160;it<br>
+free&#160;software&#160;which&#160;everyone&#160;can&#160;redistribute&#160;and&#160;change&#160;under&#160;these&#160;terms.<br>
+<br>
+&#160;&#160;To&#160;do&#160;so,&#160;attach&#160;the&#160;following&#160;notices&#160;to&#160;the&#160;program.&#160;&#160;It&#160;is&#160;safest<br>
+to&#160;attach&#160;them&#160;to&#160;the&#160;start&#160;of&#160;each&#160;source&#160;file&#160;to&#160;most&#160;effectively<br>
+convey&#160;the&#160;exclusion&#160;of&#160;warranty;&#160;and&#160;each&#160;file&#160;should&#160;have&#160;at&#160;least<br>
+the&#160;"copyright"&#160;line&#160;and&#160;a&#160;pointer&#160;to&#160;where&#160;the&#160;full&#160;notice&#160;is&#160;found.<br>
+<br>
+&#160;&#160;&#160;&#160;&lt;one&#160;line&#160;to&#160;give&#160;the&#160;program's&#160;name&#160;and&#160;a&#160;brief&#160;idea&#160;of&#160;what&#160;it&#160;does.&gt;<br>
+&#160;&#160;&#160;&#160;Copyright&#160;(C)&#160;&lt;year&gt;&#160;&#160;&lt;name&#160;of&#160;author&gt;<br>
+<br>
+&#160;&#160;&#160;&#160;This&#160;program&#160;is&#160;free&#160;software;&#160;you&#160;can&#160;redistribute&#160;it&#160;and/or&#160;modify<br>
+&#160;&#160;&#160;&#160;it&#160;under&#160;the&#160;terms&#160;of&#160;the&#160;GNU&#160;General&#160;Public&#160;License&#160;as&#160;published&#160;by<br>
+&#160;&#160;&#160;&#160;the&#160;Free&#160;Software&#160;Foundation;&#160;either&#160;version&#160;2&#160;of&#160;the&#160;License,&#160;or<br>
+&#160;&#160;&#160;&#160;(at&#160;your&#160;option)&#160;any&#160;later&#160;version.<br>
+<br>
+&#160;&#160;&#160;&#160;This&#160;program&#160;is&#160;distributed&#160;in&#160;the&#160;hope&#160;that&#160;it&#160;will&#160;be&#160;useful,<br>
+&#160;&#160;&#160;&#160;but&#160;WITHOUT&#160;ANY&#160;WARRANTY;&#160;without&#160;even&#160;the&#160;implied&#160;warranty&#160;of<br>
+&#160;&#160;&#160;&#160;MERCHANTABILITY&#160;or&#160;FITNESS&#160;FOR&#160;A&#160;PARTICULAR&#160;PURPOSE.&#160;&#160;See&#160;the<br>
+&#160;&#160;&#160;&#160;GNU&#160;General&#160;Public&#160;License&#160;for&#160;more&#160;details.<br>
+<br>
+&#160;&#160;&#160;&#160;You&#160;should&#160;have&#160;received&#160;a&#160;copy&#160;of&#160;the&#160;GNU&#160;General&#160;Public&#160;License<br>
+&#160;&#160;&#160;&#160;along&#160;with&#160;this&#160;program;&#160;if&#160;not,&#160;write&#160;to&#160;the&#160;Free&#160;Software<br>
+&#160;&#160;&#160;&#160;Foundation,&#160;Inc.,&#160;59&#160;Temple&#160;Place,&#160;Suite&#160;330,&#160;Boston,&#160;MA&#160;&#160;02111-1307&#160;&#160;USA<br>
+<br>
+<br>
+Also&#160;add&#160;information&#160;on&#160;how&#160;to&#160;contact&#160;you&#160;by&#160;electronic&#160;and&#160;paper&#160;mail.<br>
+<br>
+If&#160;the&#160;program&#160;is&#160;interactive,&#160;make&#160;it&#160;output&#160;a&#160;short&#160;notice&#160;like&#160;this<br>
+when&#160;it&#160;starts&#160;in&#160;an&#160;interactive&#160;mode:<br>
+<br>
+&#160;&#160;&#160;&#160;Gnomovision&#160;version&#160;69,&#160;Copyright&#160;(C)&#160;year&#160;&#160;name&#160;of&#160;author<br>
+&#160;&#160;&#160;&#160;Gnomovision&#160;comes&#160;with&#160;ABSOLUTELY&#160;NO&#160;WARRANTY;&#160;for&#160;details&#160;type&#160;`show&#160;w'.<br>
+&#160;&#160;&#160;&#160;This&#160;is&#160;free&#160;software,&#160;and&#160;you&#160;are&#160;welcome&#160;to&#160;redistribute&#160;it<br>
+&#160;&#160;&#160;&#160;under&#160;certain&#160;conditions;&#160;type&#160;`show&#160;c'&#160;for&#160;details.<br>
+<br>
+The&#160;hypothetical&#160;commands&#160;`show&#160;w'&#160;and&#160;`show&#160;c'&#160;should&#160;show&#160;the&#160;appropriate<br>
+parts&#160;of&#160;the&#160;General&#160;Public&#160;License.&#160;&#160;Of&#160;course,&#160;the&#160;commands&#160;you&#160;use&#160;may<br>
+be&#160;called&#160;something&#160;other&#160;than&#160;`show&#160;w'&#160;and&#160;`show&#160;c';&#160;they&#160;could&#160;even&#160;be<br>
+mouse-clicks&#160;or&#160;menu&#160;items--whatever&#160;suits&#160;your&#160;program.<br>
+<br>
+You&#160;should&#160;also&#160;get&#160;your&#160;employer&#160;(if&#160;you&#160;work&#160;as&#160;a&#160;programmer)&#160;or&#160;your<br>
+school,&#160;if&#160;any,&#160;to&#160;sign&#160;a&#160;"copyright&#160;disclaimer"&#160;for&#160;the&#160;program,&#160;if<br>
+necessary.&#160;&#160;Here&#160;is&#160;a&#160;sample;&#160;alter&#160;the&#160;names:<br>
+<br>
+&#160;&#160;Yoyodyne,&#160;Inc.,&#160;hereby&#160;disclaims&#160;all&#160;copyright&#160;interest&#160;in&#160;the&#160;program<br>
+&#160;&#160;`Gnomovision'&#160;(which&#160;makes&#160;passes&#160;at&#160;compilers)&#160;written&#160;by&#160;James&#160;Hacker.<br>
+<br>
+&#160;&#160;&lt;signature&#160;of&#160;Ty&#160;Coon&gt;,&#160;1&#160;April&#160;1989<br>
+&#160;&#160;Ty&#160;Coon,&#160;President&#160;of&#160;Vice<br>
+<br>
+This&#160;General&#160;Public&#160;License&#160;does&#160;not&#160;permit&#160;incorporating&#160;your&#160;program&#160;into<br>
+proprietary&#160;programs.&#160;&#160;If&#160;your&#160;program&#160;is&#160;a&#160;subroutine&#160;library,&#160;you&#160;may<br>
+consider&#160;it&#160;more&#160;useful&#160;to&#160;permit&#160;linking&#160;proprietary&#160;applications&#160;with&#160;the<br>
+library.&#160;&#160;If&#160;this&#160;is&#160;what&#160;you&#160;want&#160;to&#160;do,&#160;use&#160;the&#160;GNU&#160;Library&#160;General<br>
+Public&#160;License&#160;instead&#160;of&#160;this&#160;License.<br>
+<br>
+&#160;&#160;&#160;&#160;</p></div>
+</div></body>
+</html>

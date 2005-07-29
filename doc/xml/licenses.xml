@@ -8,7 +8,7 @@
    <title>GNU Licenses</title>
   </bookinfo>
 
-  <chapter id="license.gpl" xreflabel=" The GNU General Public License">
+  <chapter id="license-gpl" xreflabel=" The GNU General Public License">
     <title>The GNU General Public License</title>
       <literallayout>
       <xi:include href="../../LICENSE.GPL" 
@@ -17,7 +17,7 @@
       </literallayout>
   </chapter>
 
-  <chapter id="license.gfdl" xreflabel="The GNU Free Documentation License">
+  <chapter id="license-gfdl" xreflabel="The GNU Free Documentation License">
     <title>The GNU Free Documentation License</title>
       <literallayout>
       <xi:include href="../../LICENSE.DOCS" 

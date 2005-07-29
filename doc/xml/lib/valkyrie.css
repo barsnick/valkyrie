@@ -68,7 +68,7 @@ table.nav td { font-size: 85%; }
 code, tt, pre { font-size: 120%; }
 code, tt { color: #761596; }
 
-div.literallayout, pre.programlisting, pre.screen {
+pre.programlisting, pre.screen {
  color:      #000000;
  padding:    0.5em;
  background: #eeeeee;

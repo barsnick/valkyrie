@@ -1,6 +1,6 @@
 /* ---------------------------------------------------------------------
  * Definition of HelpAbout                                  help_about.h
- * Small tabbed dialog showing misc. info re licence etc.
+ * Small tabbed dialog showing misc. info re license etc.
  * --------------------------------------------------------------------- 
  * This file is part of Valkyrie, a front-end for Valgrind
  * Copyright (c) 2000-2005, OpenWorks LLP <info@open-works.co.uk>
@@ -23,7 +23,7 @@ class HelpAbout : public QDialog
 {
   Q_OBJECT
 public:
-  enum TabId { ABOUT_VK=0, ABOUT_QT, LICENCE, SUPPORT };
+  enum TabId { ABOUT_VK=0, ABOUT_QT, LICENSE, SUPPORT };
 
   HelpAbout( QWidget* parent, TabId tabid );
   ~HelpAbout();
@@ -37,7 +37,7 @@ private:
   QTabWidget* tabParent;
   TextEdit* aboutVk;
   TextEdit* aboutQt;
-  TextEdit* licence;
+  TextEdit* license;
   TextEdit* support;
 };
 

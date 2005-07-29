@@ -502,8 +502,8 @@ void MainWindow::mkMenuBar()
   helpMenu->insertItem( "About Qt", this, 
                         SLOT(showAboutInfo(int)), 0, HelpAbout::ABOUT_QT );
   helpMenu->insertSeparator();
-  helpMenu->insertItem( "Licence", this, 
-                        SLOT(showAboutInfo(int)), 0, HelpAbout::LICENCE );
+  helpMenu->insertItem( "License", this, 
+                        SLOT(showAboutInfo(int)), 0, HelpAbout::LICENSE );
   helpMenu->insertItem( "Support", this, 
                         SLOT(showAboutInfo(int)), 0, HelpAbout::SUPPORT );
   helpButton->setPopup( helpMenu );

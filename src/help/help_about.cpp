@@ -1,6 +1,6 @@
 /* ---------------------------------------------------------------------
  * Implementation of HelpAbout                            help_about.cpp
- * small tab dialog showing various information re licence etc.
+ * small tab dialog showing various information re license etc.
  * --------------------------------------------------------------------- 
  * This file is part of Valkyrie, a front-end for Valgrind
  * Copyright (c) 2000-2005, OpenWorks LLP <info@open-works.co.uk>
@@ -54,7 +54,7 @@ bool TextEdit::load()
     case HelpAbout::ABOUT_QT:
       setText( ts.read().arg(qVersion()) );
       break;
-    case HelpAbout::LICENCE:
+    case HelpAbout::LICENSE:
       setText( ts.read() );
       break;
   }
@@ -115,9 +115,9 @@ HelpAbout::HelpAbout(  QWidget* parent, TabId tabid )
   aboutQt = new TextEdit( tabParent, ABOUT_QT, "about_qt" );
   tabParent->insertTab( aboutQt, "About Qt", ABOUT_QT );
 
-  /* licence tab */
-  licence = new TextEdit( tabParent, LICENCE, "licence" );
-  tabParent->insertTab( licence, "Licence Agreement", LICENCE );
+  /* license tab */
+  license = new TextEdit( tabParent, LICENSE, "about_gpl" );
+  tabParent->insertTab( license, "License Agreement", LICENSE );
   
   /* support tab */
   support = new TextEdit( tabParent, SUPPORT, "support" );
@@ -143,7 +143,7 @@ void HelpAbout::showTab( QWidget* tab )
   switch ( tabid ) {
     case ABOUT_VK: aboutVk->load(); break;
     case ABOUT_QT: aboutQt->load(); break;
-    case LICENCE:  licence->load(); break;
+    case LICENSE:  license->load(); break;
     case SUPPORT:  support->load(); break;
   }
 

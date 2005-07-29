@@ -18,8 +18,8 @@ lib_dir   = $(xml_dir)/lib
 # manual -> index.xml
 MANUAL    = $(xml_dir)/index.xml
 # list of 'about' pages for about dialog
-ABOUT_FILES = about_qt about_vk support
-# $(top_dir)LICENSE.GPL
+ABOUT_FILES = about_qt about_vk support about_gpl
+
 
 # validation stuff
 XMLLINT = xmllint

@@ -1,0 +1,16 @@
+<?xml version="1.0"?> <!-- -*- sgml -*- -->
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+
+<article>
+
+  <artheader><title>The GNU General Public License</title></artheader>
+
+    <literallayout>
+      <xi:include href="../../LICENSE.GPL"
+          parse="text"
+          xmlns:xi="http://www.w3.org/2001/XInclude" />
+    </literallayout>
+
+
+</article>

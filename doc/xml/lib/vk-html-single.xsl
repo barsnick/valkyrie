@@ -8,7 +8,7 @@
 <xsl:import href="vk-common.xsl"/>
 
 <!-- use 8859-1 encoding -->
-<xsl:output method="html" encoding="ISO-8859-1" indent="yes"/>
+<xsl:output method="html" encoding="ASCII" indent="yes"/>
 
 <!-- we include the css directly when generating a single file -->
 <xsl:template name="user.head.content">  
