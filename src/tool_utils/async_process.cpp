@@ -24,6 +24,7 @@
 #include <sys/wait.h>              /* waitpid()         */
 #include <fcntl.h>                 /* open(), O_RDONLY, O_WRONLY */
 #include <signal.h>
+#include <errno.h>                 /* Fedora Core needs this */
 
 #include "async_process.h"
 #include "vk_utils.h"
