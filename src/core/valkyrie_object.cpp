@@ -237,8 +237,7 @@ QStringList Valkyrie::modifiedFlags()
         /* see if there were any flags given for the binary */
         opt = findOption( BIN_FLAGS );
         cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
-        if ( cfgVal != opt->defaultValue )
-          modFlags << cfgVal;
+        modFlags += QStringList::split(" ", cfgVal);
       }
     } break;
 

@@ -248,6 +248,8 @@ bool Memcheck::stop( Valkyrie::RunMode rm )
     proc->tryTerminate();   /* first ask nicely. */
     /* if proc still running after msec_timeout, terminate with prejudice */
     QTimer::singleShot( 2000, proc, SLOT( kill() ) );   // TODO: move N to config
+
+    // TODO?: if kill proc while we're i parseOutput(), we could get a segfault?
     break;
 
   default:

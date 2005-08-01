@@ -135,7 +135,7 @@ int parseCmdArgs( int argc, char** argv )
   }
 
   /* get the leftovers: should only be 'myprog --myflags'.  check we
-     really do have the right prog-to-debug here.  if yes, then all
+     really do have a valid prog-to-debug here.  if yes, then all
      flags that follow it on the cmd line are assumed to belong to it. */
   if ( vkPoptPeekArg(optCon) != NULL ) {
     obj    = vkConfig->vkObject( "valkyrie" );
