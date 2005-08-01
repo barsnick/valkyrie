@@ -679,6 +679,11 @@ fi
 #QMAKE_LIBDIR_FLAGS += $QMAKE_LIBDIR_FLAGS
 #INCLUDEPATH += $QMAKE_INCLUDEPATH
 
+
+#some dists need this (e.g. old Debian)
+QMAKE_LIBS="$QMAKE_LIBS -lfreetype"
+
+
 # save to tmp.pro
 cat > $relpath/tmp.pro <<_PRO_EOF
 # Project file to create a Makefile
@@ -698,6 +703,11 @@ OBJECTS_DIR = ./.obj
 QMAKE_CFLAGS   += $QMAKE_CFLAGS
 QMAKE_CXXFLAGS += $QMAKE_CXXFLAGS
 QMAKE_LFLAGS   += $QMAKE_LFLAGS
+
+# additional libraries and includes
+LIBS += $QMAKE_LIBS
+QMAKE_LIBDIR_FLAGS += $QMAKE_LIBDIR_FLAGS
+INCLUDEPATH += $QMAKE_INCLUDEPATH
 
 # paths to qt things
 QMAKE_MOC   = $QT_MOC

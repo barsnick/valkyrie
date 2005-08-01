@@ -294,7 +294,8 @@ fi
 
 # process for compiler & linker flags ------------------------------
 CXXFLAGS="-I${QT_INC_DIR}"
-LDFLAGS="-L${QT_LIB_DIR}"
+# freetype needed by some systems (e.g. old Debian)
+LDFLAGS="-L${QT_LIB_DIR} -lfreetype"
 if [ "$THREADING" = "no" ] ; then
   result="-lqt"
   LDFLAGS="$LDFLAGS -lqt"
