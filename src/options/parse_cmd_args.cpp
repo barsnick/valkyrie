@@ -142,10 +142,8 @@ int parseCmdArgs( int argc, char** argv )
     errVal = obj->checkOptArg( Valkyrie::BINARY, vkPoptGetArg(optCon) );
     if ( errVal != PARSED_OK )
       return parseError( optCon, errVal );
-  }
 
-  /* peek to see if any flags specified */
-  if ( vkPoptPeekArg(optCon) != NULL ) {
+    /* get client flags, if any */
     const char **args = vkPoptGetArgs( optCon );
     int i = 0;
     QStringList aList;
@@ -155,11 +153,14 @@ int parseCmdArgs( int argc, char** argv )
     }
     QString flags = aList.join( " " );
     obj    = vkConfig->vkObject( "valkyrie" );
-    errVal = obj->checkOptArg( Valkyrie::BIN_FLAGS, flags.latin1() );
+    if (!flags.isNull()) {
+      errVal = obj->checkOptArg( Valkyrie::BIN_FLAGS, flags.latin1() );
+    } else {
+      errVal = obj->checkOptArg( Valkyrie::BIN_FLAGS, "" );
+    }
     if ( errVal != PARSED_OK )
       return parseError( optCon, errVal );
   }
-
 
   i = 0;
   for ( obj = objList.first(); obj; obj = objList.next() ) {
