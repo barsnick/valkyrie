@@ -302,7 +302,7 @@ int Valgrind::checkOptArg( int optid, const char* argval,
 /* valkyrie hijacks any log-to-file flags; these are not passed to
    valgrind, but are used after parsing has finished to save to.
    FIXME: not sure yet how to handle LOG_FD and LOG_SOCKET */
-QStringList Valgrind::modifiedFlags()
+QStringList Valgrind::modifiedFlags( const ToolObject* tool_obj )
 {
   QStringList modFlags;
   QString defVal, cfgVal;
@@ -317,11 +317,15 @@ QStringList Valgrind::modifiedFlags()
       case SUPPS_DEF:
         break;
 
-      /* we need '--suppressions=' before each and every filename */
+      /* only error-reporting tools have suppressions */
       case SUPPS_SEL: {
-        QStringList files = QStringList::split( ",", vkConfig->rdEntry( opt->cfgKey(), name() ) );
-        for ( unsigned int i=0; i<files.count(); i++ ) {
-          modFlags << "--" + opt->cfgKey() + "=" + files[i];
+        if ( tool_obj->name() == "memcheck" ) {
+          /* we need '--suppressions=' before each and every filename */
+          QString optEntry = vkConfig->rdEntry( opt->cfgKey(), name() );
+          QStringList files = QStringList::split( ",", optEntry );
+          for ( unsigned int i=0; i<files.count(); i++ ) {
+            modFlags << "--" + opt->cfgKey() + "=" + files[i];
+          }
         }
       } break;
 

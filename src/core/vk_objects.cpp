@@ -119,32 +119,6 @@ QString VkObject::configEntries()
   return cfgEntry;
 }
 
-/* called from VkConfig::modFlags() when a toolview needs to know what
-   flags to set || pass to a process. */
-QStringList VkObject::modifiedFlags()
-{
-  QStringList modFlags;
-  QString defVal, cfgVal;
-
-  for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
-
-    /* config already has this 'cos we need it to be first in the queue */
-    if ( this->name() == "valgrind" &&
-	 opt->key == Valgrind::TOOL )
-      continue;
-
-    defVal = opt->defaultValue;     /* opt holds the default */
-    cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
-
-    if ( defVal != cfgVal )
-      modFlags << "--" + opt->longFlag + "=" + cfgVal;
-
-  }
-
-  return modFlags;
-}
-
-
 /* determine the total no. of option structs required by counting the
    no. of entries in the optList.  Note: num_options = optList+1
    because we need a NULL option entry to terminate each option array. */

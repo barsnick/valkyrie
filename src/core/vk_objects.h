@@ -40,18 +40,16 @@ public:
             const QKeySequence& key, bool is_tool=true );
   ~VkObject();
 
-  bool isTool()           { return is_Tool;         }
-  QString name()          { return caption.lower(); }
-  QString title()         { return caption;         }
-  QString accelTitle()    { return accelText;       }
-  QKeySequence accelKey() { return accel_Key;       }
+  bool isTool()           const { return is_Tool;         }
+  QString name()          const { return caption.lower(); }
+  QString title()         const { return caption;         }
+  QString accelTitle()    const { return accelText;       }
+  QKeySequence accelKey() const { return accel_Key;       }
 
   /* called by parseCmdArgs() in parse_cmd_args.cpp,
      and from the gui options pages */
   virtual int checkOptArg(int optid, const char* argval, bool gui=false) = 0; 
 
-  /* returns a list of non-default flags to pass to valgrind */
-  virtual QStringList modifiedFlags();
   /* returns a list of options to be written to the config file */
   virtual QString configEntries();
   /* command-line + optionsWindow help and parsing stuff */

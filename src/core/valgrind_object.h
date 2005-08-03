@@ -14,6 +14,7 @@
 
 #include "vk_objects.h"
 #include "valgrind_options_page.h"
+#include "tool_object.h"
 
 
 /* class Valgrind ------------------------------------------------------ */
@@ -23,7 +24,9 @@ public:
   Valgrind();
   ~Valgrind();
 
-  QStringList modifiedFlags();
+  /* returns a list of non-default flags to pass to valgrind */
+  QStringList modifiedFlags( const ToolObject* tool_obj );
+
   int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
   enum vgOpts {

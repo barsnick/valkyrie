@@ -282,7 +282,7 @@ QString Valkyrie::currentFlags( ToolObject* tool_obj )
 #endif
       /* check if any valgrind core opts have been modified.
          'modified' means 'set to anything other than default' */
-      flags += valgrind->modifiedFlags();
+      flags += valgrind->modifiedFlags( tool_obj );
       /* now get flags which have been specified / modified for this
          tool _only_ */
       flags += tool_obj->modifiedFlags();

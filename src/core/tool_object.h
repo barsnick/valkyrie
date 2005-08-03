@@ -54,6 +54,9 @@ public:
 
   virtual OptionsPage* createOptionsPage( OptionsWindow* parent ) = 0;
 
+  /* returns a list of non-default flags to pass to valgrind */
+  virtual QStringList modifiedFlags();
+
 signals:
   void setRunMode( Valkyrie::RunMode );
   void running( bool );

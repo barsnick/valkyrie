@@ -14,6 +14,7 @@
 
 #include "tool_object.h"
 #include "tool_view.h"
+#include "vk_config.h"
 
 #include <qtimer.h>
 
@@ -62,4 +63,23 @@ void ToolObject::deleteView()
   m_view->close( true );
   //  delete memcheckView;
   m_view = 0;
+}
+
+/* called from VkConfig::modFlags() when a toolview needs to know what
+   flags to set || pass to a process. */
+QStringList ToolObject::modifiedFlags()
+{
+  QStringList modFlags;
+
+  for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
+
+    QString defVal = opt->defaultValue;     /* opt holds the default */
+    QString cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
+
+    if ( defVal != cfgVal )
+      modFlags << "--" + opt->longFlag + "=" + cfgVal;
+
+  }
+
+  return modFlags;
 }
