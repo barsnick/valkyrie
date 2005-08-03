@@ -303,17 +303,10 @@ QString Valkyrie::currentFlags( ToolObject* tool_obj )
      VKProcess as a separate string, and this includes any binary
      flags; but for display purposes in the flagWidget, concat the
      binary together with its flags 'cos it's prettier. */
-  QString flags2 = "";
-  int num_flags = flags.count();
-  for ( int i=0; i<num_flags-2; i++ )
-    flags2 += flags[i] +  "\n";
-  if ( !vkConfig->rdEntry("binary-flags", "valkyrie").isEmpty() ) {
-    flags2 += flags[num_flags-2] + " " + flags[num_flags-1];
-  } else {
-    flags2 += flags[num_flags-1];
-  }
-
-  return flags2;
+  QString flagsStr = flags.join("\n");
+  if ( !vkConfig->rdEntry("binary-flags", "valkyrie").isEmpty() )
+    flagsStr.replace( flagsStr.findRev('\n'), 1, ' ');
+  return flagsStr;
 }
 
 
