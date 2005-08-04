@@ -10,6 +10,8 @@
 #ifndef __VK_UTILS_H
 #define __VK_UTILS_H
 
+#include <stdio.h>          // printf and friends
+
 #include <qstring.h>
 #include <qpalette.h>
 
@@ -45,18 +47,25 @@ extern void vk_assert_never_reached_fail( const char* file,
    __FILE__, __LINE__, __PRETTY_FUNCTION__), 0)))
 
 
-/* print debugging msg with file+line info ----------------------------- */
-extern void vk_print( const char* file, const char* fn,
-                      unsigned int line, const char* prefix, 
-                      const char* msg, ... );
-#define VK_DEBUG(msg, args...) {            \
-  vk_print( __FILE__, __PRETTY_FUNCTION__,  \
-  __LINE__, "DEBUG", msg, ## args);       \
+#if DEBUG_ON
+/* print debugging msg with file+line info to stderr ------------------- */
+#define VK_DEBUG(msg, args...) {                              \
+  fprintf(stderr, "\nDEBUG: %s : %s #%d:\n\t",                \
+                  __FILE__, __PRETTY_FUNCTION__, __LINE__ );  \
+  fprintf(stderr, msg, ## args );                             \
+  fprintf(stderr, "\n" );                                     \
 }
+#else
+#define VK_DEBUG(msg, args...) /*NOTHING*/
+#endif
 
 
 /* print user info message --------------------------------------------- */
 extern void vkPrint( const char *, ... )
+     __attribute__ ((format (printf, 1, 2)));
+
+/* print error message ------------------------------------------------- */
+extern void vkPrintErr( const char *, ... )
      __attribute__ ((format (printf, 1, 2)));
 
 /* create a unique filename -------------------------------------------- */

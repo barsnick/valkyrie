@@ -11,7 +11,6 @@
 #include "vk_include.h"
 
 #include <stdlib.h>                 // mkstemp()
-#include <stdio.h>                  // printf and friends
 #include <stdarg.h>                 // va_start, va_end
 
 #include <qapplication.h>
@@ -36,12 +35,25 @@ void vkPrint( const char* msg, ... )
 }
 
 
+/* prints error msg -------------------------------------------------- */
+void vkPrintErr( const char* msg, ... )
+{
+  va_list ap;
+  va_start( ap, msg );
+  va_end( ap );
+  fprintf( stderr, "\n" ); 
+  vfprintf( stderr, msg, ap );
+  va_end( ap );
+  fprintf( stderr, "\n\n" );
+}
+
+
 /* prints an "Assertion failed" message and exits ---------------------- */
 __attribute__ ((noreturn))
 void vk_assert_fail( const char* expr, const char* file,
                      unsigned int line, const char* fn )
 { 
-  vkPrint("\n%s:%u\n"
+  vkPrintErr("\n%s:%u\n"
           "     %s: Assertion '%s' failed.\n",
           file, line, fn, expr );
   exit(1);
@@ -62,21 +74,6 @@ void vk_assert_never_reached_fail( const char* file,
   printf("In the bug report, please send the the above text.\n"
          "Thanks.\n\n");
   exit(1);
-}
-
-
-/* prints a debugging message with file+line info to stderr ------------ */
-void vk_print( const char* file, const char* fn, unsigned int line, 
-               const char* prefix, const char* msg, ... )
-{
-#if DEBUG_ON
-  fprintf( stderr, "\n%s: %s : %s #%d:\n\t", prefix, file, fn, line );
-  va_list ap;
-  va_start( ap, msg );
-  vfprintf( stdout, msg, ap );
-  va_end( ap );
-  fprintf( stdout, "\n");
-#endif
 }
 
 
