@@ -220,7 +220,7 @@ QDomElement getMatchingPair( QDomElement pairs_root,
   Convert element value to integer.
   Returns 0 if conversion fails
 */
-int elemToNum( QDomElement elem, bool* ok=0 )
+unsigned long elemToULong( QDomElement elem, bool* ok=0 )
 {
   QDomText domText = elem.firstChild().toText();
   if (domText.isNull()) {
@@ -228,8 +228,7 @@ int elemToNum( QDomElement elem, bool* ok=0 )
     return 0;
   }
   QString numStr = domText.data();
-  int sNum = numStr.toInt(ok);
-  return sNum;
+  return numStr.toULong(ok);
 }
 
 
@@ -241,7 +240,7 @@ bool updateCount( QDomElement mCount, QDomElement sCount )
 {
   /* get slave count */
   bool ok;
-  int sNum = elemToNum( sCount, &ok );
+  unsigned long sNum = elemToULong( sCount, &ok );
   if (!ok) {
     vklmPrint("error: converting string to int: '%s'",
 	      sCount.text().latin1());
@@ -249,7 +248,7 @@ bool updateCount( QDomElement mCount, QDomElement sCount )
   }
   
   /* get master count */
-  int mNum = elemToNum( mCount, &ok );
+  unsigned long mNum = elemToULong( mCount, &ok );
   if (!ok) {
     vklmPrint("error: converting string to int: '%s'",
 	      sCount.text().latin1());
@@ -270,8 +269,9 @@ bool updateCount( QDomElement mCount, QDomElement sCount )
 */
 bool updateWhat( QDomElement mErr, QDomElement sErr ) 
 {
-  int mLeakedBytesNum  = elemToNum( getElem( mErr, "leakedbytes"  ) );
-  int mLeakedBlocksNum = elemToNum( getElem( mErr, "leakedblocks" ) );
+  unsigned long mLeakedBytesNum, mLeakedBlocksNum;
+  mLeakedBytesNum  = elemToULong( getElem( mErr, "leakedbytes"  ) );
+  mLeakedBlocksNum = elemToULong( getElem( mErr, "leakedblocks" ) );
   
   /* do our best to update the master's 'what' string 
      - J and I will 'have words' if he changes this ... */
@@ -281,7 +281,7 @@ bool updateWhat( QDomElement mErr, QDomElement sErr )
   
   /* the first elem in the 'what' string is the no. of bytes */
   ms_what[0] = QString::number( mLeakedBytesNum );
-  
+
   /* if the 2nd elem is 'bytes', then the 4th elem is blocks */
   if ( ms_what[1] == "bytes" ) {
     ms_what[3] = QString::number( mLeakedBlocksNum );
@@ -294,10 +294,10 @@ bool updateWhat( QDomElement mErr, QDomElement sErr )
     bool ok;
     
     /* 'direct': remove the leading '(' */
-    int sl_num, ms_num;
-    sl_num = sl_what[1].remove( 0, 1 ).toInt(&ok);
+    unsigned long sl_num, ms_num;
+    sl_num = sl_what[1].remove( 0, 1 ).toULong(&ok);
     if (ok)
-      ms_num = ms_what[1].remove( 0, 1 ).toInt(&ok);
+      ms_num = ms_what[1].remove( 0, 1 ).toULong(&ok);
     if (!ok) {
       vklmPrint("error: failed to parse 'what' string");
       return false;
@@ -305,9 +305,9 @@ bool updateWhat( QDomElement mErr, QDomElement sErr )
     ms_what[1] = "(" + QString::number( ms_num + sl_num );
     
     /* indirect */
-    sl_num = sl_what[3].toInt(&ok);
+    sl_num = sl_what[3].toULong(&ok);
     if (ok)
-      ms_num = ms_what[3].toInt(&ok);
+      ms_num = ms_what[3].toULong(&ok);
     if (!ok) {
       vklmPrint("error: failed to parse 'what' string");
       return false;
