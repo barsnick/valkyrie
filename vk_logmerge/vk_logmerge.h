@@ -10,24 +10,9 @@
 #ifndef __VK_LOGMERGE_OBJECT_H
 #define __VK_LOGMERGE_OBJECT_H
 
-#include "vglog.h"
-#include "xml_parser.h"
+#include <qdom.h>
+#include <qstring.h>
 
-/* class VKLogMerge ------------------------------------------------------ */
-class VKLogMerge : public QObject
-{
-  Q_OBJECT
-public:
-  VKLogMerge( QObject * parent = 0, const char * name = 0 );
-  ~VKLogMerge();
-
-  bool mergeLogFiles( QString& log_list, QString& fname_out );
-
-private:
-  bool parseLog( XMLParser* xmlParser, VGLog* vgLog,
-                 QXmlSimpleReader& reader, QString& log_fname );
-  QString validateFile( QString& log_file );
-};
-
+bool mergeVgLogs( QDomDocument& master_doc, QDomDocument& slave_doc );
 
 #endif // #ifndef __VK_LOGMERGE_OBJECT_H

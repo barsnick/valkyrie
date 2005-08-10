@@ -824,26 +824,14 @@ bins.path = $VK_INSTALL_BIN
 
 TEMPLATE = app
 DEPENDPATH += vk_logmerge
-INCLUDEPATH += vk_logmerge \
-               src \
-               src/options \
-               src/tool_utils
+INCLUDEPATH += vk_logmerge
 
 # Input
-HEADERS += vk_logmerge/vk_logmerge.h \
-           vk_logmerge/vglog.h \
-           src/tool_utils/xml_parser.h \
-           src/vk_utils.h \
-           src/vk_include.h \
-           src/options/vk_popt_option.h \
-           src/options/vk_option.h
+HEADERS += vk_logmerge/vklm_main.h \
+           vk_logmerge/vk_logmerge.h
 
 SOURCES += vk_logmerge/vklm_main.cpp \
-           vk_logmerge/vk_logmerge.cpp \
-           vk_logmerge/vglog.cpp \
-           src/tool_utils/xml_parser.cpp \
-           src/vk_utils.cpp \
-           src/options/vk_option.cpp
+           vk_logmerge/vk_logmerge.cpp
 
 _LM_PRO_EOF
 

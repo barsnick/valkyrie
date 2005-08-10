@@ -8,221 +8,638 @@
  */
 
 #include "vk_logmerge.h"
-#include "vk_popt_option.h"
-#include "vk_option.h"
-#include "vk_utils.h"
+#include "vklm_main.h"
 
 #include <qfile.h>
 #include <qfileinfo.h>
+#include <stdio.h>
+#include <qdom.h>
+#include <qvaluelist.h>
+#include <qstringlist.h>
+
+typedef QValueList<QDomElement> QDomElemQVList;
 
 
-VKLogMerge::VKLogMerge( QObject* parent, const char* name )
-  : QObject( parent, name )
-{ }
-
-VKLogMerge::~VKLogMerge() { }
-
-
-/* check is valid file, correct perms, and format is xml.
-   returns absolute path of log_file.
-   returns QString::null on error.
+/*
+  Searches tree from root for all instances of 'elem',
+  returns nth (0=first) element in found list
+  - if n == -1, returns last element
+  - if no element found, returns a 'null' element
 */
-QString VKLogMerge::validateFile( QString& log_file ) 
+QDomElement getElem( QDomElement root, QString elem, int n=0 )
 {
-  int errval = PARSED_OK;
+  QDomNodeList nodes = root.elementsByTagName( elem );
+  if (n == -1)
+    n = nodes.count()-1;
+  return nodes.item(n).toElement();
+}
 
-  /* check this is a valid file, and has the right perms */
-  QString ret_file = fileCheck( &errval, log_file.latin1(), true, false );
-  if ( errval != PARSED_OK ) {
-    fprintf(stderr ,"File Error (%s): '%s'\n", 
-            parseErrString(errval), 
-            escapeEntities(log_file).latin1() );
-    return QString::null;
+/*
+  Retrieve list of (leakcheck)errors in log
+*/
+QDomElemQVList getErrors( QDomElement docRoot, bool leakcheck=false )
+{
+  QDomElemQVList errors;
+  QDomNode n = docRoot.firstChild();
+
+  bool found_first = false;
+  if (!leakcheck) {   /* main errors */
+
+    /* find first group of "error" elements */
+    while( !n.isNull() ) {
+      QDomElement e = n.toElement();
+      if( !e.isNull() ) {
+	if (found_first && e.tagName() != "error")
+	  break;
+	if (e.tagName() == "error") {
+	  found_first = true;
+	  errors.append( e );
+	}
+      }
+      n = n.nextSibling();
+    }
+  } else {             /* leakcheck errors */
+
+    /* find group of "error" elements _after_ suppcounts */
+    while( !n.isNull() ) {
+      QDomElement e = n.toElement();
+      if( !e.isNull() ) {
+	if (found_first) {
+	  if (e.tagName() != "error")
+	    break;
+	  errors.append( e );
+	}
+	if (e.tagName() == "suppcounts")
+	  found_first = true;
+      }
+      n = n.nextSibling();
+    }    
   }
-
-  /* check the file is readable, and the format is xml */
-  bool is_xml = XMLParser::xmlFormatCheck( &errval, log_file );
-  if ( errval != PARSED_OK ) {
-    fprintf(stderr, "File Error (%s): '%s'\n", 
-            parseErrString(errval),
-            log_file.latin1() );
-    return QString::null;
-  }
-
-  if ( !is_xml ) {
-    fprintf(stderr, "File Format Error: File '%s' not in xml format.\n",
-	    log_file.latin1() );
-    return QString::null;
-  }
-
-  return ret_file;
+  return errors;
 }
 
 
 
-/* opens a logfile and feeds the contents to the parser. 
-   the logfile's existence, perms and format have all been
-   pre-validated, so no need to re-check. */
-bool VKLogMerge::parseLog( XMLParser* xmlParser,
-                           VGLog* vgLog,
-                           QXmlSimpleReader& reader,
-                           QString& log_fname )
+/*
+  Heuristic function to test if frames are the 'same'
+*/
+bool matchingFrames( QDomElement frame1, QDomElement frame2 )
 {
-  connect( xmlParser, SIGNAL(loadItem(XmlOutput *)), 
-           vgLog,       SLOT(loadItem(XmlOutput *)) );
-
-  QXmlInputSource source;
-
-  QString fname = QFileInfo( log_fname ).fileName();
-  fprintf(stderr, "Parsing %s\n", fname.latin1());
-
-  QFile logFile( log_fname );
-  logFile.open( IO_ReadOnly );
-
-  int lineNumber = 1;
-  QTextStream stream( &logFile );
-  stream.setEncoding( QTextStream::UnicodeUTF8 );
-  QString inputData = stream.readLine();
-  source.setData( inputData );
-  bool ok = reader.parse( &source, true );
-
-  while ( ok && !stream.atEnd() ) {
-    lineNumber++;
-    inputData = stream.readLine();
-    source.setData( inputData );
-    ok = reader.parseContinue();
+  QDomElement iptr1 = getElem( frame1, "ip"   );
+  QDomElement objt1 = getElem( frame1, "obj"  );
+  QDomElement func1 = getElem( frame1, "fn"   );
+  QDomElement diry1 = getElem( frame1, "dir"  );
+  QDomElement file1 = getElem( frame1, "file" );
+  QDomElement line1 = getElem( frame1, "line" );
+  
+  QDomElement iptr2 = getElem( frame2, "ip"   );
+  QDomElement objt2 = getElem( frame2, "obj"  );
+  QDomElement func2 = getElem( frame2, "fn"   );
+  QDomElement diry2 = getElem( frame2, "dir"  );
+  QDomElement file2 = getElem( frame2, "file" );
+  QDomElement line2 = getElem( frame2, "line" );
+  
+  /* a frame may be the 'same' as another even if it is
+     missing some data - do the best comparison we can */
+  
+  /* only field guaranteed to be present is 'ip'.
+     comparing 'ip' is dodgy, so we try our hardest not to. */
+  
+  /* test fields: 'dir', 'file', 'line' */
+  if ( !diry1.isNull() && !diry2.isNull() &&
+       !file1.isNull() && !file2.isNull() &&
+       !line1.isNull() && !line2.isNull() ) {
+    VKLM_DEBUG("frame test A");
+    if (diry1.text() != diry2.text() ||
+	file1.text() != file2.text() ||
+	line1.text() != line2.text())
+      return false;
+    return true;
   }
-
-  logFile.close();
-
-  if ( !ok ) {
-    fprintf(stderr, "Parse Error: Parsing failed on line no %d: '%s'\n", 
-	    lineNumber, inputData.latin1() );
+  
+  /* test fields: 'file', 'line' */
+  if ( !file1.isNull() && !file2.isNull() &&
+       !line1.isNull() && !line2.isNull() ) {
+    VKLM_DEBUG("frame test B");
+    if (file1.text() != file2.text() ||
+	line1.text() != line2.text())
+      return false;
+    return true;
   }
-
-  /* disconnect the parser so it no longer communicates with the logfile */
-  disconnect( xmlParser, SIGNAL(loadItem(XmlOutput *)), 
-              vgLog,       SLOT(loadItem(XmlOutput *)) );
-  return ok;
+  
+  /* test fields: 'fn', 'ip' */
+  if ( !func1.isNull() && !func2.isNull() ) {
+    VKLM_DEBUG("frame test C");
+    if (func1.text() != func2.text() ||
+	iptr1.text() != iptr2.text())
+      return false;
+    return true;
+  }
+  
+  VKLM_DEBUG("frame test D");
+  /* test field: 'ip' */
+  if (iptr1.text() != iptr2.text())
+    return false;
+  return true;
 }
 
 
-
-/* if --merge=<file_list> was specified on the cmd-line, called by
-   valkyrie->runTool(); if set via the open-file-dialog in the gui,
-   called by MemcheckView::openMergeFile().  either way, the value in
-   [valkyrie:merge] is what we need to know */
-bool VKLogMerge::mergeLogFiles( QString& log_list, QString& fname_out )
+/*
+  Heuristic function to test if errors are the 'same'
+*/
+bool matchingErrors( QDomElement err1, QDomElement err2 )
 {
-  QFile logFile( log_list );
-  QFileInfo fi( log_list );
+#define MAX_FRAMES_COMPARE 4
 
-  if ( !(fi.isFile() && logFile.open( IO_ReadOnly )) ) {
-    fprintf(stderr, "Open File Error: Unable to open logfile '%s'.\n", log_list.latin1() );
+  QDomElement kind1 = getElem( err1, "kind" );
+  QDomElement kind2 = getElem( err2, "kind" );
+
+  /* test #1: is the 'kind' the same */
+  if (kind1.text() != kind2.text()) {
+    VKLM_DEBUG("=> different error kind");
     return false;
   }
 
-  fprintf(stderr, "Merging logs in %s\n", fi.fileName().latin1());
+  /* - one stack per error */
+  QDomElement stack1 = getElem( err1, "stack" );
+  QDomElement stack2 = getElem( err2, "stack" );
 
-  /* iterate through the list of files, validating each one as we go.
-     if a file is valid, bung it in the list, else skip it.
-     if we bomb out > 5 times, offer a chance to cancel the operation. */
-  QStringList logFileList;
+  /* - one or more frames per stack */
+  QDomNodeList framelist1 = stack1.elementsByTagName( "frame" );
+  QDomNodeList framelist2 = stack2.elementsByTagName( "frame" );
 
-  QTextStream stream( &logFile );
-  while ( !stream.atEnd() ) {
-    QString temp = stream.readLine().simplifyWhiteSpace();
-    /* skip empty lines */
-    if ( temp.isEmpty() )
-      continue;
-    /* check re file perms and format */
-    temp = validateFile( temp );
-    if ( !temp.isNull() ) {
-      logFileList << temp;
-    } else {
-      /* die on first error */
+  /* test #2: error stacks have same num frames,
+     if either below our MAX_FRAMES_COMPARE */
+  if ( (framelist1.count() < MAX_FRAMES_COMPARE ||
+	framelist2.count() < MAX_FRAMES_COMPARE) &&
+       framelist1.count() != framelist2.count()) {
+    VKLM_DEBUG("=> different frame count");
+    return false;
+  }
+
+  /* test #3: all stack frames the same,
+     to MAX_FRAMES_COMPARE */
+  unsigned int i;
+  for (i=0; i<framelist1.count() && i<MAX_FRAMES_COMPARE; i++) {
+    QDomElement frame1 = framelist1.item(i).toElement();
+    QDomElement frame2 = framelist2.item(i).toElement();
+    if ( ! matchingFrames( frame1, frame2 ) ) {
+      VKLM_DEBUG("=> frames compare failed");
       return false;
     }
   }
-  logFile.close();
 
-  /* check there's a minimum of two files to merge */
-  if ( logFileList.count() < 2 ) {
-    fprintf(stderr, "Merge LogFiles Error: Need minimum of 2 files to merge.\n");
+  return true;
+}
+
+
+
+/*
+  Get matching 'pair' element, based on elemType.
+*/
+QDomElement getMatchingPair( QDomElement pairs_root,
+			     QDomElement matchElem_root,
+			     QString elemType )
+{
+  QString matchStr1 = getElem( matchElem_root, elemType ).text();
+//  VKLM_DEBUG("match1: %s", matchStr1.latin1());
+
+  QDomNodeList pairs = pairs_root.elementsByTagName( "pair" );
+  for (unsigned int i=0; i<pairs.count(); i++) {
+    QDomElement pair = pairs.item(i).toElement();
+    QString matchStr2 = getElem( pair, elemType ).text();
+//    VKLM_DEBUG("match2: %s", matchStr2.latin1());
+    if ( matchStr1 == matchStr2 )
+      return pair;
+ }
+  return QDomElement();
+}
+
+
+/*
+  Convert element value to integer.
+  Returns 0 if conversion fails
+*/
+int elemToNum( QDomElement elem, bool* ok=0 )
+{
+  QDomText domText = elem.firstChild().toText();
+  if (domText.isNull()) {
+    *ok = false;
+    return 0;
+  }
+  QString numStr = domText.data();
+  int sNum = numStr.toInt(ok);
+  return sNum;
+}
+
+
+/*
+  Update master's pair::count element
+  master::pair::count += slave::pair::count
+*/
+bool updateCount( QDomElement mCount, QDomElement sCount )
+{
+  /* get slave count */
+  bool ok;
+  int sNum = elemToNum( sCount, &ok );
+  if (!ok) {
+    vklmPrint("error: converting string to int: '%s'",
+	      sCount.text().latin1());
+    return false;
+  }
+  
+  /* get master count */
+  int mNum = elemToNum( mCount, &ok );
+  if (!ok) {
+    vklmPrint("error: converting string to int: '%s'",
+	      sCount.text().latin1());
     return false;
   }
 
-  /* create a 'master' LogFile, and parse the contents of file #1 into it.
-     subsequent files are parsed one-by-one, and compared with the
-     'master'; duplicates are merged where found, and stuff like
-     <errcounts> and <suppcounts> are incremented to reflect any
-     merges.  the 'master' contains the final output */
-  VGLog masterLog( logFileList[0] );
+  /* get the actual text node */
+  QDomText mCountDomText = mCount.firstChild().toText();
 
-  QString master_fname = QFileInfo( logFileList[0] ).fileName();
+  /* set the new number */
+  mCountDomText.setData( QString::number( mNum + sNum ) );
+  return true;
+}
 
-  /* Note: Need separate XMLParser for masterLog,
-     since XMLParser::reset() will delete the object pointers */
-  XMLParser xmlParser_mastr( this, true );
-  xmlParser_mastr.reset();
-  QXmlSimpleReader reader_mastr;
-  reader_mastr.setContentHandler( &xmlParser_mastr );
-  reader_mastr.setErrorHandler( &xmlParser_mastr );
 
-  /* parse the first logfile into the master */
-  bool parse_ok = parseLog( &xmlParser_mastr, &masterLog, 
-                            reader_mastr, logFileList[0] );
+/*
+  Update master's error::'what' element
+*/
+bool updateWhat( QDomElement mErr, QDomElement sErr ) 
+{
+  int mLeakedBytesNum  = elemToNum( getElem( mErr, "leakedbytes"  ) );
+  int mLeakedBlocksNum = elemToNum( getElem( mErr, "leakedblocks" ) );
+  
+  /* do our best to update the master's 'what' string 
+     - J and I will 'have words' if he changes this ... */
+  QDomElement mWhat = getElem( mErr, "what" );
+  QString mWhatStr = mWhat.text();
+  QStringList ms_what = QStringList::split( " ", mWhatStr );
+  
+  /* the first elem in the 'what' string is the no. of bytes */
+  ms_what[0] = QString::number( mLeakedBytesNum );
+  
+  /* if the 2nd elem is 'bytes', then the 4th elem is blocks */
+  if ( ms_what[1] == "bytes" ) {
+    ms_what[3] = QString::number( mLeakedBlocksNum );
 
-  if (!parse_ok) {   /* failed parse on master file: die */
-    fprintf(stderr, "Failed merge.\n");
-    return false;
+  } else {
+    /* else life is a bit more difficult - hope for the best 
+       [1] = direct, [3] = indirect, [7] = blocks */
+    QString sWhatStr = getElem( sErr, "what" ).text();
+    QStringList sl_what( QStringList::split( " ", sWhatStr ) );
+    bool ok;
+    
+    /* 'direct': remove the leading '(' */
+    int sl_num, ms_num;
+    sl_num = sl_what[1].remove( 0, 1 ).toInt(&ok);
+    if (ok)
+      ms_num = ms_what[1].remove( 0, 1 ).toInt(&ok);
+    if (!ok) {
+      vklmPrint("error: failed to parse 'what' string");
+      return false;
+    }
+    ms_what[1] = "(" + QString::number( ms_num + sl_num );
+    
+    /* indirect */
+    sl_num = sl_what[3].toInt(&ok);
+    if (ok)
+      ms_num = ms_what[3].toInt(&ok);
+    if (!ok) {
+      vklmPrint("error: failed to parse 'what' string");
+      return false;
+    }
+    
+    ms_what[3] = QString::number( ms_num + sl_num );
+    /* blocks */
+    ms_what[7] = QString::number( mLeakedBlocksNum );
   }
+  
+  /* finally! update master's what string */
+  QDomText mWhatDomText = mWhat.firstChild().toText();
+  mWhatDomText.setData( ms_what.join( " " ) );
+  return true;
+}
 
-  /* loop over the rest of the files in the list, and merge one-by-one */
-  QString slave_fname;
-  for ( unsigned int i=1; i<logFileList.count(); i++ ) {
 
-    XMLParser xmlParser_slave( this, true );
-    xmlParser_slave.reset();
-    QXmlSimpleReader reader_slave;
-    reader_slave.setContentHandler( &xmlParser_slave );
-    reader_slave.setErrorHandler( &xmlParser_slave );
 
-    /* set filename */
-    slave_fname = QFileInfo( logFileList[i] ).fileName();
+/*
+  Merge errors
+*/
+bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
+{
+  QDomElement sDocRoot = slave_doc.documentElement();
+  QDomElement mDocRoot = master_doc.documentElement();
 
-    /* create a new VGLog */
-    VGLog slaveLog( logFileList[i] );
+  QDomElemQVList sErrors = getErrors( sDocRoot );
+  QDomElemQVList mErrors = getErrors( mDocRoot );
+  QDomElement sErrCounts = getElem( sDocRoot, "errorcounts", -1 );
+  QDomElement mErrCounts = getElem( mDocRoot, "errorcounts", -1 );
+  
+  VKLM_DEBUG( "--- update matches (n=%d) --- ", sErrors.count());
 
-    /* parse the next file in the list into slaveLog */
-    parse_ok = parseLog( &xmlParser_slave, &slaveLog, 
-                         reader_slave, logFileList[i] );
-
-    if (!parse_ok) {   /* failed merge on slave file: skip file */
-      fprintf(stderr, "Skipping merge of slave file: %s\n", slave_fname.latin1());
+  /* --- find matches: update master err, delete slave err ---  */
+  
+  /* --- for each error in master ---  */
+  QDomElemQVList::Iterator mIter;
+  for ( mIter = mErrors.begin(); mIter != mErrors.end(); ++mIter ) {
+    QDomElement mErr = *mIter;
+    
+    VKLM_DEBUG("master err: '%s'",
+	       getElem( mErr, "unique" ).text().latin1());
+    VKLM_DEBUG("");
+    
+    /* get master errorcount::pair for this error::unique */
+    QDomElement mPair = getMatchingPair( mErrCounts, mErr, "unique" );
+    if (mPair.isNull()) {
+      VKLM_DEBUG("error: no matching master errorcount\n");
+//      return false;
       continue;
     }
-
-    /* tell user we are merging the slave into the master */
-    fprintf(stderr, "Merging %s <- %s\n", master_fname.latin1(), slave_fname.latin1());
-
-    bool merge_ok = masterLog.merge( &slaveLog );
-
-    if (!merge_ok) {   /* failed merge on slave file: skipped file */
-      fprintf(stderr, "Skipping merge of slave file: %s\n", slave_fname.latin1());
+    
+    /* --- for each error in slave --- */
+    QDomElemQVList::Iterator sIter;
+    for ( sIter = sErrors.begin(); sIter != sErrors.end(); ++sIter ) {
+      QDomElement sErr = *sIter;
+      
+      VKLM_DEBUG("slave err: '%s'",
+		 getElem( sErr, "unique" ).text().latin1());
+      
+      /* get slave errorcount::pair for this error::unique */
+      QDomElement sPair = 
+	getMatchingPair( sErrCounts, sErr, "unique" );
+      
+      if (sPair.isNull()) {
+	VKLM_DEBUG("error: no matching slave errorcount");
+//	return false;
+	continue;
+      }
+      
+      if ( matchingErrors(mErr, sErr) ) {
+	VKLM_DEBUG("=> matched");
+	/* --- master count += slave count --- */
+	if ( ! updateCount( getElem( mPair, "count" ),
+			    getElem( sPair, "count" ) ) ) {
+	  VKLM_DEBUG("error: failed master errorcount update");
+//	  return false;
+	  continue;
+	}
+	
+	/* --- remove error from slave list & xml --- */
+	sIter = sErrors.remove( sIter );
+	sDocRoot.removeChild( sErr );
+	sErrCounts.removeChild( sPair );
+	
+	/* sIter now points to next error
+	   - go back one, so for loop goes to next */
+	sIter--;
+      }
+      VKLM_DEBUG("");
     }
+    VKLM_DEBUG("\n");
   }
 
-  bool fileSaved = masterLog.save( fname_out );
+  VKLM_DEBUG( "--- append non-matches (n=%d) --- ", sErrors.count());
 
-  fprintf(stderr, "Merge Complete\n");
-  if ( fileSaved ) {
-    if (!fname_out.isEmpty()) {
-      fprintf(stderr, "Output saved to '%s'\n", fname_out.latin1());
+  /* --- if master has no errorcounts, but slave has remaining errors
+     => create new errorcounts element --- */
+  if ( mErrCounts.isNull() && sErrors.count() > 0 ) {
+    VKLM_DEBUG("creating new master errcounts");
+    
+    /* create <errorcounts></errorcounts> */
+    mErrCounts = master_doc.createElement( "errorcounts" );
+    
+    /* and insert before status_end */
+    QDomElement mStatus = getElem( mDocRoot, "status", 1 );
+    mDocRoot.insertBefore( mErrCounts, mStatus );
+    
+    /* set mErrCounts, so errors & counts know where to be appended */
+    QDomElement mErrCounts = getElem( mDocRoot, "errorcounts", -1 );
+  }
+  
+  /* --- append remaining slave errors to master --- */
+  QDomElemQVList::Iterator sIter;
+  for ( sIter = sErrors.begin(); sIter != sErrors.end(); ++sIter ) {
+    QDomElement sErr = *sIter;
+    VKLM_DEBUG("appending slave err: '%s'",
+	       getElem( sErr, "unique" ).text().latin1());
+    
+    /* get slave errorcount::pair for this error::unique */
+    QDomElement sPair = getMatchingPair( sErrCounts, sErr, "unique" );
+    if (sPair.isNull()) {
+      VKLM_DEBUG("error: no matching slave errorcount");
+//	return false;
+      continue;
     }
+    
+    /* --- append slave error to master --- */
+    mDocRoot.insertBefore( sErr, mErrCounts );
+    
+    /* --- append slave errorcount to master --- */
+    mErrCounts.appendChild( sPair );
+  }
+  VKLM_DEBUG("\n\n");
+
+  return true;
+}
+
+
+
+/*
+  Merge suppcounts
+*/
+bool mergeSuppCounts( QDomElement& mDocRoot, QDomElement& sDocRoot )
+{
+  QDomElement mSuppCounts = getElem( mDocRoot, "suppcounts" );
+  QDomElement sSuppCounts = getElem( sDocRoot, "suppcounts" );
+
+  QDomNodeList mPairs = mSuppCounts.elementsByTagName( "pair" );
+  QDomNodeList sPairs = sSuppCounts.elementsByTagName( "pair" );
+
+  VKLM_DEBUG("--- update matches (n=%d) ---", sPairs.count());
+
+  /* --- for each suppcount::pair in master --- */
+  for (unsigned int mIdx=0; mIdx<mPairs.count(); mIdx++) {
+    QDomElement mPair = mPairs.item(mIdx).toElement();
+    QString     mStr  = getElem( mPair, "name" ).text();
+
+    VKLM_DEBUG("master suppcount pair: '%s'", mStr.latin1());
+
+    /* --- for each suppcount::pair in slave --- */
+    for (unsigned int sIdx=0; sIdx<sPairs.count(); sIdx++) {
+      QDomElement sPair = sPairs.item(sIdx).toElement();
+      QString     sStr  = getElem( sPair, "name" ).text();
+      VKLM_DEBUG("slave  suppcount pair: '%s'", sStr.latin1());
+
+      if ( mStr == sStr ) { /* matching pair */
+	VKLM_DEBUG("=> matched");
+	/* --- master pair::count += slave pair::count --- */
+	if ( ! updateCount( getElem( mPair, "count" ),
+			    getElem( sPair, "count" ) ) ) {
+	  VKLM_DEBUG("error: failed master suppcount update");
+	  //	return false;
+	  continue;
+	}
+
+	/* --- remove error from xml (auto removes from list) --- */
+	sSuppCounts.removeChild( sPair );
+
+	/* there can't be more than one match, so go to next mPair */
+	break;
+      }
+      VKLM_DEBUG("");
+    }
+    VKLM_DEBUG("\n");
+  }
+
+  VKLM_DEBUG("--- append non-matches (n=%d) ---", sPairs.count());
+
+  /* Note: guaranteed to have a suppcounts element, unlike errcounts */
+
+  /* --- append remaining slave suppcount::pairs to master --- */
+  for (unsigned int sIdx=0; sIdx<sPairs.count(); sIdx++) {
+    QDomElement sPair = sPairs.item(sIdx).toElement();
+    VKLM_DEBUG("appending slave suppcount pair: '%s'",
+	       getElem( sPair, "name" ).text().latin1());
+    mSuppCounts.appendChild( sPair );
+  }
+  VKLM_DEBUG("\n\n");
+
+  return true;
+}
+
+
+
+
+/*
+  Merge leak errors
+*/
+bool mergeLeakErrors( QDomElement& mDocRoot, QDomElement& sDocRoot )
+{
+  QDomElemQVList sLeakErrors = getErrors( sDocRoot, true/*leak*/ );
+  QDomElemQVList mLeakErrors = getErrors( mDocRoot, true/*leak*/ );
+
+  VKLM_DEBUG("--- update matches (n=%d) ---", sLeakErrors.count());
+
+  /* --- for each leak_error in master ---  */
+  QDomElemQVList::Iterator mIter;
+  for ( mIter = mLeakErrors.begin();
+	mIter != mLeakErrors.end(); ++mIter ) {
+    QDomElement mErr = *mIter;
+
+    VKLM_DEBUG("master leak_err: '%s'",
+	       getElem( mErr, "unique" ).text().latin1());
+
+    /* --- for each leak_error in slave ---  */
+    QDomElemQVList::Iterator sIter;
+    for ( sIter = sLeakErrors.begin();
+	  sIter != sLeakErrors.end(); ++sIter ) {
+      QDomElement sErr = *sIter;
+
+      VKLM_DEBUG("slave leak_err: '%s'",
+		 getElem( sErr, "unique" ).text().latin1());
+
+      if ( matchingErrors(mErr, sErr) ) {
+	VKLM_DEBUG("=> matched");
+
+	/* --- update master leakedBytes, leakedBlocks, what --- */
+
+	if ( ! updateCount( getElem( mErr, "leakedbytes"  ),
+			    getElem( sErr, "leakedbytes"  ) ) ) {
+	  VKLM_DEBUG("error: failed master leakedbytes update");
+//	    return false;
+	  continue;
+	}
+	if ( ! updateCount( getElem( mErr, "leakedblocks" ),
+		     getElem( sErr, "leakedblocks" ) ) ) {
+	  VKLM_DEBUG("error: failed master leakedblocks update");
+//	    return false;
+	  continue;
+	}
+	if ( ! updateWhat( mErr, sErr ) ) {
+	  VKLM_DEBUG("error: failed to update master 'what'");
+//	    return false;
+	  continue;
+	}
+
+	/* --- remove error from slave list & xml --- */
+	sIter = sLeakErrors.remove( sIter );
+	sDocRoot.removeChild( sErr );
+
+	/* sIter now points to next error
+	   - go back one, so for loop goes to next */
+	sIter--;
+      }
+      VKLM_DEBUG("");
+    }
+    VKLM_DEBUG("\n");
+  }
+
+  VKLM_DEBUG("--- append non-matches (n=%d) ---", sLeakErrors.count());
+
+  /* --- append remaining slave leak_errors to master --- */
+  QDomElemQVList::Iterator sIter;
+  for ( sIter = sLeakErrors.begin();
+	sIter != sLeakErrors.end(); ++sIter ) {
+    VKLM_DEBUG("appending slave leak_err: '%s'",
+	       getElem( *sIter, "unique" ).text().latin1());
+    
+    mDocRoot.appendChild( *sIter );
+  }
+  return true;
+}
+
+
+/*
+  Merge Valgrind Logs: master_doc <= slave_doc
+*/
+bool mergeVgLogs( QDomDocument& master_doc, QDomDocument& slave_doc )
+{
+  QDomElement sDocRoot = slave_doc.documentElement();
+  QDomElement mDocRoot = master_doc.documentElement();
+
+  /* check the same tool was used */
+  QDomElement sTool = getElem( sDocRoot, "tool" );
+  QDomElement mTool = getElem( mDocRoot, "tool" );
+  if (sTool.text() != mTool.text()) {
+    vklmPrint("error: different tool used for this log");
+    return false;
+  }
+
+  /* check the same binary was used */
+  QDomElement sExe = getElem( getElem( sDocRoot, "argv" ), "exe" );
+  QDomElement mExe = getElem( getElem( mDocRoot, "argv" ), "exe" );
+  if (sExe.text() != mExe.text()) {
+    vklmPrint("error: different executable used for this log");
+    return false;
+  }
+
+  /* merge errors */
+  VKLM_DEBUG("=== MERGE ERRORS ===\n");
+  if (getErrors( sDocRoot ).count() != 0) {
+    mergeErrors( master_doc, slave_doc );
   } else {
-    fprintf(stderr, "Failed to save result\n");
+    VKLM_DEBUG("no errors to merge");
+  }
+ 
+  /* merge suppcounts */
+  VKLM_DEBUG("=== MERGE SUPPCOUNTS ===\n");
+  QDomElement sSuppCounts = getElem( sDocRoot, "suppcounts" );
+  if ( sSuppCounts.elementsByTagName( "pair" ).count() != 0) {
+    mergeSuppCounts( mDocRoot, sDocRoot );
+  } else {
+    VKLM_DEBUG("no suppcounts to merge");
   }
 
+  /* merge leak_errors */
+  VKLM_DEBUG("=== MERGE LEAKCOUNTS ===\n");
+  if (getErrors( sDocRoot, true/*leak*/ ).count() != 0) {
+    mergeLeakErrors( mDocRoot, sDocRoot );
+  } else {
+    VKLM_DEBUG("no leak errors to merge");
+  }
   return true;
 }
