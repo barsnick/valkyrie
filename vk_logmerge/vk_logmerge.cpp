@@ -290,64 +290,18 @@ bool updateLeakWhat( QDomElement mErr, QDomElement sErr )
   mLeakedBytesNum  += sLeakedBytesNum;
   mLeakedBlocksNum += mLeakedBlocksNum;
 
-  /* now comes some delicate operations on the 'what' string.
-     ref: memcheck/mac_leakcheck.c::MAC_(pp_LeakError)
-    
-     perhaps better off using qregexp...
+  /* don't try to parse the current 'what' strings
+     - not intended for machine consumption.
+     just re-create a what string of our own.
+     (not distinguishing direct/indirect errors)
   */
+  QString mWhatStr = QString::number( mLeakedBytesNum ) +
+    " bytes in " + QString::number( mLeakedBlocksNum ) + 
+    " blocks are possibly (indirectly?) lost";
 
-  /* do our best to update the master's 'what' string 
-     - J and I will 'have words' if he changes this ... */
   QDomElement mWhat = getElem( mErr, "what" );
-  QString mWhatStr = mWhat.text();
-  QStringList ms_what = QStringList::split( " ", mWhatStr );
-  
-  /* the first elem in the 'what' string is the no. of bytes */
-  ms_what[0] = QString::number( mLeakedBytesNum );
-
-  /* if the 2nd elem is 'bytes', then the 4th elem is blocks */
-  if ( ms_what[1] == "bytes" ) {
-    ms_what[3] = QString::number( mLeakedBlocksNum );
-
-  } else {
-    /* else life is a bit more difficult - hope for the best 
-       [1] = direct, [3] = indirect, [7] = blocks */
-    QString sWhatStr = getElem( sErr, "what" ).text();
-    QStringList sl_what( QStringList::split( " ", sWhatStr ) );
-    bool ok;
-    
-    /* 'direct': remove the leading '(' */
-    unsigned long sl_num, ms_num;
-    sl_num = sl_what[1].remove( 0, 1 ).toULong(&ok);
-    if (ok)
-      ms_num = ms_what[1].remove( 0, 1 ).toULong(&ok);
-    if (!ok) {
-      vklmPrint("error: failed to parse 'what' string");
-      return false;
-    }
-    ms_what[1] = "(" + QString::number( ms_num + sl_num );
-    
-    /* indirect */
-    sl_num = sl_what[3].toULong(&ok);
-    if (ok)
-      ms_num = ms_what[3].toULong(&ok);
-    if (!ok) {
-      vklmPrint("error: failed to parse 'what' string");
-      return false;
-    }
-    
-    ms_what[3] = QString::number( ms_num + sl_num );
-    /* blocks */
-    ms_what[7] = QString::number( mLeakedBlocksNum );
-  }
-
-  /* TODO:
-     if master == definitely && slave == possibly,
-     => set master = possibly? */
-  
-  /* finally! update master's what string */
   QDomText mWhatDomText = mWhat.firstChild().toText();
-  mWhatDomText.setData( ms_what.join( " " ) );
+  mWhatDomText.setData( mWhatStr );
   return true;
 }
 
