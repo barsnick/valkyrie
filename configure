@@ -804,9 +804,9 @@ INCLUDEPATH += $QMAKE_INCLUDEPATH
 QMAKE_MOC   = $QT_MOC
 QMAKE_UIC   = $QT_UIC -L $QT_DIR/plugins
 QMAKE_QMAKE = $QT_QMAKE
-QMAKE_INCDIR_QT = $QT_DIR/include
-QMAKE_LIBDIR_QT = $QT_DIR/lib
-QMAKE_RTLDIR_QT = $QT_DIR/lib
+QMAKE_INCDIR_QT = $QT_INC_DIR
+QMAKE_LIBDIR_QT = $QT_LIB_DIR
+QMAKE_RTLDIR_QT = $QT_LIB_DIR
 QMAKESPEC       = $QT_DIR/mkspecs/linux-g++
 
 # paths to valkyrie things
@@ -814,8 +814,8 @@ QMAKE_ABSOLUTE_SOURCE_ROOT = $VK_SOURCE_TREE
 QT_SOURCE_TREE    = $VK_SOURCE_TREE
 QT_BUILD_TREE     = $VK_BUILD_TREE
 QT_INSTALL_PREFIX = $VK_INSTALL_PREFIX
-docs.path = $VK_INSTALL_DOCS
-bins.path = $VK_INSTALL_BIN
+docs.path         = $VK_INSTALL_DOCS
+bins.path         = $VK_INSTALL_BIN
 
 
 ######################################################################
