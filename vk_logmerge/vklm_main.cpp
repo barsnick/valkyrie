@@ -33,7 +33,7 @@ void vklmPrint( const char* msg, ... )
 
 void usage()
 {
-  fprintf(stderr, "%s, a valgrind log file merger.  Version 0.9.0, 25-July-2005.\n\n", progname);
+  fprintf(stderr, "%s, a Valgrind XML log file merger.  Version 0.9.0, 25-July-2005.\n\n", progname);
 
   fprintf(stderr, "  usage: %s [flags and input files in any order]\n\n", progname);
 
@@ -42,7 +42,7 @@ void usage()
   fprintf(stderr, "    -f log_list   obtain input files from log_list (one per line)\n");
   fprintf(stderr, "    -o outfile    write merged output to outfile\n\n");
 
-  fprintf(stderr, "  At least 2 input files must be given.\n\n");
+  fprintf(stderr, "  At least 1 input file must be given.\n\n");
 
   fprintf(stderr, "  If no '-o outfile' is given, writes to standard output.\n\n");
 
@@ -84,10 +84,6 @@ bool mergeVgLogList( QStringList& log_files,
     vklmPrint("no input logs given\n");
     return false;
   }
-  if ( log_files.count() < 2 ) {
-    vklmPrint("need minimum of 2 files to merge\n");
-    return false;
-  }
 
   if (vklm_verbosity > 0)
     vklmPrint("merging logs...");
@@ -95,7 +91,7 @@ bool mergeVgLogList( QStringList& log_files,
   /* read first parseable file into master */
   QString master_fname;
   unsigned int lognum;
-  for (lognum=0; lognum<log_files.count()-1; lognum++) {
+  for (lognum=0; lognum<log_files.count(); lognum++) {
     /* get simple filename */
     master_fname = QFileInfo( log_files[0] ).fileName();
 
@@ -103,13 +99,8 @@ bool mergeVgLogList( QStringList& log_files,
       break;
     vklmPrint("skipping merge of file: '%s'\n", master_fname.latin1());
   }
-  if (lognum >= log_files.count()-1) {
-    vklmPrint("need minimum of 2 files to merge\n");
-    return false;
-  }
 
   /* loop over the rest of the files in the list, and merge one-by-one */
-  bool merged_once = false;
   for (lognum++; lognum<log_files.count(); lognum++) {
     /* get simple filename */
     QString slave_fname = QFileInfo( log_files[lognum] ).fileName();
@@ -128,13 +119,7 @@ bool mergeVgLogList( QStringList& log_files,
     }
     if (!ok) {   /* failed parse/merge of slave file => skipped file */
       vklmPrint("skipping merge of file: '%s'\n", slave_fname.latin1());
-    } else {
-      merged_once = true;
     }
-  }
-  if (!merged_once) {
-    vklmPrint("need minimum of 2 files to merge\n");
-    return false;
   }
   if (vklm_verbosity > 0)
     vklmPrint("merge complete\n");
