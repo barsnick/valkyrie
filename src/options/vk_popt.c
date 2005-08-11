@@ -435,7 +435,7 @@ static void vkSingleOptionHelp( FILE * fp,
 
   if ( helpdesc ) {
     char * le = left + strlen( left );
-    *le++ = '=';
+    *le++ = ' ';
     strcpy( le, helpdesc );
     le += strlen(le);
     *le = '\0';
