@@ -19,6 +19,9 @@
 const char* progname=0;
 int vklm_verbosity=0;
 
+#define SKIP_FILE_ON_ERROR 0  /* 0: die, 1: skip */
+
+
 /* print message to stderr */
 void vklmPrint( const char* msg, ... )
 {
@@ -79,7 +82,7 @@ bool parseLog( QString file_path, QDomDocument& vgLog )
 bool mergeVgLogList( QStringList& log_files, 
 		     QDomDocument& master_log/*out*/ )
 {
-  /* check there's a minimum of two files to merge */
+  /* check there's a minimum of one file */
   if ( log_files.count() < 1 ) {
     vklmPrint("No input files specified.  For help, try -h.");
     return false;
@@ -88,20 +91,37 @@ bool mergeVgLogList( QStringList& log_files,
   if (vklm_verbosity > 0)
     vklmPrint("merging logs...");
 
-  /* read first parseable file into master */
   QString master_fname;
-  unsigned int lognum;
+  unsigned int lognum=0;
+
+#if SKIP_FILE_ON_ERROR
+  /* read first parseable file into master */
   for (lognum=0; lognum<log_files.count(); lognum++) {
     /* get simple filename */
     master_fname = QFileInfo( log_files[0] ).fileName();
 
     if ( parseLog( log_files[lognum], master_log ) )
       break;
-    vklmPrint("skipping merge of file: '%s'\n", master_fname.latin1());
+    vklmPrint("skipping file: '%s'\n", master_fname.latin1());
+  }
+#else // DIE
+  /* read first file into master */
+  master_fname = QFileInfo( log_files[0] ).fileName();
+  if ( ! parseLog( log_files[0], master_log ) ) {
+    vklmPrint("failed to parse file: '%s'\n", master_fname.latin1());
+    return false;
+  }
+#endif
+
+  lognum++;
+
+  if (lognum >= log_files.count()) {
+    if (vklm_verbosity > 0)
+      vklmPrint("no logs to merge\n");
   }
 
   /* loop over the rest of the files in the list, and merge one-by-one */
-  for (lognum++; lognum<log_files.count(); lognum++) {
+  for (; lognum<log_files.count(); lognum++) {
     /* get simple filename */
     QString slave_fname = QFileInfo( log_files[lognum] ).fileName();
 
@@ -110,19 +130,32 @@ bool mergeVgLogList( QStringList& log_files,
     //  QDomDocument slave_log( "valgrind" );
 
     bool ok = parseLog( log_files[lognum], slave_log );
-    if (ok) {    
-      if (vklm_verbosity > 0)
-	vklmPrint("merging %s <- %s", master_fname.latin1(), slave_fname.latin1());
-
-      /* --- merge the logs --- */
-      ok = mergeVgLogs( master_log, slave_log );
-    }
     if (!ok) {   /* failed parse/merge of slave file => skipped file */
-      vklmPrint("skipping merge of file: '%s'\n", slave_fname.latin1());
+#if SKIP_FILE_ON_ERROR
+      vklmPrint("skipping file: '%s'\n", slave_fname.latin1());
+      continue;
+#else // DIE
+      vklmPrint("failed to parse file: '%s'\n", slave_fname.latin1());
+      return false;
+#endif
+    }
+    if (vklm_verbosity > 0)
+      vklmPrint("merging %s <- %s", master_fname.latin1(), slave_fname.latin1());
+    
+    /* --- merge the logs --- */
+    ok = mergeVgLogs( master_log, slave_log );
+    if (!ok) {   /* failed parse/merge of slave file => skipped file */
+#if SKIP_FILE_ON_ERROR
+      vklmPrint("skipping file: '%s'\n", slave_fname.latin1());
+      continue;
+#else // DIE
+      vklmPrint("merge failed for file: '%s'\n", slave_fname.latin1());
+      return false;
+#endif
     }
   }
   if (vklm_verbosity > 0)
-    vklmPrint("merge complete\n");
+    vklmPrint("done.\n");
 
   return true;
 }
@@ -194,6 +227,7 @@ int main ( int argc, char* argv[] )
   */
   QDomDocument mergedLog;    // TODO: give DTD: QDomDocument( "valgrind" );
   if ( ! mergeVgLogList( log_files, mergedLog ) ) {
+    vklmPrint("quitting...\n");
     return 1;
   }
 

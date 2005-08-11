@@ -229,15 +229,24 @@ QDomElement getMatchingPair( QDomElement pairs_root,
   Convert element value to integer.
   Returns 0 if conversion fails
 */
-unsigned long elemToULong( QDomElement elem, bool* ok=0 )
+unsigned long elemToULong( QDomElement elem, bool* ok )
 {
   QDomText domText = elem.firstChild().toText();
   if (domText.isNull()) {
+    vklmPrint("error converting string to number: element not a 'text' element: '%s'",
+	      elem.text().latin1());
     *ok = false;
     return 0;
   }
   QString numStr = domText.data();
-  return numStr.toULong(ok);
+  unsigned long num = numStr.toULong(ok);
+  if (!ok) {
+    vklmPrint("error: converting string to number: '%s'",
+	      elem.text().latin1());
+    *ok = false;
+    return 0;
+  }
+  return num;
 }
 
 
@@ -250,19 +259,11 @@ bool updateCount( QDomElement mCount, QDomElement sCount )
   /* get slave count */
   bool ok;
   unsigned long sNum = elemToULong( sCount, &ok );
-  if (!ok) {
-    vklmPrint("error: converting string to int: '%s'",
-	      sCount.text().latin1());
-    return false;
-  }
+  if (!ok) return false;
   
   /* get master count */
   unsigned long mNum = elemToULong( mCount, &ok );
-  if (!ok) {
-    vklmPrint("error: converting string to int: '%s'",
-	      sCount.text().latin1());
-    return false;
-  }
+  if (!ok) return false;
 
   /* get the actual text node */
   QDomText mCountDomText = mCount.firstChild().toText();
@@ -278,13 +279,18 @@ bool updateCount( QDomElement mCount, QDomElement sCount )
 */
 bool updateLeakWhat( QDomElement mErr, QDomElement sErr ) 
 {
+  bool ok;
   unsigned long mLeakedBytesNum, mLeakedBlocksNum;
-  mLeakedBytesNum  = elemToULong( getElem( mErr, "leakedbytes"  ) );
-  mLeakedBlocksNum = elemToULong( getElem( mErr, "leakedblocks" ) );
+  mLeakedBytesNum  = elemToULong( getElem( mErr, "leakedbytes"  ), &ok );
+  if (!ok) return false;
+  mLeakedBlocksNum = elemToULong( getElem( mErr, "leakedblocks" ), &ok );
+  if (!ok) return false;
 
   unsigned long sLeakedBytesNum, sLeakedBlocksNum;
-  sLeakedBytesNum  = elemToULong( getElem( sErr, "leakedbytes"  ) );
-  sLeakedBlocksNum = elemToULong( getElem( sErr, "leakedblocks" ) );
+  sLeakedBytesNum  = elemToULong( getElem( sErr, "leakedbytes"  ), &ok );
+  if (!ok) return false;
+  sLeakedBlocksNum = elemToULong( getElem( sErr, "leakedblocks" ), &ok );
+  if (!ok) return false;
   
   /* update the master's bytes and blocks counts */
   mLeakedBytesNum  += sLeakedBytesNum;
@@ -339,10 +345,8 @@ bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
     /* get master errorcount::pair for this error::unique */
     QDomElement mPair = getMatchingPair( mErrCounts, mErr, "unique" );
     if (mPair.isNull()) {
-      if (vklm_verbosity > 1)
-	vklmPrint("error: no matching master errorcount\n");
-//      return false;
-      continue;
+      vklmPrint("error: no matching master errorcount\n");
+      return false;
     }
     
     /* --- for each error in slave --- */
@@ -360,8 +364,7 @@ bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
       
       if (sPair.isNull()) {
 	vklmPrint("error: no matching slave errorcount");
-//	return false;
-	continue;
+	return false;
       }
       
       if ( matchingErrors(mErr, sErr) ) {
@@ -372,8 +375,7 @@ bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
 	if ( ! updateCount( getElem( mPair, "count" ),
 			    getElem( sPair, "count" ) ) ) {
 	  vklmPrint("error: failed master errorcount update");
-//	  return false;
-	  continue;
+	  return false;
 	}
 	
 	/* --- remove error from slave list & xml --- */
@@ -436,8 +438,7 @@ bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
     QDomElement sPair = getMatchingPair( sErrCounts, sErr, "unique" );
     if (sPair.isNull()) {
       vklmPrint("error: no matching slave errorcount");
-//	return false;
-      continue;
+      return false;
     }
     
     /* --- append slave error to master --- */
@@ -488,8 +489,7 @@ bool mergeSuppCounts( QDomElement& mDocRoot, QDomElement& sDocRoot )
 	if ( ! updateCount( getElem( mPair, "count" ),
 			    getElem( sPair, "count" ) ) ) {
 	  vklmPrint("error: failed master suppcount update");
-	  //	return false;
-	  continue;
+	  return false;
 	}
 
 	/* --- remove error from xml (auto removes from list) --- */
@@ -564,19 +564,16 @@ bool mergeLeakErrors( QDomElement& mDocRoot, QDomElement& sDocRoot )
 	if ( ! updateCount( getElem( mErr, "leakedbytes"  ),
 			    getElem( sErr, "leakedbytes"  ) ) ) {
 	  vklmPrint("error: failed master leakedbytes update");
-//	    return false;
-	  continue;
+	  return false;
 	}
 	if ( ! updateCount( getElem( mErr, "leakedblocks" ),
 		     getElem( sErr, "leakedblocks" ) ) ) {
 	  vklmPrint("error: failed master leakedblocks update");
-//	    return false;
-	  continue;
+	  return false;
 	}
 	if ( ! updateLeakWhat( mErr, sErr ) ) {
-	  vklmPrint("error: failed to update master 'what'");
-//	    return false;
-	  continue;
+	  vklmPrint("error: failed to update master 'what' string");
+	  return false;
 	}
 
 	/* --- remove error from slave list & xml --- */
@@ -623,7 +620,7 @@ bool mergeVgLogs( QDomDocument& master_doc, QDomDocument& slave_doc )
   QDomElement sTool = getElem( sDocRoot, "tool" );
   QDomElement mTool = getElem( mDocRoot, "tool" );
   if (sTool.text() != mTool.text()) {
-    vklmPrint("error: different tool used for this log");
+    vklmPrint("error: different tool used for this logfile");
     return false;
   }
 
@@ -631,7 +628,7 @@ bool mergeVgLogs( QDomDocument& master_doc, QDomDocument& slave_doc )
   QDomElement sExe = getElem( getElem( sDocRoot, "argv" ), "exe" );
   QDomElement mExe = getElem( getElem( mDocRoot, "argv" ), "exe" );
   if (sExe.text() != mExe.text()) {
-    vklmPrint("error: different executable used for this log");
+    vklmPrint("error: different executable used for this logfile");
     return false;
   }
 
@@ -641,7 +638,8 @@ bool mergeVgLogs( QDomDocument& master_doc, QDomDocument& slave_doc )
     vklmPrint("=== MERGE ERRORS ===\n");
   }
   if (getErrors( sDocRoot ).count() != 0) {
-    mergeErrors( master_doc, slave_doc );
+    if ( ! mergeErrors( master_doc, slave_doc ) )
+      return false;
   } else {
     if (vklm_verbosity > 1)
       vklmPrint("no errors to merge");
@@ -654,7 +652,8 @@ bool mergeVgLogs( QDomDocument& master_doc, QDomDocument& slave_doc )
   }
   QDomElement sSuppCounts = getElem( sDocRoot, "suppcounts" );
   if ( sSuppCounts.elementsByTagName( "pair" ).count() != 0) {
-    mergeSuppCounts( mDocRoot, sDocRoot );
+    if ( ! mergeSuppCounts( mDocRoot, sDocRoot ) )
+      return false;
   } else {
     if (vklm_verbosity > 1)
       vklmPrint("no suppcounts to merge");
@@ -666,7 +665,8 @@ bool mergeVgLogs( QDomDocument& master_doc, QDomDocument& slave_doc )
     vklmPrint("=== MERGE LEAK ERRORS ===\n");
   }
   if (getErrors( sDocRoot, true/*leak*/ ).count() != 0) {
-    mergeLeakErrors( mDocRoot, sDocRoot );
+    if ( ! mergeLeakErrors( mDocRoot, sDocRoot ) )
+      return false;
   } else {
     if (vklm_verbosity > 1)
       vklmPrint("no leak errors to merge");
