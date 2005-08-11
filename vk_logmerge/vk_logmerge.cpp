@@ -109,7 +109,8 @@ bool matchingFrames( QDomElement frame1, QDomElement frame2 )
   if ( !diry1.isNull() && !diry2.isNull() &&
        !file1.isNull() && !file2.isNull() &&
        !line1.isNull() && !line2.isNull() ) {
-    VKLM_DEBUG("frame test A");
+    if (vklm_verbosity > 2)
+      vklmPrint("frame test A: dir, file, line");
     if (diry1.text() != diry2.text() ||
 	file1.text() != file2.text() ||
 	line1.text() != line2.text())
@@ -120,7 +121,8 @@ bool matchingFrames( QDomElement frame1, QDomElement frame2 )
   /* test fields: 'file', 'line' */
   if ( !file1.isNull() && !file2.isNull() &&
        !line1.isNull() && !line2.isNull() ) {
-    VKLM_DEBUG("frame test B");
+    if (vklm_verbosity > 2)
+      vklmPrint("frame test B: file, line");
     if (file1.text() != file2.text() ||
 	line1.text() != line2.text())
       return false;
@@ -129,14 +131,16 @@ bool matchingFrames( QDomElement frame1, QDomElement frame2 )
   
   /* test fields: 'fn', 'ip' */
   if ( !func1.isNull() && !func2.isNull() ) {
-    VKLM_DEBUG("frame test C");
+    if (vklm_verbosity > 2)
+      vklmPrint("frame test C: func, ip");
     if (func1.text() != func2.text() ||
 	iptr1.text() != iptr2.text())
       return false;
     return true;
   }
   
-  VKLM_DEBUG("frame test D");
+  if (vklm_verbosity > 2)
+    vklmPrint("frame test D: ip only");
   /* test field: 'ip' */
   if (iptr1.text() != iptr2.text())
     return false;
@@ -158,7 +162,8 @@ bool matchingErrors( QDomElement err1, QDomElement err2 )
 
   /* test #1: is the 'kind' the same */
   if (kind1.text() != kind2.text()) {
-    VKLM_DEBUG("=> different error kind");
+    if (vklm_verbosity > 2)
+      vklmPrint("=> different error kind");
     return false;
   }
 
@@ -175,7 +180,8 @@ bool matchingErrors( QDomElement err1, QDomElement err2 )
   if ( (framelist1.count() < MAX_FRAMES_COMPARE ||
 	framelist2.count() < MAX_FRAMES_COMPARE) &&
        framelist1.count() != framelist2.count()) {
-    VKLM_DEBUG("=> different frame count");
+    if (vklm_verbosity > 2)
+      vklmPrint("=> different number of frames");
     return false;
   }
 
@@ -186,7 +192,8 @@ bool matchingErrors( QDomElement err1, QDomElement err2 )
     QDomElement frame1 = framelist1.item(i).toElement();
     QDomElement frame2 = framelist2.item(i).toElement();
     if ( ! matchingFrames( frame1, frame2 ) ) {
-      VKLM_DEBUG("=> frames compare failed");
+      if (vklm_verbosity > 2)
+	vklmPrint("=> stack comparison failed");
       return false;
     }
   }
@@ -204,13 +211,13 @@ QDomElement getMatchingPair( QDomElement pairs_root,
 			     QString elemType )
 {
   QString matchStr1 = getElem( matchElem_root, elemType ).text();
-//  VKLM_DEBUG("match1: %s", matchStr1.latin1());
+  //    vklmPrint("pair match1: %s", matchStr1.latin1());
 
   QDomNodeList pairs = pairs_root.elementsByTagName( "pair" );
   for (unsigned int i=0; i<pairs.count(); i++) {
     QDomElement pair = pairs.item(i).toElement();
     QString matchStr2 = getElem( pair, elemType ).text();
-//    VKLM_DEBUG("match2: %s", matchStr2.latin1());
+    //      vklmPrint("pair match2: %s", matchStr2.latin1());
     if ( matchStr1 == matchStr2 )
       return pair;
  }
@@ -359,7 +366,8 @@ bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
   QDomElement sErrCounts = getElem( sDocRoot, "errorcounts", -1 );
   QDomElement mErrCounts = getElem( mDocRoot, "errorcounts", -1 );
   
-  VKLM_DEBUG( "--- update matches (n=%d) --- ", sErrors.count());
+  if (vklm_verbosity > 1)
+    vklmPrint( "--- update matches (n=%d) --- ", sErrors.count());
 
   /* --- find matches: update master err, delete slave err ---  */
   
@@ -368,14 +376,17 @@ bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
   for ( mIter = mErrors.begin(); mIter != mErrors.end(); ++mIter ) {
     QDomElement mErr = *mIter;
     
-    VKLM_DEBUG("master err: '%s'",
-	       getElem( mErr, "unique" ).text().latin1());
-    VKLM_DEBUG("");
+    if (vklm_verbosity > 1)
+      vklmPrint("master err: '%s'",
+		getElem( mErr, "unique" ).text().latin1());
+    if (vklm_verbosity > 2)
+      vklmPrint(" ");
     
     /* get master errorcount::pair for this error::unique */
     QDomElement mPair = getMatchingPair( mErrCounts, mErr, "unique" );
     if (mPair.isNull()) {
-      VKLM_DEBUG("error: no matching master errorcount\n");
+      if (vklm_verbosity > 1)
+	vklmPrint("error: no matching master errorcount\n");
 //      return false;
       continue;
     }
@@ -385,25 +396,28 @@ bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
     for ( sIter = sErrors.begin(); sIter != sErrors.end(); ++sIter ) {
       QDomElement sErr = *sIter;
       
-      VKLM_DEBUG("slave err: '%s'",
-		 getElem( sErr, "unique" ).text().latin1());
+      if (vklm_verbosity > 1)
+	vklmPrint("slave err: '%s'",
+		  getElem( sErr, "unique" ).text().latin1());
       
       /* get slave errorcount::pair for this error::unique */
       QDomElement sPair = 
 	getMatchingPair( sErrCounts, sErr, "unique" );
       
       if (sPair.isNull()) {
-	VKLM_DEBUG("error: no matching slave errorcount");
+	vklmPrint("error: no matching slave errorcount");
 //	return false;
 	continue;
       }
       
       if ( matchingErrors(mErr, sErr) ) {
-	VKLM_DEBUG("=> matched");
+	if (vklm_verbosity > 1)
+	  vklmPrint("=> matched");
+
 	/* --- master count += slave count --- */
 	if ( ! updateCount( getElem( mPair, "count" ),
 			    getElem( sPair, "count" ) ) ) {
-	  VKLM_DEBUG("error: failed master errorcount update");
+	  vklmPrint("error: failed master errorcount update");
 //	  return false;
 	  continue;
 	}
@@ -429,17 +443,21 @@ bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
 	   faster, especially if can expect errors in similar order.
 	*/
       }
-      VKLM_DEBUG("");
+      if (vklm_verbosity > 2)
+	vklmPrint(" ");
     }
-    VKLM_DEBUG("\n");
+    if (vklm_verbosity > 1)
+      vklmPrint("\n");
   }
 
-  VKLM_DEBUG( "--- append non-matches (n=%d) --- ", sErrors.count());
+  if (vklm_verbosity > 1)
+    vklmPrint( "--- append non-matches (n=%d) --- ", sErrors.count());
 
   /* --- if master has no errorcounts, but slave has remaining errors
      => create new errorcounts element --- */
   if ( mErrCounts.isNull() && sErrors.count() > 0 ) {
-    VKLM_DEBUG("creating new master errcounts");
+    if (vklm_verbosity > 2)
+      vklmPrint("creating new master errcounts");
     
     /* create <errorcounts></errorcounts> */
     mErrCounts = master_doc.createElement( "errorcounts" );
@@ -456,13 +474,14 @@ bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
   QDomElemQVList::Iterator sIter;
   for ( sIter = sErrors.begin(); sIter != sErrors.end(); ++sIter ) {
     QDomElement sErr = *sIter;
-    VKLM_DEBUG("appending slave err: '%s'",
-	       getElem( sErr, "unique" ).text().latin1());
+    if (vklm_verbosity > 1)
+      vklmPrint("appending slave err: '%s'",
+		getElem( sErr, "unique" ).text().latin1());
     
     /* get slave errorcount::pair for this error::unique */
     QDomElement sPair = getMatchingPair( sErrCounts, sErr, "unique" );
     if (sPair.isNull()) {
-      VKLM_DEBUG("error: no matching slave errorcount");
+      vklmPrint("error: no matching slave errorcount");
 //	return false;
       continue;
     }
@@ -473,8 +492,6 @@ bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
     /* --- append slave errorcount to master --- */
     mErrCounts.appendChild( sPair );
   }
-  VKLM_DEBUG("\n\n");
-
   return true;
 }
 
@@ -491,27 +508,32 @@ bool mergeSuppCounts( QDomElement& mDocRoot, QDomElement& sDocRoot )
   QDomNodeList mPairs = mSuppCounts.elementsByTagName( "pair" );
   QDomNodeList sPairs = sSuppCounts.elementsByTagName( "pair" );
 
-  VKLM_DEBUG("--- update matches (n=%d) ---", sPairs.count());
+  if (vklm_verbosity > 1)
+    vklmPrint("--- update matches (n=%d) ---", sPairs.count());
 
   /* --- for each suppcount::pair in master --- */
   for (unsigned int mIdx=0; mIdx<mPairs.count(); mIdx++) {
     QDomElement mPair = mPairs.item(mIdx).toElement();
     QString     mStr  = getElem( mPair, "name" ).text();
 
-    VKLM_DEBUG("master suppcount pair: '%s'", mStr.latin1());
+    if (vklm_verbosity > 1)
+      vklmPrint("master suppcount pair: '%s'", mStr.latin1());
 
     /* --- for each suppcount::pair in slave --- */
     for (unsigned int sIdx=0; sIdx<sPairs.count(); sIdx++) {
       QDomElement sPair = sPairs.item(sIdx).toElement();
       QString     sStr  = getElem( sPair, "name" ).text();
-      VKLM_DEBUG("slave  suppcount pair: '%s'", sStr.latin1());
+
+      if (vklm_verbosity > 1)
+	vklmPrint("slave  suppcount pair: '%s'", sStr.latin1());
 
       if ( mStr == sStr ) { /* matching pair */
-	VKLM_DEBUG("=> matched");
+	if (vklm_verbosity > 1)
+	  vklmPrint("=> matched");
 	/* --- master pair::count += slave pair::count --- */
 	if ( ! updateCount( getElem( mPair, "count" ),
 			    getElem( sPair, "count" ) ) ) {
-	  VKLM_DEBUG("error: failed master suppcount update");
+	  vklmPrint("error: failed master suppcount update");
 	  //	return false;
 	  continue;
 	}
@@ -522,24 +544,26 @@ bool mergeSuppCounts( QDomElement& mDocRoot, QDomElement& sDocRoot )
 	/* there can't be more than one match, so go to next mPair */
 	break;
       }
-      VKLM_DEBUG("");
+      if (vklm_verbosity > 1)
+	vklmPrint(" ");
     }
-    VKLM_DEBUG("\n");
+    if (vklm_verbosity > 1)
+      vklmPrint("\n");
   }
 
-  VKLM_DEBUG("--- append non-matches (n=%d) ---", sPairs.count());
+  if (vklm_verbosity > 1)
+    vklmPrint("--- append non-matches (n=%d) ---", sPairs.count());
 
   /* Note: guaranteed to have a suppcounts element, unlike errcounts */
 
   /* --- append remaining slave suppcount::pairs to master --- */
   for (unsigned int sIdx=0; sIdx<sPairs.count(); sIdx++) {
     QDomElement sPair = sPairs.item(sIdx).toElement();
-    VKLM_DEBUG("appending slave suppcount pair: '%s'",
-	       getElem( sPair, "name" ).text().latin1());
+    if (vklm_verbosity > 1)
+      vklmPrint("appending slave suppcount pair: '%s'",
+		getElem( sPair, "name" ).text().latin1());
     mSuppCounts.appendChild( sPair );
   }
-  VKLM_DEBUG("\n\n");
-
   return true;
 }
 
@@ -554,7 +578,8 @@ bool mergeLeakErrors( QDomElement& mDocRoot, QDomElement& sDocRoot )
   QDomElemQVList sLeakErrors = getErrors( sDocRoot, true/*leak*/ );
   QDomElemQVList mLeakErrors = getErrors( mDocRoot, true/*leak*/ );
 
-  VKLM_DEBUG("--- update matches (n=%d) ---", sLeakErrors.count());
+  if (vklm_verbosity > 1)
+    vklmPrint("--- update matches (n=%d) ---", sLeakErrors.count());
 
   /* --- for each leak_error in master ---  */
   QDomElemQVList::Iterator mIter;
@@ -562,8 +587,9 @@ bool mergeLeakErrors( QDomElement& mDocRoot, QDomElement& sDocRoot )
 	mIter != mLeakErrors.end(); ++mIter ) {
     QDomElement mErr = *mIter;
 
-    VKLM_DEBUG("master leak_err: '%s'",
-	       getElem( mErr, "unique" ).text().latin1());
+    if (vklm_verbosity > 1)
+      vklmPrint("master leak_err: '%s'",
+		getElem( mErr, "unique" ).text().latin1());
 
     /* --- for each leak_error in slave ---  */
     QDomElemQVList::Iterator sIter;
@@ -571,28 +597,30 @@ bool mergeLeakErrors( QDomElement& mDocRoot, QDomElement& sDocRoot )
 	  sIter != sLeakErrors.end(); ++sIter ) {
       QDomElement sErr = *sIter;
 
-      VKLM_DEBUG("slave leak_err: '%s'",
-		 getElem( sErr, "unique" ).text().latin1());
+      if (vklm_verbosity > 1)
+	vklmPrint("slave leak_err: '%s'",
+		  getElem( sErr, "unique" ).text().latin1());
 
       if ( matchingErrors(mErr, sErr) ) {
-	VKLM_DEBUG("=> matched");
+	if (vklm_verbosity > 1)
+	  vklmPrint("=> matched");
 
 	/* --- update master leakedBytes, leakedBlocks, what --- */
 
 	if ( ! updateCount( getElem( mErr, "leakedbytes"  ),
 			    getElem( sErr, "leakedbytes"  ) ) ) {
-	  VKLM_DEBUG("error: failed master leakedbytes update");
+	  vklmPrint("error: failed master leakedbytes update");
 //	    return false;
 	  continue;
 	}
 	if ( ! updateCount( getElem( mErr, "leakedblocks" ),
 		     getElem( sErr, "leakedblocks" ) ) ) {
-	  VKLM_DEBUG("error: failed master leakedblocks update");
+	  vklmPrint("error: failed master leakedblocks update");
 //	    return false;
 	  continue;
 	}
 	if ( ! updateLeakWhat( mErr, sErr ) ) {
-	  VKLM_DEBUG("error: failed to update master 'what'");
+	  vklmPrint("error: failed to update master 'what'");
 //	    return false;
 	  continue;
 	}
@@ -605,19 +633,23 @@ bool mergeLeakErrors( QDomElement& mDocRoot, QDomElement& sDocRoot )
 	   - go back one, so for loop goes to next */
 	sIter--;
       }
-      VKLM_DEBUG("");
+      if (vklm_verbosity > 2)
+	vklmPrint(" ");
     }
-    VKLM_DEBUG("\n");
+    if (vklm_verbosity > 1)
+      vklmPrint("\n");
   }
 
-  VKLM_DEBUG("--- append non-matches (n=%d) ---", sLeakErrors.count());
+  if (vklm_verbosity > 1)
+    vklmPrint("--- append non-matches (n=%d) ---", sLeakErrors.count());
 
   /* --- append remaining slave leak_errors to master --- */
   QDomElemQVList::Iterator sIter;
   for ( sIter = sLeakErrors.begin();
 	sIter != sLeakErrors.end(); ++sIter ) {
-    VKLM_DEBUG("appending slave leak_err: '%s'",
-	       getElem( *sIter, "unique" ).text().latin1());
+    if (vklm_verbosity > 1)
+      vklmPrint("appending slave leak_err: '%s'",
+		getElem( *sIter, "unique" ).text().latin1());
     
     mDocRoot.appendChild( *sIter );
   }
@@ -650,28 +682,43 @@ bool mergeVgLogs( QDomDocument& master_doc, QDomDocument& slave_doc )
   }
 
   /* merge errors */
-  VKLM_DEBUG("=== MERGE ERRORS ===\n");
+  if (vklm_verbosity > 1) {
+    vklmPrint("\n");
+    vklmPrint("=== MERGE ERRORS ===\n");
+  }
   if (getErrors( sDocRoot ).count() != 0) {
     mergeErrors( master_doc, slave_doc );
   } else {
-    VKLM_DEBUG("no errors to merge");
+    if (vklm_verbosity > 1)
+      vklmPrint("no errors to merge");
   }
  
   /* merge suppcounts */
-  VKLM_DEBUG("=== MERGE SUPPCOUNTS ===\n");
+  if (vklm_verbosity > 1) {
+    vklmPrint("\n\n");
+    vklmPrint("=== MERGE SUPPCOUNTS ===\n");
+  }
   QDomElement sSuppCounts = getElem( sDocRoot, "suppcounts" );
   if ( sSuppCounts.elementsByTagName( "pair" ).count() != 0) {
     mergeSuppCounts( mDocRoot, sDocRoot );
   } else {
-    VKLM_DEBUG("no suppcounts to merge");
+    if (vklm_verbosity > 1)
+      vklmPrint("no suppcounts to merge");
   }
 
   /* merge leak_errors */
-  VKLM_DEBUG("=== MERGE LEAKCOUNTS ===\n");
+  if (vklm_verbosity > 1) {
+    vklmPrint("\n\n");
+    vklmPrint("=== MERGE LEAK ERRORS ===\n");
+  }
   if (getErrors( sDocRoot, true/*leak*/ ).count() != 0) {
     mergeLeakErrors( mDocRoot, sDocRoot );
   } else {
-    VKLM_DEBUG("no leak errors to merge");
+    if (vklm_verbosity > 1)
+      vklmPrint("no leak errors to merge");
   }
+  if (vklm_verbosity > 1)
+    vklmPrint("\n");
+
   return true;
 }

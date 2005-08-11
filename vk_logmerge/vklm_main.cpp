@@ -17,6 +17,7 @@
 
 /* Global vars */
 const char* progname=0;
+int vklm_verbosity=0;
 
 /* print message to stderr */
 void vklmPrint( const char* msg, ... )
@@ -30,24 +31,22 @@ void vklmPrint( const char* msg, ... )
   fprintf( stderr, "\n" );
 }
 
-
 void usage()
 {
   fprintf(stderr, "%s, a valgrind log file merger.  Version 0.9.0, 25-July-2005.\n\n", progname);
 
-  fprintf(stderr, "usage: 1. %s [-h] [-o OUTFILE] -f LOGFILE_LIST\n", progname);
-  fprintf(stderr, "       2. %s [-h] [-o OUTFILE] LOGFILE1 LOGFILE2...\n\n", progname);
-  fprintf(stderr, "  -h            print this message\n");
-  fprintf(stderr, "  -o OUTFILE    write merged output to OUTFILE\n");
-  fprintf(stderr, "  -f LOG_LIST   read list of LOGs from LOG_LIST (one per line)\n\n");
+  fprintf(stderr, "  usage: %s [flags and input files in any order]\n\n", progname);
 
-  fprintf(stderr, "Flags and input files may be given in any order.\n\n");
+  fprintf(stderr, "    -h            print this message\n");
+  fprintf(stderr, "    -v            be verbose (more -v's give more)\n");
+  fprintf(stderr, "    -f log_list   obtain input files from log_list (one per line)\n");
+  fprintf(stderr, "    -o outfile    write merged output to outfile\n\n");
 
-  fprintf(stderr, "If no -o OUTFILE is given, writes output to stdout.\n\n");
+  fprintf(stderr, "  At least 2 input files must be given.\n\n");
 
-  fprintf(stderr, "Both usage methods may be used together, as long as\n");
-  fprintf(stderr, "at least two logfiles are specified to be merged.\n");
-  fprintf(stderr, "e.g. vk_logmerge -f LOGFILE_LIST LOGFILE -o OUTFILE\n\n");
+  fprintf(stderr, "  If no '-o outfile' is given, writes to standard output.\n\n");
+
+  fprintf(stderr, "  Example: %s log1.xml -f loglist.fls -o merged.xml\n\n", progname);
 }
 
 
@@ -90,7 +89,8 @@ bool mergeVgLogList( QStringList& log_files,
     return false;
   }
 
-  vklmPrint("merging logs...");
+  if (vklm_verbosity > 0)
+    vklmPrint("merging logs...");
 
   /* read first parseable file into master */
   QString master_fname;
@@ -120,9 +120,10 @@ bool mergeVgLogList( QStringList& log_files,
 
     bool ok = parseLog( log_files[lognum], slave_log );
     if (ok) {    
-      /* tell user we are merging the slave into the master */
-      vklmPrint("merging %s <- %s", master_fname.latin1(), slave_fname.latin1());
-      
+      if (vklm_verbosity > 0)
+	vklmPrint("merging %s <- %s", master_fname.latin1(), slave_fname.latin1());
+
+      /* --- merge the logs --- */
       ok = mergeVgLogs( master_log, slave_log );
     }
     if (!ok) {   /* failed parse/merge of slave file => skipped file */
@@ -135,7 +136,8 @@ bool mergeVgLogList( QStringList& log_files,
     vklmPrint("need minimum of 2 files to merge\n");
     return false;
   }
-  vklmPrint("merge complete\n");
+  if (vklm_verbosity > 0)
+    vklmPrint("merge complete\n");
 
   return true;
 }
@@ -157,11 +159,15 @@ int main ( int argc, char* argv[] )
     parse command-line args
   */
   int c;
-  while ((c = getopt (argc, argv, "-hf:o:")) != -1) {
+  while ((c = getopt (argc, argv, "-hvf:o:")) != -1) {
     switch (c) {
     case 'h':  /* help */
       usage();
       return 0;
+      
+    case 'v':  /* be verbose */
+      vklm_verbosity++;
+      break;
       
     case 1:  /* the '-' in optstring puts non-option args here */
       log_files << optarg;    /* we validate the file later */
