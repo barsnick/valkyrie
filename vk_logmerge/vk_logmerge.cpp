@@ -146,6 +146,8 @@ bool matchingFrames( QDomElement frame1, QDomElement frame2 )
 
 /*
   Heuristic function to test if errors are the 'same'
+  Tries to follow same hueristic as valgrind
+   - see coregrind/m_execontext.c::VG_(eq_ExeContext)
 */
 bool matchingErrors( QDomElement err1, QDomElement err2 )
 {
@@ -265,14 +267,28 @@ bool updateCount( QDomElement mCount, QDomElement sCount )
 
 
 /*
-  Update master's error::'what' element
+  Update master's leakcheck error::'what' element
 */
-bool updateWhat( QDomElement mErr, QDomElement sErr ) 
+bool updateLeakWhat( QDomElement mErr, QDomElement sErr ) 
 {
   unsigned long mLeakedBytesNum, mLeakedBlocksNum;
   mLeakedBytesNum  = elemToULong( getElem( mErr, "leakedbytes"  ) );
   mLeakedBlocksNum = elemToULong( getElem( mErr, "leakedblocks" ) );
+
+  unsigned long sLeakedBytesNum, sLeakedBlocksNum;
+  sLeakedBytesNum  = elemToULong( getElem( sErr, "leakedbytes"  ) );
+  sLeakedBlocksNum = elemToULong( getElem( sErr, "leakedblocks" ) );
   
+  /* update the master's bytes and blocks counts */
+  mLeakedBytesNum  += sLeakedBytesNum;
+  mLeakedBlocksNum += mLeakedBlocksNum;
+
+  /* now comes some delicate operations on the 'what' string.
+     ref: memcheck/mac_leakcheck.c::MAC_(pp_LeakError)
+    
+     perhaps better off using qregexp...
+  */
+
   /* do our best to update the master's 'what' string 
      - J and I will 'have words' if he changes this ... */
   QDomElement mWhat = getElem( mErr, "what" );
@@ -317,6 +333,10 @@ bool updateWhat( QDomElement mErr, QDomElement sErr )
     /* blocks */
     ms_what[7] = QString::number( mLeakedBlocksNum );
   }
+
+  /* TODO:
+     if master == definitely && slave == possibly,
+     => set master = possibly? */
   
   /* finally! update master's what string */
   QDomText mWhatDomText = mWhat.firstChild().toText();
@@ -396,6 +416,18 @@ bool mergeErrors( QDomDocument& master_doc, QDomDocument& slave_doc )
 	/* sIter now points to next error
 	   - go back one, so for loop goes to next */
 	sIter--;
+
+	/* NOTE: not simply break'ing, as we can't guarantee there isn't
+	   another slave error that the same master error would match.
+	   This implies our error-matching heuristic isn't the same as
+	   valgrind's, i.e. match(slaveErr1, slaveErr2) may be true.
+
+	   CAB: Q: Why is it better to continue here?
+	   If we miss a potential second match to current master error,
+	   it'll be appended anyway.
+	   Neither way is entirely accurate, but break'ing would be
+	   faster, especially if can expect errors in similar order.
+	*/
       }
       VKLM_DEBUG("");
     }
@@ -559,7 +591,7 @@ bool mergeLeakErrors( QDomElement& mDocRoot, QDomElement& sDocRoot )
 //	    return false;
 	  continue;
 	}
-	if ( ! updateWhat( mErr, sErr ) ) {
+	if ( ! updateLeakWhat( mErr, sErr ) ) {
 	  VKLM_DEBUG("error: failed to update master 'what'");
 //	    return false;
 	  continue;
