@@ -81,7 +81,7 @@ bool mergeVgLogList( QStringList& log_files,
 {
   /* check there's a minimum of two files to merge */
   if ( log_files.count() < 1 ) {
-    vklmPrint("no input logs given\n");
+    vklmPrint("No input files specified.  For help, try -h.");
     return false;
   }
 
@@ -215,7 +215,8 @@ int main ( int argc, char* argv[] )
     QTextStream outStream( &outFile );
     outStream << xml_string;
     outFile.close();
-    vklmPrint("output saved to '%s'\n", outfile.latin1());
+    if (vklm_verbosity > 0)
+      vklmPrint("output saved to '%s'\n", outfile.latin1());
 
   } else {
     /* write to stdout */
