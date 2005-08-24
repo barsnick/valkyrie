@@ -56,6 +56,50 @@ void usage()
 
 
 /*
+  Clean log of superfluous leak_errors, and empty errorcounts
+*/
+void clean_log( QDomDocument& domdoc )
+{
+  QDomElement docRoot = domdoc.documentElement();
+  QDomNode n = docRoot.firstChild();
+
+  /* remove any leak_errors output before status==FINISHED */
+  while( !n.isNull() ) {
+    QDomElement e = n.toElement();
+    if( !e.isNull() ) {
+
+      /* quit after status == FINISHED */
+      if (e.tagName() == "status") {
+	QString state = e.firstChild().toElement().text();
+	if (state == "FINISHED")
+	  break;
+      }
+      else if (e.tagName() == "error") {
+	QDomNodeList err_details = e.childNodes();
+	assert( err_details.count() >= 4 );
+	QString kind = err_details.item(2).toElement().text();
+	if ( kind.startsWith( "Leak_" ) ) {
+	  /* keep valid n (guaranteed not first child) */
+	  n = n.previousSibling();
+	  /* remove leak error from tree */
+	  docRoot.removeChild( e );
+	}
+      }
+      else if (e.tagName() == "errorcounts") {
+	if (e.childNodes().count() == 0) {
+	  /* keep valid n (guaranteed not first child) */
+	  n = n.previousSibling();
+	  /* empty errorcount: remove from tree */
+	  docRoot.removeChild( e );
+	}
+      }
+    }
+    n = n.nextSibling();
+  }
+}
+
+
+/*
   Parse a valgrind xml log file to a QDomDocument
 */
 bool parseLog( QString file_path, QDomDocument& vgLog )
@@ -74,6 +118,10 @@ bool parseLog( QString file_path, QDomDocument& vgLog )
     return false;
   }
   file.close();
+
+  /* clean log of unwanted errs, errcounts...  */
+  clean_log( vgLog );
+
   return true;
 }
 
@@ -106,7 +154,7 @@ bool mergeVgLogList( QStringList& log_files,
       break;
     vklmPrint("skipping file: '%s'\n", master_fname.latin1());
   }
-#else // DIE
+#else // die_on_error
   /* read first file into master */
   master_fname = QFileInfo( log_files[0] ).fileName();
   if ( ! parseLog( log_files[0], master_log ) ) {
