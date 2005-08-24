@@ -308,7 +308,7 @@ QString plaintxtVgError( const QDomElement& errorcount,
 	break;
       }
     }
-    output_str += "Occurred " + count + " time(s):\n";
+    output_str += "Occurred " + count + " times:\n";
   }
 
   QDomNode n = error.firstChild();
