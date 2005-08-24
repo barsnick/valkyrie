@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
 
 /* If we're not using GNU C, elide __attribute__ */
 #ifndef __GNUC__

@@ -11,6 +11,7 @@
 #include <qdom.h>
 #include <qstring.h>
 #include <qstringlist.h>
+#include <qmap.h>
 
 #include "vklm_main.h"
 #include "vk_logmerge.h"
@@ -42,6 +43,7 @@ void usage()
 
   fprintf(stderr, "    -h            print this message\n");
   fprintf(stderr, "    -v            be verbose (more -v's give more)\n");
+  fprintf(stderr, "    -t            output plain text (non-xml)\n");
   fprintf(stderr, "    -f log_list   obtain input files from log_list (one per line)\n");
   fprintf(stderr, "    -o outfile    write merged output to outfile\n\n");
 
@@ -162,6 +164,244 @@ bool mergeVgLogList( QStringList& log_files,
 
 
 
+#if 0
+void printDomTree( const QDomElement &parentElement,
+		   QString indent=QString("") )
+{
+  QDomNode n = parentElement.firstChild();
+
+  while( !n.isNull() ) {
+    if ( n.isElement() ) {
+      QDomElement e = n.toElement();
+      QString pre = indent + e.tagName();
+
+      if (e.hasChildNodes() && e.firstChild().isElement()) {
+	/* branch node */
+	fprintf(stderr, "%s\n", pre.latin1());
+      } else {
+	/* leaf node */
+	QString content = e.text();
+	fprintf(stderr, "%s: %s\n", pre.latin1(), content.latin1());
+      }
+    }
+    n = n.nextSibling();
+  }
+}
+#endif
+
+
+QString plaintxtVgPreamble( const QDomElement& preamble )
+{
+  QString output_str;
+  QDomNodeList lines = preamble.childNodes();
+  for (unsigned int i=0; i<lines.count(); i++) {
+    QString content = lines.item(i).toElement().text();
+    output_str += content + "\n";
+  }
+  output_str += "\n";
+  return output_str;
+}
+
+
+/* ref: coregrind/m_debuginfo/symtab.c :: VG_(describe_IP) */
+/* CAB: why don't print dirname for non-xml ? */
+QString describe_IP( QDomNode frame )
+{
+  QDomNodeList frame_details = frame.childNodes();
+  assert( frame_details.count() >= 1 );  /* only ip guaranteed */
+  QDomElement ip     = frame_details.item( 0 ).toElement();
+  QDomElement obj    = frame_details.item( 1 ).toElement();
+  QDomElement fn     = frame_details.item( 2 ).toElement();
+//  QDomElement dir    = frame_details.item( 3 ).toElement();
+  QDomElement srcloc = frame_details.item( 4 ).toElement();
+  QDomElement line   = frame_details.item( 5 ).toElement();
+
+  bool  know_fnname  = !fn.isNull();
+  bool  know_objname = !obj.isNull();
+  bool  know_srcloc  = !srcloc.isNull() && !line.isNull();
+//  bool  know_dirinfo = !dir.isNull();
+
+  QString str = ip.text() + ": ";
+  if (know_fnname) {
+    str += fn.text();
+    if (!know_srcloc && know_objname)
+      str += " (in " + obj.text() + ")";
+  } else if (know_objname && !know_srcloc) {
+    str += "(within " + obj.text() + ")";
+  } else {
+    str += "???";
+  }
+  if (know_srcloc) {
+    str += " (" + srcloc.text() + ":" + line.text() + ")";
+  }
+  return str;
+}
+
+
+QString plaintxtVgError( const QDomElement& error )
+{
+  QString output_str;
+  QDomNode n = error.firstChild();
+
+  while( !n.isNull() ) {
+    if ( n.isElement() ) {
+      QDomElement e = n.toElement();
+      QString tag = e.tagName();
+
+      if (tag == "what") {
+	output_str += e.text() + "\n";
+      }
+      else if (tag == "stack") {
+	QDomNodeList frames = e.childNodes();
+	for (unsigned int i=0; i<frames.count(); i++) {
+	  QString ip_desc = describe_IP( frames.item(i) );
+	  output_str += (i==0 ? "   at " : "   by ") + ip_desc + "\n";
+	}
+      }
+      else if (tag == "auxwhat") {
+	output_str += "  " + e.text() + "\n";
+      }
+    }
+    n = n.nextSibling();
+  }
+  output_str += "\n";
+  return output_str;
+}
+
+
+/* ref: memcheck/mac_leakcheck.c :: MAC_(do_detect_memory_leaks) */
+QString plaintxtVgErrorSummary( QDomElement& errcnt, QDomElement& suppcnt )
+{
+  int errs=0, err_contexts=0, supps=0, supp_contexts=0;
+  QDomNodeList pairs;
+
+  /* count errors */
+  pairs = errcnt.childNodes();
+  err_contexts = pairs.count();
+  for (unsigned int i=0; i<pairs.count(); i++) {
+    QDomElement count = pairs.item(i).firstChild().toElement();
+    errs += count.text().toULong();
+  }
+
+  /* count suppressions */
+  pairs = suppcnt.childNodes();
+  supp_contexts = pairs.count();
+  for (unsigned int i=0; i<pairs.count(); i++) {
+    QDomElement count = pairs.item(i).firstChild().toElement();
+    supps += count.text().toULong();
+  }
+
+  QString output_str = "ERROR SUMMARY: " +
+    QString::number(errs) + " errors from " +
+    QString::number(err_contexts) + " contexts " +
+    "(suppressed: " + QString::number(supps) + " from " +
+    QString::number(supp_contexts) + ")\n\n\n";
+
+  return output_str;
+}
+
+
+/* ref: memcheck/mac_leakcheck.c :: MAC_(do_detect_memory_leaks) */
+/* print leak error summary (only for errs after suppcounts output) */
+/* CAB: suppressed leak errs? - not printed for xml */
+QString plaintxtVgLeakSummary( const QDomDocument& log )
+{
+  enum ErrKind { EK_UNREACHED=0, EK_INDIRECT, EK_INTERIOR, EK_PROPER };
+
+  QMap<QString,int> errkind_map;
+  errkind_map["Leak_DefinitelyLost"] = EK_UNREACHED;
+  errkind_map["Leak_IndirectlyLost"] = EK_INDIRECT;
+  errkind_map["Leak_PossiblyLost"  ] = EK_INTERIOR;
+  errkind_map["Leak_StillReachable"] = EK_PROPER;
+
+  typedef struct {
+    unsigned long bytes, blocks;
+  } Leak;
+
+  Leak leaks[ errkind_map.count() ];
+  for (unsigned int i=0; i<errkind_map.count(); i++) {
+    leaks[i].bytes  = 0;
+    leaks[i].blocks = 0;
+  }
+
+  /* gather details from leak errors (those after 'suppcounts') */
+  bool start_leak_errors = false;
+  QDomNode n = log.documentElement().firstChild();
+  while( !n.isNull() ) {
+    if ( n.isElement() ) {
+      QDomElement e = n.toElement();
+      QString tag = e.tagName();
+
+      if (tag == "suppcounts") {
+	start_leak_errors = true;
+      }
+      else if (start_leak_errors && tag == "error") {
+	QDomNodeList err_details = e.childNodes();
+	assert( err_details.count() >= 6 ); /* leak errs only */
+	QString kind   = err_details.item( 2 ).toElement().text();
+	QString bytes  = err_details.item( 4 ).toElement().text();
+	QString blocks = err_details.item( 5 ).toElement().text();
+
+	leaks[ errkind_map[ kind ] ].bytes  += bytes.toULong();
+	leaks[ errkind_map[ kind ] ].blocks += blocks.toULong();
+      }
+    }
+    n = n.nextSibling();
+  }
+
+#define LEAK_STR( lk ) QString( \
+  QString::number(lk.bytes) + " bytes in " + \
+  QString::number(lk.blocks) + " blocks.\n" )
+
+  QString output_str = "LEAK SUMMARY\n";
+  output_str += "   definitely lost: " + LEAK_STR(leaks[EK_UNREACHED]);
+  if (leaks[EK_INDIRECT].blocks > 0)
+  output_str += "   indirectly lost: " + LEAK_STR(leaks[EK_INDIRECT]);
+  output_str += "     possibly lost: " + LEAK_STR(leaks[EK_INTERIOR]);
+  output_str += "   still reachable: " + LEAK_STR(leaks[EK_PROPER]);
+
+  return output_str;
+}
+
+/* print entire log to plain text string,
+   a-la valgrind non-xml output */
+QString plaintxtVgLog( const QDomDocument& log )
+{
+  QDomElement last_errcnt;
+  QString output_str;
+
+  QDomNode n = log.documentElement().firstChild();
+  while( !n.isNull() ) {
+    if ( n.isElement() ) {
+      QDomElement e = n.toElement();
+      QString tag = e.tagName();
+
+      if (tag == "preamble") {
+	output_str += plaintxtVgPreamble( e );
+      }
+      else if (tag == "error") {
+	output_str += plaintxtVgError( e );
+      }
+      else if (tag == "errorcounts") {
+	/* keep hold of last errcnt, for error summary */
+	last_errcnt = e;
+      }
+      else if (tag == "suppcounts") {
+	output_str += plaintxtVgErrorSummary( last_errcnt, e );
+      }
+    }
+    n = n.nextSibling();
+  }
+
+  /* print leak summary (memcheck only) */
+  output_str += plaintxtVgLeakSummary( log );
+
+  return output_str;
+}
+
+
+
+
 /*
   Main
 */
@@ -169,6 +409,7 @@ int main ( int argc, char* argv[] )
 {
   QString outfile;
   QStringList log_files;
+  bool plaintext_output = false;
 
   QString fname_nopath = QFileInfo(argv[0]).fileName();
   progname = fname_nopath.latin1();
@@ -177,7 +418,7 @@ int main ( int argc, char* argv[] )
     parse command-line args
   */
   int c;
-  while ((c = getopt (argc, argv, "-hvf:o:")) != -1) {
+  while ((c = getopt (argc, argv, "-hvtf:o:")) != -1) {
     switch (c) {
     case 'h':  /* help */
       usage();
@@ -214,6 +455,10 @@ int main ( int argc, char* argv[] )
       outfile = optarg;
       break;
       
+    case 't':
+      plaintext_output = true;
+      break;
+      
     case '?':
       usage();
       return 1;
@@ -234,7 +479,11 @@ int main ( int argc, char* argv[] )
   /*
     output result
   */
-  QString xml_string = mergedLog.toString( 2/*indent*/ );
+  QString output_str;
+  if (plaintext_output)
+    output_str = plaintxtVgLog( mergedLog );
+  else
+    output_str = mergedLog.toString( 2/*indent*/ );
 
   if ( ! outfile.isEmpty() ) {
     /* write to file */
@@ -247,14 +496,14 @@ int main ( int argc, char* argv[] )
     }
 
     QTextStream outStream( &outFile );
-    outStream << xml_string;
+    outStream << output_str;
     outFile.close();
     if (vklm_verbosity > 0)
       vklmPrint("output saved to '%s'\n", outfile.latin1());
 
   } else {
     /* write to stdout */
-    fprintf( stdout, "%s", xml_string.latin1() );
+    fprintf( stdout, "%s", output_str.latin1() );
   }
 
   return 0;
