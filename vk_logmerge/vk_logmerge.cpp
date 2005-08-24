@@ -34,43 +34,58 @@ QDomElement getElem( QDomElement root, QString elem, int n=0 )
   return nodes.item(n).toElement();
 }
 
+
 /*
-  Retrieve list of (leakcheck)errors in log
+  Retrieve list of (plain/leakcheck)errors in log
 */
 QDomElemQVList getErrors( QDomElement docRoot, bool leakcheck=false )
 {
   QDomElemQVList errors;
   QDomNode n = docRoot.firstChild();
 
-  bool found_first = false;
   if (!leakcheck) {   /* main errors */
 
     /* find first group of "error" elements */
     while( !n.isNull() ) {
       QDomElement e = n.toElement();
       if( !e.isNull() ) {
-	if (found_first && e.tagName() != "error")
-	  break;
-	if (e.tagName() == "error") {
-	  found_first = true;
-	  errors.append( e );
+
+	/* quit after status == FINISHED */
+	if (e.tagName() == "status") {
+	  QString state = e.firstChild().toElement().text();
+	  if (state == "FINISHED")
+	    break;
+	}
+	else if (e.tagName() == "error") {
+	  /* may get leakcheck errors here too... */
+	  QDomNodeList err_details = e.childNodes();
+	  assert( err_details.count() >= 4 );
+	  QString kind = err_details.item(2).toElement().text();
+	  if ( ! kind.startsWith( "Leak_" ) )
+	    errors.append( e );
 	}
       }
       n = n.nextSibling();
     }
   } else {             /* leakcheck errors */
 
+    bool start = false;
+
     /* find group of "error" elements _after_ suppcounts */
     while( !n.isNull() ) {
       QDomElement e = n.toElement();
       if( !e.isNull() ) {
-	if (found_first) {
-	  if (e.tagName() != "error")
-	    break;
+
+	/* start after status == FINISHED */
+	if (e.tagName() == "status") {
+	  QString state = e.firstChild().toElement().text();
+	  if (state == "FINISHED")
+	    start = true;
+	}
+	else if (start && e.tagName() == "error") {
+	  /* only get leakcheck errs after status == FINISHED */
 	  errors.append( e );
 	}
-	if (e.tagName() == "suppcounts")
-	  found_first = true;
       }
       n = n.nextSibling();
     }    
