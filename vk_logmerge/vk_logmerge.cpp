@@ -301,6 +301,19 @@ bool updateLeakWhat( QDomElement mErr )
   mLeakedBlocksNum = elemToULong( getElem( mErr, "leakedblocks" ), &ok );
   if (!ok) return false;
 
+  QString loss;
+  QString kind = getElem( mErr, "kind" ).text();
+  if (kind == "Leak_DefinitelyLost")
+    loss = "definitely lost";
+  else if (kind == "Leak_IndirectlyLost")
+    loss = "indirectly lost";
+  else if (kind == "Leak_PossiblyLost")
+    loss = "possibly lost";
+  else if (kind == "Leak_StillReachable")
+    loss = "still reachable";
+  else
+    assert(0); /* shouldn't ever get here */
+
   /* don't try to parse the current 'what' strings
      - not intended for machine consumption.
      just re-create a what string of our own.
@@ -308,7 +321,7 @@ bool updateLeakWhat( QDomElement mErr )
   */
   QString mWhatStr = QString::number( mLeakedBytesNum ) +
     " bytes in " + QString::number( mLeakedBlocksNum ) + 
-    " blocks are possibly (indirectly?) lost";
+    " blocks are " + loss;
 
   QDomElement mWhat = getElem( mErr, "what" );
   QDomText mWhatDomText = mWhat.firstChild().toText();
