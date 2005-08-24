@@ -292,7 +292,7 @@ bool updateCount( QDomElement mCount, QDomElement sCount )
 /*
   Update master's leakcheck error::'what' element
 */
-bool updateLeakWhat( QDomElement mErr, QDomElement sErr ) 
+bool updateLeakWhat( QDomElement mErr ) 
 {
   bool ok;
   unsigned long mLeakedBytesNum, mLeakedBlocksNum;
@@ -300,16 +300,6 @@ bool updateLeakWhat( QDomElement mErr, QDomElement sErr )
   if (!ok) return false;
   mLeakedBlocksNum = elemToULong( getElem( mErr, "leakedblocks" ), &ok );
   if (!ok) return false;
-
-  unsigned long sLeakedBytesNum, sLeakedBlocksNum;
-  sLeakedBytesNum  = elemToULong( getElem( sErr, "leakedbytes"  ), &ok );
-  if (!ok) return false;
-  sLeakedBlocksNum = elemToULong( getElem( sErr, "leakedblocks" ), &ok );
-  if (!ok) return false;
-  
-  /* update the master's bytes and blocks counts */
-  mLeakedBytesNum  += sLeakedBytesNum;
-  mLeakedBlocksNum += mLeakedBlocksNum;
 
   /* don't try to parse the current 'what' strings
      - not intended for machine consumption.
@@ -577,16 +567,16 @@ bool mergeLeakErrors( QDomElement& mDocRoot, QDomElement& sDocRoot )
 	/* --- update master leakedBytes, leakedBlocks, what --- */
 
 	if ( ! updateCount( getElem( mErr, "leakedbytes"  ),
-			    getElem( sErr, "leakedbytes"  ) ) ) {
+                            getElem( sErr, "leakedbytes"  ) ) ) {
 	  vklmPrint("error: failed master leakedbytes update");
 	  return false;
 	}
 	if ( ! updateCount( getElem( mErr, "leakedblocks" ),
-		     getElem( sErr, "leakedblocks" ) ) ) {
+                            getElem( sErr, "leakedblocks" ) ) ) {
 	  vklmPrint("error: failed master leakedblocks update");
 	  return false;
 	}
-	if ( ! updateLeakWhat( mErr, sErr ) ) {
+	if ( ! updateLeakWhat( mErr ) ) {
 	  vklmPrint("error: failed to update master 'what' string");
 	  return false;
 	}
