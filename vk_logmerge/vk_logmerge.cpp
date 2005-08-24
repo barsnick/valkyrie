@@ -235,7 +235,7 @@ QDomElement getMatchingPair( QDomElement pairs_root,
     //      vklmPrint("pair match2: %s", matchStr2.latin1());
     if ( matchStr1 == matchStr2 )
       return pair;
- }
+  }
   return QDomElement();
 }
 

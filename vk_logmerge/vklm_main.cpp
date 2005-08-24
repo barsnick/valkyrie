@@ -286,11 +286,32 @@ QString describe_IP( QDomNode frame )
 }
 
 
-QString plaintxtVgError( const QDomElement& error )
+QString plaintxtVgError( const QDomElement& errorcount,
+                         const QDomElement& error )
 {
   QString output_str;
-  QDomNode n = error.firstChild();
 
+  /* for non-leak errors, add count */
+  QDomElement err_kind   = error.childNodes().item(2).toElement();
+  if (!err_kind.text().startsWith("Leak_")) {
+    QDomElement err_unique = error.childNodes().item(0).toElement();
+    
+    /* find count from matching pair in errorcount */
+    QString count = "?";
+    QDomNodeList pairs = errorcount.elementsByTagName( "pair" );
+    for (unsigned int i=0; i<pairs.count(); i++) {
+      QDomNodeList pair_details = pairs.item(i).childNodes();
+      QDomElement unique = pair_details.item(1).toElement();
+      if (unique.text() == err_unique.text() ) {
+	QDomElement cnt = pair_details.item(0).toElement();
+	count = cnt.text();
+	break;
+      }
+    }
+    output_str += "Occurred " + count + " time(s):\n";
+  }
+
+  QDomNode n = error.firstChild();
   while( !n.isNull() ) {
     if ( n.isElement() ) {
       QDomElement e = n.toElement();
@@ -418,6 +439,21 @@ QString plaintxtVgLog( const QDomDocument& log )
   QDomElement last_errcnt;
   QString output_str;
 
+  /* get last errorcounts element */
+  QDomNode node = log.documentElement().lastChild();
+  while( !node.isNull() ) {
+    if ( node.isElement() ) {
+      QDomElement e = node.toElement();
+      QString tag = e.tagName();
+
+      if (tag == "errorcounts") {
+ 	last_errcnt = e;
+	break;
+      }
+    }
+    node = node.previousSibling();
+  }
+
   QDomNode n = log.documentElement().firstChild();
   while( !n.isNull() ) {
     if ( n.isElement() ) {
@@ -428,11 +464,7 @@ QString plaintxtVgLog( const QDomDocument& log )
 	output_str += plaintxtVgPreamble( e );
       }
       else if (tag == "error") {
-	output_str += plaintxtVgError( e );
-      }
-      else if (tag == "errorcounts") {
-	/* keep hold of last errcnt, for error summary */
-	last_errcnt = e;
+	output_str += plaintxtVgError( last_errcnt, e );
       }
       else if (tag == "suppcounts") {
 	output_str += plaintxtVgErrorSummary( last_errcnt, e );
