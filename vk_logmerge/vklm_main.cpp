@@ -56,7 +56,10 @@ void usage()
 
 
 /*
-  Clean log of superfluous leak_errors, and empty errorcounts
+  Clean log of:
+   - superfluous leak_errors
+   - empty errorcounts
+   - top-level text nodes
 */
 void clean_log( QDomDocument& domdoc )
 {
@@ -95,6 +98,19 @@ void clean_log( QDomDocument& domdoc )
       }
     }
     n = n.nextSibling();
+  }
+
+  /* remove top-level text nodes
+     - misc client output, or non-xml valgrind output
+  */
+  QDomNodeList nodes = docRoot.childNodes();
+  for (unsigned int i=0; i<nodes.count(); i++) {
+    QDomNode n = nodes.item(i);
+    if (n.isText()) {
+      docRoot.removeChild( n );
+      /* since two text nodes can't exist together (would be one node),
+	 can skip next node, so no need for i--; */
+    }
   }
 }
 
