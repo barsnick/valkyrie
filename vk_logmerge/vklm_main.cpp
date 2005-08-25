@@ -64,52 +64,43 @@ void usage()
 void clean_log( QDomDocument& domdoc )
 {
   QDomElement docRoot = domdoc.documentElement();
-  QDomNode n = docRoot.firstChild();
 
-  /* remove any leak_errors output before status==FINISHED */
-  while( !n.isNull() ) {
-    QDomElement e = n.toElement();
-    if( !e.isNull() ) {
+  bool status_finished=false;
+  QDomNodeList nodes = docRoot.childNodes();
+  for (unsigned int i=0; i<nodes.count(); i++) {
+    QDomNode n = nodes.item(i);
+    if( n.isElement() ) {
+      QDomElement e = n.toElement();
 
-      /* quit after status == FINISHED */
       if (e.tagName() == "status") {
-	QString state = e.firstChild().toElement().text();
-	if (state == "FINISHED")
-	  break;
+	if (e.firstChild().toElement().text() == "FINISHED")
+	  status_finished = true;
       }
-      else if (e.tagName() == "error") {
+      else if (!status_finished && e.tagName() == "error") {
+	/* remove leak_errors output before status==FINISHED
+	   = superfluous intermediate leakchecks */
 	QDomNodeList err_details = e.childNodes();
 	assert( err_details.count() >= 4 );
 	QString kind = err_details.item(2).toElement().text();
 	if ( kind.startsWith( "Leak_" ) ) {
-	  /* keep valid n (guaranteed not first child) */
-	  n = n.previousSibling();
 	  /* remove leak error from tree */
 	  docRoot.removeChild( e );
+	  i--;
 	}
       }
       else if (e.tagName() == "errorcounts") {
+	/* remove empty errorcounts */
 	if (e.childNodes().count() == 0) {
-	  /* keep valid n (guaranteed not first child) */
-	  n = n.previousSibling();
-	  /* empty errorcount: remove from tree */
 	  docRoot.removeChild( e );
+	  i--;
 	}
       }
     }
-    n = n.nextSibling();
-  }
-
-  /* remove top-level text nodes
-     - misc client output, or non-xml valgrind output
-  */
-  QDomNodeList nodes = docRoot.childNodes();
-  for (unsigned int i=0; i<nodes.count(); i++) {
-    QDomNode n = nodes.item(i);
-    if (n.isText()) {
+    else if (n.isText()) {
+      /* remove top-level text nodes
+	 = misc client output, or non-xml valgrind output */
       docRoot.removeChild( n );
-      /* since two text nodes can't exist together (would be one node),
-	 can skip next node, so no need for i--; */
+      i--;
     }
   }
 }
