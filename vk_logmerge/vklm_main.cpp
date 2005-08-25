@@ -64,9 +64,9 @@ void usage()
 void clean_log( QDomDocument& domdoc )
 {
   QDomElement docRoot = domdoc.documentElement();
-
-  bool status_finished=false;
   QDomNodeList nodes = docRoot.childNodes();
+  bool status_finished=false;
+
   for (unsigned int i=0; i<nodes.count(); i++) {
     QDomNode n = nodes.item(i);
     if( n.isElement() ) {

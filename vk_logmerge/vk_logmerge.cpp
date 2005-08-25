@@ -510,10 +510,10 @@ bool mergeSuppCounts( QDomElement& mDocRoot, QDomElement& sDocRoot )
 	  return false;
 	}
 
-	/* --- remove error from xml (auto removes from list) --- */
+	/* --- remove err from node (auto-rm'd from sPairs list) --- */
 	sSuppCounts.removeChild( sPair );
-
-	/* there can't be more than one match, so go to next mPair */
+	/* don't worry about sIdx:
+	   can only be one match, so just go to next mPair */
 	break;
       }
       if (vklm_verbosity > 1)
