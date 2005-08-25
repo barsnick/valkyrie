@@ -106,7 +106,7 @@ QString vk_mkstemp( QString fname, QString path,
 #else
   int n_digits = 5;  // num digits to use in log filename
 
-  QString date = QDate::currentDate().toString("dd.MM.yy");
+  QString date = QDate::currentDate().toString("yy.MM.dd");
   fname += "-" + date + "-";  // add pre-number separator
   
   /* get a *sorted* list of all log files */
