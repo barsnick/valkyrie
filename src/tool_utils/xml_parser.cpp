@@ -45,6 +45,7 @@ TopStatus::TopStatus() : XmlOutput( STATUS )
   num_errs   = 0;
   num_leaks  = 0;
   num_blocks = 0;
+  protocolVersion = -1;
 }
 
 /* format output for displaying in listview */
@@ -54,49 +55,94 @@ void TopStatus::printDisplay()
   ts << "Valgrind: " << state << " '" << object << "'  ";
 
   int syear, smonth, sday, shours, smins, ssecs, smsecs;
-  sscanf( stime.ascii(), "%d-%d-%d %d:%d:%d.%4d", 
-          &syear, &smonth, &sday, &shours, &smins, &ssecs, &smsecs );
-  QDate sta_date( syear, smonth, sday );
-  QTime sta_time( shours, smins, ssecs, smsecs );
+  int eyear, emonth, eday, ehours, emins, esecs, emsecs;
+  int ret;
+  if (protocolVersion == 1) {
+     // Valgrind < v3.1 outputs standard date-time
+     ret = sscanf( stime.ascii(), "%d-%d-%d %d:%d:%d.%4d", 
+                   &syear, &smonth, &sday,
+                   &shours, &smins, &ssecs, &smsecs );
+     if (ret == 7) {
+        /* start date/time */
+        QDate sta_date;
+        QTime sta_time( shours, smins, ssecs, smsecs );
+        sta_date = QDate( syear, smonth, sday );
+        ts << sta_date.toString( "MMM/d/yy " );
+        ts << sta_time.toString( "hh:mm:ss.zzz" ); 
 
-  /* start date */
-  ts << sta_date.toString( "MMM/d/yy  " );
-  /* start time */
-  ts << sta_time.toString( "hh:mm:ss.zzz" );
-
-  if ( !etime.isEmpty() ) {     /* finished */
-    ts << " - ";
-
-    int eyear, emonth, eday, ehours, emins, esecs, emsecs;
-    sscanf( etime.ascii(), "%d-%d-%d %d:%d:%d.%4d", 
-            &eyear, &emonth, &eday, &ehours, &emins, &esecs, &emsecs );
-    QDate end_date( eyear, emonth, eday );
-    QTime end_time( ehours, emins, esecs, emsecs );
-
-    /* end date, but only if > start_date */
-    if ( end_date > sta_date )
-      ts << end_date.toString( "MMM/d/yy  " );
-    /* end time */
-    ts << end_time.toString( "hh:mm:ss.zzz" );
-    /* elapsed time */
-    ts << " (";
-    if ( end_date > sta_date ) {
-      QDate elap_date( end_date.year()  - sta_date.year(),
-                       end_date.month() - sta_date.month(),
-                       end_date.day()   - sta_date.day() );
-      ts << elap_date.toString( "MMM/d/yy  " );
-    }
-
-    /* elapsed date-time:  86,400,000 msecs in 1 day */
-    int elapsed_date_msecs = sta_date.daysTo( end_date ) * 86400000;
-    /* elapsed time-time */
-    int elapsed_time_msecs = sta_time.msecsTo( end_time );
-    /* add everything together */
-    int elapsed_msecs    = elapsed_date_msecs + elapsed_time_msecs;
-
-    QTime time_a;    /* 00:00:00.000 */
-    QTime elapsed_time = time_a.addMSecs( elapsed_msecs );
-    ts << elapsed_time.toString( "hh:mm:ss.zzz" ) << ")";
+        if ( !etime.isEmpty() ) {     /* run finished */
+           ts << " - ";
+           ret = sscanf( etime.ascii(), "%d-%d-%d %d:%d:%d.%4d", 
+                         &eyear, &emonth, &eday,
+                         &ehours, &emins, &esecs, &emsecs );
+           if (ret == 7) {
+              /* end date/time */ 
+              QDate end_date = QDate( eyear, emonth, eday );
+              QTime end_time( ehours, emins, esecs, emsecs );
+              // only output end_date if > start_date
+              if ( end_date > sta_date )
+                 ts << end_date.toString( "MMM/d/yy " );
+              ts << end_time.toString( "hh:mm:ss.zzz" );
+ 
+              /* elapsed time */
+              ts << " (";
+              if ( end_date > sta_date ) {
+                 int days = sta_date.daysTo( end_date );
+                 ts << days << ((days == 1) ? "day " : "days ");
+              }
+              QTime time_a;    /* 00:00:00.000 */
+              QTime elapsed_time =
+                 time_a.addMSecs( sta_time.msecsTo( end_time ) );
+              ts << elapsed_time.toString( "hh:mm:ss.zzz" ) << ")";
+           } else {
+              fprintf(stderr, "Error: can't read end-time string\n");
+           } 
+        }
+     } else {
+        fprintf(stderr, "Error: can't read start-time string\n");
+     }
+  }
+  else if (protocolVersion == 2) {
+     // Valgrind >= v3.1 outputs a count only
+     ret = sscanf( stime.ascii(), "%d:%d:%d:%d.%4d", 
+                   &sday, &shours, &smins, &ssecs, &smsecs );
+     if (ret == 5) {
+        if ( !etime.isEmpty() ) {     /* run finished */
+           ret = sscanf( etime.ascii(), "%d:%d:%d:%d.%4d", 
+                         &eday, &ehours, &emins, &esecs, &emsecs );
+           if (ret == 5 ) {
+              /* elapsed time */
+              int msecs = emsecs - smsecs;
+              int secs  = esecs  - ssecs;
+              int mins  = emins  - smins;
+              int hours = ehours - shours;
+              int days  = eday   - sday;
+              if (msecs < 0) { secs--;  msecs += 1000; }
+              if (secs  < 0) { mins--;  secs  += 60; }
+              if (mins  < 0) { hours--; mins  += 60; }
+              if (hours < 0) { days--;  hours += 24; }
+              if (days  < 0) {
+                 fprintf(stderr, "Error: negative runtime!\n");
+                 msecs = secs = mins = hours = days = 0;
+              }
+              ts << "(wallclock runtime: ";
+              if (days  > 0)
+                 ts << days  << ((days  == 1) ? "day "  : "days " );
+              if (hours > 0 || days > 0)
+                 ts << hours << ((hours == 1) ? "hour " : "hours ");
+              if (mins  > 0 || hours > 0 || days > 0)
+                 ts << mins  << ((mins  == 1) ? "min "  : "mins " );
+              ts << secs  << "." << msecs << "secs)";
+           } else {
+              fprintf(stderr, "Error: can't read end-time string\n");
+           } 
+        }
+     } else {
+        fprintf(stderr, "Error: can't read start-time string\n");
+     } 
+  }
+  else {
+     fprintf(stderr, "Error: bad xml protocol number\n");
   }
 
   /* errors, leaks */
@@ -753,11 +799,12 @@ bool XMLParser::endElement( const QString&, const QString&,
     case VGOUTPUT:   /* ignore */
       break;
     case PROTOCOL:
-      if ( content != "1" ) {
+      if ( content != "1" && content != "2" ) {
         fprintf(stderr, "Fatal Error: wrong protocol version\n");
-	return false;
+        return false;
       }
-      info->protocolVersion = content.toInt();
+      topStatus->protocolVersion = content.toInt();
+      info->protocolVersion      = content.toInt();
       break;
     case PREAMBLE:
       inPreamble = false;

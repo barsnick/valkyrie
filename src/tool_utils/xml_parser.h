@@ -65,6 +65,7 @@ public:
   void printDisplay();
 
 public:
+  int protocolVersion;
   int num_errs, num_leaks, num_blocks;
   QString state, stime, etime, object;
 };
