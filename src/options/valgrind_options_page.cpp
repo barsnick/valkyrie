@@ -90,22 +90,22 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
 
   itemList.insert( Valgrind::RUN_LIBC,                    /* checkbox */
                    optionWidget( Valgrind::RUN_LIBC,   cgroup2, false ) );
-  itemList.insert( Valgrind::PTR_CHECK,                   /* checkbox */
-                   optionWidget( Valgrind::PTR_CHECK,  cgroup2, false ) );
   itemList.insert( Valgrind::EM_WARNS,                    /* checkbox */
                    optionWidget( Valgrind::EM_WARNS,   cgroup2, false ) );
 
   itemList.insert( Valgrind::SMC_CHECK,                   /* combobox */
                    optionWidget( Valgrind::SMC_CHECK,  cgroup2, true ) );
-  itemList.insert( Valgrind::WEIRD,                       /* combobox */
-                   optionWidget( Valgrind::WEIRD,      cgroup2, true ) );
+  itemList.insert( Valgrind::SIM_HINTS,                   /* combobox */
+                   optionWidget( Valgrind::SIM_HINTS,  cgroup2, true ) );
+  itemList.insert( Valgrind::KERN_VAR,                    /* combobox */
+                   optionWidget( Valgrind::KERN_VAR,   cgroup2, true ) );
 
   cgrid2->addWidget( itemList[Valgrind::RUN_LIBC ]->widget(),  1, 0 );
-  cgrid2->addWidget( itemList[Valgrind::PTR_CHECK]->widget(),  2, 0 );
-  cgrid2->addWidget( itemList[Valgrind::EM_WARNS ]->widget(),  3, 0 );
+  cgrid2->addWidget( itemList[Valgrind::EM_WARNS ]->widget(),  2, 0 );
 
-  cgrid2->addLayout( itemList[Valgrind::SMC_CHECK]->hlayout(), 4, 0 );
-  cgrid2->addLayout( itemList[Valgrind::WEIRD    ]->hlayout(), 5, 0 );
+  cgrid2->addLayout( itemList[Valgrind::SMC_CHECK]->hlayout(), 3, 0 );
+  cgrid2->addLayout( itemList[Valgrind::SIM_HINTS]->hlayout(), 4, 0 );
+  cgrid2->addLayout( itemList[Valgrind::KERN_VAR ]->hlayout(), 5, 0 );
 
   core_vbox->addStretch( space );
 

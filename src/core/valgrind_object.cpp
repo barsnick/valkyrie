@@ -89,18 +89,18 @@ Valgrind::Valgrind()
           "Free glibc memory at exit:",
           "Free up glibc memory at exit?",
           urlVgCore::freeGlibc );
-  addOpt( WEIRD,       Option::ARG_STRING, Option::COMBO,      
-          "valgrind",  '\0',               "weird-hacks", 
-          "<hack1,...>", "none|lax-ioctls|ioctl-mmap", "none",
-          "Weird hacks:",
-          "Slightly modify the simulated behaviour. Recognised hacks are: lax-ioctls,ioctl-mmap. Use with caution!", 
-          urlVgCore::weirdHacks );
-  addOpt( PTR_CHECK,   Option::ARG_BOOL,   Option::CHECK,   
-          "valgrind",  '\0',               "pointercheck",
-          "<yes|no>",  "yes|no",           "yes",
-          "Enforce client address space limits:",
-          "enforce client address space limits",
-          urlVgCore::pointerCheck );
+  addOpt( SIM_HINTS,   Option::ARG_STRING, Option::COMBO,      
+          "valgrind",  '\0',               "sim-hints", 
+          "<hint1,hint2,...>", "none|lax-ioctls|enable-outer", "none",
+          "Simulation Hints:",
+          "Slightly modify the simulated behaviour. Recognised hints are: lax-ioctls, enable-outer. Use with caution!", 
+          urlVgCore::simHints );
+  addOpt( KERN_VAR,    Option::ARG_STRING, Option::COMBO,      
+          "valgrind",  '\0',               "kernel-variant", 
+          "<variant1,variant2,...>", "none|bproc", "none",
+          "Kernel Variants:",
+          "Handle non-standard kernel variants. Recognised variants are: bproc. Use with caution!", 
+          urlVgCore::kernelVariant );
   addOpt( EM_WARNS,    Option::ARG_BOOL,   Option::CHECK,   
           "valgrind",  '\0',               "show-emwarns",
           "<yes|no>",  "yes|no",           "no",
@@ -218,7 +218,7 @@ int Valgrind::checkOptArg( int optid, const char* argval,
     case TOOL:
     case VERBOSITY:
     case XML_OUTPUT:
-    case WEIRD:
+    case SIM_HINTS:
     case RUN_LIBC:
     case NUM_CALLERS:
     case ERROR_LIMIT:
@@ -233,7 +233,6 @@ int Valgrind::checkOptArg( int optid, const char* argval,
 
     case TRACK_FDS:
     case TIME_STAMP:
-    case PTR_CHECK:
     case EM_WARNS:
     case SUPPS_SEL:
     case XML_COMMENT:

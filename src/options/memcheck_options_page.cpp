@@ -38,8 +38,6 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
                    optionWidget( Memcheck::PARTIAL,    group1, false ) );
   itemList.insert( Memcheck::GCC_296,                    /* checkbox */
                    optionWidget( Memcheck::GCC_296,    group1, false ) );
-  itemList.insert( Memcheck::STRLEN,                     /* checkbox */
-                   optionWidget( Memcheck::STRLEN,     group1, false ) );
 
   itemList.insert( Memcheck::LEAK_RES,                   /* combobox */
                    optionWidget( Memcheck::LEAK_RES,   group1, true ) );
@@ -49,7 +47,7 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
                    optionWidget( Memcheck::ALIGNMENT,  group1, true ) );
 
   /* grid layout for group1 */
-  int rows = 9;
+  int rows = 10;
   int cols = 2;
   QGridLayout* grid1 = new QGridLayout( group1, rows, cols, margin, space );
   grid1->setRowSpacing( 0, topSpace );   /* blank top row */
@@ -63,14 +61,13 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
 
   grid1->addWidget( itemList[Memcheck::PARTIAL]->widget(),     4, 0 );
   grid1->addWidget( itemList[Memcheck::GCC_296]->widget(),     5, 0 );
-  grid1->addWidget( itemList[Memcheck::STRLEN]->widget(),      6, 0 );
 
-  grid1->addMultiCellWidget( sep(group1,"sep2"), 7,7, 0,1 );
+  grid1->addMultiCellWidget( sep(group1,"sep2"), 6,6, 0,1 );
   grid1->setRowSpacing( 7, topSpace );   /* add a bit more space here */
 
-  grid1->addLayout( itemList[Memcheck::LEAK_RES]->hlayout(),    8, 0 );
-  grid1->addLayout( itemList[Memcheck::FREELIST]->hlayout(),    9, 0 );
-  grid1->addLayout( itemList[Memcheck::ALIGNMENT ]->hlayout(), 10, 0 );
+  grid1->addLayout( itemList[Memcheck::LEAK_RES]->hlayout(),    7, 0 );
+  grid1->addLayout( itemList[Memcheck::FREELIST]->hlayout(),    8, 0 );
+  grid1->addLayout( itemList[Memcheck::ALIGNMENT ]->hlayout(),  9, 0 );
 
 	/* Note: this widget is disabled because valgrind disables them when
 		 generating xml output (see docs/internals/xml_output.txt) */

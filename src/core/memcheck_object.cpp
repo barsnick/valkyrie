@@ -83,12 +83,6 @@ Memcheck::Memcheck()
           "Minimum alignment of allocations",
           "set minimum alignment of allocations", 
            urlVgCore::Alignment );
-  addOpt( STRLEN,       Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",   '\0',               "avoid-strlen-errors",
-          "<yes|no>",   "yes|no",           "yes",
-          "Suppress errors from inlined strlen",
-          "suppress errors from inlined strlen",  
-          urlMemcheck::Strlen );
 }
 
 
@@ -107,7 +101,6 @@ int Memcheck::checkOptArg( int optid, const char* argval,
     case LEAK_RES:
     case SHOW_REACH:
     case GCC_296:
-    case STRLEN:
       opt->isValidArg( &errval, argval );
       break;
 

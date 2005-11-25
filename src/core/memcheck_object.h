@@ -48,8 +48,7 @@ public:
     FREELIST,
     GCC_296,
     ALIGNMENT,
-    STRLEN,
-    LAST_CMD_OPT  = STRLEN
+    LAST_CMD_OPT  = ALIGNMENT
   };
 
   bool optionUsesPwr2( int optId ) {

@@ -66,10 +66,10 @@ namespace urlVgCore {
   extern const char* trackFds;
   extern const char* timeStamp;
   extern const char* freeGlibc;
-  extern const char* pointerCheck;
   extern const char* showEmWarns;
   extern const char* smcSupport;
-  extern const char* weirdHacks;
+  extern const char* simHints;
+  extern const char* kernelVariant;
   /* valgrind's options page: tab Error Reporting */
   extern const char* genSuppressions;
   extern const char* autoDemangle;
@@ -98,7 +98,6 @@ namespace urlMemcheck {
   extern const char* Leakres;
   extern const char* Showreach;
   extern const char* gcc296;
-  extern const char* Strlen;
 }
 
 

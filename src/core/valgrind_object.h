@@ -43,8 +43,8 @@ public:
     LOG_SOCKET,     // --log-socket
     /* uncommon options relevant to all tools */
     RUN_LIBC,       // --run-libc-freeres
-    WEIRD,          // --weird-hacks
-    PTR_CHECK,      // --pointercheck
+    SIM_HINTS,      // --sim-hints
+    KERN_VAR,       // --kernel-variant
     EM_WARNS,       // --show-emwarns
     SMC_CHECK,      // --smc-check
     /* options relevant to error-reporting tools */
