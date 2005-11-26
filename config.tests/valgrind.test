@@ -78,9 +78,14 @@ fi
 echo "${ECHO_T}$result" >&6
 
 if [ x"$found" = xno ] ; then
-  echo "   Cannot find valgrind.  " >&2
-  echo "   Rerun configure with --vg-dir=/path/to/valgrind/tree." >&2
-  exit 1
+  echo "************************************************************************" >&2
+  echo "************************************************************************" >&2
+  echo "   Warning: Cannot find valgrind." >&2
+  echo "   You can set the path to valgrind later, within Valkyrie," >&2
+  echo "   or rerun configure now with --vg-dir=/path/to/valgrind/tree." >&2
+  echo "************************************************************************" >&2
+  echo "************************************************************************" >&2
+  exit 0
 fi
 
 
@@ -99,9 +104,14 @@ fi
 echo "${ECHO_T}$result" >&6
 
 if [ x"$found" = xno ] ; then
-  echo "   Valgrind version >= $VG_VERSION is required "
-  echo "   Rerun this script with --vg-exec=/path/to/valgrind." >&2
-  exit 1
+  echo "************************************************************************" >&2
+  echo "************************************************************************" >&2
+  echo "   Warning: Valgrind version >= $VG_VERSION is required."
+  echo "   You can set the path to a more recent valgrind later, within Valkyrie," >&2
+  echo "   or rerun configure now with --vg-dir=/path/to/valgrind/tree." >&2
+  echo "************************************************************************" >&2
+  echo "************************************************************************" >&2
+  exit 0
 fi
 
 
@@ -137,9 +147,15 @@ fi
 echo "${ECHO_T}$result" >&6
 
 if [ x"$found" = xno ] ; then
-  echo "   Cannot find valgrind's suppressions path.  " >&2
-  echo "   Rerun configure with --vg-supp=/path/to/suppdir" >&2
-  exit 1
+  echo "************************************************************************" >&2
+  echo "************************************************************************" >&2
+  echo "   Warning: Cannot find valgrind's suppressions path." >&2
+  echo "   ." >&2
+  echo "   You can set the suppressions path later, within Valkyrie," >&2
+  echo "   or rerun configure now with --vg-supp=/path/to/suppdir." >&2
+  echo "************************************************************************" >&2
+  echo "************************************************************************" >&2
+  exit 0
 fi
 
 echo "VG_EXEC_PATH=$VG_EXEC_PATH" >> $CACHE_FILE

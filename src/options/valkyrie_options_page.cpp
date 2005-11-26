@@ -107,11 +107,11 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
   itemList.insert( Valkyrie::VG_EXEC,                   /* ledit    */
                    optionWidget(Valkyrie::VG_EXEC,      group1, true ) );
   //RM: ((LeWidget*)itemList[Valkyrie::VG_EXEC])->setReadOnly( true );
-  itemList[Valkyrie::VG_EXEC]->setEnabled( false );
+//  itemList[Valkyrie::VG_EXEC]->setEnabled( false );
   itemList.insert( Valkyrie::VG_SUPPS_DIR,              /* ledit    */
                    optionWidget(Valkyrie::VG_SUPPS_DIR, group1, true ) );
   //RM: ((LeWidget*)itemList[Valkyrie::VG_SUPPS_DIR])->setReadOnly( true );
-  itemList[Valkyrie::VG_SUPPS_DIR]->setEnabled( false );
+//  itemList[Valkyrie::VG_SUPPS_DIR]->setEnabled( false );
 #endif
 
   /* 2nd grid layout for group1 */

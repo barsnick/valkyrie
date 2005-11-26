@@ -81,12 +81,12 @@ Valkyrie::Valkyrie()
           "",          "1|10",             "2", 
           "Extra lines shown above/below the target line:", "",
           urlValkyrie::srcLines );
-  /* path to valgrind executable (found by configure) */
+  /* path to valgrind executable (maybe found by configure) */
   addOpt( VG_EXEC,     Option::NOT_POPT,   Option::LEDIT, 
           "valkyrie",  '\0',               "vg-exec",
           "",          "",                 "",
           "Valgrind:", "",                 urlValkyrie::vgDir );
-  /* path to a supp files dir. this is initially found by configure,
+  /* path to a supp files dir. this may have been found by configure,
      but can be changed later via valkyrie's Option page to point to
      another suppression files dir */
   addOpt( VG_SUPPS_DIR,   Option::NOT_POPT, Option::LEDIT, 

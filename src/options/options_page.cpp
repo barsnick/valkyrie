@@ -127,22 +127,29 @@ void OptionsPage::resetDefaults()
                     "to the installation defaults.</p>"
                     "<p>Continue ?</p>", vkObj->title().latin1() );
   if ( ok == MsgBox::vkYes ) { 
+		bool reset_vg    = false;
+		bool reset_supps = false;
     QIntDictIterator<OptionWidget> it( itemList );
     for ( ;  it.current(); ++it ) {
 
-			/* never reset these: only set via configure */
+			/* reset these from configure setup */
       if ( it.currentKey() == Valkyrie::VG_EXEC || 
 					 it.currentKey() == Valkyrie::VG_SUPPS_DIR ) {
+				reset_vg = true;
 				continue;
 			}
-			/* need to reset this lot */
 			if ( it.currentKey() == Valgrind::SUPPS_SEL ||
            it.currentKey() == Valgrind::SUPPS_ALL ) {
-				vkConfig->updatePaths();
+				reset_supps = true;
+				continue;
 			}
 
       it.current()->resetDefault();
     }
+		if (reset_vg)
+			vkConfig->resetCfgValgrind();
+		if (reset_supps)
+			vkConfig->resetCfgSupps();
   }
 }
 

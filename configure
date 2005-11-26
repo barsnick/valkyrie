@@ -366,11 +366,7 @@ if [ -z "$VG_DIR" ] ; then
   fi
 fi
 
-$cfgtests/valgrind.test $VK_CACHE $VG_DIR $VG_EXEC_PATH $VG_SUPP_DIR && VG_RESULT="$VG_RESULT valgrind"
-if [ -z "$VG_RESULT" ] ; then
-  rm -f $VK_CACHE
-  exit 1
-fi
+$cfgtests/valgrind.test $VK_CACHE $VG_DIR $VG_EXEC_PATH $VG_SUPP_DIR
 
 
 
@@ -457,11 +453,11 @@ cat > $vk_include_h <<_INC_EOF
 #define VK_SUPPS_DIR  "/suppressions/"
 
 /* valgrind paths ------------------------------------------------------ */
-#define VG_EXEC_PATH  "$VG_EXEC_PATH"
-#define VG_SUPP_DIR   "$VG_SUPP_DIR"
+#define CFG_VG_EXEC_PATH  "$VG_EXEC_PATH"
+#define CFG_VG_SUPP_DIR   "$VG_SUPP_DIR"
 
 /* other executables --------------------------------------------------- */
-#define MERGE_EXEC_PATH "$MERGE_EXEC_PATH"
+#define CFG_MERGE_EXEC_PATH "$MERGE_EXEC_PATH"
 
 /* names --------------------------------------------------------------- */
 #define Vk_Name      "$vk_name"
@@ -576,6 +572,11 @@ fi
 #---------------------------------------------------------------------------
 # Give feedback on configuration
 #---------------------------------------------------------------------------
+PRNT_VG_EXEC_PATH=$VG_EXEC_PATH
+if [ "$PRNT_VG_EXEC_PATH" == "" ]; then
+		PRNT_VG_EXEC_PATH="(not found)"
+fi
+
 echo
 echo "Configuration:"
 echo "  Installing to ........ $VK_INSTALL_PREFIX/"
@@ -586,12 +587,12 @@ echo "  Building on .......... $PLATFORM"
 echo "  Building for ......... $XPLATFORM"
 fi
 echo "  Qt ................... $QT_DIR/"
-echo "  Valgrind ............. $VG_EXEC_PATH"
+echo "  Valgrind ............. $PRNT_VG_EXEC_PATH"
 output="yes"
 #[ -z "$MYSQL_LIB" ] && output="no"
 #echo "  MySQL support ........ $output"
 echo "  Thread support ....... $CFG_THREAD"
-output="dynamically (shared )"
+output="dynamically (shared)"
 [ "$CFG_SHARED" = "no" ] && output="statically"
 echo "  Linking: ............. $output"
 output="release"

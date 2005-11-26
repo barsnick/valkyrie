@@ -129,15 +129,6 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
 
   case Okay:
 		mEntryMap = parseFile( ok );
-
-		/* double-check that all the install paths are correct - if not,
-			 silently correct them.  we have to delete any entries held in
-			 [valgrind:suppressions] as they may contain invalid paths, and
-			 re-initialise with default suppressions */
-		if ( rdEntry("vg-exec",      "valkyrie") != VG_EXEC_PATH || 
-				 rdEntry("vg-supps-dir", "valkyrie") != VG_SUPP_DIR ) {
-			updatePaths();
-		}
     break;
 
   case CreateRcFile:
@@ -146,7 +137,7 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
             "and %s cannot run without this file.<br>"
             "Creating it now ...</p>", 
             rcFileName.latin1(), vkName() );
-		writeConfigDefaults( false );
+		writeConfigDefaults();
     num_tries++;
     goto retry;      /* try again */
     break;
@@ -427,41 +418,79 @@ void VkConfig::insertData( const EntryKey &ekey,
 }
 
 
+void VkConfig::resetCfgValgrind()
+{
+	updateCfgValgrind( mEntryMap );
+
+  /* write entries to disk immediately */
+  sync();
+}
+
+void VkConfig::resetCfgSupps()
+{
+	updateCfgSupps( mEntryMap );
+
+  /* write entries to disk immediately */
+  sync();
+}
+
+
 /* If we've just created valkyrierc, or if we've moved machines, or
    changed some install paths, write the vg-exec-path and vg-supp-dir
-   paths found by 'configure' to valkyrierc.  These values can never 
-   be over-ridden by the user; only ever set via configure.*/
-void VkConfig::updatePaths()
+   paths found by 'configure' to valkyrierc.
+	 These values can be over-ridden by the user.
+	 Warning: If install vars empty, will reset those vars */
+void VkConfig::updateCfgPaths( EntryMap &rcMap )
 {
-  wrEntry( MERGE_EXEC_PATH, "merge-exec",   "valkyrie" );
-  wrEntry( VG_EXEC_PATH,    "vg-exec",      "valkyrie" );
-  wrEntry( VG_SUPP_DIR,     "vg-supps-dir", "valkyrie" );
+	QString merge_exec = CFG_MERGE_EXEC_PATH;
+	rcMap[ EntryKey( "valkyrie", "merge-exec" ) ].mValue = merge_exec;
 
-  /* find and store valgrind's suppressions files */
-  QString def_supp   = "";
-  QString supp_files = "";
-  QDir supp_dir( VG_SUPP_DIR );
-  /* see if we have any *.supp files in here - if so, grab 'em while
-     the going's good */
-  QStringList supp_list = supp_dir.entryList( "*.supp", QDir::Files );
-  for ( unsigned int i=0; i<supp_list.count(); i++ ) {
-    supp_files += supp_dir.absPath() + "/" + supp_list[i] + sep;
-    /* the only selected one is the default suppression file */
-    if ( supp_list[i] == rdEntry( "suppressions", "valgrind" ) )
-      def_supp = supp_dir.absPath() + "/" + supp_list[i];
-  }
-  /* chop off the trailing ';' */
-  supp_files.truncate( supp_files.length() - 1 );
-  /* write the list of found .supp files */
-  wrEntry( supp_files, "supps-all", "valgrind" );
-  /* and hold onto these values, 'cos they are the install defaults */
-  wrEntry( supp_files, "supps-def", "valgrind" );
-  /* and write the default supp. file including path */
-  wrEntry( def_supp, "suppressions", "valgrind" );
+	updateCfgValgrind( rcMap );
+	updateCfgSupps( rcMap );
+}
 
-  /* write entries to disk immediately in case Something Bad happens,
-     as we won't get another chance to do this */
-  sync();
+void VkConfig::updateCfgValgrind( EntryMap &rcMap )
+{
+	QString vg_exec    = CFG_VG_EXEC_PATH;
+	QString vg_supps   = CFG_VG_SUPP_DIR;
+
+	rcMap[ EntryKey( "valkyrie", "vg-exec" )    ].mValue = vg_exec;
+	rcMap[ EntryKey( "valkyrie", "vg-supps" )   ].mValue = vg_supps;
+}
+
+void VkConfig::updateCfgSupps( EntryMap &rcMap )
+{
+	QString vg_exec  = rcMap[ EntryKey( "valkyrie", "vg-exec" )    ].mValue;
+	QString vg_supps = rcMap[ EntryKey( "valkyrie", "vg-supps" )   ].mValue;
+
+	if ( vg_supps.isEmpty() ) {
+		/* if supps var empty: reset these vars too */
+		rcMap[ EntryKey( "valgrind", "supps-all" )   ].mValue = "";
+		rcMap[ EntryKey( "valgrind", "supps-def" )   ].mValue = "";
+		rcMap[ EntryKey( "valgrind", "suppressions" )].mValue = "";
+	} else {
+		/* find and store valgrind's suppressions files */
+		QString def_supp   = "";
+		QString supp_files = "";
+		QDir supp_dir( vg_supps );
+		/* see if we have any *.supp files in here - if so, grab 'em while
+			 the going's good */
+		QStringList supp_list = supp_dir.entryList( "*.supp", QDir::Files );
+		for ( unsigned int i=0; i<supp_list.count(); i++ ) {
+			supp_files += supp_dir.absPath() + "/" + supp_list[i] + sep;
+			/* the only selected one is the default suppression file */
+			if ( supp_list[i] == rdEntry( "suppressions", "valgrind" ) )
+				def_supp = supp_dir.absPath() + "/" + supp_list[i];
+		}
+		/* chop off the trailing ';' */
+		supp_files.truncate( supp_files.length() - 1 );
+		/* write the list of found .supp files */
+		rcMap[ EntryKey( "valgrind", "supps-all" )   ].mValue = supp_files;
+		/* and hold onto these values, 'cos they are the install defaults */
+		rcMap[ EntryKey( "valgrind", "supps-def" )   ].mValue = supp_files;
+		/* and write the default supp. file including path */
+		rcMap[ EntryKey( "valgrind", "suppressions" )].mValue = def_supp;
+	}
 }
 
 void VkConfig::backupConfigFile()
@@ -469,6 +498,10 @@ void VkConfig::backupConfigFile()
 	QString dt = QDateTime::currentDateTime().toString( ".dd.MM.yyyy");
 	QString bak = rcFileName.latin1() + dt + ".bak";
 	QDir d;
+	if ( !d.exists(rcFileName) ) {
+		// TODO: Err
+		return;
+	}
 	d.rename( rcFileName, bak );
 	fprintf(stderr, "Backed up config file to: %s\n", bak.latin1());
 }
@@ -504,9 +537,6 @@ EntryMap VkConfig::parseFile( bool *ok )
 		fprintf(stderr, "Configuration file: %s\n", vk_ver_rc.latin1());
 		fprintf(stderr, "Valkyrie:    %s\n", vkVersion());
 
-		/* Backup old config file */
-		backupConfigFile();
-
 		/* Create new default config, bringing over any old values */
 		fprintf(stderr, "Updating configuration file...\n\n");
 		QString new_config = mkConfigDefaults();
@@ -526,7 +556,7 @@ EntryMap VkConfig::parseFile( bool *ok )
 		newMap[ EntryKey( "valkyrie", "version" ) ].mValue = vkVersion();
 
 		/* write out new config */
-		*ok = writeConfig( newMap );
+		*ok = writeConfig( newMap, true );
 		if (!*ok) {
 			fprintf(stderr, "Error: parseFile(): Failed to write new configuration file\n");
 			// TODO
@@ -580,8 +610,13 @@ EntryMap VkConfig::parseConfigToMap( QTextStream &stream )
 }
 
 
-bool VkConfig::writeConfig( EntryMap rcMap )
+bool VkConfig::writeConfig( EntryMap rcMap, bool backup/*=false*/ )
 {
+	if (backup) {
+		/* move old config file, if it exists */
+		backupConfigFile();
+	}
+
   /* The temporary map should now be full of ALL entries.
      Write it out to disk. */
   QFile outF( rcFileName );
@@ -814,23 +849,21 @@ logfile=\n\n";
    The first time valkyrie is started, vkConfig looks to see if this
    file is present in the user's home dir.  If not, it writes the
    relevant data to ~/.PACKAGE/PACKAGErc */
-void VkConfig::writeConfigDefaults( bool rm )
+void VkConfig::writeConfigDefaults()
 {
-  /* we might have to remove an old rc file */
-  if ( rm ) {
-    QFile rcF( rcFileName ); 
-    if ( !rcF.remove() ) 
-      VK_DEBUG("Failed to delete old version rcfile.");
-  }
+	QString default_config = mkConfigDefaults();
+	QTextStream strm( &default_config, IO_ReadOnly );
+	EntryMap rcMap = parseConfigToMap( strm );
+	
+	/* Set our 'configured' valgrind paths, if we have them */
+	updateCfgPaths( rcMap );
 
-  QFile outF( rcFileName ); 
-  if ( !outF.open( IO_WriteOnly ) ) { 
-		// TODO
+	/* write out new config */
+	if ( !writeConfig( rcMap, true ) ) {
+		fprintf(stderr, "Error: writeConfigDefaults(): Failed to write configuration file\n");
+		// TODO: Err
 		return;
 	}
-	QTextStream aStream( &outF );
-	aStream << mkConfigDefaults();
-	outF.close();
 
   //newConfigFile = true;
 }

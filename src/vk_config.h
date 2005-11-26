@@ -114,8 +114,9 @@ public:
   /* returns an object's id */
   int vkObjectId( VkObject* obj );
 
-  /* write vg-exec-path, vg-supp-dir path and default supp file values */
-  void updatePaths();
+  /* reset vg-exec-path, vg-supp-dir path and default supp file values */
+	void resetCfgSupps();
+	void resetCfgValgrind();
 
   /* read fns ---------------------------------------------------------- */
   QString rdEntry( const QString &pKey, const QString &pGroup );
@@ -147,14 +148,19 @@ private:
   bool checkPaths();
   QString mkConfigHeader( void );
   QString mkConfigDefaults( void );
-  void writeConfigDefaults( bool rm=false );
+  void writeConfigDefaults();
 
-  bool writeConfig( EntryMap rcMap );
+  bool writeConfig( EntryMap rcMap, bool backup=false );
   EntryMap parseConfigToMap( QTextStream &stream );
   void insertData( const EntryKey &key, const EntryData &data );
   void backupConfigFile();
   EntryMap parseFile( bool *ok );
   RetVal checkAccess() const;
+
+  /* write vg-exec-path, vg-supp-dir path and default supp file values */
+  void updateCfgPaths( EntryMap &rcMap );
+	void updateCfgValgrind( EntryMap &rcMap );
+	void updateCfgSupps( EntryMap &rcMap );
 
   /* creates the various VkObjects and initialises their options,
      ready for cmd-line parsing (if any). */
