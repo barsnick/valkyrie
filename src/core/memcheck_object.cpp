@@ -478,7 +478,7 @@ bool Memcheck::runProcess( QStringList flags, int log_fd,
 
 /* slot, connected to proc's signal readyReadStd***().
    read and process the data, which might be output in chunks.
-   output is auto-saved to a logfile in ~/.valkyrie-X.X.X/logs/
+   output is auto-saved to a logfile in ~/.valkyrie/logs/
    Note: This function must not block, else vkprocess can finish
    and be deleted before this unblocks and returns to vkprocess,
    leading to a segfault.

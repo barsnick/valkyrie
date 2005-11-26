@@ -19,9 +19,6 @@
 #include "cachegrind_object.h"
 #include "massif_object.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>         /* close, access */
 
 #include <qdatetime.h>
@@ -47,10 +44,40 @@ void VkConfig::dontSync()
 /* write-sync is only necessary if there are dirty entries ------------- */
 void VkConfig::sync()
 {
-  if ( mDirty ) {
-    writebackConfig();
-    mDirty = false;
+  if ( !mDirty ) return;
+
+  /* read config file from disk, and fill the temporary structure 
+     with entries from the file */
+	bool ok;
+	EntryMap rcMap = parseFile( &ok );
+	if (!ok) {
+		fprintf(stderr, "Error: sync(): Failed to parse configuration file\n");
+		// TODO
+		return;
+	}
+
+  /* augment this structure with the dirty entries from the
+     config object */
+  EntryMapIterator aIt;
+  for ( aIt = mEntryMap.begin(); aIt != mEntryMap.end(); ++aIt) {
+    const EntryData &dirtyEntry = aIt.data();
+    if ( !dirtyEntry.mDirty ) 
+      continue;
+    /* put dirty entries from the config object into the temporary map.
+			 if the entry exists, replaces the data
+			 if is a new entry (i.e old rc file), insert new key:data */
+    rcMap.insert( aIt.key(), dirtyEntry );
   }
+
+	/* write out updated config */
+  ok = writeConfig( rcMap );
+	if (!ok) {
+		fprintf(stderr, "Error: sync(): Failed to write configuration file\n");
+		// TODO
+		return;
+	}
+
+	mDirty = false;
 }
 
 
@@ -74,8 +101,8 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   vk_email     = VK_EMAIL;
   vg_copyright = VG_COPYRIGHT;
 
-  rcPath.sprintf( "%s/.%s-%s", 
-                  QDir::homeDirPath().latin1(), vkname(), vkVersion() );
+  rcPath.sprintf( "%s/.%s", 
+                  QDir::homeDirPath().latin1(), vkname() );
   rcFileName.sprintf( "%s/%src", rcPath.latin1(), vkname() );
   dbasePath = rcPath + VK_DBASE_DIR;
   logsPath  = rcPath + VK_LOGS_DIR;
@@ -101,19 +128,16 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
   switch ( rval ) {
 
   case Okay:
-    *ok = true;
-    if ( parseFile() == Fail ) {
-      *ok = false;
-    } break;
+		mEntryMap = parseFile( ok );
 
-  case BadRcVersion:
-    vkInfo( 0, "Configuration",
-            "<p>The configuration file '%s' version is invalid.</p> "
-            "<p>Removing and re-creating it now ...</p>", 
-            rcFileName.latin1() );
-    mkConfigFile( true );
-    num_tries++;
-    goto retry;      /* try again */
+		/* double-check that all the install paths are correct - if not,
+			 silently correct them.  we have to delete any entries held in
+			 [valgrind:suppressions] as they may contain invalid paths, and
+			 re-initialise with default suppressions */
+		if ( rdEntry("vg-exec",      "valkyrie") != VG_EXEC_PATH || 
+				 rdEntry("vg-supps-dir", "valkyrie") != VG_SUPP_DIR ) {
+			updatePaths();
+		}
     break;
 
   case CreateRcFile:
@@ -122,7 +146,7 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
             "and %s cannot run without this file.<br>"
             "Creating it now ...</p>", 
             rcFileName.latin1(), vkName() );
-    mkConfigFile();
+		writeConfigDefaults( false );
     num_tries++;
     goto retry;      /* try again */
     break;
@@ -135,13 +159,11 @@ VkConfig::VkConfig( bool *ok ) : QObject( 0, "vkConfig" )
 
   case BadFilename:
   case NoDir:
-  case BadRcFile:
   case Fail:
     vkFatal( 0, "Config Creation Failed",
              "<p>Initialisation of Config failed.</p>" );
     break;
   }
-
 }
 
 
@@ -160,13 +182,13 @@ const char* VkConfig::vgCopyright() { return vg_copyright.data(); }
 QString VkConfig::vkdocDir()  { return vkdocPath; }
 
 QString VkConfig::vgdocDir()  { return vgdocPath; }
-/* ~/.valkyrie-X.X.X/ */
+/* ~/.valkyrie/ */
 QString VkConfig::rcDir()     { return rcPath;    }
-/* ~/.valkyrie-X.X.X/dbase/ */
+/* ~/.valkyrie/dbase/ */
 QString VkConfig::dbaseDir()  { return dbasePath; }
-/* ~/.valkyrie-X.X.X/logs/ */
+/* ~/.valkyrie/logs/ */
 QString VkConfig::logsDir()   { return logsPath;  }
-/* ~/.valkyrie-X.X.X/suppressions/ */
+/* ~/.valkyrie/suppressions/ */
 QString VkConfig::suppDir()   { return suppPath;  }
 
 
@@ -411,9 +433,9 @@ void VkConfig::insertData( const EntryKey &ekey,
    be over-ridden by the user; only ever set via configure.*/
 void VkConfig::updatePaths()
 {
-  wrEntry( MERGE_EXEC,   "merge-exec",   "valkyrie" );
-  wrEntry( VG_EXEC_PATH, "vg-exec",      "valkyrie" );
-  wrEntry( VG_SUPP_DIR,  "vg-supps-dir", "valkyrie" );
+  wrEntry( MERGE_EXEC_PATH, "merge-exec",   "valkyrie" );
+  wrEntry( VG_EXEC_PATH,    "vg-exec",      "valkyrie" );
+  wrEntry( VG_SUPP_DIR,     "vg-supps-dir", "valkyrie" );
 
   /* find and store valgrind's suppressions files */
   QString def_supp   = "";
@@ -442,48 +464,88 @@ void VkConfig::updatePaths()
   sync();
 }
 
-
-VkConfig::RetVal VkConfig::parseFile()
+void VkConfig::backupConfigFile()
 {
+	QString dt = QDateTime::currentDateTime().toString( ".dd.MM.yyyy");
+	QString bak = rcFileName.latin1() + dt + ".bak";
+	QDir d;
+	d.rename( rcFileName, bak );
+	fprintf(stderr, "Backed up config file to: %s\n", bak.latin1());
+}
+
+EntryMap VkConfig::parseFile( bool *ok )
+{
+  EntryMap rcMap, newMap;
   QFile rFile( rcFileName );
   if ( !rFile.open( IO_ReadOnly ) ) {
-    vkFatal( 0, "Parse Config File",
-             "<p>Failed to open the file %s for reading.<br>"
-             "%s cannot run without this file.</p>", 
-             rcFileName.latin1(), vkName() );
-    return Fail;
-  } else {
-    /* beam me up, scotty */
-    parseConfigFile( rFile );
-    rFile.close();
+		/* Error: Failed to open file. */
+		vkFatal( 0, "Parse Config File",
+						 "<p>Failed to open the file %s for reading.<br>"
+						 "%s cannot run without this file.</p>", 
+						 rcFileName.latin1(), vkName() );
+		*ok = false;
+    return EntryMap();
   }
+	*ok = true;
 
-  /* double-check that all the install paths are correct - if not,
-     silently correct them.  we have to delete any entries held in
-     [valgrind:suppressions] as they may contain invalid paths, and
-     re-initialise with default suppressions */
-  if ( rdEntry("vg-exec",      "valkyrie") != VG_EXEC_PATH || 
-       rdEntry("vg-supps-dir", "valkyrie") != VG_SUPP_DIR ) {
-    updatePaths();
-  }
+	/* beam me up, scotty */
+	QTextStream stream( &rFile );
+	rcMap = parseConfigToMap( stream );
+	rFile.close();
 
-  return Okay;
+
+	/* Check for correct rc version number
+	   - if mismatch, print warning, update entries */
+	QString vk_ver_rc = rcMap[ EntryKey( "valkyrie", "version" ) ].mValue;
+	QString vk_ver    = vkVersion();
+
+	if (vk_ver_rc != vk_ver) {  /* Version mismatch - fix rc file */
+		fprintf(stderr, "Warning: Configuration file version mismatch:\n");
+		fprintf(stderr, "Configuration file: %s\n", vk_ver_rc.latin1());
+		fprintf(stderr, "Valkyrie:    %s\n", vkVersion());
+
+		/* Backup old config file */
+		backupConfigFile();
+
+		/* Create new default config, bringing over any old values */
+		fprintf(stderr, "Updating configuration file...\n\n");
+		QString new_config = mkConfigDefaults();
+		QTextStream strm( &new_config, IO_ReadOnly );
+    newMap = parseConfigToMap( strm );
+
+		/* loop over entries in old rc:
+			   if (entry exists in new map) copy value from old */
+		EntryMapIterator aIt;
+		for ( aIt = rcMap.begin(); aIt != rcMap.end(); ++aIt) {
+			const EntryKey  &rcKey = aIt.key();
+			if ( newMap.find(rcKey) != newMap.end() ) {
+				newMap[ rcKey ] = aIt.data();
+			}
+		}
+		/* but keep the new version! */
+		newMap[ EntryKey( "valkyrie", "version" ) ].mValue = vkVersion();
+
+		/* write out new config */
+		*ok = writeConfig( newMap );
+		if (!*ok) {
+			fprintf(stderr, "Error: parseFile(): Failed to write new configuration file\n");
+			// TODO
+		}
+
+		/* and return new map */
+		return newMap;
+	}
+	/* return map */
+	return rcMap;
 }
 
 
-void VkConfig::parseConfigFile( QFile &rFile, EntryMap *writeBackMap )
+EntryMap VkConfig::parseConfigToMap( QTextStream &stream )
 {
-  if ( !rFile.isOpen() ) {
-    VK_DEBUG( "parseConfigFile( %s )\n"
-             "rFile '%s' is not open for parsing", 
-             VK_STRLOC, rcFileName.latin1() );
-    return;
-  }
+  EntryMap rcMap;
+  QString  line;
+  QString  aGroup;
 
-  QString line;
-  QString aGroup;
-
-  QTextStream stream( &rFile );
   stream.setEncoding( QTextStream::UnicodeUTF8 );
   while ( !stream.atEnd() ) {
 
@@ -510,91 +572,49 @@ void VkConfig::parseConfigFile( QFile &rFile, EntryMap *writeBackMap )
       EntryKey entryKey( aGroup, key );
       EntryData entryData( value, false );
 
-      if ( writeBackMap ) {
-        /* insert into the temporary scratchpad map */
-        writeBackMap->insert( entryKey, entryData );
-      } else { 
-        /* directly insert value into config object */
-        insertData( entryKey, entryData );
-      }
-
+			/* insert into the temporary scratchpad map */
+			rcMap.insert( entryKey, entryData );
     }
   }
+	return rcMap;
 }
 
 
-void VkConfig::writebackConfig()
+bool VkConfig::writeConfig( EntryMap rcMap )
 {
-  EntryMap tmpMap;
-
-  /* read config file from disk, and fill the temporary structure 
-     with entries from the file */
-  QFile rcFile( rcFileName );
-  if ( !rcFile.open(IO_ReadOnly) ) {
-    VK_DEBUG( "writebackConfig( %s )\n"
-             "failed to open rcfile: %s", 
-             VK_STRLOC, rcFileName.latin1() );
-  } else {
-    parseConfigFile( rcFile, &tmpMap );
-    rcFile.close();
-  }
-
-  /* augment this structure with the dirty entries from the
-     config object */
-  EntryMapIterator aIt;
-  for ( aIt = mEntryMap.begin(); aIt != mEntryMap.end(); ++aIt) {
-    const EntryData &dirtyEntry = aIt.data();
-    if ( !dirtyEntry.mDirty ) 
-      continue;
-    /* put dirty entries from the config object into the
-       temporary map, possibly replacing an existing entry */
-    tmpMap.replace( aIt.key(), dirtyEntry );
-  }
-
   /* The temporary map should now be full of ALL entries.
      Write it out to disk. */
-  FILE *pStream = 0;
-  int fd = open( rcFileName, O_WRONLY | O_TRUNC);
-  if ( fd < 0 )
-    return;
-  pStream = fdopen( fd, "w");
-  if ( !pStream ) {
-    close(fd);
-    return;
-  }
+  QFile outF( rcFileName );
+  if ( !outF.open( IO_WriteOnly ) ) {
+		// TODO
+		return false;
+	}
+	QTextStream aStream( &outF );
+	
+	/* Write comment header */
+	QString hdr = mkConfigHeader();
+	aStream << hdr.latin1();
 
-  bool firstEntry = true;
+	/* Write out map entries under relevant group sections */
   QString currGroup;
-  for ( aIt = tmpMap.begin(); aIt != tmpMap.end(); ++aIt) {
+  EntryMapIterator aIt;
+  for ( aIt = rcMap.begin(); aIt != rcMap.end(); ++aIt) {
 
     const EntryKey  &currKey   = aIt.key();
     const EntryData &currEntry = aIt.data();
 
     /* new group */
     if ( currGroup != currKey.mGroup ) {
-
-      if ( firstEntry ) {
-        QString hdr = QString("# %1 %2 Configuration File\n")
-                             .arg(vkName()).arg(vkVersion());
-
-        fprintf( pStream, hdr.latin1() );
-
-        QDateTime dt = QDateTime::currentDateTime();
-        hdr = "# " + dt.toString( "MMMM d hh:mm yyyy" ) + "\n";
-        fprintf( pStream, hdr.latin1() );
-      }
-
       currGroup = currKey.mGroup;
-      fprintf( pStream, "\n[%s]\n", currGroup.latin1() );
+      aStream << "\n[" << currGroup << "]\n";
     }
-    firstEntry = false;
 
     /* group data */
-    fprintf( pStream, "%s=%s\n",  
-             currKey.mKey.latin1(), currEntry.mValue.latin1() );
+		aStream << currKey.mKey << "=" << currEntry.mValue << "\n";
   }
 
-  fclose( pStream );
+	outF.close();
+	return true;
 }
 
 
@@ -636,23 +656,6 @@ VkConfig::RetVal VkConfig::checkAccess() const
             "<p>Re-creating it now ... .. </p>", 
             rcFileName.latin1() );
     return CreateRcFile;
-  }
-
-  /* 5. and finally, check the version no. for compatibility */
-  QFile rcFile( rcFileName );
-  if ( rcFile.open( IO_ReadOnly ) ) {
-    QTextStream ts( &rcFile );
-    QString line = ts.readLine();
-    rcFile.close();
-    /* get the version as a string */
-    int i = 0;
-    while ( !line[i].isDigit() ) i++;
-    line = line.right( line.length() - i );
-    i = 0;
-    while ( line[i].isDigit() || line[i] == '.' )  i++;
-    line = line.left( i );
-    if ( line != vk_version.data() )
-      return BadRcVersion;
   }
 
   return Okay;
@@ -751,25 +754,24 @@ int VkConfig::vkObjectId( VkObject* obj )
 }
 
 
+
 /* Create the default configuration file.  -----------------------------
-   The first time valkyrie is started, vkConfig looks to see if this
-   file is present in the user's home dir.  If not, it writes the
-   relevant data to ~/.PACKAGE/PACKAGErc */
-void VkConfig::mkConfigFile( bool rm )
+ */
+QString VkConfig::mkConfigHeader( void )
 {
-  /* we might have to remove an old rc file */
-  if ( rm ) {
-    QFile rcF( rcFileName ); 
-    if ( !rcF.remove() ) 
-      VK_DEBUG("Failed to delete old version rcfile.");
-  }
-
   QDateTime dt = QDateTime::currentDateTime();
+  QString hdr = QString("# %1 configuration file\n").arg(vkName());
+  hdr += "# " + dt.toString( "MMMM d hh:mm yyyy" ) + "\n";
+  hdr += "# Warning: This file is auto-generated, edits may be lost!\n";
+	return hdr;
+}
 
-  QString header = QString("# %1 %2 configuration file\n")
-                          .arg(vkName()).arg(vkVersion());
-  header += "# " + dt.toString( "MMMM d hh:mm yyyy" ) + "\n\n";
+QString VkConfig::mkConfigDefaults( void )
+{
+	QString str;
+	QTextStream ts( &str, IO_WriteOnly );
 
+	QString header = mkConfigHeader();
 
   char * window_colors = "[Colors]\n\
 background=214,205,187\n\
@@ -794,33 +796,50 @@ dbase=valkyrie\n\
 logging=true\n\
 logfile=\n\n";
 
+	ts << header << "\n" << window_colors << mainwin_size_pos << dbase;
+
+	/* a new tool might have been added, or other changes made, in
+		 which case this fn wouldn't contain the correct options=values
+		 if it were hard-wired in. Better safe than sorry: just get all
+		 tools that are present to spew their options/flags out to disk. */
+	VkObject* vkobj;
+	for ( vkobj = vkObjectList.first(); vkobj; vkobj = vkObjectList.next() ) {
+		ts << vkobj->configEntries();
+	}
+	return str;
+}
+
+
+/* Create the default configuration file.  -----------------------------
+   The first time valkyrie is started, vkConfig looks to see if this
+   file is present in the user's home dir.  If not, it writes the
+   relevant data to ~/.PACKAGE/PACKAGErc */
+void VkConfig::writeConfigDefaults( bool rm )
+{
+  /* we might have to remove an old rc file */
+  if ( rm ) {
+    QFile rcF( rcFileName ); 
+    if ( !rcF.remove() ) 
+      VK_DEBUG("Failed to delete old version rcfile.");
+  }
 
   QFile outF( rcFileName ); 
-  if ( outF.open( IO_WriteOnly ) ) { 
-    QTextStream aStream( &outF ); 
-
-    aStream << header << window_colors << mainwin_size_pos << dbase;
-
-    /* a new tool might have been added, or other changes made, in
-       which case this fn wouldn't contain the correct options=values
-       if it were hard-wired in. Better safe than sorry: just get all
-       tools that are present to spew their options/flags out to disk. */
-    VkObject* vkobj;
-    for ( vkobj = vkObjectList.first(); vkobj; vkobj = vkObjectList.next() ) {
-      aStream << vkobj->configEntries();
-    }
-
-    outF.close();
-  }
+  if ( !outF.open( IO_WriteOnly ) ) { 
+		// TODO
+		return;
+	}
+	QTextStream aStream( &outF );
+	aStream << mkConfigDefaults();
+	outF.close();
 
   //newConfigFile = true;
 }
 
 
-/* ~/.PACKAGE-X.X.X is a sine qua non ---------------------------------- 
-   checks to see if ~/valkyrie-X.X.X/ and its required sub-dirs are
+/* ~/.PACKAGE is a sine qua non ---------------------------------------- 
+   checks to see if ~/valkyrie/ and its required sub-dirs are
    all present and correct.  If not, tries to create them.
-  ~/valkyrie-X.X.X/ 
+  ~/valkyrie/ 
     - valkyrierc
     - dbase/
     - logs/
@@ -844,7 +863,7 @@ bool VkConfig::checkDirs()
     switch ( state ) {
 
       /* normal startup checks ----------------------------------------- */
-      case CHECK_DIR:        /* does ~/.PACKAGE-X.X.X/ exist ? */
+      case CHECK_DIR:        /* does ~/.PACKAGE/ exist ? */
         state = vk_dir.exists() ? CHECK_SUB_DIRS : MK_TOP_DIR;
         break;
 
@@ -871,7 +890,7 @@ bool VkConfig::checkDirs()
       } break;
 
       /* first time ever startup --------------------------------------- */
-      case MK_TOP_DIR:       /* create '~/PACKAGE-X.X.X' */
+      case MK_TOP_DIR:       /* create '~/PACKAGE' */
         state = vk_dir.mkdir( rcPath ) ? MK_DB_DIR : GIVE_UP;
         break;
 

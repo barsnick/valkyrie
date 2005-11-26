@@ -17,6 +17,7 @@
 #include "vk_messages.h"
 #include "vk_utils.h"          // vk_assert(), vk_strcmp(), vkPrint()
 #include "html_urls.h"
+#include "vk_include.h"        // VK_VERSION
 
 #include <qapplication.h>
 
@@ -45,7 +46,7 @@ Valkyrie::Valkyrie()
           "",          "show this help message and exit", urlNone );
   addOpt( HELP_OPT,    Option::ARG_NONE,   Option::NONE,
           "",          'v',                "version", 
-          "",          "",                 "", 
+          "",          "",                 VK_VERSION, 
           "",          "display version information and exit", urlNone );
   addOpt( HELP_OPT,    Option::ARG_NONE,   Option::NONE,
           "",          'V',                "valgrind-opts", 

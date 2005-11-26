@@ -140,17 +140,20 @@ public:
 
 private:
   enum RetVal { Okay=1, BadFilename, NoDir, NoPerms,
-                BadRcFile, BadRcVersion, CreateRcFile, Fail };
+                CreateRcFile, Fail };
   void sync();
 
   bool checkDirs();
   bool checkPaths();
-  void mkConfigFile( bool rm=false );
+  QString mkConfigHeader( void );
+  QString mkConfigDefaults( void );
+  void writeConfigDefaults( bool rm=false );
 
-  void writebackConfig();
-  void parseConfigFile( QFile &rFile, EntryMap *writeBackMap=NULL );
+  bool writeConfig( EntryMap rcMap );
+  EntryMap parseConfigToMap( QTextStream &stream );
   void insertData( const EntryKey &key, const EntryData &data );
-  RetVal parseFile();
+  void backupConfigFile();
+  EntryMap parseFile( bool *ok );
   RetVal checkAccess() const;
 
   /* creates the various VkObjects and initialises their options,
@@ -179,7 +182,7 @@ private:
   QString logsPath;         /* path to log dir */
   QString dbasePath;        /* path to dbase dir */
   /* path to user's suppression files dir.
-     default is ~/.valkyrie-X.X.X/suppressions */
+     default is ~/.valkyrie/suppressions */
   QString suppPath;
 
   EntryMap mEntryMap;       /* the config dict */

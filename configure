@@ -68,7 +68,7 @@ VG_DIR=             # path to valgrind's install dir
 VG_EXEC_PATH=       # path to valgrind executable
 VG_SUPP_DIR=        # path to valgrind's suppressions dir
 
-MERGE_EXEC=         # path to vk_logmerge
+MERGE_EXEC_PATH=    # path to vk_logmerge
 
 #MYSQL_LIB=          # path to MySQL library ( -lmysqlclient )
 #MYSQL_INC=          # path to MySQL include directory
@@ -419,7 +419,7 @@ fi
 
 
 # FIXME: kludging this for now...
-MERGE_EXEC="$relpath/bin/vk_logmerge"
+MERGE_EXEC_PATH="$relpath/bin/vk_logmerge"
 
 
 #-------------------------------------------------------------------
@@ -461,7 +461,7 @@ cat > $vk_include_h <<_INC_EOF
 #define VG_SUPP_DIR   "$VG_SUPP_DIR"
 
 /* other executables --------------------------------------------------- */
-#define MERGE_EXEC    "$MERGE_EXEC"
+#define MERGE_EXEC_PATH "$MERGE_EXEC_PATH"
 
 /* names --------------------------------------------------------------- */
 #define Vk_Name      "$vk_name"
