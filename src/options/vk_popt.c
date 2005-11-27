@@ -457,7 +457,7 @@ static void vkSingleOptionHelp( FILE * fp,
   helpLength = strlen( help );
   while ( helpLength > lineLength ) {
     const char * ch;
-    char format[10];
+    char format[100];
 
     ch = help + lineLength - 1;
     while ( ch > help && !isspace(*ch) ) 
