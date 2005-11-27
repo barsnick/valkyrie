@@ -1,12 +1,12 @@
-<html>
+<html xmlns:cf="http://docbook.sourceforge.net/xmlns/chunkfast/1.0">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>6. README_MISSING_SYSCALL_OR_IOCTL</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
-<link rel="home" href="index.html" title="Valgrind Documentation">
-<link rel="up" href="dist.html" title="Distribution Documents">
-<link rel="previous" href="dist.readme.html" title="5. README">
+<meta name="generator" content="DocBook XSL Stylesheets V1.69.0">
+<link rel="start" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="dist.html" title="Valgrind Distribution Documents">
+<link rel="prev" href="dist.readme.html" title="5. README">
 <link rel="next" href="dist.readme-developers.html" title="7. README_DEVELOPERS">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -14,15 +14,12 @@
 <td width="22px" align="center" valign="middle"><a accesskey="p" href="dist.readme.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
 <td width="25px" align="center" valign="middle"><a accesskey="u" href="dist.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
 <td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
-<th align="center" valign="middle">Distribution Documents</th>
+<th align="center" valign="middle">Valgrind Distribution Documents</th>
 <td width="22px" align="center" valign="middle"><a accesskey="n" href="dist.readme-developers.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
 </tr></table></div>
 <div class="chapter" lang="en">
-<div class="titlepage">
-<div><div><h2 class="title">
-<a name="dist.readme-missing"></a>6. README_MISSING_SYSCALL_OR_IOCTL</h2></div></div>
-<div></div>
-</div>
+<div class="titlepage"><div><div><h2 class="title">
+<a name="dist.readme-missing"></a>6. README_MISSING_SYSCALL_OR_IOCTL</h2></div></div></div>
 <div class="literallayout"><p><br>
       <br>
 Dealing with missing system call or ioctl wrappers in Valgrind<br>
@@ -38,7 +35,7 @@ Note that an "ioctl" is just a special kind of system call, really; so<br>
 there's not a lot of need to distinguish them (at least conceptually)<br>
 in the discussion that follows.<br>
 <br>
-All this machinery is in coregrind/vg_syscalls.c.<br>
+All this machinery is in coregrind/m_syswrap.<br>
 <br>
 <br>
 What are syscall/ioctl wrappers?  What do they do?<br>
@@ -127,7 +124,7 @@ following:<br>
        grep NNN /usr/include/asm/unistd.h<br>
 <br>
     This should tell you something like  __NR_mysyscallname.<br>
-    Copy this entry to coregrind/$(VG_PLATFORM)/vki_unistd.h.<br>
+    Copy this entry to coregrind/vki_unistd-$(VG_PLATFORM).h.<br>
 <br>
 <br>
 2.  Do 'man 2 mysyscallname' to get some idea of what the syscall<br>
@@ -141,8 +138,9 @@ following:<br>
 <br>
 <br>
 3.  Add a case to the already-huge collection of wrappers in <br>
-    coregrind/vg_syscalls.c.  For each in-memory parameter which is <br>
-    read or written by the syscall, do one of<br>
+    the coregrind/m_syswrap/syswrap-*.c files. <br>
+    For each in-memory parameter which is read or written by<br>
+    the syscall, do one of<br>
     <br>
       PRE_MEM_READ( ... )<br>
       PRE_MEM_RASCIIZ( ... ) <br>
@@ -152,8 +150,13 @@ following:<br>
     succeeds, issue suitable POST_MEM_WRITE( ... ) calls.<br>
     (There's no need for POST_MEM_READ calls.)<br>
 <br>
-    Also, add it to the sys_info[] array; use SYSBA if it requires a<br>
-    PRE() and POST() function, and SYSB_ if it only requires a PRE()<br>
+    Also, add it to the syscall_table[] array; use one of GENX_, GENXY<br>
+    LINX_, LINXY, PLAX_, PLAXY.<br>
+    GEN* for generic syscalls (in syswrap-generic.c), LIN* for linux<br>
+    specific ones (in syswrap-linux.c) and PLA* for the platform<br>
+    dependant ones (in syswrap-$(PLATFORM)-linux.c).<br>
+    The *XY variant if it requires a PRE() and POST() function, and<br>
+    the *X_ variant if it only requires a PRE()<br>
     function.  The 2nd arg of these macros indicate if the syscall<br>
     could possibly block.<br>
     <br>

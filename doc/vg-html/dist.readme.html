@@ -1,12 +1,12 @@
-<html>
+<html xmlns:cf="http://docbook.sourceforge.net/xmlns/chunkfast/1.0">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>5. README</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
-<link rel="home" href="index.html" title="Valgrind Documentation">
-<link rel="up" href="dist.html" title="Distribution Documents">
-<link rel="previous" href="dist.news.html" title="4. NEWS">
+<meta name="generator" content="DocBook XSL Stylesheets V1.69.0">
+<link rel="start" href="index.html" title="Valgrind Documentation">
+<link rel="up" href="dist.html" title="Valgrind Distribution Documents">
+<link rel="prev" href="dist.news.html" title="4. NEWS">
 <link rel="next" href="dist.readme-missing.html" title="6. README_MISSING_SYSCALL_OR_IOCTL">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -14,15 +14,12 @@
 <td width="22px" align="center" valign="middle"><a accesskey="p" href="dist.news.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
 <td width="25px" align="center" valign="middle"><a accesskey="u" href="dist.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
 <td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
-<th align="center" valign="middle">Distribution Documents</th>
+<th align="center" valign="middle">Valgrind Distribution Documents</th>
 <td width="22px" align="center" valign="middle"><a accesskey="n" href="dist.readme-missing.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
 </tr></table></div>
 <div class="chapter" lang="en">
-<div class="titlepage">
-<div><div><h2 class="title">
-<a name="dist.readme"></a>5. README</h2></div></div>
-<div></div>
-</div>
+<div class="titlepage"><div><div><h2 class="title">
+<a name="dist.readme"></a>5. README</h2></div></div></div>
 <div class="literallayout"><p><br>
       <br>
 Release notes for Valgrind<br>
@@ -40,15 +37,15 @@ problems, consult FAQ.txt to see if there are workarounds.<br>
 <br>
 Executive Summary<br>
 ~~~~~~~~~~~~~~~~~<br>
-Valgrind is a GPL'd system for debugging and profiling x86-Linux programs.<br>
-With the tools that come with Valgrind, you can automatically detect<br>
-many memory management and threading bugs, avoiding hours of frustrating<br>
-bug-hunting, making your programs more stable. You can also perform<br>
-detailed profiling to help speed up your programs.<br>
+Valgrind is an award-winning suite of tools for debugging and profiling<br>
+Linux programs. With the tools that come with Valgrind, you can<br>
+automatically detect many memory management and threading bugs, avoiding<br>
+hours of frustrating bug-hunting, making your programs more stable. You can<br>
+also perform detailed profiling, to speed up and reduce memory use of your<br>
+programs.<br>
 <br>
-The Valgrind distribution includes five tools: two memory error<br>
+The Valgrind distribution currently includes five tools: two memory error<br>
 detectors, a thread error detector, a cache profiler and a heap profiler.<br>
-Several other tools have been built with Valgrind.<br>
 <br>
 To give you an idea of what Valgrind tools do, when a program is run<br>
 under the supervision of the first memory error detector tool, all reads<br>
@@ -73,8 +70,8 @@ on.<br>
 <br>
 Valgrind is closely tied to details of the CPU, operating system and<br>
 to a less extent, compiler and basic C libraries. This makes it<br>
-difficult to make it portable, so I have chosen at the outset to<br>
-concentrate on what I believe to be a widely used platform: x86/Linux.<br>
+difficult to make it portable.  Nonetheless, it is available for<br>
+the following platforms: x86/Linux, AMD64/Linux and PPC32/Linux.<br>
 <br>
 Valgrind is licensed under the GNU General Public License, version 2. <br>
 Read the file COPYING in the source distribution for details.<br>
@@ -89,31 +86,32 @@ specified with --prefix= when building.<br>
 <br>
 Building and installing it<br>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~<br>
-To install from CVS :<br>
+To install from the Subversion repository :<br>
 <br>
-  0. Check out the code from CVS, following the instructions at<br>
-     http://developer.kde.org/source/anoncvs.html. The 'modulename' is<br>
-     "valgrind".<br>
+  0. Check out the code from SVN, following the instructions at<br>
+     http://www.valgrind.org/downloads/repository.html.<br>
 <br>
   1. cd into the source directory.<br>
 <br>
   2. Run ./autogen.sh to setup the environment (you need the standard<br>
      autoconf tools to do so).<br>
 <br>
+  3. Continue with the following instructions...<br>
+<br>
 To install from a tar.bz2 distribution:<br>
 <br>
-  3. Run ./configure, with some options if you wish. The standard<br>
+  4. Run ./configure, with some options if you wish. The standard<br>
      options are documented in the INSTALL file.  The only interesting<br>
      one is the usual --prefix=/where/you/want/it/installed.<br>
 <br>
-  4. Do "make".<br>
+  5. Do "make".<br>
 <br>
-  5. Do "make install", possibly as root if the destination permissions<br>
+  6. Do "make install", possibly as root if the destination permissions<br>
      require that.<br>
 <br>
-  6. See if it works.  Try "valgrind --tool=memcheck ls -l".  Either<br>
-     this works, or it bombs out with some complaint.  In that case,<br>
-     please let us know (see www.valgrind.org).<br>
+  7. See if it works.  Try "valgrind ls -l".  Either this works, or it<br>
+     bombs out with some complaint.  In that case, please let us know<br>
+     (see www.valgrind.org).<br>
 <br>
 Important!  Do not move the valgrind installation into a place<br>
 different from that specified by --prefix at build time.  This will<br>
@@ -121,9 +119,7 @@ cause things to break in subtle ways, mostly when Valgrind handles<br>
 fork/exec calls.<br>
 <br>
 <br>
-Julian Seward (jseward@acm.org)<br>
-Nick Nethercote (njn@valgrind.org)<br>
-Jeremy Fitzhardinge (jeremy@goop.org)<br>
+The Valgrind Developers<br>
 <br>
     </p></div>
 </div>

@@ -1,66 +1,61 @@
-<html>
+<html xmlns:cf="http://docbook.sourceforge.net/xmlns/chunkfast/1.0">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>3. Memcheck: a heavyweight memory checker</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
-<link rel="home" href="index.html" title="Valgrind Documentation">
+<meta name="generator" content="DocBook XSL Stylesheets V1.69.0">
+<link rel="start" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="manual.html" title="Valgrind User Manual">
-<link rel="previous" href="manual-core.warnings.html" title="2.15. Warning Messages You Might See">
-<link rel="next" href="mc-manual.flags.html" title="3.2. Command-line flags specific to Memcheck">
+<link rel="prev" href="manual-core.html" title="2. Using and understanding the Valgrind core">
+<link rel="next" href="ac-manual.html" title="4. Addrcheck: a lightweight memory checker">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
-<td width="22px" align="center" valign="middle"><a accesskey="p" href="manual-core.warnings.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="manual-core.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
 <td width="25px" align="center" valign="middle"><a accesskey="u" href="manual.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
 <td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
 <th align="center" valign="middle">Valgrind User Manual</th>
-<td width="22px" align="center" valign="middle"><a accesskey="n" href="mc-manual.flags.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="ac-manual.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
 </tr></table></div>
 <div class="chapter" lang="en">
-<div class="titlepage">
-<div><div><h2 class="title">
-<a name="mc-manual"></a>3. Memcheck: a heavyweight memory checker</h2></div></div>
-<div></div>
-</div>
+<div class="titlepage"><div><div><h2 class="title">
+<a name="mc-manual"></a>3. Memcheck: a heavyweight memory checker</h2></div></div></div>
 <div class="toc">
 <p><b>Table of Contents</b></p>
 <dl>
 <dt><span class="sect1"><a href="mc-manual.html#mc-manual.bugs">3.1. Kinds of bugs that Memcheck can find</a></span></dt>
-<dt><span class="sect1"><a href="mc-manual.flags.html">3.2. Command-line flags specific to Memcheck</a></span></dt>
-<dt><span class="sect1"><a href="mc-manual.errormsgs.html">3.3. Explanation of error messages from Memcheck</a></span></dt>
+<dt><span class="sect1"><a href="mc-manual.html#mc-manual.flags">3.2. Command-line flags specific to Memcheck</a></span></dt>
+<dt><span class="sect1"><a href="mc-manual.html#mc-manual.errormsgs">3.3. Explanation of error messages from Memcheck</a></span></dt>
 <dd><dl>
-<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.badrw">3.3.1. Illegal read / Illegal write errors</a></span></dt>
-<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.uninitvals">3.3.2. Use of uninitialised values</a></span></dt>
-<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.badfrees">3.3.3. Illegal frees</a></span></dt>
-<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.rudefn">3.3.4. When a block is freed with an inappropriate deallocation
+<dt><span class="sect2"><a href="mc-manual.html#mc-manual.badrw">3.3.1. Illegal read / Illegal write errors</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.html#mc-manual.uninitvals">3.3.2. Use of uninitialised values</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.html#mc-manual.badfrees">3.3.3. Illegal frees</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.html#mc-manual.rudefn">3.3.4. When a block is freed with an inappropriate deallocation
 function</a></span></dt>
-<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.badperm">3.3.5. Passing system call parameters with inadequate read/write
+<dt><span class="sect2"><a href="mc-manual.html#mc-manual.badperm">3.3.5. Passing system call parameters with inadequate read/write
 permissions</a></span></dt>
-<dt><span class="sect2"><a href="mc-manual.errormsgs.html#mc-manual.overlap">3.3.6. Overlapping source and destination blocks</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.html#mc-manual.overlap">3.3.6. Overlapping source and destination blocks</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.html#mc-manual.leaks">3.3.7. Memory leak detection</a></span></dt>
 </dl></dd>
-<dt><span class="sect1"><a href="mc-manual.suppfiles.html">3.4. Writing suppressions files</a></span></dt>
-<dt><span class="sect1"><a href="mc-manual.machine.html">3.5. Details of Memcheck's checking machinery</a></span></dt>
+<dt><span class="sect1"><a href="mc-manual.html#mc-manual.suppfiles">3.4. Writing suppression files</a></span></dt>
+<dt><span class="sect1"><a href="mc-manual.html#mc-manual.machine">3.5. Details of Memcheck's checking machinery</a></span></dt>
 <dd><dl>
-<dt><span class="sect2"><a href="mc-manual.machine.html#mc-manual.value">3.5.1. Valid-value (V) bits</a></span></dt>
-<dt><span class="sect2"><a href="mc-manual.machine.html#mc-manual.vaddress">3.5.2. Valid-address (A) bits</a></span></dt>
-<dt><span class="sect2"><a href="mc-manual.machine.html#mc-manual.together">3.5.3. Putting it all together</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.html#mc-manual.value">3.5.1. Valid-value (V) bits</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.html#mc-manual.vaddress">3.5.2. Valid-address (A) bits</a></span></dt>
+<dt><span class="sect2"><a href="mc-manual.html#mc-manual.together">3.5.3. Putting it all together</a></span></dt>
 </dl></dd>
-<dt><span class="sect1"><a href="mc-manual.leaks.html">3.6. Memory leak detection</a></span></dt>
-<dt><span class="sect1"><a href="mc-manual.clientreqs.html">3.7. Client Requests</a></span></dt>
+<dt><span class="sect1"><a href="mc-manual.html#mc-manual.clientreqs">3.6. Client Requests</a></span></dt>
 </dl>
 </div>
-<p>To use this tool, you must specify
-<tt class="computeroutput">--tool=memcheck</tt> on the Valgrind
-command line.</p>
+<p>To use this tool, you may specify
+<code class="computeroutput">--tool=memcheck</code> on the Valgrind
+command line.  You don't have to, though, since Memcheck is the default
+tool.</p>
 <div class="sect1" lang="en">
-<div class="titlepage">
-<div><div><h2 class="title" style="clear: both">
-<a name="mc-manual.bugs"></a>3.1. Kinds of bugs that Memcheck can find</h2></div></div>
-<div></div>
-</div>
-<p>Memcheck is Valgrind-1.0.X's checking mechanism bundled up
-into a tool.  All reads and writes of memory are checked, and
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="mc-manual.bugs"></a>3.1. Kinds of bugs that Memcheck can find</h2></div></div></div>
+<p>Memcheck is Valgrind's heavyweight memory checking
+tool.  All reads and writes of memory are checked, and
 calls to malloc/new/free/delete are intercepted. As a result,
 Memcheck can detect the following problems:</p>
 <div class="itemizedlist"><ul type="disc">
@@ -72,11 +67,813 @@ Memcheck can detect the following problems:</p>
    lost forever</p></li>
 <li><p>Mismatched use of malloc/new/new [] vs
     free/delete/delete []</p></li>
-<li><p>Overlapping <tt class="computeroutput">src</tt> and
-    <tt class="computeroutput">dst</tt> pointers in
-    <tt class="computeroutput">memcpy()</tt> and related
+<li><p>Overlapping <code class="computeroutput">src</code> and
+    <code class="computeroutput">dst</code> pointers in
+    <code class="computeroutput">memcpy()</code> and related
     functions</p></li>
-<li><p>Some misuses of the POSIX pthreads API</p></li>
+</ul></div>
+</div>
+<div class="sect1" lang="en">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="mc-manual.flags"></a>3.2. Command-line flags specific to Memcheck</h2></div></div></div>
+<div class="itemizedlist">
+<a name="leakcheck"></a><ul type="disc">
+<li>
+<p><code class="computeroutput">--leak-check=no</code></p>
+<p><code class="computeroutput">--leak-check=summary</code> [default]</p>
+<p><code class="computeroutput">--leak-check=full</code></p>
+<p>When enabled, search for memory leaks when the client
+    program finishes.  A memory leak means a malloc'd block,
+    which has not yet been free'd, but to which no pointer can be
+    found.  Such a block can never be free'd by the program,
+    since no pointer to it exists.  If set to
+    <code class="computeroutput">summary</code>, it says how many leaks occurred.
+    If set to <code class="computeroutput">all</code>, it gives details of each
+    individual leak.</p>
+</li>
+<li>
+<p><a name="showreach"></a><code class="computeroutput">--show-reachable=no</code>
+    [default]</p>
+<p><code class="computeroutput">--show-reachable=yes</code></p>
+<p>When disabled, the memory leak detector only shows
+    blocks for which it cannot find a pointer to at all, or it
+    can only find a pointer to the middle of.  These blocks are
+    prime candidates for memory leaks.  When enabled, the leak
+    detector also reports on blocks which it could find a pointer
+    to.  Your program could, at least in principle, have freed
+    such blocks before exit.  Contrast this to blocks for which
+    no pointer, or only an interior pointer could be found: they
+    are more likely to indicate memory leaks, because you do not
+    actually have a pointer to the start of the block which you
+    can hand to <code class="computeroutput">free</code>, even if
+    you wanted to.</p>
+</li>
+<li>
+<p><a name="leakres"></a><code class="computeroutput">--leak-resolution=low</code>
+    [default]</p>
+<p><code class="computeroutput">--leak-resolution=med</code></p>
+<p><code class="computeroutput">--leak-resolution=high</code></p>
+<p>When doing leak checking, determines how willing
+    Memcheck is to consider different backtraces to be the same.
+    When set to <code class="computeroutput">low</code>, the
+    default, only the first two entries need match.  When
+    <code class="computeroutput">med</code>, four entries have to
+    match.  When <code class="computeroutput">high</code>, all
+    entries need to match.</p>
+<p>For hardcore leak debugging, you probably want to use
+    <code class="computeroutput">--leak-resolution=high</code>
+    together with
+    <code class="computeroutput">--num-callers=40</code> or some
+    such large number.  Note however that this can give an
+    overwhelming amount of information, which is why the defaults
+    are 4 callers and low-resolution matching.</p>
+<p>Note that the
+    <code class="computeroutput">--leak-resolution=</code> setting
+    does not affect Memcheck's ability to find leaks.  It only
+    changes how the results are presented.</p>
+</li>
+<li>
+<p><a name="freelist"></a><code class="computeroutput">--freelist-vol=&lt;number&gt;</code>
+    [default: 5000000]</p>
+<p>When the client program releases memory using free (in
+    <code class="literal">C</code>) or delete (<code class="literal">C++</code>),
+    that memory is not immediately made available for
+    re-allocation.  Instead it is marked inaccessible and placed
+    in a queue of freed blocks.  The purpose is to defer 
+    as long as possible the point at which freed-up memory comes back 
+    into circulation.  This increases the chance that Memcheck will be 
+    able to detect invalid accesses to blocks for some significant period
+    of time after they have been freed.</p>
+<p>This flag specifies the maximum total size, in bytes,
+    of the blocks in the queue.  The default value is five million
+    bytes.  Increasing this increases the total amount of memory
+    used by Memcheck but may detect invalid uses of freed blocks
+    which would otherwise go undetected.</p>
+</li>
+<li>
+<p><a name="gcc296"></a><code class="computeroutput">--workaround-gcc296-bugs=no</code>
+    [default]</p>
+<p><code class="computeroutput">--workaround-gcc296-bugs=yes</code></p>
+<p>When enabled, assume that reads and writes some small
+    distance below the stack pointer are due to bugs in gcc
+    2.96, and does not report them.  The "small distance" is 256
+    bytes by default.  Note that gcc 2.96 is the default compiler
+    on some older Linux distributions (RedHat 7.X) and so you may need to use 
+    this flag.  Do not use it if you do not have to, as it can cause real errors 
+    to be overlooked.  A better alternative is to use a more recent gcc/g++ in 
+    which this bug is fixed.</p>
+</li>
+<li>
+<p><a name="partial"></a><code class="computeroutput">--partial-loads-ok=yes</code>
+    </p>
+<p><code class="computeroutput">--partial-loads-ok=no</code>[default]
+    </p>
+<p>Controls how Memcheck handles word-sized, word-aligned loads from
+    addresses for which some bytes are addressible and others are
+    not.  When <code class="computeroutput">yes</code>,
+    such loads do not elicit an address error.
+    Instead, the loaded V bytes corresponding to the illegal
+    addresses indicate Undefined, and those corresponding to
+    legal addresses are loaded from shadow memory, as usual.</p>
+<p>When <code class="computeroutput">no</code>(the default), 
+    loads from partially invalid addresses are treated the same as 
+    loads from completely invalid addresses: an illegal-address error
+    is issued, and the resulting V bytes indicate valid data.</p>
+<p>Note that code that behaves in this way is in violation of
+    the the ISO C/C++ standards, and should be considered broken.
+    If at all possible, such code should be fixed.  This flag should
+    be used only as a last resort.
+    </p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect1" lang="en">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="mc-manual.errormsgs"></a>3.3. Explanation of error messages from Memcheck</h2></div></div></div>
+<p>Despite considerable sophistication under the hood,
+Memcheck can only really detect two kinds of errors: use of
+illegal addresses, and use of undefined values.  Nevertheless,
+this is enough to help you discover all sorts of
+memory-management nasties in your code.  This section presents a
+quick summary of what error messages mean.  The precise behaviour
+of the error-checking machinery is described in <a href="mc-manual.html#mc-manual.machine">Details of Memcheck's checking machinery</a>.</p>
+<div class="sect2" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="mc-manual.badrw"></a>3.3.1. Illegal read / Illegal write errors</h3></div></div></div>
+<p>For example:</p>
+<pre class="programlisting">
+Invalid read of size 4
+   at 0x40F6BBCC: (within /usr/lib/libpng.so.2.1.0.9)
+   by 0x40F6B804: (within /usr/lib/libpng.so.2.1.0.9)
+   by 0x40B07FF4: read_png_image__FP8QImageIO (kernel/qpngio.cpp:326)
+   by 0x40AC751B: QImageIO::read() (kernel/qimage.cpp:3621)
+ Address 0xBFFFF0E0 is not stack'd, malloc'd or free'd
+</pre>
+<p>This happens when your program reads or writes memory at a
+place which Memcheck reckons it shouldn't.  In this example, the
+program did a 4-byte read at address 0xBFFFF0E0, somewhere within
+the system-supplied library libpng.so.2.1.0.9, which was called
+from somewhere else in the same library, called from line 326 of
+<code class="filename">qpngio.cpp</code>, and so on.</p>
+<p>Memcheck tries to establish what the illegal address might
+relate to, since that's often useful.  So, if it points into a
+block of memory which has already been freed, you'll be informed
+of this, and also where the block was free'd at.  Likewise, if it
+should turn out to be just off the end of a malloc'd block, a
+common result of off-by-one-errors in array subscripting, you'll
+be informed of this fact, and also where the block was
+malloc'd.</p>
+<p>In this example, Memcheck can't identify the address.
+Actually the address is on the stack, but, for some reason, this
+is not a valid stack address -- it is below the stack pointer
+and that isn't allowed.  In this
+particular case it's probably caused by gcc generating invalid
+code, a known bug in some ancient versions of gcc.</p>
+<p>Note that Memcheck only tells you that your program is
+about to access memory at an illegal address.  It can't stop the
+access from happening.  So, if your program makes an access which
+normally would result in a segmentation fault, you program will
+still suffer the same fate -- but you will get a message from
+Memcheck immediately prior to this.  In this particular example,
+reading junk on the stack is non-fatal, and the program stays
+alive.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="mc-manual.uninitvals"></a>3.3.2. Use of uninitialised values</h3></div></div></div>
+<p>For example:</p>
+<pre class="programlisting">
+Conditional jump or move depends on uninitialised value(s)
+   at 0x402DFA94: _IO_vfprintf (_itoa.h:49)
+   by 0x402E8476: _IO_printf (printf.c:36)
+   by 0x8048472: main (tests/manuel1.c:8)
+</pre>
+<p>An uninitialised-value use error is reported when your
+program uses a value which hasn't been initialised -- in other
+words, is undefined.  Here, the undefined value is used somewhere
+inside the printf() machinery of the C library.  This error was
+reported when running the following small program:</p>
+<pre class="programlisting">
+int main()
+{
+  int x;
+  printf ("x = %d\n", x);
+}</pre>
+<p>It is important to understand that your program can copy
+around junk (uninitialised) data as much as it likes.
+Memcheck observes this and keeps track of the data, but does not
+complain.  A complaint is issued only when your program attempts
+to make use of uninitialised data.  In this example, x is
+uninitialised.  Memcheck observes the value being passed to
+<code class="literal">_IO_printf</code> and thence to
+<code class="literal">_IO_vfprintf</code>, but makes no comment.  However,
+_IO_vfprintf has to examine the value of x so it can turn it into
+the corresponding ASCII string, and it is at this point that
+Memcheck complains.</p>
+<p>Sources of uninitialised data tend to be:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>Local variables in procedures which have not been
+    initialised, as in the example above.</p></li>
+<li><p>The contents of malloc'd blocks, before you write
+    something there.  In C++, the new operator is a wrapper round
+    malloc, so if you create an object with new, its fields will
+    be uninitialised until you (or the constructor) fill them in,
+    which is only Right and Proper.</p></li>
+</ul></div>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="mc-manual.badfrees"></a>3.3.3. Illegal frees</h3></div></div></div>
+<p>For example:</p>
+<pre class="programlisting">
+Invalid free()
+   at 0x4004FFDF: free (vg_clientmalloc.c:577)
+   by 0x80484C7: main (tests/doublefree.c:10)
+ Address 0x3807F7B4 is 0 bytes inside a block of size 177 free'd
+   at 0x4004FFDF: free (vg_clientmalloc.c:577)
+   by 0x80484C7: main (tests/doublefree.c:10)
+</pre>
+<p>Memcheck keeps track of the blocks allocated by your
+program with malloc/new, so it can know exactly whether or not
+the argument to free/delete is legitimate or not.  Here, this
+test program has freed the same block twice.  As with the illegal
+read/write errors, Memcheck attempts to make sense of the address
+free'd.  If, as here, the address is one which has previously
+been freed, you wil be told that -- making duplicate frees of the
+same block easy to spot.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="mc-manual.rudefn"></a>3.3.4. When a block is freed with an inappropriate deallocation
+function</h3></div></div></div>
+<p>In the following example, a block allocated with
+<code class="computeroutput">new[]</code> has wrongly been
+deallocated with <code class="computeroutput">free</code>:</p>
+<pre class="programlisting">
+Mismatched free() / delete / delete []
+   at 0x40043249: free (vg_clientfuncs.c:171)
+   by 0x4102BB4E: QGArray::~QGArray(void) (tools/qgarray.cpp:149)
+   by 0x4C261C41: PptDoc::~PptDoc(void) (include/qmemarray.h:60)
+   by 0x4C261F0E: PptXml::~PptXml(void) (pptxml.cc:44)
+ Address 0x4BB292A8 is 0 bytes inside a block of size 64 alloc'd
+   at 0x4004318C: __builtin_vec_new (vg_clientfuncs.c:152)
+   by 0x4C21BC15: KLaola::readSBStream(int) const (klaola.cc:314)
+   by 0x4C21C155: KLaola::stream(KLaola::OLENode const *) (klaola.cc:416)
+   by 0x4C21788F: OLEFilter::convert(QCString const &amp;) (olefilter.cc:272)
+</pre>
+<p>In <code class="literal">C++</code> it's important to deallocate
+memory in a way compatible with how it was allocated.  The deal
+is:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>If allocated with
+    <code class="computeroutput">malloc</code>,
+    <code class="computeroutput">calloc</code>,
+    <code class="computeroutput">realloc</code>,
+    <code class="computeroutput">valloc</code> or
+    <code class="computeroutput">memalign</code>, you must
+    deallocate with <code class="computeroutput">free</code>.</p></li>
+<li><p>If allocated with
+    <code class="computeroutput">new[]</code>, you must deallocate
+    with <code class="computeroutput">delete[]</code>.</p></li>
+<li><p>If allocated with <code class="computeroutput">new</code>,
+   you must deallocate with
+   <code class="computeroutput">delete</code>.</p></li>
+</ul></div>
+<p>The worst thing is that on Linux apparently it doesn't
+matter if you do muddle these up, and it all seems to work ok,
+but the same program may then crash on a different platform,
+Solaris for example.  So it's best to fix it properly.  According
+to the KDE folks "it's amazing how many C++ programmers don't
+know this".</p>
+<p>Pascal Massimino adds the following clarification:
+<code class="computeroutput">delete[]</code> must be used for
+objects allocated by <code class="computeroutput">new[]</code> because
+the compiler stores the size of the array and the
+pointer-to-member to the destructor of the array's content just
+before the pointer actually returned.  This implies a
+variable-sized overhead in what's returned by
+<code class="computeroutput">new</code> or
+<code class="computeroutput">new[]</code>.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="mc-manual.badperm"></a>3.3.5. Passing system call parameters with inadequate read/write
+permissions</h3></div></div></div>
+<p>Memcheck checks all parameters to system calls:
+</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>It checks all the direct parameters
+  themselves.</p></li>
+<li><p>Also, if a system call needs to read from a buffer provided
+  by your program, Memcheck checks that the entire buffer is addressible and
+  has valid data, ie, it is readable.</p></li>
+<li><p>Also, if the system call needs to write to a user-supplied
+  buffer, Memcheck checks that the buffer is addressible.</p></li>
+</ul></div>
+<p>
+</p>
+<p>After the system call, Memcheck updates its tracked information to
+precisely reflect any changes in memory permissions caused by the system call.
+</p>
+<p>Here's an example of two system calls with invalid parameters:</p>
+<pre class="programlisting">
+  #include &lt;stdlib.h&gt;
+  #include &lt;unistd.h&gt;
+  int main( void )
+  {
+    char* arr  = malloc(10);
+    int*  arr2 = malloc(sizeof(int));
+    write( 1 /* stdout */, arr, 10 );
+    exit(arr2[0]);
+  }
+</pre>
+<p>You get these complaints ...</p>
+<pre class="programlisting">
+  Syscall param write(buf) points to uninitialised byte(s)
+     at 0x25A48723: __write_nocancel (in /lib/tls/libc-2.3.3.so)
+     by 0x259AFAD3: __libc_start_main (in /lib/tls/libc-2.3.3.so)
+     by 0x8048348: (within /auto/homes/njn25/grind/head4/a.out)
+   Address 0x25AB8028 is 0 bytes inside a block of size 10 alloc'd
+     at 0x259852B0: malloc (vg_replace_malloc.c:130)
+     by 0x80483F1: main (a.c:5)
+
+  Syscall param exit(error_code) contains uninitialised byte(s)
+     at 0x25A21B44: __GI__exit (in /lib/tls/libc-2.3.3.so)
+     by 0x8048426: main (a.c:8)
+</pre>
+<p>... because the program has (a) tried to write uninitialised junk from
+the malloc'd block to the standard output, and (b) passed an uninitialised
+value to <code class="computeroutput">exit</code>.  Note that the first error
+refers to the memory pointed to by <code class="computeroutput">buf</code> (not
+<code class="computeroutput">buf</code> itself), but the second error refers to
+the argument <code class="computeroutput">error_code</code> itself.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="mc-manual.overlap"></a>3.3.6. Overlapping source and destination blocks</h3></div></div></div>
+<p>The following C library functions copy some data from one
+memory block to another (or something similar):
+<code class="computeroutput">memcpy()</code>,
+<code class="computeroutput">strcpy()</code>,
+<code class="computeroutput">strncpy()</code>,
+<code class="computeroutput">strcat()</code>,
+<code class="computeroutput">strncat()</code>. 
+The blocks pointed to by their
+<code class="computeroutput">src</code> and
+<code class="computeroutput">dst</code> pointers aren't allowed to
+overlap.  Memcheck checks for this.</p>
+<p>For example:</p>
+<pre class="programlisting">
+==27492== Source and destination overlap in memcpy(0xbffff294, 0xbffff280, 21)
+==27492==    at 0x40026CDC: memcpy (mc_replace_strmem.c:71)
+==27492==    by 0x804865A: main (overlap.c:40)
+==27492== 
+</pre>
+<p>You don't want the two blocks to overlap because one of
+them could get partially trashed by the copying.</p>
+<p>You might think that Memcheck is being overly pedantic reporting
+this in the case where <code class="computeroutput">dst</code> is less
+than <code class="computeroutput">src</code>.  For example, the obvious way
+to implement <code class="computeroutput">memcpy()</code> is by copying
+from the first byte to the last.  However, the optimisation guides of
+some architectures recommend copying from the last byte down to the first.
+Also, some implementations of <code class="computeroutput">memcpy()</code>
+zero <code class="computeroutput">dst</code> before copying, because zeroing
+the destination's cache line(s) can improve performance.</p>
+<p>The moral of the story is:  if you want to write truly portable code,
+don't make any assumptions about the language implementation.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="mc-manual.leaks"></a>3.3.7. Memory leak detection</h3></div></div></div>
+<p>Memcheck keeps track of all memory blocks issued in
+response to calls to malloc/calloc/realloc/new.  So when the
+program exits, it knows which blocks have not been freed.
+</p>
+<p>If <code class="computeroutput">--leak-check</code> is set
+appropriately, for each remaining block, Memcheck scans the entire
+address space of the process, looking for pointers to the block.
+Each block fits into one of the three following categories.</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>Still reachable: A pointer to the start
+    of the block is found.  This usually indicates programming
+    sloppiness.  Since the block is still pointed at, the
+    programmer could, at least in principle, free it before
+    program exit.  Because these are very common and arguably
+    not a problem, Memcheck won't report such blocks unless
+    <code class="computeroutput">--show-reachable=yes</code> is
+    specified.</p></li>
+<li><p>Possibly lost, or "dubious": A pointer to the
+    interior of the block is found.  The pointer might originally
+    have pointed to the start and have been moved along, or it
+    might be entirely unrelated.  Memcheck deems such a block as
+    "dubious", because it's unclear whether or not a pointer to it
+    still exists.</p></li>
+<li><p>Definitely lost, or "leaked": The worst
+    outcome is that no pointer to the block can be found.  The
+    block is classified as "leaked", because the programmer could
+    not possibly have freed it at program exit, since no pointer
+    to it exists.  This is likely a symptom of having lost the
+    pointer at some earlier point in the program.</p></li>
+</ul></div>
+<p>For each block mentioned, Memcheck will also tell you where
+the block was allocated.  It cannot tell you how or why the
+pointer to a leaked block has been lost;  you have to work that
+out for yourself.  In general, you should attempt to ensure your
+programs do not have any leaked or dubious blocks at exit.</p>
+<p>For example:</p>
+<pre class="programlisting">
+8 bytes in 1 blocks are definitely lost in loss record 1 of 14
+   at 0x........: malloc (vg_replace_malloc.c:...)
+   by 0x........: mk (leak-tree.c:11)
+   by 0x........: main (leak-tree.c:39)
+
+88 (8 direct, 80 indirect) bytes in 1 blocks are definitely lost 
+                           in loss record 13 of 14
+   at 0x........: malloc (vg_replace_malloc.c:...)
+   by 0x........: mk (leak-tree.c:11)
+   by 0x........: main (leak-tree.c:25)
+</pre>
+<p>The first message describes a simple case of a single 8 byte
+block that has been definitely lost.  The second case
+mentions both "direct" and "indirect" leaks.  The distinction is
+that a direct leak is a block which has no pointers to it.  An
+indirect leak is a block which is only pointed to by other leaked
+blocks.  Both kinds of leak are bad.</p>
+<p>The precise area of memory in which Memcheck searches for
+pointers is: all naturally-aligned machine-word-sized words for which all A
+bits indicate addressibility and all V bits indicated that the
+stored value is actually valid.</p>
+</div>
+</div>
+<div class="sect1" lang="en">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="mc-manual.suppfiles"></a>3.4. Writing suppression files</h2></div></div></div>
+<p>The basic suppression format is described in 
+<a href="manual-core.html#manual-core.suppress">Suppressing errors</a>.</p>
+<p>The suppression (2nd) line should have the form:</p>
+<pre class="programlisting">
+Memcheck:suppression_type</pre>
+<p>Or, since some of the suppressions are shared with Addrcheck:</p>
+<pre class="programlisting">
+Memcheck,Addrcheck:suppression_type</pre>
+<p>The Memcheck suppression types are as follows:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><code class="computeroutput">Value1</code>, 
+    <code class="computeroutput">Value2</code>,
+    <code class="computeroutput">Value4</code>,
+    <code class="computeroutput">Value8</code>,
+    <code class="computeroutput">Value16</code>,
+    meaning an uninitialised-value error when
+    using a value of 1, 2, 4, 8 or 16 bytes.</p></li>
+<li><p>Or: <code class="computeroutput">Cond</code> (or its old
+    name, <code class="computeroutput">Value0</code>), meaning use
+    of an uninitialised CPU condition code.</p></li>
+<li><p>Or: <code class="computeroutput">Addr1</code>,
+    <code class="computeroutput">Addr2</code>, 
+    <code class="computeroutput">Addr4</code>,
+    <code class="computeroutput">Addr8</code>,
+    <code class="computeroutput">Addr16</code>, 
+    meaning an invalid address during a
+    memory access of 1, 2, 4, 8 or 16 bytes respectively.</p></li>
+<li><p>Or: <code class="computeroutput">Param</code>, meaning an
+    invalid system call parameter error.</p></li>
+<li><p>Or: <code class="computeroutput">Free</code>, meaning an
+    invalid or mismatching free.</p></li>
+<li><p>Or: <code class="computeroutput">Overlap</code>, meaning a
+    <code class="computeroutput">src</code> /
+    <code class="computeroutput">dst</code> overlap in
+    <code class="computeroutput">memcpy() or a similar
+    function</code>.</p></li>
+<li><p>Or: <code class="computeroutput">Leak</code>, meaning
+    a memory leak.</p></li>
+</ul></div>
+<p>The extra information line: for Param errors, is the name
+of the offending system call parameter.  No other error kinds
+have this extra line.</p>
+<p>The first line of the calling context: for Value and Addr
+errors, it is either the name of the function in which the error
+occurred, or, failing that, the full path of the .so file or
+executable containing the error location.  For Free errors, is
+the name of the function doing the freeing (eg,
+<code class="computeroutput">free</code>,
+<code class="computeroutput">__builtin_vec_delete</code>, etc).  For
+Overlap errors, is the name of the function with the overlapping
+arguments (eg.  <code class="computeroutput">memcpy()</code>,
+<code class="computeroutput">strcpy()</code>, etc).</p>
+<p>Lastly, there's the rest of the calling context.</p>
+</div>
+<div class="sect1" lang="en">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="mc-manual.machine"></a>3.5. Details of Memcheck's checking machinery</h2></div></div></div>
+<p>Read this section if you want to know, in detail, exactly
+what and how Memcheck is checking.</p>
+<div class="sect2" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="mc-manual.value"></a>3.5.1. Valid-value (V) bits</h3></div></div></div>
+<p>It is simplest to think of Memcheck implementing a
+synthetic CPU which is identical to a real CPU, except
+for one crucial detail.  Every bit (literally) of data processed,
+stored and handled by the real CPU has, in the synthetic CPU, an
+associated "valid-value" bit, which says whether or not the
+accompanying bit has a legitimate value.  In the discussions
+which follow, this bit is referred to as the V (valid-value)
+bit.</p>
+<p>Each byte in the system therefore has a 8 V bits which
+follow it wherever it goes.  For example, when the CPU loads a
+word-size item (4 bytes) from memory, it also loads the
+corresponding 32 V bits from a bitmap which stores the V bits for
+the process' entire address space.  If the CPU should later write
+the whole or some part of that value to memory at a different
+address, the relevant V bits will be stored back in the V-bit
+bitmap.</p>
+<p>In short, each bit in the system has an associated V bit,
+which follows it around everywhere, even inside the CPU.  Yes,
+all the CPU's registers (integer, floating point, vector and condition 
+registers) have their own V bit vectors.</p>
+<p>Copying values around does not cause Memcheck to check for,
+or report on, errors.  However, when a value is used in a way
+which might conceivably affect the outcome of your program's
+computation, the associated V bits are immediately checked.  If
+any of these indicate that the value is undefined, an error is
+reported.</p>
+<p>Here's an (admittedly nonsensical) example:</p>
+<pre class="programlisting">
+int i, j;
+int a[10], b[10];
+for ( i = 0; i &lt; 10; i++ ) {
+  j = a[i];
+  b[i] = j;
+}</pre>
+<p>Memcheck emits no complaints about this, since it merely
+copies uninitialised values from
+<code class="computeroutput">a[]</code> into
+<code class="computeroutput">b[]</code>, and doesn't use them in any
+way.  However, if the loop is changed to:</p>
+<pre class="programlisting">
+for ( i = 0; i &lt; 10; i++ ) {
+  j += a[i];
+}
+if ( j == 77 ) 
+  printf("hello there\n");
+</pre>
+<p>then Valgrind will complain, at the
+<code class="computeroutput">if</code>, that the condition depends
+on uninitialised values.  Note that it <span><strong class="command">doesn't</strong></span>
+complain at the <code class="computeroutput">j += a[i];</code>,
+since at that point the undefinedness is not "observable".  It's
+only when a decision has to be made as to whether or not to do
+the <code class="computeroutput">printf</code> -- an observable
+action of your program -- that Memcheck complains.</p>
+<p>Most low level operations, such as adds, cause Memcheck to
+use the V bits for the operands to calculate the V bits for the result.
+Even if the result is partially or wholly undefined, it does not
+complain.</p>
+<p>Checks on definedness only occur in three places: when a
+value is used to generate a memory address, when control
+flow decision needs to be made, and when a system call is
+detected, Valgrind checks definedness of parameters as
+required.</p>
+<p>If a check should detect undefinedness, an error message is
+issued.  The resulting value is subsequently regarded as
+well-defined.  To do otherwise would give long chains of error
+messages.  In effect, we say that undefined values are
+non-infectious.</p>
+<p>This sounds overcomplicated.  Why not just check all reads
+from memory, and complain if an undefined value is loaded into a
+CPU register?  Well, that doesn't work well, because perfectly
+legitimate C programs routinely copy uninitialised values around
+in memory, and we don't want endless complaints about that.
+Here's the canonical example.  Consider a struct like
+this:</p>
+<pre class="programlisting">
+struct S { int x; char c; };
+struct S s1, s2;
+s1.x = 42;
+s1.c = 'z';
+s2 = s1;
+</pre>
+<p>The question to ask is: how large is <code class="computeroutput">struct
+S</code>, in bytes?  An
+<code class="computeroutput">int</code> is 4 bytes and a
+<code class="computeroutput">char</code> one byte, so perhaps a
+<code class="computeroutput">struct S</code> occupies 5 bytes?
+Wrong.  All (non-toy) compilers we know of will round the size of
+<code class="computeroutput">struct S</code> up to a whole number of
+words, in this case 8 bytes.  Not doing this forces compilers to
+generate truly appalling code for subscripting arrays of
+<code class="computeroutput">struct S</code>'s.</p>
+<p>So <code class="computeroutput">s1</code> occupies 8 bytes,
+yet only 5 of them will be initialised.  For the assignment
+<code class="computeroutput">s2 = s1</code>, gcc generates code to
+copy all 8 bytes wholesale into
+<code class="computeroutput">s2</code> without regard for their
+meaning.  If Memcheck simply checked values as they came out of
+memory, it would yelp every time a structure assignment like this
+happened.  So the more complicated semantics described above is
+necessary.  This allows <code class="literal">gcc</code> to copy
+<code class="computeroutput">s1</code> into
+<code class="computeroutput">s2</code> any way it likes, and a
+warning will only be emitted if the uninitialised values are
+later used.</p>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="mc-manual.vaddress"></a>3.5.2. Valid-address (A) bits</h3></div></div></div>
+<p>Notice that the previous subsection describes how the
+validity of values is established and maintained without having
+to say whether the program does or does not have the right to
+access any particular memory location.  We now consider the
+latter issue.</p>
+<p>As described above, every bit in memory or in the CPU has
+an associated valid-value (V) bit.  In
+addition, all bytes in memory, but not in the CPU, have an
+associated valid-address (A) bit.  This
+indicates whether or not the program can legitimately read or
+write that location.  It does not give any indication of the
+validity or the data at that location -- that's the job of the
+V bits -- only whether or not the location may
+be accessed.</p>
+<p>Every time your program reads or writes memory, Memcheck
+checks the A bits associated with the address.
+If any of them indicate an invalid address, an error is emitted.
+Note that the reads and writes themselves do not change the A
+bits, only consult them.</p>
+<p>So how do the A bits get set/cleared?  Like this:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>When the program starts, all the global data areas are
+    marked as accessible.</p></li>
+<li><p>When the program does malloc/new, the A bits for
+    exactly the area allocated, and not a byte more, are marked
+    as accessible.  Upon freeing the area the A bits are changed
+    to indicate inaccessibility.</p></li>
+<li><p>When the stack pointer register
+    (<code class="literal">SP</code>) moves up or down,
+    A bits are set.  The rule is that the area
+    from <code class="literal">SP</code> up to the base of the stack is
+    marked as accessible, and below <code class="literal">SP</code> is
+    inaccessible.  (If that sounds illogical, bear in mind that
+    the stack grows down, not up, on almost all Unix systems,
+    including GNU/Linux.)  Tracking <code class="literal">SP</code> like
+    this has the useful side-effect that the section of stack
+    used by a function for local variables etc is automatically
+    marked accessible on function entry and inaccessible on
+    exit.</p></li>
+<li><p>When doing system calls, A bits are changed
+    appropriately.  For example, mmap() magically makes files
+    appear in the process' address space, so the A bits must be
+    updated if mmap() succeeds.</p></li>
+<li><p>Optionally, your program can tell Valgrind about such
+    changes explicitly, using the client request mechanism
+    described above.</p></li>
+</ul></div>
+</div>
+<div class="sect2" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="mc-manual.together"></a>3.5.3. Putting it all together</h3></div></div></div>
+<p>Memcheck's checking machinery can be summarised as
+follows:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>Each byte in memory has 8 associated
+    V (valid-value) bits, saying whether or
+    not the byte has a defined value, and a single
+    A (valid-address) bit, saying whether or
+    not the program currently has the right to read/write that
+    address.</p></li>
+<li><p>When memory is read or written, the relevant
+    A bits are consulted.  If they indicate an
+    invalid address, Valgrind emits an Invalid read or Invalid
+    write error.</p></li>
+<li><p>When memory is read into the CPU's registers,
+    the relevant V bits are fetched from
+    memory and stored in the simulated CPU.  They are not
+    consulted.</p></li>
+<li><p>When a register is written out to memory, the
+    V bits for that register are written back
+    to memory too.</p></li>
+<li><p>When values in CPU registers are used to
+    generate a memory address, or to determine the outcome of a
+    conditional branch, the V bits for those
+    values are checked, and an error emitted if any of them are
+    undefined.</p></li>
+<li><p>When values in CPU registers are used for any
+    other purpose, Valgrind computes the V bits for the result,
+    but does not check them.</p></li>
+<li><p>One the V bits for a value in the
+    CPU have been checked, they are then set to indicate
+    validity.  This avoids long chains of errors.</p></li>
+<li>
+<p>When values are loaded from memory, valgrind checks the
+    A bits for that location and issues an illegal-address
+    warning if needed.  In that case, the V bits loaded are
+    forced to indicate Valid, despite the location being invalid.</p>
+<p>This apparently strange choice reduces the amount of
+    confusing information presented to the user.  It avoids the
+    unpleasant phenomenon in which memory is read from a place
+    which is both unaddressible and contains invalid values, and,
+    as a result, you get not only an invalid-address (read/write)
+    error, but also a potentially large set of
+    uninitialised-value errors, one for every time the value is
+    used.</p>
+<p>There is a hazy boundary case to do with multi-byte
+    loads from addresses which are partially valid and partially
+    invalid.  See details of the flag
+    <code class="computeroutput">--partial-loads-ok</code> for
+    details.  </p>
+</li>
+</ul></div>
+<p>Memcheck intercepts calls to malloc, calloc, realloc,
+valloc, memalign, free, new, new[], delete and delete[].
+The behaviour you get
+is:</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p>malloc/new/new[]: the returned memory is marked as
+    addressible but not having valid values.  This means you have
+    to write on it before you can read it.</p></li>
+<li><p>calloc: returned memory is marked both addressible and
+    valid, since calloc() clears the area to zero.</p></li>
+<li><p>realloc: if the new size is larger than the old, the
+    new section is addressible but invalid, as with
+    malloc.</p></li>
+<li><p>If the new size is smaller, the dropped-off section is
+    marked as unaddressible.  You may only pass to realloc a
+    pointer previously issued to you by malloc/calloc/realloc.</p></li>
+<li><p>free/delete/delete[]: you may only pass to these
+    functions a pointer
+    previously issued to you by the corresponding allocation function.
+    Otherwise, Valgrind complains.  If the pointer is
+    indeed valid, Valgrind marks the entire area it points at as
+    unaddressible, and places the block in the
+    freed-blocks-queue.  The aim is to defer as long as possible
+    reallocation of this block.  Until that happens, all attempts
+    to access it will elicit an invalid-address error, as you
+    would hope.</p></li>
+</ul></div>
+</div>
+</div>
+<div class="sect1" lang="en">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="mc-manual.clientreqs"></a>3.6. Client Requests</h2></div></div></div>
+<p>The following client requests are defined in
+<code class="filename">memcheck.h</code>.  They also work for Addrcheck.
+See <code class="filename">memcheck.h</code> for exact details of their
+arguments.</p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><code class="computeroutput">VALGRIND_MAKE_NOACCESS</code>,
+    <code class="computeroutput">VALGRIND_MAKE_WRITABLE</code> and
+    <code class="computeroutput">VALGRIND_MAKE_READABLE</code>.
+    These mark address ranges as completely inaccessible,
+    accessible but containing undefined data, and accessible and
+    containing defined data, respectively.  Subsequent errors may
+    have their faulting addresses described in terms of these
+    blocks.  Returns a "block handle".  Returns zero when not run
+    on Valgrind.</p></li>
+<li><p><code class="computeroutput">VALGRIND_DISCARD</code>: At
+    some point you may want Valgrind to stop reporting errors in
+    terms of the blocks defined by the previous three macros.  To
+    do this, the above macros return a small-integer "block
+    handle".  You can pass this block handle to
+    <code class="computeroutput">VALGRIND_DISCARD</code>.  After
+    doing so, Valgrind will no longer be able to relate
+    addressing errors to the user-defined block associated with
+    the handle.  The permissions settings associated with the
+    handle remain in place; this just affects how errors are
+    reported, not whether they are reported.  Returns 1 for an
+    invalid handle and 0 for a valid handle (although passing
+    invalid handles is harmless).  Always returns 0 when not run
+    on Valgrind.</p></li>
+<li><p><code class="computeroutput">VALGRIND_CHECK_WRITABLE</code>
+    and <code class="computeroutput">VALGRIND_CHECK_READABLE</code>:
+    check immediately whether or not the given address range has
+    the relevant property, and if not, print an error message.
+    Also, for the convenience of the client, returns zero if the
+    relevant property holds; otherwise, the returned value is the
+    address of the first byte for which the property is not true.
+    Always returns 0 when not run on Valgrind.</p></li>
+<li><p><code class="computeroutput">VALGRIND_CHECK_DEFINED</code>:
+    a quick and easy way to find out whether Valgrind thinks a
+    particular variable (lvalue, to be precise) is addressible
+    and defined.  Prints an error message if not.  Returns no
+    value.</p></li>
+<li><p><code class="computeroutput">VALGRIND_DO_LEAK_CHECK</code>:
+    run the memory leak detector right now.  Returns no value.  I
+    guess this could be used to incrementally check for leaks
+    between arbitrary places in the program's execution.
+    Warning: not properly tested!</p></li>
+<li><p><code class="computeroutput">VALGRIND_COUNT_LEAKS</code>:
+    fills in the four arguments with the number of bytes of
+    memory found by the previous leak check to be leaked,
+    dubious, reachable and suppressed.  Again, useful in test
+    harness code, after calling
+    <code class="computeroutput">VALGRIND_DO_LEAK_CHECK</code>.</p></li>
+<li><p><code class="computeroutput">VALGRIND_GET_VBITS</code> and
+    <code class="computeroutput">VALGRIND_SET_VBITS</code>: allow
+    you to get and set the V (validity) bits for an address
+    range.  You should probably only set V bits that you have got
+    with <code class="computeroutput">VALGRIND_GET_VBITS</code>.
+    Only for those who really know what they are doing.  Note: currently
+    disabled in Valgrind 3.1.0.</p></li>
 </ul></div>
 </div>
 </div>
@@ -84,9 +881,9 @@ Memcheck can detect the following problems:</p>
 <br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
 <tr>
 <td rowspan="2" width="40%" align="left">
-<a accesskey="p" href="manual-core.warnings.html">&lt;&lt; 2.15. Warning Messages You Might See</a> </td>
+<a accesskey="p" href="manual-core.html">&lt;&lt; 2. Using and understanding the Valgrind core</a> </td>
 <td width="20%" align="center"><a accesskey="u" href="manual.html">Up</a></td>
-<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="mc-manual.flags.html">3.2. Command-line flags specific to Memcheck &gt;&gt;</a>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="ac-manual.html">4. Addrcheck: a lightweight memory checker &gt;&gt;</a>
 </td>
 </tr>
 <tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>

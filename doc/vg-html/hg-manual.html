@@ -1,32 +1,31 @@
-<html>
+<html xmlns:cf="http://docbook.sourceforge.net/xmlns/chunkfast/1.0">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>7. Helgrind: a data-race detector</title>
 <link rel="stylesheet" href="vg_basic.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
-<link rel="home" href="index.html" title="Valgrind Documentation">
+<meta name="generator" content="DocBook XSL Stylesheets V1.69.0">
+<link rel="start" href="index.html" title="Valgrind Documentation">
 <link rel="up" href="manual.html" title="Valgrind User Manual">
-<link rel="previous" href="ms-manual.options.html" title="6.4. Massif options">
+<link rel="prev" href="ms-manual.html" title="6. Massif: a heap profiler">
 <link rel="next" href="nl-manual.html" title="8. Nulgrind: the ``null'' tool">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
-<td width="22px" align="center" valign="middle"><a accesskey="p" href="ms-manual.options.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
+<td width="22px" align="center" valign="middle"><a accesskey="p" href="ms-manual.html"><img src="images/prev.png" width="18" height="21" border="0" alt="Prev"></a></td>
 <td width="25px" align="center" valign="middle"><a accesskey="u" href="manual.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
 <td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
 <th align="center" valign="middle">Valgrind User Manual</th>
 <td width="22px" align="center" valign="middle"><a accesskey="n" href="nl-manual.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
 </tr></table></div>
 <div class="chapter" lang="en">
-<div class="titlepage">
-<div><div><h2 class="title">
-<a name="hg-manual"></a>7. Helgrind: a data-race detector</h2></div></div>
-<div></div>
-</div>
+<div class="titlepage"><div><div><h2 class="title">
+<a name="hg-manual"></a>7. Helgrind: a data-race detector</h2></div></div></div>
 <p>Helgrind is a Valgrind tool for detecting data races in C
 and C++ programs that use the Pthreads library.</p>
-<p>To use this tool, you specify
-<tt class="computeroutput">--tool=helgrind</tt> on the Valgrind
+<p>Note: Helgrind does not work in Valgrind 3.1.0.  We hope
+to reinstate in version 3.2.0.</p>
+<p>To use this tool, you must specify
+<code class="computeroutput">--tool=helgrind</code> on the Valgrind
 command line.</p>
 <p>It uses the Eraser algorithm described in:
 
@@ -63,7 +62,7 @@ that location, and so a possible data race might result.</p>
 <p>Helgrind also allows for "thread segment lifetimes".  If
 the execution of two threads cannot overlap -- for example, if
 your main thread waits on another thread with a
-<tt class="computeroutput">pthread_join()</tt> operation -- they
+<code class="computeroutput">pthread_join()</code> operation -- they
 can both access the same variable without holding a lock.</p>
 <p>There's a lot of other sophistication in Helgrind, aimed at
 reducing the number of false reports, and at producing useful
@@ -74,7 +73,7 @@ day...</p>
 <br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
 <tr>
 <td rowspan="2" width="40%" align="left">
-<a accesskey="p" href="ms-manual.options.html">&lt;&lt; 6.4. Massif options</a> </td>
+<a accesskey="p" href="ms-manual.html">&lt;&lt; 6. Massif: a heap profiler</a> </td>
 <td width="20%" align="center"><a accesskey="u" href="manual.html">Up</a></td>
 <td rowspan="2" width="40%" align="right"> <a accesskey="n" href="nl-manual.html">8. Nulgrind: the ``null'' tool &gt;&gt;</a>
 </td>
