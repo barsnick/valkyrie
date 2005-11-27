@@ -6,10 +6,8 @@
  *
  * parseErrString() is defined in vk_option.cpp
  * ---------------------------------------------------------------------
- * This file is part of Valkyrie, a front-end for Valgrind
- * Copyright (c) 2000-2005, OpenWorks LLP <info@open-works.co.uk>
- * This program is released under the terms of the GNU GPL v.2
- * See the file LICENSE.GPL for the full license details.
+ * popt is Copyright (c) 1998 Red Hat Software and distributed under
+ * an X11-style license, which is in turn compatible the GNU GPL v.2.
  */
 
 #ifndef __VK_POPT_OPTION_H

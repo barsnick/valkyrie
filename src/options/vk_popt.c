@@ -3,10 +3,8 @@
  * This is a seriously hacked version of the popt libraries.
  * No credit to me, all thanks and many apologies to the Red Hat team
  * ---------------------------------------------------------------------
- * This file is part of Valkyrie, a front-end for Valgrind
- * Copyright (c) 2000-2005, OpenWorks LLP <info@open-works.co.uk>
- * This program is released under the terms of the GNU GPL v.2
- * See the file LICENSE.GPL for the full license details.
+ * popt is Copyright (c) 1998 Red Hat Software and distributed under
+ * an X11-style license, which is in turn compatible the GNU GPL v.2.
  */
 
 #include "vk_popt.h"
