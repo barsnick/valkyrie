@@ -67,7 +67,7 @@ Memcheck::Memcheck()
           urlMemcheck::Partial );
   addOpt( FREELIST,    Option::ARG_UINT,   Option::LEDIT, 
           "memcheck",  '\0',               "freelist-vol",
-          "<number>",  "",                 "1000000",
+          "<number>",  "",                 "5000000",
           "Volume of freed blocks queue:",
           "volume of freed blocks queue",
           urlMemcheck::Freelist );
