@@ -61,7 +61,7 @@ Memcheck::Memcheck()
           urlMemcheck::Showreach );
   addOpt( PARTIAL,     Option::ARG_BOOL,   Option::CHECK, 
           "memcheck",  '\0',               "partial-loads-ok",
-          "<yes|no>",  "yes|no",           "yes",
+          "<yes|no>",  "yes|no",           "no",
           "Ignore errors on partially invalid addresses",
           "too hard to explain here; see manual",
           urlMemcheck::Partial );
