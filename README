@@ -1,7 +1,7 @@
-Release Notes for Valkyrie 0.9.0  (25 July 2005)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Release Notes for Valkyrie 1.1.0 (27 Nov 2005)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We`ve finally been persuaded to polish some of Valkyrie`s rough edges
+We've finally been persuaded to polish some of Valkyrie's rough edges
 and release her out into the big wide world on her own.
 
 She has been completely re-written from the ground up, although there
@@ -29,7 +29,7 @@ To check out Valkyrie via anonymous, read-only svn access:
 Executive Summary
 ~~~~~~~~~~~~~~~~~
 
-Valkyrie is a GPL`d graphical front-end to the Valgrind suite of tools
+Valkyrie is a GPL'd graphical front-end to the Valgrind suite of tools
 for debugging and profiling x86-Linux programs.  
 
 Valkyrie uses the Qt widget library <http://www.trolltech.com>, and

@@ -37,7 +37,7 @@ void vklmPrint( const char* msg, ... )
 
 void usage()
 {
-  fprintf(stderr, "%s, a Valgrind XML log file merger.  Version 0.9.0, 25-July-2005.\n\n", progname);
+  fprintf(stderr, "%s, a Valgrind XML log file merger.  Version 1.1.0, 27-Nov-2005.\n\n", progname);
 
   fprintf(stderr, "  usage: %s [flags and input files in any order]\n\n", progname);
 
