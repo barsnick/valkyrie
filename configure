@@ -896,6 +896,10 @@ install:
 	make -f \$(VK_MAKEFILE) install
 	make -f \$(LM_MAKEFILE) install
 
+regtest:
+	tests/vk_kdx_regtest
+	/usr/bin/perl tests/vk_regtest vk_logmerge
+
 _MKFL_EOF
 
 

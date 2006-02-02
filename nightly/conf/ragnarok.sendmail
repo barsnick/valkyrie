@@ -1,0 +1,5 @@
+
+#use: subject file-to-mail
+
+/usr/bin/mail -s "$1" -R cerion@valgrind.org -r cerion@valgrind.org cerion@valgrind.org < $2
+ 

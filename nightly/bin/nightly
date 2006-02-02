@@ -1,0 +1,160 @@
+#!/bin/sh
+
+#----------------------------------------------------------------------------
+# Automated build and test for Valkyrie.  Compares Valkyrie from 24 hours
+# ago with the current one.
+#
+#   Use: two args, first is path to top of ValkyrieABT tree
+#        second is name of machine
+#
+# This file is based on Valgrind/nightly
+#----------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------
+# Helper function
+#----------------------------------------------------------------------------
+
+runcmd () {
+   logfile=$1
+   str=$2
+   shift 2
+
+   # Header in short logfile
+   echo -n "   $str  ... " >> $logfile.short
+
+   # Header and command in verbose logfile
+   echo -n "   $str  ... " >> $logfile.verbose
+   echo "$*" >> $logfile.verbose
+
+   # Run the command
+   (eval "$*") >> $logfile.verbose 2>&1
+   res=$?
+
+   # Write result to the short logfile
+   if [ $res == 0 ]
+   then
+      echo "done"   >> $logfile.short
+   else
+      echo "failed" >> $logfile.short
+   fi
+
+   return $res
+}
+
+#----------------------------------------------------------------------------
+# Startup
+#----------------------------------------------------------------------------
+# Get args from command line
+ABT_TOP=$1
+ABT_MACHINE=$2
+
+# Get times and date
+ABT_START=`date "+%F %H:%M:%S %Z"`
+
+svn_old_date=`date --date=yesterday +%Y-%m-%dT%H:%M:%S`
+svn_new_date=`date --date=today     +%Y-%m-%dT%H:%M:%S`
+
+cd $ABT_TOP
+
+source $ABT_TOP/conf/$ABT_MACHINE.conf
+
+
+#----------------------------------------------------------------------------
+# Check out, build, test
+#----------------------------------------------------------------------------
+
+# Do everything twice -- once for the 24 hours old Valkyrie, and once 
+# for the current one.
+for logfile in old new ; do
+
+   # Remove the old valkyrie/ directory
+   rm -rf valkyrie
+
+   # Remove old short and verbose log files, and start the new ones
+   for ext in short verbose ; do
+      echo > $logfile.$ext
+   done
+
+   # Choose the current Valkyrie, or one from 24 hours ago
+   if [ $logfile = "old" ] ; then
+      svn_date=$svn_old_date
+   else
+      svn_date=$svn_new_date
+   fi
+
+   # Get dates for the old and new versions
+
+   # Check out, build, run tests
+   runcmd $logfile \
+          "Checking out valkyrie source tree" \
+          "svn co svn://svn.valgrind.org/valkyrie/trunk -r {$svn_date} valkyrie" && \
+   \
+   runcmd $logfile \
+          "Configuring valkyrie             " \
+          "cd valkyrie && ./configure" && \
+   \
+   runcmd $logfile \
+          "Building valkyrie                " \
+          "cd valkyrie && make" && \
+   \
+   runcmd $logfile \
+          "Running regression tests         " \
+          "cd valkyrie && make regtest"
+
+   # Grab some indicative text for the short log file -- if the regtests
+   # succeeded, show their results.  If we didn't make it that far, show the
+   # last 20 lines.
+   egrep -q '^== [0-9]+ tests' $logfile.verbose && (
+      echo >> $logfile.short
+      echo "Regression test results follow" >> $logfile.short
+      echo >> $logfile.short
+      awk '/^== [0-9]+ tests/, /^$/ { print }' $logfile.verbose >> $logfile.short
+   ) || (
+      echo >> $logfile.short
+      echo "Last 20 lines of verbose log follow" >> $logfile.short \
+      echo >> $logfile.short
+      tail -20 $logfile.verbose >> $logfile.short
+   )
+done
+
+#----------------------------------------------------------------------------
+# Prepare results and send
+#----------------------------------------------------------------------------
+
+# 'final' shows the difference between the old and new results
+echo                                                     >  final
+echo "Nightly build on" $ABT_MACHINE "(" $ABT_DETAILS ")" \
+     "started at" $ABT_START                             >> final
+
+# If the results differ from 24 hours ago, print extra stuff.
+diff -C1 old.short new.short > diff.short
+changed=$?
+
+if [ $changed != 0 ] ; then
+   echo "Results differ from 24 hours ago"      >> final
+else
+   echo "Results unchanged from 24 hours ago"   >> final
+fi
+
+# Always show the current results.
+cat new.short >> final
+
+if [ $changed != 0 ] ; then
+   echo "=================================================" >> final
+   echo "== Results from 24 hours ago                   ==" >> final
+   echo "=================================================" >> final
+   cat old.short                                            >> final
+
+   echo                                                     >> final
+   echo "=================================================" >> final
+   echo "== Difference between 24 hours ago and now     ==" >> final
+   echo "=================================================" >> final
+   echo                                                     >> final
+   cat diff.short                                           >> final
+   echo                                                     >> final
+fi
+
+# Email the results
+$ABT_TOP/conf/$ABT_MACHINE.sendmail \
+   "$ABT_START nightly build ($ABT_MACHINE, $ABT_DETAILS)" \
+   $ABT_TOP/final
