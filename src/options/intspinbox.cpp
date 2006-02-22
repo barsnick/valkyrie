@@ -492,7 +492,12 @@ Editor::~Editor()
 
 
 Editor::Editor( IntSpin * parent,  const char * name )
-  : QWidget( parent, name, WNoAutoErase )
+  : QWidget( parent, name, 
+#if (QT_VERSION-0 >= 0x030200)
+             WNoAutoErase )
+#else // QT_VERSION < 3.2
+             WResizeNoErase | WRepaintNoErase )
+#endif
 {
   cw = parent;
   pmBuf = 0;
@@ -723,7 +728,12 @@ IntSpin::~IntSpin()
 
 
 IntSpin::IntSpin( QWidget* parent, const char* name )
-  : QWidget( parent, name, WNoAutoErase )
+  : QWidget( parent, name, 
+#if (QT_VERSION-0 >= 0x030200)
+             WNoAutoErase )
+#else // QT_VERSION < 3.2
+             WResizeNoErase | WRepaintNoErase )
+#endif
 {
   numSecs = 0;
   timerId = 0;

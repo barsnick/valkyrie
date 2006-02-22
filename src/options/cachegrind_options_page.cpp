@@ -60,7 +60,11 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
   int rows = 4;
   int cols = 3;
   QGridLayout* grid1 = new QGridLayout( group1, rows, cols, margin, space );
+#if (QT_VERSION-0 >= 0x030200)
   grid1->setRowSpacing( 0, topSpace );   /* blank top row */
+#else // QT_VERSION < 3.2
+  grid1->addRowSpacing( 0, topSpace );   /* blank top row */
+#endif
   grid1->setColStretch( 2, 10 );         /* push widgets to the left */
 
   grid1->addWidget( itemList[Cachegrind::I1_CACHE]->label(),  1, 0 );
@@ -99,7 +103,11 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
   rows = 4;
   cols = 2;
   QGridLayout* grid2 = new QGridLayout( group2, rows, cols, margin, space );
+#if (QT_VERSION-0 >= 0x030200)
   grid2->setRowSpacing( 0, topSpace );   /* blank top row */
+#else // QT_VERSION < 3.2
+  grid2->addRowSpacing( 0, topSpace );   /* blank top row */
+#endif
   grid2->setColStretch( 2, 10 );         /* push widgets to the left */
 
   grid2->addWidget(itemList[Cachegrind::AUTO   ]->widget(),  1, 0 );
@@ -108,7 +116,11 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
   grid2->addLayout(itemList[Cachegrind::THRESH ]->hlayout(), 4, 0 );
   grid2->addLayout(itemList[Cachegrind::CONTEXT]->hlayout(), 5, 0 );
 
+#if (QT_VERSION-0 >= 0x030200)
   grid2->setRowSpacing( 6, topSpace );
+#else // QT_VERSION < 3.2
+  grid2->addRowSpacing( 6, topSpace );
+#endif
   grid2->addMultiCellLayout( pidLedit->hlayout(), 7,7, 0,2 );
   grid2->addMultiCellLayout( incLedit->hlayout(), 8,8, 0,2 );
 

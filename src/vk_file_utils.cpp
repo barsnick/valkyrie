@@ -790,8 +790,26 @@ QString FileDialogPrivate::File::text( int column ) const
       if ( size > INT_MAX ) {
         struct stat buffer;
         if ( ::stat( QFile::encodeName(info.name()), &buffer ) == 0 ) {
+#if (QT_VERSION-0 >= 0x030200)
           Q_ULLONG size64 = (Q_ULLONG)buffer.st_size;
           return QString::number(size64);
+#else // QT_VERSION < 3.2
+            off_t n = buffer.st_size;
+            // ### use QString::number() instead when it has support
+            // ### for 64-bit integers (off_t) on all platforms
+            if ( n > 0 ) {
+               char charbuf[21*sizeof(QChar)];
+               QChar *buf = (QChar*)charbuf;
+               QChar *p = &buf[20];
+               uint len = 0;
+               do {
+                  *--p = "0123456789"[(int)(n%10)];
+                  n /= 10;
+                  ++len;
+               } while ( n );
+               return QString( p, len );
+            }
+#endif
         }
       }
 #endif

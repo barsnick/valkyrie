@@ -457,7 +457,13 @@ void MainWindow::mkMenuBar()
   runButton = new QToolButton( this, "tb_rerun" );
   runButton->setIconSet( QPixmap(run_xpm) );
   runButton->setTextLabel( "&Run" );
+#if (QT_VERSION-0 >= 0x030200)
+  printf("QT_VER >= 3.2\n");
   runButton->setTextPosition( QToolButton::BesideIcon );
+#else // QT_VERSION < 3.2
+  printf("QT_VER < 3.2\n");
+  runButton->setTextPosition( QToolButton::Right );
+#endif
   runButton->setUsesTextLabel( showToolbarLabels );
   runButton->setAutoRaise( true );
   runButton->setAccel( CTRL+Key_R );
@@ -472,7 +478,11 @@ void MainWindow::mkMenuBar()
   stopButton = new QToolButton( this, "tb_stop" );
   stopButton->setIconSet( QPixmap(stop_xpm) );
   stopButton->setTextLabel( "S&top" );
+#if (QT_VERSION-0 >= 0x030200)
   stopButton->setTextPosition( QToolButton::BesideIcon );
+#else // QT_VERSION < 3.2
+  stopButton->setTextPosition( QToolButton::Right );
+#endif
   stopButton->setUsesTextLabel( showToolbarLabels );
   stopButton->setAutoRaise( true );
   stopButton->setAccel( CTRL+Key_T );
@@ -490,7 +500,11 @@ void MainWindow::mkMenuBar()
   helpButton = new QToolButton( this );
   helpButton->setIconSet( QPixmap(help_xpm) );
   helpButton->setTextLabel( "&Help" );
+#if (QT_VERSION-0 >= 0x030200)
   helpButton->setTextPosition( QToolButton::BesideIcon );
+#else // QT_VERSION < 3.2
+  helpButton->setTextPosition( QToolButton::Right );
+#endif
   helpButton->setUsesTextLabel( showToolbarLabels );
   helpButton->setAutoRaise( true );
   helpButton->setAccel( ALT+Key_H );

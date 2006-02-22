@@ -50,20 +50,32 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
   int rows = 10;
   int cols = 2;
   QGridLayout* grid1 = new QGridLayout( group1, rows, cols, margin, space );
+#if (QT_VERSION-0 >= 0x030200)
   grid1->setRowSpacing( 0, topSpace );   /* blank top row */
+#else // QT_VERSION < 3.2
+  grid1->addRowSpacing( 0, topSpace );   /* blank top row */
+#endif
   grid1->setColStretch( 1, 10 );         /* push widgets to the left */
 
   grid1->addLayout( itemList[Memcheck::LEAK_CHECK]->hlayout(), 1, 0 );
   grid1->addWidget( itemList[Memcheck::SHOW_REACH]->widget(),  2, 0 );
 
   grid1->addMultiCellWidget( sep(group1,"sep1"), 3,3, 0,1 );
+#if (QT_VERSION-0 >= 0x030200)
   grid1->setRowSpacing( 3, topSpace );   /* add a bit more space here */
+#else // QT_VERSION < 3.2
+  grid1->addRowSpacing( 3, topSpace );   /* add a bit more space here */
+#endif
 
   grid1->addWidget( itemList[Memcheck::PARTIAL]->widget(),     4, 0 );
   grid1->addWidget( itemList[Memcheck::GCC_296]->widget(),     5, 0 );
 
   grid1->addMultiCellWidget( sep(group1,"sep2"), 6,6, 0,1 );
+#if (QT_VERSION-0 >= 0x030200)
   grid1->setRowSpacing( 7, topSpace );   /* add a bit more space here */
+#else // QT_VERSION < 3.2
+  grid1->addRowSpacing( 7, topSpace );   /* add a bit more space here */
+#endif
 
   grid1->addLayout( itemList[Memcheck::LEAK_RES]->hlayout(),    7, 0 );
   grid1->addLayout( itemList[Memcheck::FREELIST]->hlayout(),    8, 0 );

@@ -243,7 +243,11 @@ void MemcheckView::mkToolBar()
   openlogButton = new QToolButton( mcToolBar, "tb_open_log" );
   openlogButton->setIconSet( QPixmap( open_log_xpm ) );
   openlogButton->setTextLabel( "Log File" );
+#if (QT_VERSION-0 >= 0x030200)
   openlogButton->setTextPosition( QToolButton::BesideIcon );
+#else // QT_VERSION < 3.2
+  openlogButton->setTextPosition( QToolButton::Right );
+#endif
   openlogButton->setUsesTextLabel( show_text );
   openlogButton->setAutoRaise( true );
   QPopupMenu* logMenu = new QPopupMenu( openlogButton );
@@ -258,7 +262,11 @@ void MemcheckView::mkToolBar()
   savelogButton = new QToolButton( mcToolBar, "tb_save_log" );
   savelogButton->setIconSet( QPixmap( save_log_xpm ) );
   savelogButton->setTextLabel( "Save Log" );
+#if (QT_VERSION-0 >= 0x030200)
   savelogButton->setTextPosition( QToolButton::BesideIcon );
+#else // QT_VERSION < 3.2
+  savelogButton->setTextPosition( QToolButton::Right );
+#endif
   savelogButton->setUsesTextLabel( show_text );
   savelogButton->setAutoRaise( true );
   connect( savelogButton, SIGNAL( clicked() ), 
@@ -270,7 +278,11 @@ void MemcheckView::mkToolBar()
   suppedButton = new QToolButton( mcToolBar, "tb_supp_ed" );
   suppedButton->setIconSet( QPixmap( supp_editor_xpm ) );
   suppedButton->setTextLabel( "Supp'n Editor" );
+#if (QT_VERSION-0 >= 0x030200)
   suppedButton->setTextPosition( QToolButton::BesideIcon );
+#else // QT_VERSION < 3.2
+  suppedButton->setTextPosition( QToolButton::Right );
+#endif
   suppedButton->setUsesTextLabel( show_text );
   suppedButton->setAutoRaise( true );
   connect( suppedButton, SIGNAL( clicked() ), 

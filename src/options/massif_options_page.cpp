@@ -46,25 +46,41 @@ MassifOptionsPage::MassifOptionsPage( QWidget* parent, VkObject* obj )
   int rows = 7;
   int cols = 2;
   QGridLayout* grid1 = new QGridLayout( group1, rows, cols, margin, space );
+#if (QT_VERSION-0 >= 0x030200)
   grid1->setRowSpacing( 0, topSpace );   /* blank top row */
+#else // QT_VERSION < 3.2
+  grid1->addRowSpacing( 0, topSpace );   /* blank top row */
+#endif
   grid1->setColStretch( 1, 10 );         /* push widgets to the left */
 
   grid1->addWidget( itemList[Massif::HEAP      ]->widget(),   1, 0 );
   grid1->addLayout( itemList[Massif::HEAP_ADMIN]->hlayout(),  2, 0 );
 
   grid1->addMultiCellWidget( sep(group1,"sep1"), 3,3, 0,1 );
+#if (QT_VERSION-0 >= 0x030200)
   grid1->setRowSpacing( 3, topSpace );   /* add a bit more space here */
+#else // QT_VERSION < 3.2
+  grid1->addRowSpacing( 3, topSpace );   /* add a bit more space here */
+#endif
 
   grid1->addWidget( itemList[Massif::STACKS    ]->widget(),   4, 0 );
   grid1->addLayout( itemList[Massif::DEPTH     ]->hlayout(),  5, 0 );
 
   grid1->addMultiCellWidget( sep(group1,"sep2"), 6,6, 0,1 );
+#if (QT_VERSION-0 >= 0x030200)
   grid1->setRowSpacing( 6, topSpace );   /* add a bit more space here */
+#else // QT_VERSION < 3.2
+  grid1->addRowSpacing( 6, topSpace );   /* add a bit more space here */
+#endif
 
   grid1->addLayout( itemList[Massif::ALLOC_FN  ]->vlayout(),  7, 0 );
 
   grid1->addMultiCellWidget( sep(group1,"sep3"), 8,8, 0,1 );
+#if (QT_VERSION-0 >= 0x030200)
   grid1->setRowSpacing( 8, topSpace );   /* add a bit more space here */
+#else // QT_VERSION < 3.2
+  grid1->addRowSpacing( 8, topSpace );   /* add a bit more space here */
+#endif
 
   grid1->addLayout( itemList[Massif::FORMAT    ]->hlayout(),  9, 0 );
   grid1->addLayout( itemList[Massif::ALIGNMENT ]->hlayout(), 10, 0 );

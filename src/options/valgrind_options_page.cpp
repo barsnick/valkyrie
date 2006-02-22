@@ -54,7 +54,11 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
   int rows = 7;
   int cols = 2;
   QGridLayout* cgrid1 = new QGridLayout( cgroup1, rows, cols, margin, space );
+#if (QT_VERSION-0 >= 0x030200)
   cgrid1->setRowSpacing( 0, topSpace );   /* blank top row */
+#else // QT_VERSION < 3.2
+  cgrid1->addRowSpacing( 0, topSpace );   /* blank top row */
+#endif
   cgrid1->setColStretch( 1, 10 );         /* push widgets to the left */
 
   itemList.insert( Valgrind::TOOL,                        /* combobox */
@@ -85,7 +89,11 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
   /* tabCore - group box 2 - grid layout */
   rows = 6;  cols = 2;
   QGridLayout* cgrid2 = new QGridLayout( cgroup2, rows, cols, margin, space );
+#if (QT_VERSION-0 >= 0x030200)
   cgrid2->setRowSpacing( 0, topSpace );   /* blank top row */
+#else // QT_VERSION < 3.2
+  cgrid2->addRowSpacing( 0, topSpace );   /* blank top row */
+#endif
   cgrid2->setColStretch( 1, 10 );         /* push widgets to the left */
 
   itemList.insert( Valgrind::RUN_LIBC,                    /* checkbox */
@@ -123,7 +131,11 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
   /* tabErep - group box 1 - grid layout */
   rows = 14;  cols = 2;
   QGridLayout* egrid1 = new QGridLayout( egroup1, rows, cols, margin, space );
+#if (QT_VERSION-0 >= 0x030200)
   egrid1->setRowSpacing( 0, topSpace );   /* blank top row */
+#else // QT_VERSION < 3.2
+  egrid1->addRowSpacing( 0, topSpace );   /* blank top row */
+#endif
 
   itemList.insert( Valgrind::GEN_SUPP,                  /* checkbox */
                    optionWidget( Valgrind::GEN_SUPP,    egroup1, false ) );
@@ -167,7 +179,11 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
   egrid1->addLayout( itemList[Valgrind::DB_COMMAND ]->hlayout(),  8, 0 );
 
   egrid1->addMultiCellWidget( sep(egroup1,"sep1"), 9,9, 0,1 );
+#if (QT_VERSION-0 >= 0x030200)
   egrid1->setRowSpacing( 9, topSpace );   /* add a bit more space here */
+#else // QT_VERSION < 3.2
+  egrid1->addRowSpacing( 9, topSpace );   /* add a bit more space here */
+#endif
   //----------
   QHBoxLayout* hBox = new QHBoxLayout( 6, "hBox" );
   hBox->addLayout( itemList[Valgrind::INPUT_FD]->hlayout() );

@@ -63,7 +63,11 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
   int rows = 0;
   int cols = 3;
   QGridLayout* grid1 = new QGridLayout( gvbox, rows, cols, space );
+#if (QT_VERSION-0 >= 0x030200)
   grid1->setRowSpacing( 0, topSpace );   /* blank top row */
+#else // QT_VERSION < 3.2
+  grid1->addRowSpacing( 0, topSpace );   /* blank top row */
+#endif
 
   grid1->addWidget( itemList[Valkyrie::TOOLTIP]->widget(), 1, 0 );
   grid1->addWidget( itemList[Valkyrie::ICONTXT]->widget(), 1, 2 );
@@ -123,13 +127,21 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
   grid2->addWidget( editLedit->button(),                       1, 0 );
   grid2->addWidget( editLedit->widget(),                       1, 1 );
 
+#if (QT_VERSION-0 >= 0x030200)
   grid2->setRowSpacing( 2, topSpace );
+#else // QT_VERSION < 3.2
+  grid2->addRowSpacing( 2, topSpace );
+#endif
   grid2->addWidget( binLedit->button(),                        3, 0 );
   grid2->addWidget( binLedit->widget(),                        3, 1 );
   grid2->addWidget( itemList[Valkyrie::BIN_FLAGS]->label(),    4, 0 );
   grid2->addWidget( itemList[Valkyrie::BIN_FLAGS]->widget(),   4, 1 );
 
+#if (QT_VERSION-0 >= 0x030200)
   grid2->setRowSpacing( 5, topSpace );
+#else // QT_VERSION < 3.2
+  grid2->addRowSpacing( 5, topSpace );
+#endif
 #if 0
   grid2->addWidget( vgbinLedit->button(),                      6, 0 );
   grid2->addWidget( vgbinLedit->widget(),                      6, 1 );
