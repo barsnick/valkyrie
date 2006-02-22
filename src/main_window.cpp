@@ -458,10 +458,8 @@ void MainWindow::mkMenuBar()
   runButton->setIconSet( QPixmap(run_xpm) );
   runButton->setTextLabel( "&Run" );
 #if (QT_VERSION-0 >= 0x030200)
-  printf("QT_VER >= 3.2\n");
   runButton->setTextPosition( QToolButton::BesideIcon );
 #else // QT_VERSION < 3.2
-  printf("QT_VER < 3.2\n");
   runButton->setTextPosition( QToolButton::Right );
 #endif
   runButton->setUsesTextLabel( showToolbarLabels );
