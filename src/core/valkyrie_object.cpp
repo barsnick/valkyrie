@@ -11,192 +11,212 @@
 #include "valkyrie_object.h"
 #include "valgrind_object.h"
 #include "tool_object.h"
-#include "xml_parser.h"        // xmlFormatCheck
 
 #include "vk_config.h"
 #include "vk_messages.h"
 #include "vk_utils.h"          // vk_assert(), vk_strcmp(), vkPrint()
 #include "html_urls.h"
 #include "vk_include.h"        // VK_VERSION
+#include "vk_popt_option.h"    // PERROR* and friends 
+#include "vk_include.h"        // CFG_VG_EXEC_PATH
 
 #include <qapplication.h>
 
 
-/* class Valkyrie ------------------------------------------------------ 
-   The key value of HELP_OPT is used:
-   - to exclude the option from configEntries;
-   - to determine when a shortFlag is needed for popt.
-   The key value of NOT_POPT is used:
-   - to exclude the option from popt options.  
-*/
-Valkyrie:: ~Valkyrie() { }
+
+/* class Valkyrie --------------------------------------------------- */
+Valkyrie:: ~Valkyrie()
+{
+   if (m_valgrind != 0) {
+      delete m_valgrind;
+      m_valgrind = 0;
+   }
+}
 
 
 Valkyrie::Valkyrie()
-  : VkObject( "Valkyrie", "Valkyrie", Qt::Key_unknown, false ) 
+   : VkObject( "Valkyrie", "Valkyrie", Qt::Key_unknown, VkObject::ID_VALKYRIE ) 
 {
-  /* init vars */
-  runMode = modeNotSet;
-  valgrind   = 0;
+   /* init vars */
+   m_startRunState = VkRunState::STOPPED;
+
+   /* init valgrind */
+   m_valgrind = new Valgrind();
+
+   /* init tools */
+   initToolObjects();
 
 
-  addOpt( HELP_OPT,    Option::ARG_NONE,   Option::NONE,
-          "",          'h',                "help", 
-          "",          "",                 "", 
-          "",          "show this help message and exit", urlNone );
-  addOpt( HELP_OPT,    Option::ARG_NONE,   Option::NONE,
-          "",          'v',                "version", 
-          "",          "",                 VK_VERSION, 
-          "",          "display version information and exit", urlNone );
-  addOpt( HELP_OPT,    Option::ARG_NONE,   Option::NONE,
-          "",          'V',                "valgrind-opts", 
-          "",          "",                 "", 
-          "",          "Show valgrind options too, and exit", urlNone );
-  addOpt( TOOLTIP,     Option::NOT_POPT,   Option::CHECK, 
-          "valkyrie",  '\0',               "show-tooltips", 
-          "",          "true|false",       "true", 
-          "Show tooltips",      "",        urlValkyrie::toolTips );
-  addOpt( PALETTE,     Option::NOT_POPT,   Option::CHECK, 
-          "valkyrie",  '\0',               "use-vk-palette", 
-          "",          "true|false",       "true", 
-          "Use valkyrie's palette",   "",  urlValkyrie::palette );
-  addOpt( ICONTXT,     Option::NOT_POPT,   Option::CHECK, 
-          "valkyrie",  '\0',               "show-butt-text", 
-          "",          "true|false",       "true", 
-          "Show toolbar text labels",  "", urlValkyrie::toolLabels );
-  addOpt( FONT_SYSTEM,  Option::NOT_POPT,   Option::CHECK,
-          "valkyrie",   '\0',               "use-system-font", 
-          "",          "true|false",       "true", 
-          "Use default system font",  "",  urlValkyrie::userFont );
-  addOpt( FONT_USER,   Option::NOT_POPT,   Option::LEDIT, 
-          "valkyrie",  '\0',               "user-font", 
-          "",          "",  "Luxi Sans,10,-1,5,50,0,0,0,0,0", 
-          "",          "",                 urlValkyrie::userFont );
-  addOpt( SRC_EDITOR,  Option::NOT_POPT,   Option::LEDIT, 
-          "valkyrie",  '\0',               "src-editor", 
-          "",          "",                 "/usr/bin/emacs", 
-          "Src Editor:",   "",             urlValkyrie::srcEditor );
-  addOpt( SRC_LINES,   Option::NOT_POPT,   Option::SPINBOX, 
-          "valkyrie",  '\0',               "src-lines",
-          "",          "1|10",             "2", 
-          "Extra lines shown above/below the target line:", "",
-          urlValkyrie::srcLines );
-  /* path to valgrind executable (maybe found by configure) */
-  addOpt( VG_EXEC,     Option::NOT_POPT,   Option::LEDIT, 
-          "valkyrie",  '\0',               "vg-exec",
-          "",          "",                 "",
-          "Valgrind:", "",                 urlValkyrie::vgDir );
-  /* path to a supp files dir. this may have been found by configure,
-     but can be changed later via valkyrie's Option page to point to
-     another suppression files dir */
-  addOpt( VG_SUPPS_DIR,   Option::NOT_POPT, Option::LEDIT, 
-          "valkyrie",  '\0',               "vg-supps-dir",
-          "",          "",                 "",
-          "Supps.Dir:",  "",               urlValkyrie::suppDir );
-  addOpt( BINARY,      Option::NOT_POPT,   Option::LEDIT,
-          "valkyrie",  '\0',               "binary", 
-          "",          "",                 "", 
-          "Binary:",   "",                 urlValkyrie::binary );
-  addOpt( BIN_FLAGS,   Option::NOT_POPT,   Option::LEDIT,
-          "valkyrie",  '\0',               "binary-flags", 
-          "",          "",                 "", 
-          "Binary flags:", "",             urlValkyrie::binFlags );
-  addOpt( VIEW_LOG,    Option::ARG_STRING, Option::NONE, 
-          "valkyrie",  '\0',               "view-log", 
-          "<file>",    "",                 "",
-          "View logfile:", "parse and view a valgrind logfile",
-          urlNone );
-  /* path to vk_logmerge executable (found by configure) */
-  addOpt( MERGE_EXEC,  Option::NOT_POPT,   Option::LEDIT,
-          "valkyrie",  '\0',               "merge-exec",
-          "",          "",                 "",
-          "Log Merger:", "",               urlNone );
-  addOpt( MERGE_LOGS,  Option::ARG_STRING, Option::NONE, 
-          "valkyrie",  '\0',               "merge", 
-          "<loglist>", "",                 "",
-          "View logfiles:", "merge multiple logfiles, discarding duplicate errors",
-          urlNone );
+   addOpt( HELP,         VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
+           "",           'h',                  "help", 
+           "",           "",                   "", 
+           "",           "show this help message and exit", urlNone );
+   addOpt( VERSION,      VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
+           "",           'v',                  "version", 
+           "",           "",                   VK_VERSION, 
+           "",           "display version information and exit", urlNone );
+   addOpt( VGHELP,       VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
+           "",           'V',                  "valgrind-opts", 
+           "",           "",                   "", 
+           "",           "Show valgrind options too, and exit", urlNone );
+   addOpt( TOOLTIP,      VkOPTION::NOT_POPT,   VkOPTION::WDG_CHECK, 
+           "valkyrie",  '\0',                  "show-tooltips", 
+           "",           "true|false",         "true", 
+           "Show tooltips",      "",           urlValkyrie::toolTips );
+   addOpt( PALETTE,      VkOPTION::NOT_POPT,   VkOPTION::WDG_CHECK, 
+           "valkyrie",   '\0',                 "use-vk-palette", 
+           "",           "true|false",         "true", 
+           "Use valkyrie's palette",   "",     urlValkyrie::palette );
+   addOpt( ICONTXT,      VkOPTION::NOT_POPT,   VkOPTION::WDG_CHECK, 
+           "valkyrie",   '\0',                 "show-butt-text", 
+           "",           "true|false",         "true", 
+           "Show toolbar text labels",  "",    urlValkyrie::toolLabels );
+   addOpt( FONT_SYSTEM,  VkOPTION::NOT_POPT,   VkOPTION::WDG_CHECK,
+           "valkyrie",   '\0',                 "use-system-font", 
+           "",           "true|false",         "true", 
+           "Use default system font",  "",     urlValkyrie::userFont );
+   addOpt( FONT_USER,    VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
+           "valkyrie",   '\0',                 "user-font", 
+           "",           "",                   "Luxi Sans,10,-1,5,50,0,0,0,0,0", 
+           "",           "",                   urlValkyrie::userFont );
+   addOpt( SRC_EDITOR,   VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
+           "valkyrie",   '\0',                 "src-editor", 
+           "",           "",                   "/usr/bin/emacs", 
+           "Src Editor:",   "",                urlValkyrie::srcEditor );
+   addOpt( SRC_LINES,    VkOPTION::NOT_POPT,   VkOPTION::WDG_SPINBOX, 
+           "valkyrie",   '\0',                 "src-lines",
+           "",           "1|10",               "2", 
+           "Extra lines shown above/below the target line:", "",
+           urlValkyrie::srcLines );
+
+   /* path to valgrind executable (maybe found by configure) */
+   addOpt( VG_EXEC,      VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
+           "valkyrie",   '\0',                 "vg-exec",
+           "",           "",                   CFG_VG_EXEC_PATH,
+           "Valgrind:",  "",                   urlValkyrie::vgDir );
+   addOpt( BINARY,       VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT,
+           "valkyrie",   '\0',                 "binary", 
+           "",           "",                   "", 
+           "Binary:",    "",                   urlValkyrie::binary );
+   addOpt( BIN_FLAGS,    VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT,
+           "valkyrie",   '\0',                 "binary-flags", 
+           "",           "",                   "", 
+           "Binary flags:", "",                urlValkyrie::binFlags );
+   addOpt( VIEW_LOG,     VkOPTION::ARG_STRING, VkOPTION::WDG_NONE, 
+           "valkyrie",   '\0',                 "view-log", 
+           "<file>",     "",                   "",
+           "View logfile:", "parse and view a valgrind logfile",
+           urlNone );
+
+   /* path to vk_logmerge executable (found by configure) */
+   addOpt( MERGE_EXEC,   VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT,
+           "valkyrie",   '\0',                 "merge-exec",
+           "",           "",                   "",
+           "Log Merger:", "",                  urlNone );
+   addOpt( MERGE_LOGS,   VkOPTION::ARG_STRING, VkOPTION::WDG_NONE, 
+           "valkyrie",   '\0',                 "merge", 
+           "<loglist>",  "",                   "",
+           "View logfiles:", "merge multiple logfiles, discarding duplicate errors",
+           urlNone );
 }
 
 
 int Valkyrie::checkOptArg( int optid, const char* argval, 
-                           bool use_gui/*=false*/ )
+                           bool /*use_gui*//*=false*/ )
 { 
-  int errval = PARSED_OK;
-  QString argVal( argval );
-  Option* opt = findOption( optid );
-  switch ( optid ) {
+   int errval = PARSED_OK;
+   QString argVal( argval );
+   // Option* opt = findOption( optid );
 
-  /* these options are _only_ set via the gui, and are either (a)
-     limited to a set of available values, or (b) have already been
-     checked, so no need to re-check them. */
-    case TOOLTIP:
-    case PALETTE:
-    case ICONTXT:
-    case FONT_SYSTEM:
-    case FONT_USER:
-    case SRC_LINES:
-    case VG_SUPPS_DIR:
+   switch ( (Valkyrie::vkOpts)optid ) {
+
+      /* these options are _only_ set via the gui, and are either (a)
+         limited to a set of available values, or (b) have already been
+         checked, so no need to re-check them. */
+   case TOOLTIP:
+   case PALETTE:
+   case ICONTXT:
+   case FONT_SYSTEM:
+   case FONT_USER:
+   case SRC_LINES:
       return errval;
       break;
 
-    case SRC_EDITOR:
-    case VG_EXEC:
+   case SRC_EDITOR:
+   case MERGE_EXEC:
+   case VG_EXEC:
       argVal = binaryCheck( &errval, argval );
       break;
 
-    case VIEW_LOG:
-      argVal = fileCheck( &errval, argval, true, false );
-      if ( errval == PARSED_OK ) {
-        /* check the file format is xml */
-        bool ok = XMLParser::xmlFormatCheck( &errval, argVal );
-        if ( ok && errval == PARSED_OK ) {
-          runMode = modeParseLog;
-        }
-      }
-      break;
-
-    /* expects a single file which contains a list of
-       logfiles-to-be-merged, each on a separate line, with a minimum
-       of two logfiles. Validating each file is done at merge-time, as
-       we will then skip any files which we can't read. */
-    case MERGE_LOGS:
+   case VIEW_LOG:
       argVal = fileCheck( &errval, argval, true, false );
       if ( errval == PARSED_OK )
-        runMode = modeMergeLogs;
+         m_startRunState = VkRunState::TOOL1;
       break;
 
-    case BINARY:
+      /* expects a single file which contains a list of
+         logfiles-to-be-merged, each on a separate line, with a minimum
+         of two logfiles. Validating each file is done at merge-time, as
+         we will then skip any files which we can't read. */
+   case MERGE_LOGS:
+      argVal = fileCheck( &errval, argval, true, false );
+      if ( errval == PARSED_OK )
+         m_startRunState = VkRunState::TOOL2;
+      break;
+
+   case BINARY:
       argVal = binaryCheck( &errval, argval );
-      if ( errval == PARSED_OK ) 
-        runMode = modeParseOutput;
+      if ( errval == PARSED_OK )
+         m_startRunState = VkRunState::VALGRIND;
       break;
 
-    case BIN_FLAGS:
+   case BIN_FLAGS:
       argVal = argval;
       break;
-  }
 
-  /* if this option has been called from the cmd-line, save its value
-     in valkyrierc if it has passed the checks. */
-  if ( errval == PARSED_OK && use_gui == false ) {
-    writeOptionToConfig( opt, argVal );
-  }
+   /* ignore these opts */
+   case HELP:
+   case VGHELP:
+   case VERSION:
+      break;
+   }
 
-  return errval; 
+   return errval; 
 }
 
 
-/* get ptrs to all tools. */
-void Valkyrie::init()
+/* Gather all config entries that hold persistent data
+   - basically all options with an associated option widget.
+   Called from VkConfig::mkConfigFile() when we need to create the
+   valkyrierc file for the very first time. */
+QString Valkyrie::configEntries()
 {
-  valgrind   = (Valgrind*)vkConfig->vkObject( "valgrind" );
+   QString cfgEntry = "\n[" + name() + "]\n";
+   for ( Option* opt = m_optList.first(); opt; opt = m_optList.next() ) {
 
-  ToolList toolList = vkConfig->toolList();
+      /* Don't create config entries for these options:
+         They don't hold persistent data, and have no associated option
+         widget */
+      if (opt->m_key == Valkyrie::HELP       ) continue;
+      if (opt->m_key == Valkyrie::VGHELP     ) continue;
+      if (opt->m_key == Valkyrie::VIEW_LOG   ) continue;
+      if (opt->m_key == Valkyrie::MERGE_LOGS ) continue;
 
-  for ( ToolObject* tool=toolList.first(); tool; tool=toolList.next() ) {
-    connect( tool, SIGNAL( fatal() ), this, SLOT( quit() ) );
-  }
+      cfgEntry += opt->m_longFlag + "=" + opt->m_defaultValue + "\n";
+   }
+
+   return cfgEntry;
+}
+
+
+/* setup tools. */
+void Valkyrie::initToolObjects()
+{ 
+   /* connect all tool::fatal() signals to this::quit() */
+   ToolObjList toolObjList = valgrind()->toolObjList();
+   for ( ToolObject* tool=toolObjList.first(); tool; tool=toolObjList.next() ) {
+      connect( tool, SIGNAL( fatal() ), this, SLOT( quit() ) );
+   }
 }
 
 
@@ -204,157 +224,113 @@ void Valkyrie::init()
 void Valkyrie::quit()
 { exit(0); }
 
-/* called from MainWindow::run() */
-void Valkyrie::setRunMode( Valkyrie::RunMode rm )
-{ runMode = rm; }
+
+/* Returns a '\n' separated list of current relevant flags.
+   Called by MainWindow::showFlagsWidget()
+   - which is triggered by optionsWin::flagsChanged signal
+*/
+QString Valkyrie::getDisplayFlags()
+{
+   QString flagsStr = m_flags.join("\n");
+   if ( !vkConfig->rdEntry("binary-flags", "valkyrie").isEmpty() )
+      flagsStr.replace( flagsStr.findRev('\n'), 1, ' ');
+   return flagsStr;
+}
 
 
-/* called from Valkyrie::currentFlags() 
+/* called from Valkyrie::updateVgFlags() 
    see if valkyrie was told what to do:
    - on the cmd-line
    - via a tool
    - via the gui options page */
-QStringList Valkyrie::modifiedFlags()
+QStringList Valkyrie::modifiedVgFlags()
 {
-  Option* opt;
-  QStringList modFlags;
-  QString cfgVal;
-
-  switch ( runMode ) {
-
-    case modeParseLog: {
-      opt    = findOption( VIEW_LOG );
-      cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
-      if ( cfgVal != opt->defaultValue )
-        modFlags << "--" + opt->longFlag + "=" + cfgVal;
-    } break;
-
-    case modeNotSet:
-    case modeParseOutput: {
-      opt    = findOption( BINARY );
-      cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
-      if ( cfgVal != opt->defaultValue ) {
-        modFlags << cfgVal;
-        /* see if there were any flags given for the binary */
-        opt = findOption( BIN_FLAGS );
-        cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
-        modFlags += QStringList::split(" ", cfgVal);
-      }
-    } break;
-
-    case modeMergeLogs:
-      opt    = findOption( MERGE_LOGS );
-      cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
-      if ( cfgVal != opt->defaultValue )
-        modFlags << "--" + opt->longFlag + "=" + cfgVal;
-      break;
-
-  default:
-    vk_assert_never_reached();
-  }
-
-  return modFlags;
+   Option*     opt    = findOption( BINARY );
+   QString     cfgVal = vkConfig->rdEntry( opt->m_longFlag, name() );
+   QStringList modFlags;
+   if ( cfgVal != opt->m_defaultValue ) {
+      modFlags << cfgVal;
+      /* see if there were any flags given for the binary */
+      opt = findOption( BIN_FLAGS );
+      cfgVal = vkConfig->rdEntry( opt->m_longFlag, name() );
+      modFlags += QStringList::split(" ", cfgVal);
+   }
+   return modFlags;
 }
 
 
-/* called by:
-   (a) MainWindow::showFlagsWidget() so user can see 
-       exactly what is being fed to valgrind on the cmd-line;
-   (b) by Valkyrie::runTool().  
-   returns a '\n' separated list of current relevant flags */
-QString Valkyrie::currentFlags( ToolObject* tool_obj )
+/* Update flags for current tool
+   Called by MainWindow::updateVgFlags()
+   - which is triggered by optionsWin::flagsChanged signal
+*/
+void Valkyrie::updateVgFlags( int tId )
 {
-  flags.clear();
+   ToolObject* tool = valgrind()->toolObj( tId );
 
-  switch ( runMode ) {
-
-    /* if nothing was specified on the cmd-line, or we're about to run
-       valgrind, return the flags which would be used if the current
-       tool were run */
-    case modeNotSet:
-    case modeParseOutput:
-      /* get the /path/to/valgrind */
-      flags << vkConfig->rdEntry( "vg-exec","valkyrie");
-       /* set the tool we are using */
-#if 1
-      flags << "--tool=" + tool_obj->name();
-#else
-      flags << "--tool=none";
-#endif
-      /* check if any valgrind core opts have been modified.
-         'modified' means 'set to anything other than default' */
-      flags += valgrind->modifiedFlags( tool_obj );
-      /* now get flags which have been specified / modified for this
-         tool _only_ */
-      flags += tool_obj->modifiedFlags();
-      /* finally, check for valkyrie-specific flags */
-      flags += modifiedFlags();
-      break;
-
-    case modeParseLog:
-    case modeMergeLogs:
-      flags += modifiedFlags();
-      break;
-
-  default:
-    vk_assert_never_reached();
-  }
-
-  /* ### hack alert: unfortunately, we have to pass each arg to
-     VKProcess as a separate string, and this includes any binary
-     flags; but for display purposes in the flagWidget, concat the
-     binary together with its flags 'cos it's prettier. */
-  QString flagsStr = flags.join("\n");
-  if ( !vkConfig->rdEntry("binary-flags", "valkyrie").isEmpty() )
-    flagsStr.replace( flagsStr.findRev('\n'), 1, ' ');
-  return flagsStr;
+   /* modifiedVgFlags() functions return non-default flags */
+   m_flags.clear();
+   m_flags << vkConfig->rdEntry( "vg-exec","valkyrie"); // path/to/valgrind
+   m_flags << "--tool=" + tool->name();                 // tool
+   m_flags += valgrind()->modifiedVgFlags( tool );      // valgrind opts
+   m_flags += tool->modifiedVgFlags();                  // tool opts
+   m_flags += this->modifiedVgFlags();                  // valkyrie opts
 }
 
 
 /* called from MainWin when user clicks stopButton */
-void Valkyrie::stopTool( ToolObject* activeTool )
+void Valkyrie::stopTool( int tId )
 {
-  vk_assert( activeTool != 0 );
+   ToolObject* tool = valgrind()->toolObj( tId );
+   vk_assert( tool != 0 );
 
-  bool success = activeTool->stop( runMode );
-
-  vk_assert( success );  // TODO: what to do if couldn't stop?
+   bool success = tool->stop();
+   vk_assert( success );  // TODO: what to do if couldn't stop?
 }
 
 
-/* Run the tool for this runMode */
-bool Valkyrie::runTool( ToolObject* activeTool )
+/* Run the tool with given runState */
+bool Valkyrie::runTool( int tId, VkRunState::State runState )
 {
-  vk_assert( activeTool != 0 );
+   ToolObject* activeTool = valgrind()->toolObj( tId );
+   vk_assert( activeTool != 0 );
 
-  bool success = true;
+   /* Adding user-invisible flags to capture valgrind output
+      --log-file-exactly must be given a filename by the tool */
+   QStringList vgFlags = m_flags;
+   vgFlags.insert( ++(vgFlags.begin()), "--log-file-exactly" );
 
-  /* find out what we are supposed to be doing */
-  switch ( runMode ) {
-
-  case modeNotSet:       /* no flags given on cmd-line */
-    break;
-    
-  /* run valgrind --tool=tool_name, with all flags */
-  case modeParseOutput:
-    currentFlags( activeTool ); /* ensure flags up-to-date */
-    success = activeTool->run( flags );
-    break;
-
-  /* let tool decide what to do for other runModes */
-  case modeParseLog:
-  case modeMergeLogs:
-    success = activeTool->start( runMode );
-    break;
-
-  default:
-    vk_assert_never_reached();
-  }
-
-  /* we've done what we were asked to do, so relax */
-  //runMode = modeNotSet;
-
-  return success;
+   return activeTool->start( runState, vgFlags );
 }
 
 
+/* Run the tool with given runState */
+VkRunState::State Valkyrie::startRunState()
+{ return m_startRunState; }
+
+
+
+/* Return VkObject with given objId */
+VkObject* Valkyrie::vkObject( int objId )
+{
+   switch (objId) {
+   case VkObject::ID_VALKYRIE: return this;
+   case VkObject::ID_VALGRIND: return valgrind();
+   default:                    return valgrind()->toolObj( objId );
+   }
+}
+
+
+/* Return list of all VkObjects */
+VkObjectList Valkyrie::vkObjList()
+{
+   VkObjectList vkObjList; // don't delete contents!
+
+   vkObjList.append(this);
+   vkObjList.append(m_valgrind);
+
+   ToolObjList tools = valgrind()->toolObjList();
+   for ( ToolObject* tool = tools.first(); tool; tool = tools.next() )
+      vkObjList.append( tool );
+
+   return vkObjList;
+}

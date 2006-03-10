@@ -17,63 +17,68 @@
 
 #include "vk_objects.h"
 #include "valkyrie_options_page.h"
+#include "valgrind_object.h"
+#include "tool_object.h"
 
-
-class Valgrind;
-class ToolObject;
 
 /* class Valkyrie ------------------------------------------------------
    Note: the very first option must be > 0, otherwise it conflicts
    with arg_flags in popt. */
 class Valkyrie : public VkObject
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  Valkyrie();
-  ~Valkyrie();
+   Valkyrie();
+   ~Valkyrie();
 
-  void init();        /* get ptrs to all tools */
-  bool runTool( ToolObject* activeTool );
-  void stopTool( ToolObject* activeTool );
+   bool runTool( int tId, VkRunState::State runState );
+   void stopTool( int tId );
 
-  /* modeNotSet:      no cmd-line options given
-   * modeParseLog:    read <logfile> from disk
-   * modeMergeLogs:   read <file-list> from disk and merge the contents
-   * modeParseOutput: read output direct from valgrind 
-   */
-  enum RunMode { modeNotSet=0, modeParseLog, modeMergeLogs, modeParseOutput };
-  void setRunMode( Valkyrie::RunMode rm );
-  RunMode runmode() { return runMode; }
+   /* returns a '\n' separated list of current relevant flags */
+   QString getDisplayFlags();
+   /* update flags for current tool */
+   void updateVgFlags( int tId );
 
-  /* returns a '\n' separated list of current relevant flags */
-  QString currentFlags( ToolObject* tool_obj );
-  /* flags relating only to valkyrie */
-  QStringList modifiedFlags();
+   int checkOptArg( int optid, const char* argval,
+                    bool use_gui=false );
 
-  int checkOptArg( int optid, const char* argval, bool use_gui=false );
+   enum vkOpts {
+      HELP,        VERSION,   VGHELP,
+      TOOLTIP,     PALETTE,   ICONTXT,
+      FONT_SYSTEM, FONT_USER, SRC_EDITOR, SRC_LINES,
+      VG_EXEC,      /* path to valgrind executable */
+      /* FIRST_CMD_OPT */
+      BINARY, BIN_FLAGS, VIEW_LOG, MERGE_EXEC, MERGE_LOGS,
+      LAST_CMD_OPT  = MERGE_LOGS
+   };
 
-  enum vkOpts {
-    HELP_OPT,    TOOLTIP,   PALETTE,    ICONTXT,
-    FONT_SYSTEM, FONT_USER, SRC_EDITOR, SRC_LINES,
-    VG_EXEC,      /* path to valgrind executable (/usr/bin/valgrind) */
-    VG_SUPPS_DIR, /* path to supp. files dir [def = /usr/lib/valgrind/] */
-    /* FIRST_CMD_OPT */
-    BINARY, BIN_FLAGS, VIEW_LOG, MERGE_EXEC, MERGE_LOGS,
-    LAST_CMD_OPT  = MERGE_LOGS
-  };
+   OptionsPage* createOptionsPage( OptionsWindow* parent ) {
+      return (OptionsPage*)new ValkyrieOptionsPage( parent, this );
+   }
 
-  OptionsPage* createOptionsPage( OptionsWindow* parent ) {
-    return (OptionsPage*)new ValkyrieOptionsPage( parent, this );
-  }
+   QString configEntries();
+
+   VkRunState::State startRunState();
+
+   Valgrind* valgrind() { return m_valgrind; }
+   /* for simplicity */
+   VkObjectList vkObjList();
+   VkObject*    vkObject( int objId );
 
 public slots:
-  void quit();
+   void quit();
 
 private:
-  RunMode runMode;
-  QStringList flags;
+   /* flags relating only to valkyrie */
+   QStringList modifiedVgFlags();
 
-  Valgrind* valgrind;
+   void initToolObjects();
+
+private:
+   Valgrind*         m_valgrind;         /* Vg[ Tools ] */
+
+   VkRunState::State m_startRunState;    /* just used on startup */
+   QStringList       m_flags;
 };
 
 

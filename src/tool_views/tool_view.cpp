@@ -15,17 +15,16 @@
 
 ToolView::~ToolView() { }
 
-ToolView::ToolView( QWidget* parent, ToolObject* tool )
-  : QMainWindow( parent, tool->name(), WDestructiveClose )
+ToolView::ToolView( QWidget* parent, const char* name )
+   : QMainWindow( parent, name, WDestructiveClose )
 {
-  m_tool = tool;
+   QString caption = QString(name);
+   if (caption.length() > 0)
+      caption[0] = caption[0].upper();
+   setCaption( caption );
 
-  QString name = tool->name();
-  name[0] = name[0].upper();
-  setCaption( name );
-
-  central = new QWidget( this );
-  setCentralWidget( central );
+   central = new QWidget( this );
+   setCentralWidget( central );
 }
 
 
@@ -37,10 +36,10 @@ ToolView::ToolView( QWidget* parent, ToolObject* tool )
 ToolViewStack::~ToolViewStack() { }
 
 ToolViewStack::ToolViewStack( QWidget* parent/*=0*/, const char * name/*=0*/ )
-  : QWidgetStack( parent, name ) { }
+   : QWidgetStack( parent, name ) { }
 
 ToolViewStack::ToolViewStack( QWidget* parent, const char * name, WFlags f )
-  : QWidgetStack( parent, name, f ) { }
+   : QWidgetStack( parent, name, f ) { }
 
 int ToolViewStack::addView( ToolView* tv, int id )
 { return addWidget(tv, id); }
@@ -60,35 +59,42 @@ const ToolViewList* ToolViewStack::viewList()
    returns 0 if none found */
 ToolView* ToolViewStack::ToolViewStack::nextView( ToolView* lastView/*=0*/ )
 {
-  const ToolViewList* views = viewList();
-  ToolViewListIter it( *views );
-  ToolView* view;
-  for (; ((view = it.current()) != 0); ++it ) {
-    if (view != lastView)
-      return view;
-  }
-  return 0;
+   const ToolViewList* views = viewList();
+   ToolViewListIter it( *views );
+   ToolView* view;
+   for (; ((view = it.current()) != 0); ++it ) {
+      if (view != lastView)
+         return view;
+   }
+   return 0;
 }
 
+/* return currently-visible view 
+   0 if no visible */
 ToolView* ToolViewStack::visible()
 { return (ToolView*)QWidgetStack::visibleWidget(); }
 
+/* return id of currently-visible view
+   -1 if no visible */
+int ToolViewStack::visibleId()
+{ return id( visible() ); }
+
 void ToolViewStack::listViews()
 {
-  printf("=============\n");
-  const ToolViewList* views = viewList();
-  ToolViewListIter it( *views ); // iterate over the views
-  ToolView* view;
-  for (; ((view = it.current()) != 0); ++it ) {
-    printf("ToolView: id(%d), name(%s)\n", id(view), view->name());
-  }
+   printf("=============\n");
+   const ToolViewList* views = viewList();
+   ToolViewListIter it( *views ); // iterate over the views
+   ToolView* view;
+   for (; ((view = it.current()) != 0); ++it ) {
+      printf("ToolView: id(%d), name(%s)\n", id(view), view->name());
+   }
 }
 
 
 /* Bring new ToolView to front
-    - Hide any previous ToolView widgets
-    - Raise new ToolView
-    - Show any current ToolView widgets */
+   - Hide any previous ToolView widgets
+   - Raise new ToolView
+   - Show any current ToolView widgets */
 void ToolViewStack::raiseView( int id )
 { raiseWidget(id); }
 

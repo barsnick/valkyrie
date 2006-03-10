@@ -9,167 +9,216 @@
  */
 
 #include "vk_objects.h"
-#include "valkyrie_object.h"  /* for obj->checkOptArg(...); */
+#include "valkyrie_object.h"  /* for Valkyrie::enums */
 
 #include "vk_utils.h"
 #include "vk_popt.h"
+#include "vk_popt_option.h"  /* namespace OPTION */
 #include "vk_config.h"
 
-/* return values: error = -1, show-help-and-exit = 0, ok = 1 */
-#define PARSE_ERROR   -1
-#define SHOW_HELP_EXIT 0
-#define PARSED_OKAY    1
+/* return values: error < 0, ok = 0(PARSED_OK), show-help-and-exit = 1 */
+#define SHOW_HELP_EXIT 1
 
 
-int showHelp( vkPoptContext con, char key )
+void showHelp( vkPoptContext con, char key, Valkyrie* vk )
 {
-  switch ( key ) {
+   switch ( key ) {
+   case 'v':
+      printf("%s-%s\n", vkConfig->vkName(), vkConfig->vkVersion() );
+      break;
 
-  case 'v':
-    printf("%s-%s\n", vkConfig->vkName(), vkConfig->vkVersion() );
-    break;
+   case 'h':
+      vkPoptPrintHelp( con, stdout, vk->title().latin1() );
+      printf( "\n%s is copyright %s %s\n"
+              "and licensed under the GNU General Public License, version 2.\n"
+              "Bug reports, feedback, praise, abuse, etc, to <%s>\n\n",
+              vkConfig->vkName(), vkConfig->vkCopyright(), 
+              vkConfig->vkAuthor(), vkConfig->vkEmail() );
+      break;
 
-  case 'h':
-    vkPoptPrintHelp( con, stdout, "Valkyrie options:" );
-    printf( "\n%s is copyright %s %s\n"
-            "and licensed under the GNU General Public License, version 2.\n"
-            "Bug reports, feedback, praise, abuse, etc, to <%s>\n\n",
-            vkConfig->vkName(), vkConfig->vkCopyright(), 
-            vkConfig->vkAuthor(), vkConfig->vkEmail() );
-    break;
+   case 'V':
+      vkPoptPrintHelp( con, stdout, NULL );
+      printf("\n%s is copyright %s %s\n", 
+             vkConfig->vkName(), 
+             vkConfig->vkCopyright(), vkConfig->vkAuthor() );
+      printf("Valgrind is copyright %s\n\n", vkConfig->vgCopyright() );
+      break;
 
-  case 'V':
-    vkPoptPrintHelp( con, stdout, NULL );
-    printf("\n%s is copyright %s %s\n", 
-           vkConfig->vkName(), 
-           vkConfig->vkCopyright(), vkConfig->vkAuthor() );
-    printf("Valgrind is copyright %s\n\n", vkConfig->vgCopyright() );
-    break;
-
-  default:
-    vk_assert_never_reached();
-  }
-
-  vkPoptFreeContext( con ); 
-  return SHOW_HELP_EXIT;
+   default:
+      vk_assert_never_reached();
+   }
 }
 
 
-int parseError( vkPoptContext con, const int err )
+void parseError( vkPoptContext con, const int err )
 {
-  /* don't print anything; sender is dealing with msgs */
-  if ( err != PERROR_DEFAULT ) {
-    fprintf( stderr, "Parse error [%s] : %s\n", 
-             vkPoptBadOption(con), parseErrString( err )  );
-    fprintf( stderr, 
-             "Try 'valkyrie --help' for more information.\n" );
-  }
-  vkPoptFreeContext( con ); 
-  return PARSE_ERROR;
+   /* don't print anything; sender is dealing with msgs */
+   if ( err != PERROR_DEFAULT ) {
+      fprintf( stderr, "Parse error [%s] : %s\n", 
+               vkPoptBadOption(con), parseErrString( err )  );
+      fprintf( stderr, 
+               "Try 'valkyrie --help' for more information.\n" );
+   }
 }           
 
 
-int parseCmdArgs( int argc, char** argv )
+/* determine the total no. of option structs required by counting the
+   no. of entries in the optList.  Note: num_options = optList+1
+   because we need a NULL option entry to terminate each option array. */
+vkPoptOption* getObjOptions( /*IN */VkObject* obj,
+                             /*OUT*/vkPoptOption* vkOpts )
 {
-  int errVal;             // check fn return value
-  int rc;                 // used for argument parsing
-  char argVal[512];       // store argument values for checking
+   int idx = 0;
+   Option *opt;
+   OptionList optList;
+   vk_assert( obj != NULL );
+   vk_assert( vkOpts != NULL );
 
-  VkObjectList objList = vkConfig->vkObjList();
-  int num_objs = objList.count();
-  vkPoptOption allOptions[num_objs+1];
+   optList = obj->optList();
+   for ( opt = optList.first(); opt; opt = optList.next() ) {
+      vk_assert( opt != NULL );
 
-  int i = 0;
-  QString name_str;
-  VkObject* obj;
-  for ( obj = objList.first(); obj; obj = objList.next() ) {
+      /* only add me if i'm a popt option */
+      if ( opt->m_argType != VkOPTION::NOT_POPT ) {
+         vkPoptOption* vkopt = &vkOpts[idx++];
+         vkopt->optKey    = opt->m_key;
+         vkopt->argType   = opt->m_argType;
+         vkopt->shortFlag = opt->m_shortFlag.latin1();
+         vkopt->longFlag  = opt->m_longFlag.latin1();
+         vkopt->arg       = 0;
+         vkopt->helptxt   = opt->m_longHelp.latin1();
+         vkopt->helpdesc  = opt->m_flagDescrip.latin1();
+         /* to later call obj->checkOptArg() */
+         vkopt->objectId  = obj->objId();
+      }
+   }
+   /* null entry terminator */
+   vkOpts[idx] = nullOpt();
+   return vkOpts;
+}
 
-    name_str.sprintf( "%s options:", obj->title().latin1() ); 
-    allOptions[i].optKey    = -1;
-    allOptions[i].argType   = ARG_INC_TABLE;
-    allOptions[i].shortFlag = '\0';
-    allOptions[i].longFlag  = NULL;
-    allOptions[i].arg       = obj->poptOpts();
-    allOptions[i].helptxt   = vk_strdup( name_str.latin1() );
-    allOptions[i].helpdesc  = NULL;
 
-    i++;
-  }
+void getAllOptions( /*IN */VkObjectList objList,
+                    /*OUT*/vkPoptOption* allOpts )
+{
+   int nopts, idx = 0;
+   size_t nbytes;
+   vkPoptOption* vkOpts;
+   vk_assert( allOpts != NULL );
 
-  /* null entry terminator */
-  allOptions[i].optKey    = -1;
-  allOptions[i].argType   = 0;
-  allOptions[i].shortFlag = '\0';
-  allOptions[i].longFlag  = NULL;
-  allOptions[i].arg       = 0;
-  allOptions[i].helptxt   = NULL;
-  allOptions[i].helpdesc  = NULL;
+   for ( VkObject* obj = objList.first(); obj; obj = objList.next() ) {
+      /* allocate mem for this object's options */
+      nopts  = obj->optList().count();
+      nbytes = sizeof(vkPoptOption) * (nopts + 1/*null end*/);
+      vkOpts = (vkPoptOption*)malloc( nbytes );
 
-  /* context for parsing cmd-line opts */
-  vkPoptContext optCon = vkPoptGetContext( argc, (const char**)argv, 
-                                           allOptions ); 
+      vkPoptOption* tblOpt = &allOpts[idx++];
+      *tblOpt = nullOpt();                             /* init null struct */
+      tblOpt->arg     = getObjOptions( obj, vkOpts );  /* get this object's options */
+      tblOpt->helptxt = obj->title().latin1();         /* for lookup later */
+   }
+   /* null entry terminator */
+   allOpts[idx] = nullOpt();
+}
 
-  /* process the options */ 
-  const vkPoptOption* opt = NULL;
-  while ( (rc = vkPoptGetNextOpt( optCon, argVal, &opt ) ) == 1 ) {
-    vk_assert(opt);
 
-    char vk_arg = opt->shortFlag;
-    //    printf("vk_arg: '%c'\n", vk_arg);
-    if ( vk_arg == 'h' || vk_arg == 'v' || vk_arg == 'V' )
-      return showHelp( optCon, vk_arg );
+void freeOptions( vkPoptOption* allOpts, int num_objs )
+{
+   for ( int idx=0; idx<num_objs; idx++) {
+      /* free allocated optTable.arg */
+      if (allOpts[idx].arg != NULL) {
+         free( allOpts[idx].arg );
+         allOpts[idx].arg = NULL;
+      }
+   }
+}
+
+
+
+int parseCmdArgs( int argc, char** argv, Valkyrie* vk )
+{
+   int rc;                 // check fn return value / err value
+   char argVal[512];       // store argument values for checking
+
+   /* fetch all object options */
+   VkObjectList objList = vk->vkObjList();
+   int num_objs = objList.count();
+   vkPoptOption allOpts[num_objs+1/*null end*/];
+   getAllOptions( objList, allOpts );
+
+   /* context for parsing cmd-line opts */
+   vkPoptContext optCon =
+      vkPoptGetContext( argc, (const char**)argv, allOpts ); 
+
+   /* process the options */ 
+   const vkPoptOption* opt = NULL;
+   while ( (rc = vkPoptGetNextOpt( optCon, argVal, &opt )) == PARSED_OK ) {
+      /* rc == 1 for the first non-valkyrie/valgrind option */
+
+      vk_assert(opt);
+
+      char vk_arg = opt->shortFlag;
+      //    printf("vk_arg: '%c'\n", vk_arg);
+      if ( vk_arg == 'h' || vk_arg == 'v' || vk_arg == 'V' ) {
+         showHelp( optCon, vk_arg, vk );
+         rc = SHOW_HELP_EXIT;
+         goto done;
+      }
     
-    obj = vkConfig->vkObject( opt->objectId );
-    vk_assert( obj != NULL );
-    errVal = obj->checkOptArg( opt->optKey, argVal );
+      VkObject* obj = vk->vkObject( opt->objectId );
+      vk_assert( obj != NULL );
+      rc = obj->checkOptArg( opt->optKey, argVal );
 
-    if ( errVal != PARSED_OK ) {
-      return parseError( optCon, errVal );
-    }
+      if ( rc != PARSED_OK ) {
+         parseError( optCon, rc );
+         goto done;
+      }
 
-  }   /* end while ... */
+   }   /* end while ... */
 
-  /* an error occurred during option processing */ 
-  if ( rc < -1 ) {
-    return parseError( optCon, rc );
-  }
+   /* rc == 1 for the first non-valkyrie/valgrind option */
+   if (rc == 1)
+      rc = PARSED_OK; 
 
-  /* get the leftovers: should only be 'myprog --myflags'.  check we
-     really do have a valid prog-to-debug here.  if yes, then all
-     flags that follow it on the cmd line are assumed to belong to it. */
-  if ( vkPoptPeekArg(optCon) != NULL ) {
-    obj    = vkConfig->vkObject( "valkyrie" );
-    errVal = obj->checkOptArg( Valkyrie::BINARY, vkPoptGetArg(optCon) );
-    if ( errVal != PARSED_OK )
-      return parseError( optCon, errVal );
+   /* an error occurred during option processing */ 
+   if ( rc != PARSED_OK ) {
+      parseError( optCon, rc );
+      goto done;
+   }
 
-    /* get client flags, if any */
-    const char **args = vkPoptGetArgs( optCon );
-    int i = 0;
-    QStringList aList;
-    while ( args && args[i] != NULL ) {
-      aList << args[i];
-      i++;
-    }
-    QString flags = aList.join( " " );
-    obj    = vkConfig->vkObject( "valkyrie" );
-    if (!flags.isNull()) {
-      errVal = obj->checkOptArg( Valkyrie::BIN_FLAGS, flags.latin1() );
-    } else {
-      errVal = obj->checkOptArg( Valkyrie::BIN_FLAGS, "" );
-    }
-    if ( errVal != PARSED_OK )
-      return parseError( optCon, errVal );
-  }
+   /* get the leftovers: should only be 'myprog --myflags'.  check we
+      really do have a valid prog-to-debug here.  if yes, then all
+      flags that follow it on the cmd line are assumed to belong to it. */
+   if ( vkPoptPeekArg(optCon) != NULL ) {
+      rc = vk->checkOptArg( Valkyrie::BINARY, vkPoptGetArg(optCon) );
+      if ( rc != PARSED_OK ) {
+         parseError( optCon, rc );
+         goto done;
+      }
 
-  i = 0;
-  for ( obj = objList.first(); obj; obj = objList.next() ) {
-    vkPoptOption * args = (vkPoptOption*)allOptions[i].arg;
-    obj->freePoptOpts( args );
-    i++;
-  }
+      /* get client flags, if any */
+      const char **args = vkPoptGetArgs( optCon );
+      int i = 0;
+      QStringList aList;
+      while ( args && args[i] != NULL ) {
+         aList << args[i];
+         i++;
+      }
+      QString flags = aList.join( " " );
+      if (!flags.isNull()) {
+         rc = vk->checkOptArg( Valkyrie::BIN_FLAGS, flags.latin1() );
+      } else {
+         rc = vk->checkOptArg( Valkyrie::BIN_FLAGS, "" );
+      }
+      if ( rc != PARSED_OK ) {
+         parseError( optCon, rc );
+         goto done;
+      }
+   }
 
-  vkPoptFreeContext( optCon ); 
-
-  return PARSED_OKAY;
+ done:
+   /* Cleanup */
+   freeOptions( allOpts, num_objs );
+   vkPoptFreeContext( optCon ); 
+   return rc;
 }

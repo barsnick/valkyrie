@@ -29,43 +29,43 @@
 class AsyncProcess
 {
 public:
-  enum AsyncFlags { 
-    LEAVE_FDS_OPEN  = 1 << 0, 
-    DONT_REAP_CHILD = 1 << 1,
-    SEARCH_PATH     = 1 << 2 
-  };
+   enum AsyncFlags { 
+      LEAVE_FDS_OPEN  = 1 << 0, 
+      DONT_REAP_CHILD = 1 << 1,
+      SEARCH_PATH     = 1 << 2 
+   };
 
-  AsyncProcess( QStringList arglist, AsyncFlags flags );
-  static bool spawn( QStringList arglist, AsyncFlags flags );
+   AsyncProcess( QStringList arglist, AsyncFlags flags );
+   static bool spawn( QStringList arglist, AsyncFlags flags );
 
-  int  closeAndInvalidate( int* fd );
+   int  closeAndInvalidate( int* fd );
 
-  bool makePipe( int p[2] );
-  bool midChild() { return intermediateChild; }
-  bool writeAll( int fd, const void* vbuf, unsigned int to_write );
+   bool makePipe( int p[2] );
+   bool midChild() { return intermediateChild; }
+   bool writeAll( int fd, const void* vbuf, unsigned int to_write );
 
-  void doExec( int child_err_report_fd );
-
-private:
-  int  execute();
-  int  saneDup2( int fd1, int fd2 );
-
-  bool readInts( int fd, int* buf, int n_ints_in_buf, int* n_ints_read );
-
-  void writeErrAndExit( int fd, int msg );
-  void setCloexec( int fd );
-  void scriptExecute( const char* file, char** argv );
-
-  char* vkStrchrnul( const char* str, char c );
+   void doExec( int child_err_report_fd );
 
 private:
-  enum { CHILD_EXEC_FAILED, CHILD_DUP2_FAILED, CHILD_FORK_FAILED };
+   int  execute();
+   int  saneDup2( int fd1, int fd2 );
 
-  bool searchPath;
-  bool closeDescriptors;
-  bool intermediateChild;
+   bool readInts( int fd, int* buf, int n_ints_in_buf, int* n_ints_read );
 
-  QStringList args;
+   void writeErrAndExit( int fd, int msg );
+   void setCloexec( int fd );
+   void scriptExecute( const char* file, char** argv );
+
+   char* vkStrchrnul( const char* str, char c );
+
+private:
+   enum { CHILD_EXEC_FAILED, CHILD_DUP2_FAILED, CHILD_FORK_FAILED };
+
+   bool searchPath;
+   bool closeDescriptors;
+   bool intermediateChild;
+
+   QStringList args;
 };
 
 

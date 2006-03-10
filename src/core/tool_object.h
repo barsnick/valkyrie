@@ -19,61 +19,70 @@
 
 #include <qptrlist.h>
 
-#include <vk_process.h>
 #include "vk_objects.h"
-#include "valkyrie_object.h"
 
 class ToolObject;
-typedef QPtrList<ToolObject> ToolList;
+typedef QPtrList<ToolObject> ToolObjList;
+
+/* Own namespace for ease of use */
+namespace VkRunState {
+   /* STOPPED:    no process running
+    * VALGRIND:   running valgrind
+    * TOOL*:      running a tool-defined process
+    */
+   enum State { STOPPED=-1, VALGRIND=0, TOOL1, TOOL2, TOOL3 };
+}
+
 
 /* class ToolObject ---------------------------------------------------- */
 class ToolView;
 
 class ToolObject : public VkObject 
 {
- Q_OBJECT
+   Q_OBJECT
 public:
 
-  ToolObject( const QString& capt, const QString& txt,
-              const QKeySequence& key );
-  ~ToolObject();
+   ToolObject( const QString& capt, const QString& txt,
+               const QKeySequence& key, int objId );
+   ~ToolObject();
 
-  /* creates and returns the ToolView window for a tool object */
-  virtual ToolView* createView( QWidget* parent ) = 0;
-  /* called by MainWin::closeToolView() */
-  virtual bool isDone( Valkyrie::RunMode ) = 0;
-  virtual void deleteView();
+   /* creates and init's this tool's ToolView window */
+   virtual ToolView* createView( QWidget* parent ) = 0;
+   /* called by MainWin::closeToolView() */
+   virtual bool isDone() = 0;
+   virtual void deleteView();
+   ToolView* view();
 
-  ToolView* view() { return m_view; }
+   virtual bool start( VkRunState::State rs, QStringList vgflags ) = 0;
+   virtual bool stop() = 0;
 
-  virtual bool start( Valkyrie::RunMode rm ) = 0;
-  virtual bool stop( Valkyrie::RunMode rm ) = 0;
-  virtual bool run( QStringList flags ) = 0;
+   bool isRunning();
 
-  bool isRunning();
+   virtual OptionsPage* createOptionsPage( OptionsWindow* parent ) = 0;
 
-  virtual OptionsPage* createOptionsPage( OptionsWindow* parent ) = 0;
-
-  /* returns a list of non-default flags to pass to valgrind */
-  virtual QStringList modifiedFlags();
+   /* returns a list of non-default flags to pass to valgrind */
+   virtual QStringList modifiedVgFlags();
 
 signals:
-  void setRunMode( Valkyrie::RunMode );
-  void running( bool );
-  void message( QString );
-  void fatal();
+   void running( bool );
+   void message( QString );
+   void fatal();
 
 protected:
-  void killProc();
-  virtual void emitRunning( bool ) = 0;
+   /* set runstate and emit signal running(bool) */
+   void setRunState( VkRunState::State );
+   /* get runstate */
+   VkRunState::State runState() { return m_runState; }
+
+   virtual bool runValgrind( QStringList vgflags ) = 0;
 
 protected:
-  ToolView* m_view;  /* the toolview window */
+   ToolView*  m_view;  /* the toolview window */
+   bool       m_fileSaved;
 
-  bool is_Running;
-  bool fileSaved;
-
-  VKProcess* proc;
+private:
+   /* Keep track of current running state */
+   VkRunState::State m_runState;
 };
 
 

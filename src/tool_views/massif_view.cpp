@@ -21,26 +21,26 @@ MassifView::~MassifView()
 { }
 
 
-MassifView::MassifView( QWidget* parent, Massif* ms )
-  : ToolView( parent, ms )
+MassifView::MassifView( QWidget* parent, const char* name )
+   : ToolView( parent, name )
 {
-  QVBoxLayout* vLayout = new QVBoxLayout( central );
+   QVBoxLayout* vLayout = new QVBoxLayout( central );
 
-  /* create the listview */
-  QLabel* lbl = new QLabel( "Massif", central, "massif label" );
-  lbl->setAlignment( AlignCenter );
-  vLayout->addWidget( lbl );
+   /* create the listview */
+   QLabel* lbl = new QLabel( "Massif", central, "massif label" );
+   lbl->setAlignment( AlignCenter );
+   vLayout->addWidget( lbl );
 }
 
 
 /* called by massif: set state for buttons; set cursor state */
 void MassifView::setState( bool run )
 { 
-  if ( run ) {       /* startup */
-    setCursor( QCursor(Qt::WaitCursor) );
-  } else {           /* finished */
-    unsetCursor();
-  }
+   if ( run ) {       /* startup */
+      setCursor( QCursor(Qt::WaitCursor) );
+   } else {           /* finished */
+      unsetCursor();
+   }
 }
 
 /* slot: connected to MainWindow::toggleToolbarLabels(). 

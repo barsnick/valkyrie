@@ -18,20 +18,16 @@
 class Massif;
 class MassifView : public ToolView
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  MassifView( QWidget* parent, Massif* ms );
-  ~MassifView();
+   MassifView( QWidget* parent, const char* name );
+   ~MassifView();
 
-  /* called by massif: set state for buttons; set cursor state */
-  void setState( bool run );
+   /* called by massif: set state for buttons; set cursor state */
+   void setState( bool run );
 
 public slots:
-  void toggleToolbarLabels( bool );
-
-private:
-  /* overriding to avoid casting everywhere */
-  Massif* tool() { return (Massif*)m_tool; }
+   void toggleToolbarLabels( bool );
 };
 
 

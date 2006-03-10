@@ -21,48 +21,48 @@
 /* class HandBook ------------------------------------------------------ */
 class HandBook : public QMainWindow
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  HandBook( QWidget* parent=0, const char* name="handbook" );
-  ~HandBook();
+   HandBook( QWidget* parent=0, const char* name="handbook" );
+   ~HandBook();
 
-  void save();
-  void openUrl( const QString& url );
+   void save();
+   void openUrl( const QString& url );
 
 public slots:
-  void showYourself();
+   void showYourself();
 
 protected:
-  void closeEvent( QCloseEvent* ce );
+   void closeEvent( QCloseEvent* ce );
 
 private slots:
-  void setBackwardAvailable( bool );
-  void setForwardAvailable( bool );
-  void textChanged();
-  void openUrl();
-  void print();
-  void pathSelected( const QString & );
-  void historyChosen( int );
-  void bookmarkChosen( int );
-  void addBookmark();
+   void setBackwardAvailable( bool );
+   void setForwardAvailable( bool );
+   void textChanged();
+   void openUrl();
+   void print();
+   void pathSelected( const QString & );
+   void historyChosen( int );
+   void bookmarkChosen( int );
+   void addBookmark();
 
 private:
-  void mkMenuToolBars();
+   void mkMenuToolBars();
 
 private:
-  QString caption;
+   QString caption;
 
-  QTextBrowser* browser;
-  QComboBox* pathCombo;
+   QTextBrowser* browser;
+   QComboBox* pathCombo;
 
-  QString selectedURL;
-  QMap<int, QString> mapHistory;
-  QMap<int, QString> mapBookmarks;
+   QString selectedURL;
+   QMap<int, QString> mapHistory;
+   QMap<int, QString> mapBookmarks;
 
-  enum { BACKWARD=0, FORWARD=1, HOME=2 };
-  QMenuBar* mainMenu;
-  QPopupMenu* bookmarkMenu;
-  QPopupMenu* historyMenu;
+   enum { BACKWARD=0, FORWARD=1, HOME=2 };
+   QMenuBar* mainMenu;
+   QPopupMenu* bookmarkMenu;
+   QPopupMenu* historyMenu;
 };
 
 #endif

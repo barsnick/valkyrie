@@ -25,59 +25,60 @@
 /* class OptionWidget -------------------------------------------------- */
 OptionWidget::OptionWidget( QWidget* parent, const char* name,
                             Option* vkopt, bool mklabel )
-  : QObject( parent, name ) 
+   : QObject( parent, name ) 
 {
-  opt    = vkopt;
-  widg   = 0;
-  wLabel = 0;
+   m_opt    = vkopt;
+   m_widg   = 0;
+   m_wLabel = 0;
 
-  initialValue = vkConfig->rdEntry( opt->cfgKey(), opt->cfgGroup() );
-  currentValue = initialValue;
+   m_initialValue = vkConfig->rdEntry( m_opt->cfgKey(),
+                                       m_opt->cfgGroup() );
+   m_currentValue = m_initialValue;
 
-  if ( mklabel ) {
-    wLabel = new QLabel( opt->shortHelp, parent );
-    wLabel->setMinimumSize( wLabel->sizeHint() );
-    wLabel->setAlignment( AlignLeft|AlignVCenter|ExpandTabs );
-  }
+   if ( mklabel ) {
+      m_wLabel = new QLabel( m_opt->m_shortHelp, parent );
+      m_wLabel->setMinimumSize( m_wLabel->sizeHint() );
+      m_wLabel->setAlignment( AlignLeft|AlignVCenter|ExpandTabs );
+   }
 }
 
 int OptionWidget::id()
-{ return opt->key; }
+{ return m_opt->m_key; }
 
 QLabel * OptionWidget::label()
-{ return wLabel; }
+{ return m_wLabel; }
 
 QWidget * OptionWidget::widget()
-{ return widg; }
+{ return m_widg; }
 
 QString OptionWidget::currValue()
-{ return currentValue; }
+{ return m_currentValue; }
 
 QString OptionWidget::initValue()
-{ return initialValue; }
+{ return m_initialValue; }
 
 void OptionWidget::saveEdit( bool perm )
 {
-  if ( perm ) {
-    initialValue = currentValue;
-  } 
-  vkConfig->wrEntry( currentValue, opt->cfgKey(), opt->cfgGroup() );
+   if ( perm ) {
+      m_initialValue = m_currentValue;
+   } 
+   vkConfig->wrEntry( m_currentValue, m_opt->cfgKey(), m_opt->cfgGroup() );
 }
 
 void OptionWidget::cancelEdit()
 {
-  currentValue = initialValue;
-  vkConfig->wrEntry( currentValue, opt->cfgKey(), opt->cfgGroup() );
-  emit valueChanged( false, this );
-  reset();
+   m_currentValue = m_initialValue;
+   vkConfig->wrEntry( m_currentValue, m_opt->cfgKey(), m_opt->cfgGroup() );
+   emit valueChanged( false, this );
+   reset();
 }
 
 void OptionWidget::setEnabled( bool enable )
 {
-	if ( wLabel != 0 )
-		wLabel->setEnabled( enable );
-	if ( widg != 0 ) {
-		widg->setEnabled( enable );
+	if ( m_wLabel != 0 )
+		m_wLabel->setEnabled( enable );
+	if ( m_widg != 0 ) {
+		m_widg->setEnabled( enable );
 	}
 }
 
@@ -86,24 +87,24 @@ void OptionWidget::setEnabled( bool enable )
    combos, spinboxes and lineedits have their own way of doings things */
 QHBoxLayout * OptionWidget::hlayout()
 {
-  vk_assert( wLabel != 0 );
+   vk_assert( m_wLabel != 0 );
 
-  hBox = new QHBoxLayout( 6, "hBox" );
-  hBox->addWidget( wLabel );
-  hBox->addWidget( widg );
+   m_hBox = new QHBoxLayout( 6, "hBox" );
+   m_hBox->addWidget( m_wLabel );
+   m_hBox->addWidget( m_widg );
 
-  return hBox; 
+   return m_hBox; 
 }
 
 
 QVBoxLayout* OptionWidget::vlayout()
 {
-  vk_assert( wLabel != 0 );
-  vBox = new QVBoxLayout( 6, "vBox" );
-  vBox->addWidget( wLabel );
-  vBox->addWidget( widg );
+   vk_assert( m_wLabel != 0 );
+   m_vBox = new QVBoxLayout( 6, "vBox" );
+   m_vBox->addWidget( m_wLabel );
+   m_vBox->addWidget( m_widg );
 
-  return vBox;
+   return m_vBox;
 }
 
 
@@ -112,280 +113,280 @@ QVBoxLayout* OptionWidget::vlayout()
 /* class CkWidget: QCheckBox ------------------------------------------- */
 CkWidget::~CkWidget() 
 {
-  if ( cbox ) {
-    delete cbox;
-    cbox = 0;
-  }
+   if ( m_cbox ) {
+      delete m_cbox;
+      m_cbox = 0;
+   }
 }
 
 CkWidget::CkWidget( QWidget* parent, Option* vkopt, bool mklabel )
-  : OptionWidget( parent, "ck_widget", vkopt, mklabel ) 
+   : OptionWidget( parent, "ck_widget", vkopt, mklabel ) 
 { 
-  cbox = new QCheckBox( opt->shortHelp, parent, "check_box" );
-  widg = cbox;
+   m_cbox = new QCheckBox( m_opt->m_shortHelp, parent, "check_box" );
+   m_widg = m_cbox;
 
-  initialState = vkConfig->rdBool( opt->cfgKey(), opt->cfgGroup() );
-  cbox->setChecked( initialState );
-  connect( cbox, SIGNAL(toggled(bool)), 
-           this, SLOT(ckChanged(bool)) );
+   m_initialState = vkConfig->rdBool( m_opt->cfgKey(), m_opt->cfgGroup() );
+   m_cbox->setChecked( m_initialState );
+   connect( m_cbox, SIGNAL(toggled(bool)), 
+            this,     SLOT(ckChanged(bool)) );
 
-  /* not added if the url is empty */
-  ContextHelp::add( widg, opt->url() );
+   /* not added if the url is empty */
+   ContextHelp::add( m_widg, m_opt->url() );
 }
 
 void CkWidget::ckChanged( bool on )
 {
-  currentValue = (on) ? opt->possValues[0] : opt->possValues[1];
-  bool edited = currentValue != vkConfig->rdEntry( opt->cfgKey(),
-                                                   opt->cfgGroup() );
-  emit valueChanged( edited, this );
-  /* for dis/enabling associated widgets */
-  emit changed( on );
-  emit clicked( opt->key );
+   m_currentValue = (on) ? m_opt->m_possValues[0] : m_opt->m_possValues[1];
+   bool edited = m_currentValue != vkConfig->rdEntry( m_opt->cfgKey(),
+                                                      m_opt->cfgGroup() );
+   emit valueChanged( edited, this );
+   /* for dis/enabling associated widgets */
+   emit changed( on );
+   emit clicked( m_opt->m_key );
 }
 
 void CkWidget::reset()
-{ cbox->setChecked( initialState ); }
+{ m_cbox->setChecked( m_initialState ); }
 
 void CkWidget::resetDefault()
 {
-  bool on = ( opt->defValue() == "1"   || opt->defValue() == "on"  || 
-              opt->defValue() == "yes" || opt->defValue() == "true" );
-  setOn( on );
+   bool on = ( m_opt->defValue() == "1"   || m_opt->defValue() == "on"  || 
+               m_opt->defValue() == "yes" || m_opt->defValue() == "true" );
+   setOn( on );
 }
 
 bool CkWidget::isOn()
-{ return cbox->isChecked(); }
+{ return m_cbox->isChecked(); }
 
 void CkWidget::setOn( bool on )
-{ cbox->setChecked( on ); }
+{ m_cbox->setChecked( on ); }
 
 
 
 /* class RbWidget: QRadioButton ---------------------------------------- */
 RbWidget::~RbWidget() 
 {
-  if ( radio ) {
-    delete radio;
-    radio = 0;
-  }
+   if ( m_radio ) {
+      delete m_radio;
+      m_radio = 0;
+   }
 }
 
 RbWidget::RbWidget( QWidget* parent, Option* vkopt, bool mklabel )
-  : OptionWidget( parent, "rb_widget", vkopt, mklabel ) 
+   : OptionWidget( parent, "rb_widget", vkopt, mklabel ) 
 { 
-  radio = new QRadioButton( opt->shortHelp, parent, "radio_button" );
-  widg = radio;
+   m_radio = new QRadioButton( m_opt->m_shortHelp, parent, "radio_button" );
+   m_widg  = m_radio;
 
-  initialState = vkConfig->rdBool( opt->cfgKey(), opt->cfgGroup() );
-  radio->setChecked( initialState );
-  connect( radio, SIGNAL(toggled(bool)), 
-           this, SLOT(rbChanged(bool)) );
+   m_initialState = vkConfig->rdBool( m_opt->cfgKey(), m_opt->cfgGroup() );
+   m_radio->setChecked( m_initialState );
+   connect( m_radio, SIGNAL(toggled(bool)), 
+            this, SLOT(rbChanged(bool)) );
 
-  /* not added if the url is empty */
-  ContextHelp::add( widg, opt->url() );
+   /* not added if the url is empty */
+   ContextHelp::add( m_widg, m_opt->url() );
 }
 
 void RbWidget::rbChanged( bool on )
 {
-  currentValue = (on) ? opt->possValues[0] : opt->possValues[1];
-  bool edited = currentValue != vkConfig->rdEntry( opt->cfgKey(),
-                                                   opt->cfgGroup() );
-  emit valueChanged( edited, this );
-  /* for dis/enabling associated widgets */
-  emit changed( on );
-  emit clicked( opt->key );
+   m_currentValue = (on) ? m_opt->m_possValues[0] : m_opt->m_possValues[1];
+   bool edited = m_currentValue != vkConfig->rdEntry( m_opt->cfgKey(),
+                                                      m_opt->cfgGroup() );
+   emit valueChanged( edited, this );
+   /* for dis/enabling associated widgets */
+   emit changed( on );
+   emit clicked( m_opt->m_key );
 }
 
 void RbWidget::reset()
-{ radio->setChecked( initialState ); }
+{ m_radio->setChecked( m_initialState ); }
 
 void RbWidget::resetDefault()
 {
-  bool on = ( opt->defValue() == "1"   || opt->defValue() == "on"  || 
-              opt->defValue() == "yes" || opt->defValue() == "true" );
-  setOn( on );
+   bool on = ( m_opt->defValue() == "1"   || m_opt->defValue() == "on"  || 
+               m_opt->defValue() == "yes" || m_opt->defValue() == "true" );
+   setOn( on );
 }
 
 bool RbWidget::isOn()
-{ return radio->isOn(); }
+{ return m_radio->isOn(); }
 
 void RbWidget::setOn( bool on )
-{ radio->setChecked( on ); }
+{ m_radio->setChecked( on ); }
 
 
 
 /* class LeWidget: QLineEdit ------------------------------------------- */
 LeWidget::~LeWidget()
 {
-  if ( ledit ) {
-    delete ledit;
-    ledit = 0;
-  }
-  if ( pb ) {
-    delete pb;
-    pb = 0;
-  }
+   if ( m_ledit ) {
+      delete m_ledit;
+      m_ledit = 0;
+   }
+   if ( m_pb ) {
+      delete m_pb;
+      m_pb = 0;
+   }
 }
 
 LeWidget::LeWidget( QWidget *parent, Option * vkopt, bool mklabel )
-  : OptionWidget( parent, "le_widget", vkopt, mklabel ) 
+   : OptionWidget( parent, "le_widget", vkopt, mklabel ) 
 {
-  pb     = 0;
-  ledit  = new QLineEdit( parent, "line_edit" ); 
-  widg = ledit;
+   m_pb    = 0;
+   m_ledit = new QLineEdit( parent, "line_edit" ); 
+   m_widg  = m_ledit;
 
-  ledit->setText( initialValue );
-  connect( ledit, SIGNAL( textChanged(const QString &) ),
-           this,  SLOT( leChanged(const QString &) ) );
-  connect( ledit, SIGNAL( returnPressed() ),
-           this,  SIGNAL( returnPressed() ) );
+   m_ledit->setText( m_initialValue );
+   connect( m_ledit, SIGNAL( textChanged(const QString &) ),
+            this,      SLOT( leChanged(const QString &) ) );
+   connect( m_ledit, SIGNAL( returnPressed() ),
+            this,    SIGNAL( returnPressed() ) );
 
-  /* not added if the url is empty */
-  ContextHelp::add( widg, opt->url() );
+   /* not added if the url is empty */
+   ContextHelp::add( m_widg, m_opt->url() );
 }
 
 void LeWidget::setCurrValue( const QString& txt ) 
 { 
-  ledit->setText( txt );  /* calls leChanged(txt) */
-  if ( txt.length() > 0 )
-    ledit->setCursorPosition( 0 );
+   m_ledit->setText( txt );  /* calls leChanged(txt) */
+   if ( txt.length() > 0 )
+      m_ledit->setCursorPosition( 0 );
 }
 
 void LeWidget::addCurrValue( const QString& txt )
 { 
-  if ( currentValue.isEmpty() ) {
-    setCurrValue( txt );
-  } else {
-    setCurrValue( ledit->text() + "," + txt ); 
-  }
+   if ( m_currentValue.isEmpty() ) {
+      setCurrValue( txt );
+   } else {
+      setCurrValue( m_ledit->text() + "," + txt ); 
+   }
 }
 
 void LeWidget::leChanged( const QString& txt )
 {
-  currentValue = txt;
-  bool edited  = currentValue != vkConfig->rdEntry( opt->cfgKey(),
-                                                    opt->cfgGroup() );
-  emit valueChanged( edited, this );
+   m_currentValue = txt;
+   bool edited  = m_currentValue != vkConfig->rdEntry( m_opt->cfgKey(),
+                                                       m_opt->cfgGroup() );
+   emit valueChanged( edited, this );
 }
 
 void LeWidget::reset()
-{ ledit->setText( initialValue ); }
+{ m_ledit->setText( m_initialValue ); }
 
 void LeWidget::resetDefault()
-{ setCurrValue( opt->defValue() ); }
+{ setCurrValue( m_opt->defValue() ); }
 
 QPushButton * LeWidget::button()
-{ return pb; }
+{ return m_pb; }
 
 void LeWidget::setReadOnly( bool ro )
-{ ledit->setReadOnly( ro ); }
+{ m_ledit->setReadOnly( ro ); }
 
 void LeWidget::addButton( QWidget* parent, const QObject* receiver, 
                           const char* slot, QString txt/*=QString::null*/, 
                           bool /*icon=false*/ )
 {
-  QString label = !txt.isNull() ? txt : opt->shortHelp;
-  pb = new QPushButton( label, parent );
+   QString label = !txt.isNull() ? txt : m_opt->m_shortHelp;
+   m_pb = new QPushButton( label, parent );
 
-  int pbht = ledit->height() - 8;
-  pb->setMaximumHeight( pbht );
-  connect( pb, SIGNAL(clicked()), receiver, slot );
+   int pbht = m_ledit->height() - 8;
+   m_pb->setMaximumHeight( pbht );
+   connect( m_pb, SIGNAL(clicked()), receiver, slot );
 }
 
 
 /* layout for line edits where we want to have a pushbutton with
-   opt->shortHelp as its text, instead of the standard QLabel */
+   m_opt->shortHelp as its text, instead of the standard QLabel */
 QHBoxLayout * LeWidget::hlayout()
 {
-  hBox = new QHBoxLayout( 6, "le_hBox" );
-  if ( pb != 0 ) {
-    hBox->addWidget( pb );
-  } else {
-    hBox->addWidget( wLabel );
-  }
-  hBox->addWidget( widg );
+   m_hBox = new QHBoxLayout( 6, "le_hBox" );
+   if ( m_pb != 0 ) {
+      m_hBox->addWidget( m_pb );
+   } else {
+      m_hBox->addWidget( m_wLabel );
+   }
+   m_hBox->addWidget( m_widg );
 
-  return hBox; 
+   return m_hBox; 
 }
 
 
 /* class CbWidget: QComboBox ------------------------------------------- */
 CbWidget::~CbWidget()
 {
-  if ( combo ) {
-    delete combo;
-    combo = 0;
-  }
+   if ( m_combo ) {
+      delete m_combo;
+      m_combo = 0;
+   }
 }
 
 CbWidget::CbWidget( QWidget *parent, Option * vkopt, bool mklabel )
-  : OptionWidget( parent, "cb_widget", vkopt, mklabel ) 
+   : OptionWidget( parent, "cb_widget", vkopt, mklabel ) 
 {
-  currIdx = 0;
-  combo = new QComboBox( true, parent, "combo_box" );
-  widg = combo;
+   m_currIdx = 0;
+   m_combo   = new QComboBox( true, parent, "combo_box" );
+   m_widg    = m_combo;
 
-  combo->setInsertionPolicy( QComboBox::NoInsertion );
-  combo->setAutoCompletion( true );
-  combo->insertStringList( opt->possValues );
-  combo->setCurrentItem( currIdx );
+   m_combo->setInsertionPolicy( QComboBox::NoInsertion );
+   m_combo->setAutoCompletion( true );
+   m_combo->insertStringList( m_opt->m_possValues );
+   m_combo->setCurrentItem( m_currIdx );
 
-  for ( int i=0; i<combo->count(); i++ ) {
-    if ( initialValue == combo->text(i) ) {
-      currIdx = i;
-      break;
-    }
-  }
+   for ( int i=0; i<m_combo->count(); i++ ) {
+      if ( m_initialValue == m_combo->text(i) ) {
+         m_currIdx = i;
+         break;
+      }
+   }
 
-  combo->setCurrentItem( currIdx );
-  connect( combo, SIGNAL( activated(const QString &) ),
-           this,  SLOT( cbChanged(const QString &) ) );
+   m_combo->setCurrentItem( m_currIdx );
+   connect( m_combo, SIGNAL( activated(const QString &) ),
+            this,      SLOT( cbChanged(const QString &) ) );
 
-  /* not added if the url is empty */
-  ContextHelp::add( widg, opt->url() );
+   /* not added if the url is empty */
+   ContextHelp::add( m_widg, m_opt->url() );
 }
 
 void CbWidget::cbChanged( const QString& txt )
 {
-  bool found = false;
-  for ( int i=0; i<combo->count(); ++i ) {
-    if ( txt == combo->text(i) ) {
-      found = true;
-      combo->setCurrentItem( i );
-      break;
-    }
-  }
+   bool found = false;
+   for ( int i=0; i<m_combo->count(); ++i ) {
+      if ( txt == m_combo->text(i) ) {
+         found = true;
+         m_combo->setCurrentItem( i );
+         break;
+      }
+   }
 
-  if ( !found ) {
-    /* we didn't find the string the user typed in */
-    combo->setCurrentItem( currIdx );
-  } else {
-    currIdx = combo->currentItem();
-    currentValue = combo->currentText();
-    bool edited = currentValue != vkConfig->rdEntry( opt->cfgKey(),
-                                                     opt->cfgGroup() );
-    emit valueChanged( edited, this );
-  }
+   if ( !found ) {
+      /* we didn't find the string the user typed in */
+      m_combo->setCurrentItem( m_currIdx );
+   } else {
+      m_currIdx = m_combo->currentItem();
+      m_currentValue = m_combo->currentText();
+      bool edited = m_currentValue != vkConfig->rdEntry( m_opt->cfgKey(),
+                                                         m_opt->cfgGroup() );
+      emit valueChanged( edited, this );
+   }
 }
 
 void CbWidget::reset()
-{ cbChanged( initialValue ); }
+{ cbChanged( m_initialValue ); }
 
 void CbWidget::resetDefault()
-{ cbChanged( opt->defValue() ); }
+{ cbChanged( m_opt->defValue() ); }
 
 QHBoxLayout * CbWidget::hlayout()
 { 
-  vk_assert( wLabel != 0 );
+   vk_assert( m_wLabel != 0 );
 
-  hBox = new QHBoxLayout( 6, "hBox" );
-  hBox->addWidget( wLabel );
-  hBox->addWidget( widg );
-  hBox->setStretchFactor( wLabel, 6 );
-  hBox->setStretchFactor( widg,   2 );
+   m_hBox = new QHBoxLayout( 6, "hBox" );
+   m_hBox->addWidget( m_wLabel );
+   m_hBox->addWidget( m_widg );
+   m_hBox->setStretchFactor( m_wLabel, 6 );
+   m_hBox->setStretchFactor( m_widg,   2 );
 
-  return hBox; 
+   return m_hBox; 
 }
 
 
@@ -393,75 +394,75 @@ QHBoxLayout * CbWidget::hlayout()
 /* class SpWidget: IntSpin --------------------------------------------- */
 SpWidget::~SpWidget()
 {
-  if ( intspin ) {
-    delete intspin;
-    intspin = 0;
-  }
+   if ( m_intspin ) {
+      delete m_intspin;
+      m_intspin = 0;
+   }
 }
 
 SpWidget::SpWidget( QWidget* parent, Option* vkopt, 
                     bool mklabel, int num_sections )
-  : OptionWidget( parent, "sp_widget", vkopt, mklabel ) 
+   : OptionWidget( parent, "sp_widget", vkopt, mklabel ) 
 {
-  intspin = new IntSpin( parent, "int_spin" );
-  widg = intspin;
+   m_intspin = new IntSpin( parent, "int_spin" );
+   m_widg    = m_intspin;
 
-  numSections = num_sections;
-  connect( intspin, SIGNAL(valueChanged(const QString&)), 
-           this,    SLOT(spChanged(const QString&)) );
+   m_numSections = num_sections;
+   connect( m_intspin, SIGNAL(valueChanged(const QString&)), 
+            this,    SLOT(spChanged(const QString&)) );
 
-  /* not added if the url is empty */
-  ContextHelp::add( widg, opt->url() );
+   /* not added if the url is empty */
+   ContextHelp::add( m_widg, m_opt->url() );
 }
 
 void SpWidget::addSection( int min, int max, int defval,
                            int step, QString sep_char/*=" : "*/ )
-{ intspin->addSection( min, max, defval, step, sep_char ); }
+{ m_intspin->addSection( min, max, defval, step, sep_char ); }
 
 void SpWidget::spChanged( const QString &val )
 {
-  currentValue = val;
-  bool edited  = currentValue != vkConfig->rdEntry( opt->cfgKey(),
-                                                    opt->cfgGroup() );
-  emit valueChanged( edited, this );
+   m_currentValue = val;
+   bool edited  = m_currentValue != vkConfig->rdEntry( m_opt->cfgKey(),
+                                                       m_opt->cfgGroup() );
+   emit valueChanged( edited, this );
 }
 
 void SpWidget::reset()
 {
-  if ( numSections == 1 ) {
-    intspin->setValue( initialValue.toInt(), 0 );
-  }  else {
-    QStringList values = QStringList::split( ",", initialValue );
-    for ( unsigned int i=0; i<values.count(); i++ ) {
-      intspin->setValue( values[i].toInt(), i );
-    }
-  }
+   if ( m_numSections == 1 ) {
+      m_intspin->setValue( m_initialValue.toInt(), 0 );
+   }  else {
+      QStringList values = QStringList::split( ",", m_initialValue );
+      for ( unsigned int i=0; i<values.count(); i++ ) {
+         m_intspin->setValue( values[i].toInt(), i );
+      }
+   }
 }
 
 void SpWidget::resetDefault()
 { 
-  spChanged( opt->defValue() ); 
-  if ( numSections == 1 ) {
-    intspin->setValue( opt->defValue().toInt(), 0 );
-  } else {
-    QStringList values = QStringList::split( ",", opt->defValue() );
-    for ( unsigned int i=0; i<values.count(); i++ ) {
-      intspin->setValue( values[i].toInt(), i );
-    }
-  }
+   spChanged( m_opt->defValue() ); 
+   if ( m_numSections == 1 ) {
+      m_intspin->setValue( m_opt->defValue().toInt(), 0 );
+   } else {
+      QStringList values = QStringList::split( ",", m_opt->defValue() );
+      for ( unsigned int i=0; i<values.count(); i++ ) {
+         m_intspin->setValue( values[i].toInt(), i );
+      }
+   }
 }
 
 QHBoxLayout * SpWidget::hlayout()
 { 
-  vk_assert( wLabel != 0 );
+   vk_assert( m_wLabel != 0 );
 
-  hBox = new QHBoxLayout( 6 );
-  hBox->addWidget( wLabel );
-  hBox->addWidget( widg );
-  hBox->setStretchFactor( wLabel, 10 );
-  hBox->setStretchFactor( widg,    1 );
+   m_hBox = new QHBoxLayout( 6 );
+   m_hBox->addWidget( m_wLabel );
+   m_hBox->addWidget( m_widg );
+   m_hBox->setStretchFactor( m_wLabel, 10 );
+   m_hBox->setStretchFactor( m_widg,    1 );
 
-  return hBox; 
+   return m_hBox; 
 }
 
 
@@ -471,223 +472,291 @@ QHBoxLayout * SpWidget::hlayout()
    stuff and nothing else. */
 
 static const char* sel_supp_xpm[] = {
-"11 11 8 1",
-"   c None",
-".  c #024266",
-"+  c #5A9AB8",
-"@  c #1B5F8E",
-"#  c #79B7CD",
-"$  c #5A97B5",
-"%  c #AEDDE9",
-"&  c #8ECADC",
-"     .     ",
-"  . .+. .  ",
-" .+.@#@.+. ",
-"  .#$%$#.  ",
-" .@$&%&$@. ",
-".+#%%%%%#+.",
-" .@$&%&$@. ",
-"  .#$%$#.  ",
-" .+.@#@.+. ",
-"  . .+. .  ",
-"     .     "};
+   "11 11 8 1",
+   "   c None",
+   ".  c #024266",
+   "+  c #5A9AB8",
+   "@  c #1B5F8E",
+   "#  c #79B7CD",
+   "$  c #5A97B5",
+   "%  c #AEDDE9",
+   "&  c #8ECADC",
+   "     .     ",
+   "  . .+. .  ",
+   " .+.@#@.+. ",
+   "  .#$%$#.  ",
+   " .@$&%&$@. ",
+   ".+#%%%%%#+.",
+   " .@$&%&$@. ",
+   "  .#$%$#.  ",
+   " .+.@#@.+. ",
+   "  . .+. .  ",
+   "     .     "};
 
 LbWidget::~LbWidget()
 {
-  if ( lbox ) {
-    delete lbox;
-    lbox = 0;
-  }
+   if ( m_lbox ) {
+      delete m_lbox;
+      m_lbox = 0;
+   }
 }
 
 LbWidget::LbWidget( QWidget *parent, Option * vkopt, bool mklabel )
-  : OptionWidget( parent, "lb_widget", vkopt, mklabel ) 
+   : OptionWidget( parent, "lb_widget", vkopt, mklabel ) 
 {
-  lbox = new QListBox( parent, "list_box" );
-  widg = lbox;
-  lbox->setSelectionMode( QListBox::Single );
+   m_lbox = new QListBox( parent, "list_box" );
+   m_widg = m_lbox;
+   m_lbox->setSelectionMode( QListBox::Single );
 
-  sep  = vkConfig->sepChar();
-  mode = ( opt->cfgKey() == "supps-all" ) ? AllSupps : SelSupps;
+   m_sep  = vkConfig->sepChar();
 
-  load();
-  connect( lbox, SIGNAL(contextMenuRequested(QListBoxItem*, 
-                                             const QPoint &)),
-           this, SLOT(popupMenu(QListBoxItem*, const QPoint &)));
+   /* horrible hack alert! */
+   vk_assert( m_opt->cfgGroup() == "valgrind");
+   if (m_opt->cfgKey() == "supps-dirs")
+      m_mode = LbWidget::LB_SUPPDIRS;
+   else if (m_opt->cfgKey() == "supps-avail")
+      m_mode = LbWidget::LB_SUPPAVAIL;
+   else if (m_opt->cfgKey() == "suppressions")
+      m_mode = LbWidget::LB_SUPPSEL;
+   else
+      vk_assert_never_reached();
 
-  /* not added if the url is empty */
-  ContextHelp::add( widg, opt->url() );
+   lbLoad();
+   connect( m_lbox, SIGNAL(contextMenuRequested(QListBoxItem*, const QPoint &)),
+            this,     SLOT(popupMenu(QListBoxItem*, const QPoint &)));
+   connect( m_lbox, SIGNAL(doubleClicked(QListBoxItem*)),
+            this,     SLOT(selectItem(QListBoxItem*)));
+
+   /* not added if the url is empty */
+   ContextHelp::add( m_widg, m_opt->url() );
 }
 
 
-/* split values at the sep-char, and load all files into the listbox */
-void LbWidget::load()
+/* load items from m_currentValue to listbox */
+void LbWidget::lbLoad()
 {
-  QStringList sfiles = QStringList::split( sep, currentValue );
-  for ( unsigned int i=0; i<sfiles.count(); i++ ) {
-    lbox->insertItem( sfiles[i] );
-  }
+   m_lbox->clear();
+   QStringList sfiles = QStringList::split( m_sep, m_currentValue );
+   for ( unsigned int i=0; i<sfiles.count(); i++ ) {
+      m_lbox->insertItem( sfiles[i] );
+   }
 }
 
 
+/* reset lbox to m_currentValue
+   called from OptionWidget::cancelEdit(), after m_currentValue reset.
+ */
 void LbWidget::reset()
 {
-  lbox->clear();
-  load();
+   lbLoad();
+   emit listChanged();
 }
 
+/* called from OptionsPage::resetDefaults()
+   reset to installation defaults
+ */
 void LbWidget::resetDefault()
 {
-  lbox->clear();
-  switch( mode ) {
-    case AllSupps:
-      currentValue = vkConfig->rdEntry( "supps-def", "valgrind" );
+   m_currentValue = m_opt->defValue();
+   lbLoad();
+   lbChanged();
+}
+
+
+void LbWidget::setCurrValue( const QString& txt ) 
+{ 
+   m_currentValue = txt;
+   lbLoad();
+   lbChanged();
+}
+
+/* return all contents concat'd with m_sep  */
+QString LbWidget::lbText()
+{
+   QStringList items;
+   for ( unsigned int i=0; i<m_lbox->count(); i++ )
+      items += m_lbox->text( i );
+   return (items.count() == 0) ? "" : items.join( m_sep );
+}
+
+
+/* emit signals to indicate widget content has changed */
+void LbWidget::lbChanged()
+{
+   switch( m_mode ) {
+   case LbWidget::LB_SUPPAVAIL:
+      /* Never test this widget's editedness - holds a dynamic list */
       break;
-    case SelSupps:
-      currentValue = opt->defValue();
-      break;
-    default:
+
+   case LbWidget::LB_SUPPDIRS:
+   case LbWidget::LB_SUPPSEL: {
+      QString cfgVal = 
+         vkConfig->rdEntry(m_opt->cfgKey(), m_opt->cfgGroup());
+      bool edited = m_currentValue != cfgVal;
+      emit valueChanged( edited, this );
+      emit listChanged();
+   } break;
+
+   default:
       vk_assert_never_reached();
       break;
-  }
-
-  load();
+   }
 }
 
 
-/* compare the listbox item strings with initialValue strings */
-void LbWidget::lbChanged( const QString& )
+/* insert new list item.
+   only valid mode is LB_SUPPSEL
+*/
+void LbWidget::insertItem( const QString& entry )
 {
-  currentValue = "";
-  for ( unsigned int i=0; i<lbox->count(); i++ ) {
-    currentValue += lbox->item(i)->text() + sep;
-  }
-  /* remove trailing ',' */
-  currentValue.remove( currentValue.length()-1, 1 );
+   switch( m_mode ) {
+   case LbWidget::LB_SUPPSEL:
+      m_lbox->insertItem( entry );
+      m_currentValue = lbText();
+      lbChanged();
+      break;
 
-  bool edited = currentValue != initialValue;
-  emit valueChanged( edited, this );
+   case LbWidget::LB_SUPPDIRS:
+   case LbWidget::LB_SUPPAVAIL:  
+   default: vk_assert_never_reached(); break;
+   }
 }
 
-/* this slot should only be called when the lbox is in SelSupps mode */
-void LbWidget::insertFile( const QString& fname ) 
+
+/* double clicked item, or via right-click menu
+   for a single-entry menu, do the only thing possible
+   else do nothing
+*/
+void LbWidget::selectItem( QListBoxItem* lb_item)
 {
-  vk_assert( mode == SelSupps );
-  /* check this file isn't already in the lbox */
-  if ( 0 == lbox->findItem( fname, Qt::ExactMatch ) ) {
-    lbox->insertItem( fname );
-    lbChanged( QString::null );
-  } else {
-    vkInfo( lbox, "Duplicate File",
-            "<p>The file '%s' is already in the list.</p>", fname.latin1() );
-  }
+   if ( !lb_item )
+      return;
+
+   switch( m_mode ) {
+   case LbWidget::LB_SUPPDIRS:
+      break;
+
+   case LbWidget::LB_SUPPSEL:
+      emit itemSelected( lb_item->text() );
+      m_lbox->removeItem( m_lbox->index( lb_item ) );
+      m_currentValue = lbText();
+      lbChanged();
+      break;
+
+   case LbWidget::LB_SUPPAVAIL:
+      emit itemSelected( lb_item->text() );
+      /* Not removing item - list recalculated in valgrind opts page */
+      break;
+
+   default: vk_assert_never_reached(); break;
+   }
 }
 
 
 /* different menus and stuff for the different modes */
 void LbWidget::popupMenu( QListBoxItem* lb_item, const QPoint& )
 {
-  switch( mode ) {
-    case AllSupps: popupAll( lb_item ); break;
-    case SelSupps: popupSel( lb_item ); break;
-    default: vk_assert_never_reached(); break;
-  }
-}
-
-void LbWidget::popupSel( QListBoxItem* lb_item )
-{
-  if ( !lb_item )  /* lbox is empty, so nothing to do */
-    return;
-
-  QPopupMenu popMenu( lbox );
-  int DESELECT = popMenu.insertItem( "Deselect File" );
-  if ( !(lb_item->isSelected() && lb_item->isCurrent()) )
-    popMenu.setItemEnabled( DESELECT, false );
-
-  popMenu.setMouseTracking( true );
-  int id = popMenu.exec( QCursor::pos() );
-
-  if ( id == DESELECT ) {
-    int indx = lbox->index( lb_item );
-    lbox->removeItem( indx );
-    lbChanged( QString::null );
-  }
-
+   switch( m_mode ) {
+   case LbWidget::LB_SUPPDIRS:  popupSuppDirs( lb_item );  break;
+   case LbWidget::LB_SUPPAVAIL: popupSuppAvail( lb_item ); break;
+   case LbWidget::LB_SUPPSEL:   popupSuppSel( lb_item );   break;
+   default: vk_assert_never_reached(); break;
+   }
 }
 
 
-void LbWidget::popupAll( QListBoxItem* lb_item )
+void LbWidget::popupSuppSel( QListBoxItem* lb_item )
 {
-  enum { SELECT=10, REMOVE=11, ADD=12 };
+   vk_assert( m_mode == LbWidget::LB_SUPPSEL );
 
-  QPopupMenu popMenu( lbox );
-  popMenu.insertItem( QPixmap(sel_supp_xpm), "Select File", SELECT );
-  popMenu.insertSeparator();
-  popMenu.insertItem( "Remove File", REMOVE );
-  popMenu.insertItem( "Add File(s)", ADD );
+   if ( !lb_item )  /* m_lbox is empty, so nothing to do */
+      return;
 
-  if ( !lb_item ) {   /* lbox is empty */
-    popMenu.setItemEnabled( SELECT, false );
-    popMenu.setItemEnabled( REMOVE, false );
-  } else if ( !lb_item->isSelected() ) {
-    popMenu.setItemEnabled( SELECT, false );
-  }
+   QPopupMenu popMenu( m_lbox );
+   int DESELECT = popMenu.insertItem( "Deselect File" );
+   if ( !(lb_item->isSelected() || lb_item->isCurrent()) )
+      popMenu.setItemEnabled( DESELECT, false );
 
-  bool changed = false;
-  popMenu.setMouseTracking( true );
-  int id = popMenu.exec( QCursor::pos() );
+   popMenu.setMouseTracking( true );
+   int id = popMenu.exec( QCursor::pos() );
 
-  switch( id ) {
+   if ( id == DESELECT )
+      selectItem( lb_item );
+}
 
-    case SELECT: {
-      QString file_name = lb_item->text();
-      emit fileSelected( lb_item->text() );
-    } break;
 
-    case REMOVE: {
-      int indx = lbox->index( lb_item );
-      lbox->removeItem( indx );
+void LbWidget::popupSuppAvail( QListBoxItem* lb_item )
+{
+   vk_assert( m_mode == LbWidget::LB_SUPPAVAIL );
+
+   QPopupMenu popMenu( m_lbox );
+   int SELECT = popMenu.insertItem( QPixmap(sel_supp_xpm), "Select File" );
+   if ( !lb_item || !(lb_item->isSelected() || lb_item->isCurrent()) )
+      popMenu.setItemEnabled( SELECT, false );
+
+
+   popMenu.setMouseTracking( true );
+   int id = popMenu.exec( QCursor::pos() );
+
+   if ( id == SELECT )
+      selectItem( lb_item );
+}
+
+
+void LbWidget::popupSuppDirs( QListBoxItem* lb_item )
+{
+   vk_assert( m_mode == LbWidget::LB_SUPPDIRS );
+
+   enum { DIR_RM, DIR_ADD };
+
+   QPopupMenu popMenu( m_lbox );
+   popMenu.insertItem( "Remove Dir", DIR_RM );
+   popMenu.insertItem( "Add Dir", DIR_ADD );
+
+   if ( !lb_item/* empty */ )
+      popMenu.setItemEnabled( DIR_RM, false );
+
+   bool changed = false;
+   popMenu.setMouseTracking( true );
+   int id = popMenu.exec( QCursor::pos() );
+
+   switch( id ) {
+   case DIR_RM:
+      m_lbox->removeItem(  m_lbox->index( lb_item ) );
       changed = true;
-    } break;
-
-    case ADD: {
-      QStringList supp_files = QFileDialog::getOpenFileNames( 
-                 "Suppression Files (*.supp);;All Files (*)", 
-                 "/home", lbox, "supp_dlg", "Select one or more files" );
-      /* if user clicked cancel */
-      if ( supp_files.isEmpty() )  return;
-
-      for ( unsigned int i=0; i<supp_files.count(); i++ ) {
-
-        /* check this file isn't already in the lbox */
-        if ( 0 != lbox->findItem( supp_files[i], Qt::ExactMatch ) ) {
-          vkInfo( lbox, "Duplicate File",
-                  "<p>The file '%s' is already in the list.</p>", 
-                  supp_files[i].latin1() );
-          continue;
-        }
-
-        int errval = PARSED_OK;
-        const char* argval = supp_files[i].latin1();
-        supp_files[i] = fileCheck( &errval, argval, true, false );
-        if ( errval == PARSED_OK ) {
-          lbox->insertItem( supp_files[i] );
-          changed = true;
-        } else {
-          vkError( lbox, "Invalid Entry",
-                   "Invalid suppression file:\n \"%s\"", argval );
-        }
-      }
-    } break;
-
-    default:
       break;
-  }
 
-  if ( changed ) {
-    lbChanged( QString::null );
-  }
+   case DIR_ADD: {
+      QString startdir = m_currentValue.isEmpty()
+         ? QDir::currentDirPath()
+         : QStringList::split( m_sep, m_currentValue ).first();
 
+      QString supp_dir = QFileDialog::getExistingDirectory(
+                             startdir,
+                             m_lbox, "get_suppression_dir",
+                             "Choose Suppressions Directory", 
+                             false/*=show files too*/ );
+
+      if ( supp_dir.isEmpty() ) /* user clicked Cancel ? */
+         break;
+
+      /* check not a duplicate entry */
+      if ( m_lbox->findItem( supp_dir, Qt::ExactMatch ) != 0 ) {
+         vkInfo( m_lbox, "Duplicate Entry",
+                 "<p>The entry '%s' is already in the list.</p>",
+                 supp_dir.latin1() );
+      } else {
+         m_lbox->insertItem( supp_dir );
+         changed = true;
+      }
+   } break;
+
+   default:
+      break;
+   }
+
+   if ( changed ) {
+      m_currentValue = lbText();
+      lbChanged();
+   }
 }
-
-

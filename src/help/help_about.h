@@ -21,24 +21,24 @@ class TextEdit;
 
 class HelpAbout : public QDialog
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  enum TabId { ABOUT_VK=0, ABOUT_QT, LICENSE, SUPPORT };
+   enum TabId { ABOUT_VK=0, ABOUT_QT, LICENSE, SUPPORT };
 
-  HelpAbout( QWidget* parent, TabId tabid );
-  ~HelpAbout();
+   HelpAbout( QWidget* parent, TabId tabid );
+   ~HelpAbout();
 
 private slots:
-  void showTab( QWidget* );
+   void showTab( QWidget* );
 
 private:
-  QString title;
+   QString title;
 
-  QTabWidget* tabParent;
-  TextEdit* aboutVk;
-  TextEdit* aboutQt;
-  TextEdit* license;
-  TextEdit* support;
+   QTabWidget* tabParent;
+   TextEdit* aboutVk;
+   TextEdit* aboutQt;
+   TextEdit* license;
+   TextEdit* support;
 };
 
 
@@ -46,14 +46,14 @@ private:
 class TextEdit : public QTextEdit
 { 
 public:
-  TextEdit( QWidget* parent, HelpAbout::TabId tabid, const char* name );
-  ~TextEdit();
-  bool load();
+   TextEdit( QWidget* parent, HelpAbout::TabId tabid, const char* name );
+   ~TextEdit();
+   bool load();
 
 private:
-  bool loaded;
-  QString html_file;
-  HelpAbout::TabId tabId;
+   bool loaded;
+   QString html_file;
+   HelpAbout::TabId tabId;
 };
 
 

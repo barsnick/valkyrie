@@ -16,18 +16,17 @@
 
 class ValkyrieOptionsPage : public OptionsPage
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  ValkyrieOptionsPage( QWidget* parent, VkObject* obj );
-  bool applyOptions( int optId, bool undo=false );
+   ValkyrieOptionsPage( QWidget* parent, VkObject* obj );
+   bool applyOptions( int optId );
 
 private slots:
-  void chooseFont();
-  void fontClicked(bool);
-  void checkEditor();
-  void getBinary();
-  // void getVgExec();
-  // void getSuppDir();
+   void chooseFont();
+   void fontClicked(bool);
+   void checkEditor();
+   void getBinary();
+   void getVgExec();
 };
 
 

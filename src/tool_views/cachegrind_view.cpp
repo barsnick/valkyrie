@@ -21,28 +21,28 @@ CachegrindView::~CachegrindView()
 { }
 
 
-CachegrindView::CachegrindView( QWidget* parent, Cachegrind* cg )
-  : ToolView( parent, cg )
+CachegrindView::CachegrindView( QWidget* parent, const char* name )
+   : ToolView( parent, name )
 {
-  mkToolBar();
+   mkToolBar();
 
-  QVBoxLayout* vLayout = new QVBoxLayout( central );
+   QVBoxLayout* vLayout = new QVBoxLayout( central );
 
-  /* create the listview */
-  QLabel* lbl = new QLabel( "Cachegrind", central, "cachegrind label" );
-  lbl->setAlignment( AlignCenter );
-  vLayout->addWidget( lbl );
+   /* create the listview */
+   QLabel* lbl = new QLabel( "Cachegrind", central, "cachegrind label" );
+   lbl->setAlignment( AlignCenter );
+   vLayout->addWidget( lbl );
 }
 
 
 /* called by cachegrind: set state for buttons; set cursor state */
 void CachegrindView::setState( bool run )
 { 
-  if ( run ) {       /* startup */
-    setCursor( QCursor(Qt::WaitCursor) );
-  } else {           /* finished */
-    unsetCursor();
-  }
+   if ( run ) {       /* startup */
+      setCursor( QCursor(Qt::WaitCursor) );
+   } else {           /* finished */
+      unsetCursor();
+   }
 }
 
 

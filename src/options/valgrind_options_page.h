@@ -13,17 +13,26 @@
 
 #include "options_page.h"
 
+#include <qstringlist.h>
 
 class ValgrindOptionsPage : public OptionsPage
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  ValgrindOptionsPage( QWidget* parent, VkObject* obj );
-  bool applyOptions( int optId, bool undo=false );
+   ValgrindOptionsPage( QWidget* parent, VkObject* obj );
+   bool applyOptions( int optId );
+
+   void init();
 
 private slots:
-  void dummy();
+   void suppDirsChanged();
+   void updateSuppsAvail();
+   void getDbBin();
+   void dummy();
 
+private:
+   /* hold on to these, so don't have to rescan dirs all the time */
+   QStringList m_allAvailSuppFiles;
 };
 
 

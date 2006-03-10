@@ -23,63 +23,63 @@
 #include <qmainwindow.h>
 
 #include "vk_option.h"          /* class Option */
-#include "vk_popt_option.h"
-#include "vk_utils.h"
 #include "options_window.h"
 #include "options_page.h"
 
 class VkObject;
 typedef QPtrList<VkObject> VkObjectList;
+typedef QPtrList<Option>   OptionList;
+
 
 /* class VkObject ------------------------------------------------------ */
 class VkObject : public QObject 
 {
- Q_OBJECT
+   Q_OBJECT
 public:
-  VkObject( const QString& capt, const QString& txt,
-            const QKeySequence& key, bool is_tool=true );
-  ~VkObject();
+   /* VkObject id's: tool id's begin from ID_TOOL0 */
+   enum { ID_VALKYRIE=0, ID_VALGRIND, ID_TOOL0/*first tool*/  };
 
-  bool isTool()           const { return is_Tool;         }
-  QString name()          const { return caption.lower(); }
-  QString title()         const { return caption;         }
-  QString accelTitle()    const { return accelText;       }
-  QKeySequence accelKey() const { return accel_Key;       }
+   VkObject( const QString& capt, const QString& txt,
+             const QKeySequence& key, int objId );
+   ~VkObject();
 
-  /* called by parseCmdArgs() in parse_cmd_args.cpp,
-     and from the gui options pages */
-  virtual int checkOptArg(int optid, const char* argval, bool gui=false) = 0; 
+   QString name()          const { return m_caption.lower(); }
+   QString title()         const { return m_caption;         }
+   QString accelTitle()    const { return m_accelText;       }
+   QKeySequence accelKey() const { return m_accel_Key;       }
 
-  /* returns a list of options to be written to the config file */
-  virtual QString configEntries();
-  /* command-line + optionsWindow help and parsing stuff */
-  vkPoptOption * poptOpts();
-  void freePoptOpts( vkPoptOption * );
-  /* also called by OptionsPage::optionWidget() */
-  Option * findOption( int optid );
-  /* called by OptionsPage::optionWidget() to if should use ^2 spin widget */
-  virtual bool optionUsesPwr2( int /*optId*/ ) { return false; }
+   /* called by parseCmdArgs() in parse_cmd_args.cpp,
+      and from the gui options pages */
+   virtual int checkOptArg(int optid, const char* argval, bool gui=false) = 0; 
 
-  virtual OptionsPage* createOptionsPage( OptionsWindow* parent ) = 0;
+   /* returns a list of options to be written to the config file */
+   virtual QString configEntries();
 
-protected:
-  /* writes the value of the option to vkConfig */
-  void writeOptionToConfig( Option* opt, QString argval );
+   /* also called by OptionsPage::optionWidget() */
+   Option* findOption( int optid );
 
-  void addOpt( int key, Option::ArgType arg_type, Option::WidgetType w_type,
-               QString cfg_group,  QChar   short_flag, QString long_flag, 
-               QString flag_desc,  QString poss_vals,  QString default_val,
-               QString shelp,      QString lhelp,      const char* url );
+   virtual OptionsPage* createOptionsPage( OptionsWindow* parent ) = 0;
+
+   OptionList optList() { return m_optList; }
+
+   int objId() { return m_objId; }
 
 protected:
-  bool is_Tool;              /* not valkyrie or valgrind-core */
+   void addOpt( int key, VkOPTION::ArgType arg_type, VkOPTION::WidgetType w_type,
+                QString cfg_group,  QChar   short_flag, QString long_flag, 
+                QString flag_desc,  QString poss_vals,  QString default_val,
+                QString shelp,      QString lhelp,      const char* url );
 
-  QString caption;           /* eg. Memcheck */
+protected:
+   QString      m_caption;      /* eg. Memcheck */
 
-  QString accelText;         /* eg. &Memcheck */
-  QKeySequence accel_Key;    /* accelerator key */
+   QString      m_accelText;    /* eg. &Memcheck */
+   QKeySequence m_accel_Key;    /* accelerator key */
 
-  QPtrList<Option> optList;  /* list of options for this object */
+   OptionList   m_optList;      /* list of options for this object */
+
+private:
+   int m_objId;
 };
 
 

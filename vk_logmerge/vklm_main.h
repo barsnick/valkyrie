@@ -21,8 +21,8 @@
 #endif
 
 /* print message to stderr */
-extern void vklmPrint( const char *, ... )
-     __attribute__((format (printf, 1, 2)));
+extern void vklmPrint( int verb, const char *, ... )
+     __attribute__((format (printf, 2, 3)));
 
 extern int vklm_verbosity;
 

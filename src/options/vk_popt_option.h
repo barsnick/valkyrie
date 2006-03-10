@@ -13,18 +13,16 @@
 #ifndef __VK_POPT_OPTION_H
 #define __VK_POPT_OPTION_H
 
+namespace VkOPTION {
+   /* NOT_POPT: ignore options in cmdline option parsing
+      ARG_*   : arg type for this option (NONE = no args) */
+   enum ArgType { NOT_POPT=-1, ARG_NONE=0, ARG_STRING=1,
+                  ARG_UINT=2, ARG_PWR2=3, ARG_BOOL=4 };
 
-typedef struct {
-  int  optKey;             /* eg. VIEW-LOG               */
-  int  argType;            /* option type: ARG_***       */
-  char shortFlag;          /* '\0' || 'h'                */
-  const char* longFlag;    /* NULL || --help             */
-  void* arg;               /* 0 for Options, 
-                              'tablename' for tables eg. 'vkOptions' */
-  const char* helptxt;     /* help text                  */
-  const char* helpdesc;    /* eg. <file>                 */
-  int objectId;            /* used to call obj->checkOptArg() */
-} vkPoptOption;
+   /* these are kept in here in order to avoid depending on the gui */
+   enum WidgetType { WDG_NONE=-1, WDG_CHECK=0, WDG_RADIO,
+                     WDG_LEDIT, WDG_COMBO, WDG_LISTBOX, WDG_SPINBOX };
+}
 
 
 /* Error return values */
@@ -53,8 +51,6 @@ typedef struct {
                                     output to stderr */
 #define PERROR_POWER_OF_TWO -31  /* number not a power of two */
 
-
-
 const char* parseErrString( const int error );
 
-#endif
+#endif // #ifndef __VK_POPT_OPTION_H

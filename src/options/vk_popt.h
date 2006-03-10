@@ -14,30 +14,35 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-/* for struct vkPoptOption and parseErrString() */
-#include "vk_popt_option.h" 
-
-
-#define vmefail() (fprintf(stderr, "virtual memory exhausted.\n"), exit(EXIT_FAILURE), NULL)
-#define xstrdup(_str) (strcpy((malloc(strlen(_str)+1) ? : vmefail()), (_str)))
+#include "vk_popt_option.h"      /* parseErrString() */
 
 
 #define OPTION_DEPTH  10
 
-/* Arg type identifiers */
-#define ARG_NONE      0  /* no arg */
-#define ARG_STRING    1  /* no test performed           */
-#define ARG_UINT      2  /* arg tested as unsigned int  */
-#define ARG_BOOL      3  /* arg tested as { yes, no }   */
-#define ARG_INC_TABLE 4  /* arg points to table         */
-#define ARG_MASK      0x0000FFFF
-
 /* options can't follow args */
 #define PCONTEXT_POSIXMEHARDER (1 << 2)
 
-#define TABLE_END { 0, '\0', NULL, 0, 0, NULL, NULL }
+/* vkPoptOption can be: table of options | option | TABLE_END
+   TABLE_END: none set of: shortFlag && longFlag && arg
+   table:  arg = array of options, helptxt = table title
+   option: arg = NULL
+*/
+typedef struct _vkPoptOption {
+   int  optKey;                /* eg. VIEW-LOG                    */
+   VkOPTION::ArgType argType;  /* option type: ARG_***            */
+   char shortFlag;             /* '\0' || 'h'                     */
+   const char* longFlag;       /* NULL || --help                  */
+   struct _vkPoptOption* arg;  /* table holds ptr to  */
+   const char* helptxt;        /* help text                       */
+   const char* helpdesc;       /* eg. <file>                      */
+   int objectId;               /* used to call obj->checkOptArg() */
+} vkPoptOption;
 
-typedef struct vkPoptContext_s * vkPoptContext;
+#define TABLE_END { -1, VkOPTION::NOT_POPT, '\0', NULL, NULL, NULL, NULL, -1 }
+vkPoptOption nullOpt();
+
+
+typedef struct vkPoptContext_s* vkPoptContext;
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,33 +91,33 @@ void vkPoptPrintHelp( vkPoptContext con, FILE * fp,
    permit NULL, return NULL always */
 static inline void * _free( const void * p )
 {
-  if ( p != NULL )  
-    free((void *)p);
-  return NULL;
+   if ( p != NULL )  
+      free((void *)p);
+   return NULL;
 }
 
 
 struct optionStackEntry { 
-  int argc;
-  const char ** argv;
-  int next;
-  const char * nextArg;
-  const char * nextCharArg;
+   int argc;
+   const char ** argv;
+   int next;
+   const char * nextArg;
+   const char * nextCharArg;
 };
 
 
 struct vkPoptContext_s {
-  struct optionStackEntry optionStack[OPTION_DEPTH];
-  struct optionStackEntry * os;
-  const char ** leftovers;
-  int numLeftovers;
-  int nextLeftover;
-  const vkPoptOption * options;
-  int restLeftover;
-  int flags;
-  const char ** finalArgv;
-  int finalArgvCount;
-  int finalArgvAlloced;
+   struct optionStackEntry optionStack[OPTION_DEPTH];
+   struct optionStackEntry * os;
+   const char ** leftovers;
+   int numLeftovers;
+   int nextLeftover;
+   const vkPoptOption * options;
+   int restLeftover;
+   int flags;
+   const char ** finalArgv;
+   int finalArgvCount;
+   int finalArgvAlloced;
 };
 
 

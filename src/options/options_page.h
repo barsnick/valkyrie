@@ -30,42 +30,44 @@
 class VkObject;
 class OptionsPage : public QWidget
 {
-  Q_OBJECT
+   Q_OBJECT
 
 public:
-  OptionsPage( QWidget* parent, VkObject* obj, const char* name );
-  ~OptionsPage();
+   OptionsPage( QWidget* parent, VkObject* obj, const char* name );
+   ~OptionsPage();
 
-  bool acceptEdits();
-  bool rejectEdits();
-  bool applyEdits();
-  bool isModified() { return mod; }
+   bool rejectEdits();
+   bool applyEdits();
+   bool isModified() { return m_mod; }
 
-  void resetDefaults();
-  virtual bool applyOptions( int id, bool undo=false ) = 0;
+   void resetDefaults();
+   virtual bool applyOptions( int id ) = 0;
+
+   /* init page on open */
+   virtual void init() { /*do nothing*/ }
+
+   int optId();
 
 signals:
-  void modified();
-  void apply();
+   void modified();
+   void apply();
 
 public slots:
-  void updateEditList( bool, OptionWidget * );
+   void updateEditList( bool, OptionWidget * );
 
 protected:
-  QFrame* sep( QWidget* parent, const char* name );
-  OptionWidget* optionWidget( int optid, QWidget* parent, bool mklabel );
+   QFrame* sep( QWidget* parent, const char* name );
+   OptionWidget* optionWidget( int optid, QWidget* parent, bool mklabel );
 
 protected:
-  bool mod; 
-  int topSpace;
-	int space, margin;
+   bool m_mod; 
+   int  m_topSpace, m_space, m_margin;
 
-  VkObject * vkObj;
+   VkObject* m_vkObj;
 
-  /* prime numbers: 5, 7, 11, 13, 17, 19, 23, 29 */
-  QIntDict<OptionWidget> itemList;
-  QPtrList<OptionWidget> editList;
-  QPtrList<OptionWidget> undoList;
+   /* prime numbers: 5, 7, 11, 13, 17, 19, 23, 29 */
+   QIntDict<OptionWidget> m_itemList;
+   QPtrList<OptionWidget> m_editList;
 };
 
 

@@ -20,45 +20,39 @@
 class Massif : public ToolObject
 {
 public:
-  Massif();
-  ~Massif();
+   Massif( int objId );
+   ~Massif();
 
-  /* returns the ToolView window (massifView) for this tool */
-  ToolView* createView( QWidget* parent );
-  /* called by MainWin::closeToolView() */
-  bool isDone(Valkyrie::RunMode rm );
+   /* returns the ToolView window (massifView) for this tool */
+   ToolView* createView( QWidget* parent );
+   /* called by MainWin::closeToolView() */
+   bool isDone();
 
-  bool start( Valkyrie::RunMode rm );
-  bool stop( Valkyrie::RunMode rm );
-  bool run( QStringList /*flags*/ ) { return true; }
+   bool start( VkRunState::State rm, QStringList vgflags );
+   bool stop();
 
-  int checkOptArg( int optid, const char* argval, bool use_gui=false );
+   int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
-  enum msOpts {
-    HEAP,
-    HEAP_ADMIN,
-    STACKS,
-    DEPTH,
-    ALLOC_FN,
-    FORMAT,
-    ALIGNMENT,
-    LAST_CMD_OPT  = ALIGNMENT
-  };
+   enum msOpts {
+      HEAP,
+      HEAP_ADMIN,
+      STACKS,
+      DEPTH,
+      ALLOC_FN,
+      FORMAT,
+      ALIGNMENT,
+      LAST_CMD_OPT  = ALIGNMENT
+   };
 
-  bool optionUsesPwr2( int optId ) {
-    if (optId == ALIGNMENT) return true;
-    return false;
-  }
-
-  OptionsPage* createOptionsPage( OptionsWindow* parent ) {
-    return (OptionsPage*)new MassifOptionsPage( parent, this );
-  }
+   OptionsPage* createOptionsPage( OptionsWindow* parent ) {
+      return (OptionsPage*)new MassifOptionsPage( parent, this );
+   }
 
 private:
-  /* overriding to avoid casting everywhere */
-  MassifView* view() { return (MassifView*)m_view; }
+   /* overriding to avoid casting everywhere */
+   MassifView* view() { return (MassifView*)m_view; }
 
-  void emitRunning( bool );
+   bool runValgrind( QStringList /*vgflags*/ ) { return true; }
 };
 
 

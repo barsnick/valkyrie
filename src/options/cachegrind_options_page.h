@@ -16,14 +16,14 @@
 
 class CachegrindOptionsPage : public OptionsPage
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  CachegrindOptionsPage( QWidget* parent, VkObject* obj );
-  bool applyOptions( int optId, bool undo=false );
+   CachegrindOptionsPage( QWidget* parent, VkObject* obj );
+   bool applyOptions( int optId );
 
 private slots:
-  void getPidFile();
-  void getIncludeDirs();
+   void getPidFile();
+   void getIncludeDirs();
 };
 
 

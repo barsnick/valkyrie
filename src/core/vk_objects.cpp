@@ -6,10 +6,11 @@
  * To add a new valgrind tool:
  * - create the subclass in its own files in the src/core/ directory.
  *   see the Example below w.r.t. addOpt(...)
- * - in VkConfig::initVkObjects() [vk_config.cpp], 
- *   add 'vkObjectList.append( new tool() )': this registers the tool with valkyrie.
- * - create a new options page for the Options dialog, and add this
- *   into OptionsWindow::mkOptionsPage(int) in /options/options_window.cpp
+ * - in Valgrind::initToolObjects() [valgrind_object.cpp],
+ *   add 'm_toolObjList.append( new tool( objId++ ) )'
+ *   this registers the tool with valkyrie.
+ * - create a new options page for the Options dialog, and reimplement
+ *   VgObjet::createOptionsPage() to create this when needed.
  * - create the ToolView subclass in its own files, in the src/tool_view dir
  * That's all, folks.
  * ---------------------------------------------------------------------
@@ -22,6 +23,7 @@
 #include "vk_objects.h"
 #include "vk_config.h"
 #include "vk_popt_option.h"    // PERROR* and friends 
+#include "vk_utils.h"          // vk_assert, VK_DEBUG, etc.
 #include "vk_messages.h"       // vkInfo() and friends
 #include "html_urls.h"
 
@@ -33,164 +35,85 @@
 
 /* Example:
 addOpt( 
-  LEAK_CHECK,                            int opt_key
-  Option::ARG_BOOL,                      Option::ArgType arg_type
-  Option::CHECK,                         Option::WidgetType w_type
-  "memcheck",                            QString cfg_group     // cfgGroup()
-  '\0',                                  QChar   short_flag
-  "leak-check",                          QString long_flag     // cfgKey()
-  "<no|summary|full>",                   QString flag_desc     // cmd-line
-  "no|summary|full",                     QString poss_vals
-  "summary",                             QString default_val
-  "Search for memory leaks at exit",     QString shelp         // gui
-  "search for memory leaks at exit?",    QString lhelp         // cmd-line
-  "manual.html#leak-check" );            QString url
+   LEAK_CHECK,                            int opt_key
+   VkOPTION::ARG_BOOL,                    VkOPTION::ArgType    arg_type
+   VkOPTION::WDG_CHECK,                   VkOPTION::WidgetType w_type
+   "memcheck",                            QString cfg_group    // cfgGroup()
+   '\0',                                  QChar   short_flag
+   "leak-check",                          QString long_flag    // cfgKey()
+   "<no|summary|full>",                   QString flag_desc    // cmd-line
+   "no|summary|full",                     QString poss_vals
+   "summary",                             QString default_val
+   "Search for memory leaks at exit",     QString shelp        // gui
+   "search for memory leaks at exit?",    QString lhelp        // cmd-line
+   "manual.html#leak-check" );            QString url
 */
 
 
 /* class VkObject ------------------------------------------------------ */
 VkObject::~VkObject() 
 { 
-  optList.setAutoDelete( true );
-  optList.clear();
-  optList.setAutoDelete( false );
+   m_optList.setAutoDelete( true );
+   m_optList.clear();
 }
 
 
 VkObject::VkObject( const QString& capt, const QString& txt,
-                    const QKeySequence& key, bool is_tool ) 
-  : QObject( 0, capt )
+                    const QKeySequence& key, int objId ) 
+   : QObject( 0, capt )
 {
-  caption   = capt;
-  accelText = txt;
-  is_Tool   = is_tool;
-  accel_Key = key;
+   m_caption   = capt;
+   m_accelText = txt;
+   m_accel_Key = key;
+   m_objId     = objId;
+   //  fprintf(stderr, "VkObject::VkObject( %d: %s )\n", objId, capt.latin1() );
 }
 
 
 void VkObject::addOpt( 
-     int opt_key,  Option::ArgType arg_type, Option::WidgetType w_type, 
-     QString cfg_group, QChar short_flag,         QString long_flag, 
-     QString flag_desc, QString poss_vals,        QString default_val, 
-     QString shelp,     QString lhelp,            const char* url )
+                      int opt_key, VkOPTION::ArgType arg_type, VkOPTION::WidgetType w_type, 
+                      QString cfg_group, QChar short_flag,         QString long_flag, 
+                      QString flag_desc, QString poss_vals,        QString default_val, 
+                      QString shelp,     QString lhelp,            const char* url )
 {
-  optList.append( new Option( opt_key,   arg_type,   w_type, 
-                              cfg_group, short_flag, long_flag, 
-                              flag_desc, poss_vals,  default_val, 
-                              shelp,     lhelp,      url ) );
+   /* augment lhelp if default_val present */
+   if ( !default_val.isEmpty() )
+      lhelp += " [" + default_val + "]";
+
+   m_optList.append( new Option( opt_key,   arg_type,   w_type, 
+                                 cfg_group, short_flag, long_flag, 
+                                 flag_desc, poss_vals,  default_val, 
+                                 shelp,     lhelp,      url ) );
 }
 
 
 Option * VkObject::findOption( int optkey )
 {
-  Option* opt = NULL;
-  for ( opt=optList.first(); opt; opt=optList.next() ) {
-    if ( opt->key == optkey )
-      break;
-  }
-  vk_assert( opt != NULL );
+   vk_assert( optkey >= 0 );
+   Option* opt;
+   for ( opt=m_optList.first(); opt; opt=m_optList.next() ) {
+      if ( opt->m_key == optkey )
+         break;
+   }
+   vk_assert( opt != NULL );
 
-  return opt;
+   return opt;
 }
 
 
-/* writes the argval for this option to vkConfig. */
-void VkObject::writeOptionToConfig( Option* opt, QString argval )
-{
-  opt->modified = true;
-  vkConfig->wrEntry( argval, opt->longFlag, opt->cfgGroup() );
-}
-
-
-/* called from VkConfig::mkConfigFile() when we need to create the
-   valkyrierc file for the very first time. */
+/* Gather all config entries that hold persistent data
+   - basically all options with an associated option widget.
+   Called from VkConfig::mkConfigFile() when we need to create the
+   valkyrierc file for the very first time.
+*/
 QString VkObject::configEntries()
 {
-  QString cfgEntry = "\n[" + name() + "]\n";
-  for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
-
-    /* skip these entirely */
-    if ( opt->cfgGroup() == "valkyrie" &&
-         opt->key == Valkyrie::HELP_OPT ) continue;
-
-    cfgEntry += opt->longFlag + "=" + opt->defaultValue + "\n";
-  }
-
-  return cfgEntry;
-}
-
-/* determine the total no. of option structs required by counting the
-   no. of entries in the optList.  Note: num_options = optList+1
-   because we need a NULL option entry to terminate each option array. */
-vkPoptOption * VkObject::poptOpts()
-{
-  //printOptList();
-  int num_options  = optList.count() + 1;
-  size_t nbytes    = sizeof(vkPoptOption) * num_options;
-  vkPoptOption * vkopts = (vkPoptOption*)malloc(nbytes);
-
-  int idx = 0;
-  Option *opt;
-  QString tmp;
-  for ( opt = optList.first(); opt; opt = optList.next() ) {
-    vk_assert( opt != NULL );
-    vk_assert( vkopts != NULL );
-
-    /* only add me if i'm a popt option */
-    if ( opt->argType != Option::NOT_POPT ) {
-      vkopts[idx].optKey     = opt->key;
-      vkopts[idx].argType    = opt->argType;
-      vkopts[idx].shortFlag  = opt->shortFlag.latin1();
-      vkopts[idx].longFlag   = opt->longFlag.latin1();
-      vkopts[idx].arg        = 0;
-      tmp = opt->longHelp;
-      if ( !opt->defaultValue.isEmpty() )
-        tmp += " [" + opt->defaultValue + "]";
-      vkopts[idx].helptxt  = vk_strdup( tmp.latin1() );
-      vkopts[idx].helpdesc   = opt->flagDescrip.latin1();
-      vkopts[idx].objectId   = vkConfig->vkObjectId( this );
-      idx++;
-    }
-  }
-  /* we need a null entry to terminate the table */
-  vkopts[idx].optKey    = -1;
-  vkopts[idx].argType   = 0;
-  vkopts[idx].shortFlag = '\0';
-  vkopts[idx].longFlag  = NULL;
-  vkopts[idx].arg       = 0;
-  vkopts[idx].helptxt   = NULL;
-  vkopts[idx].helpdesc  = NULL;
-  vkopts[idx].objectId  = -1;
-
-  return vkopts;
+   QString cfgEntry = "\n[" + name() + "]\n";
+   Option* opt;
+   for ( opt = m_optList.first(); opt; opt = m_optList.next() ) {
+      cfgEntry += opt->m_longFlag + "=" + opt->m_defaultValue + "\n";
+   }
+   return cfgEntry;
 }
 
 
-/* tread carefully: when creating the struct in poptOpts(), the
-   helpdesc field was only malloc'd if there was a default value.  
-   so we check to see if the original string and the copy are the
-   same.  if yes, leave it alone, as it only contains a ptr to the
-   original string.  */
-void VkObject::freePoptOpts( vkPoptOption * vkopts )
-{
-  int num_options  = optList.count();
-  if ( num_options == PARSED_OK )
-    return;
-
-  int xx = 0;
-  for ( int yy=0; yy<num_options; yy++ ) {
-
-    /* beware: don't use strcmp on empty strings :( */
-    if ( optList.at(yy)->argType != Option::NOT_POPT && 
-         !optList.at(yy)->longHelp.isEmpty()  ) {
-      const char* tmp = optList.at(yy)->longHelp.latin1();
-      if ( !vk_strcmp( vkopts[xx].helptxt, tmp ) ) {
-        vk_str_free( vkopts[xx].helptxt );
-      }
-      xx++;
-    }
-  }
-
-  vk_free( vkopts );
-  vkopts = NULL;
-}

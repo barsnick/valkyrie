@@ -17,46 +17,46 @@
 #include <qcstring.h>
 #include <qstring.h>
 
-#include "vk_objects.h"
 #include "tool_object.h"
+#include "valkyrie_object.h"
 
 
 struct EntryData
 {
-  EntryData( const QString &value, bool dirty ) 
-    : mValue(value), mDirty(dirty) { }
-  EntryData() : mValue(QString::null), mDirty(false) { }
-  QString mValue;     /* the actual value we want */
-  bool    mDirty;     /* must the entry be written to disk? */
+   EntryData( const QString &value, bool dirty ) 
+      : mValue(value), mDirty(dirty) { }
+   EntryData() : mValue(QString::null), mDirty(false) { }
+   QString mValue;     /* the actual value we want */
+   bool    mDirty;     /* must the entry be written to disk? */
 };
 
 struct EntryKey
 {
-  EntryKey( const QString &group=QString::null, 
-            const QString &key=QString::null )
-    : mGroup(group), mKey(key), cKey( key.data() ) { }
-  QString mGroup;     /* group to which this EntryKey belongs */
-  QString mKey;       /* key of the entry in question         */
-  const char *cKey;   /* testing equality with operator <     */
+   EntryKey( const QString &group=QString::null, 
+             const QString &key=QString::null )
+      : mGroup(group), mKey(key), cKey( key.data() ) { }
+   QString mGroup;     /* group to which this EntryKey belongs */
+   QString mKey;       /* key of the entry in question         */
+   const char *cKey;   /* testing equality with operator <     */
 };
 
 /* compares two EntryKeys (needed for QMap) */
 inline bool operator <( const EntryKey &k1, const EntryKey &k2 )
 {
-  int result = qstrcmp( k1.mGroup.data(), k2.mGroup.data() );
-  if ( result != 0 )
-    return ( result < 0 );     
+   int result = qstrcmp( k1.mGroup.data(), k2.mGroup.data() );
+   if ( result != 0 )
+      return ( result < 0 );     
 
-  if ( !k1.cKey && k2.cKey )
-    return true;
+   if ( !k1.cKey && k2.cKey )
+      return true;
 
-  result = 0;
-  if ( k1.cKey && k2.cKey )
-    result = strcmp( k1.cKey, k2.cKey );
-  if ( result != 0 )
-    return result < 0;
+   result = 0;
+   if ( k1.cKey && k2.cKey )
+      result = strcmp( k1.cKey, k2.cKey );
+   if ( result != 0 )
+      return result < 0;
 
-  return false;
+   return false;
 }
 
 typedef QMap<EntryKey, EntryData> EntryMap;
@@ -67,134 +67,103 @@ typedef QMap<EntryKey, EntryData>::Iterator EntryMapIterator;
 class VkConfig : public QObject
 {
 public:
-  VkConfig( bool *ok );
-  ~VkConfig();
+   VkConfig( Valkyrie* vk, bool *ok );
+   ~VkConfig();
 
-  void dontSync();  /* don't write back to disk on exit */
+   void dontSync();  /* don't write back to disk on exit */
 
-  /* these fns return the values set in vk_include.h ------------------- */
-  const char* vkname();
-  const char* vkName();
-  const char* vkVersion();
-  const char* vkCopyright();
-  const char* vkAuthor();
-  const char* vkEmail();
-  const char* vgCopyright();
+   /* these fns return the values set in vk_include.h ------------------- */
+   const char* vkname();
+   const char* vkName();
+   const char* vkVersion();
+   const char* vkCopyright();
+   const char* vkAuthor();
+   const char* vkEmail();
+   const char* vgCopyright();
 
-  /* these fns return values held in private vars ---------------------- */
-  QString vgdocDir();
-  QString vkdocDir();
-  QString rcDir();
-  QString logsDir();
-  QString dbaseDir();
-  QString suppDir();
-  QChar sepChar() { return sep; }
+   /* these fns return values held in private vars ---------------------- */
+   QString vgdocDir();
+   QString vkdocDir();
+   QString rcDir();
+   QString logsDir();
+   QString dbaseDir();
+   QString suppDir();
+   QChar sepChar() { return m_sep; }
 
-  /* Returns a ptr to the tool currently set in [valgrind:tool] */
-  ToolObject* tool();
-  /* Returns the name of the current tool in [valgrind:tool] */
-  QString toolName();
-  /* Returns the tool id of [valgrind:tool] */
-  int toolId();
+   /* Returns a ptr to the tool currently set in [valgrind:tool] */
+   ToolObject* mainToolObj();
+   /* Returns the name of the current tool in [valgrind:tool] */
+   QString mainToolObjName();
+   /* Returns the tool id of [valgrind:tool] */
+   int mainToolObjId();
 
-  /* Returns a list of all ToolObjects
-     Note: toolList order doesn't match objectId */
-  ToolList toolList();
-  /* returns a vkObject tool, based on its objectId */
-  ToolObject* vkToolObj( int tvid );
+   /* read fns ---------------------------------------------------------- */
+   QString rdEntry( const QString &pKey, const QString &pGroup );
+   int     rdInt  ( const QString &pKey, const QString &pGroup );
+   bool    rdBool ( const QString &pKey, const QString &pGroup );
+   QFont   rdFont ( const QString &pKey, const QString &pGroup=QString::null );
+   QColor  rdColor( const QString &pKey );
 
-  /* Returns a list of all VkObjects, irrespective of whether they are
-     tools or otherwise */
-  VkObjectList vkObjList();
-  /* returns a vkObject based on its name */
-  VkObject* vkObject( const QString& obj_name );
-  /* returns a vkObject based on its objectId */
-  VkObject* vkObject( int tvid );
-
-  /* returns an object's id */
-  int vkObjectId( VkObject* obj );
-
-  /* reset vg-exec-path, vg-supp-dir path and default supp file values */
-	void resetCfgSupps();
-	void resetCfgValgrind();
-
-  /* read fns ---------------------------------------------------------- */
-  QString rdEntry( const QString &pKey, const QString &pGroup );
-  int     rdInt  ( const QString &pKey, const QString &pGroup );
-  bool    rdBool ( const QString &pKey, const QString &pGroup );
-  QFont   rdFont ( const QString &pKey, const QString &pGroup=QString::null );
-  QColor  rdColor( const QString &pKey );
-
-  /* write fns --------------------------------------------------------- */
-  void wrEntry( const QString &pValue, 
-                const QString &pKey,   const QString &pGroup );
-  void wrInt  ( const int     pValue,    
-                const QString &pKey, const QString &pGroup );
-  void wrBool ( const bool    &bValue,    
-                const QString &pKey,   const QString &pGroup );
-  void wrFont ( const QFont   &rFont,  const QString &pKey );
-  void wrColor( const QColor  &pColor, const QString &pKey );
-  /* special version of wrEntry: adds values to the existing entry,
-     rather than replacing */
-  void addEntry( const QString &pValue, 
+   /* write fns --------------------------------------------------------- */
+   void wrEntry( const QString &pValue, 
                  const QString &pKey,   const QString &pGroup );
+   void wrInt  ( const int     pValue,    
+                 const QString &pKey, const QString &pGroup );
+   void wrBool ( const bool    &bValue,    
+                 const QString &pKey,   const QString &pGroup );
+   void wrFont ( const QFont   &rFont,  const QString &pKey );
+   void wrColor( const QColor  &pColor, const QString &pKey );
+   /* special version of wrEntry: adds values to the existing entry,
+      rather than replacing */
+   void addEntry( const QString &pValue, 
+                  const QString &pKey,   const QString &pGroup );
 
 private:
-  enum RetVal { Okay=1, BadFilename, NoDir, NoPerms,
-                CreateRcFile, Fail };
-  void sync();
+   enum RetVal { Okay=1, BadFilename, NoDir, NoPerms,
+                 CreateRcFile, Fail };
+   void sync();
 
-  bool checkDirs();
-  bool checkPaths();
-  QString mkConfigHeader( void );
-  QString mkConfigDefaults( void );
-  void writeConfigDefaults();
+   bool    checkDirs();
+   bool    checkPaths();
+   QString mkConfigHeader( void );
+   QString mkConfigDefaults( void );
+   void    writeConfigDefaults();
 
-  bool writeConfig( EntryMap rcMap, bool backup=false );
-  EntryMap parseConfigToMap( QTextStream &stream );
-  void insertData( const EntryKey &key, const EntryData &data );
-  void backupConfigFile();
-  EntryMap parseFile( bool *ok );
-  RetVal checkAccess() const;
-
-  /* write vg-exec-path, vg-supp-dir path and default supp file values */
-  void updateCfgPaths( EntryMap &rcMap );
-	void updateCfgValgrind( EntryMap &rcMap );
-	void updateCfgSupps( EntryMap &rcMap );
-
-  /* creates the various VkObjects and initialises their options,
-     ready for cmd-line parsing (if any). */
-  void initVkObjects();
+   bool     writeConfig( EntryMap rcMap, bool backup=false );
+   EntryMap parseConfigToMap( QTextStream &stream );
+   void     insertData( const EntryKey &key, const EntryData &data );
+   void     backupConfigFile();
+   EntryMap parseFile( bool *ok );
+   RetVal   checkAccess() const;
 
 private:
-  QChar sep;
-  bool mDirty;
+   Valkyrie* m_valkyrie;       /* access to objects */
 
-  QCString vk_name;
-  QCString vk_Name;
-  QCString vk_version;
-  QCString vk_copyright;
-  QCString vk_author;
-  QCString vk_email;
-  QCString vg_copyright;
+   QChar m_sep;
+   bool  m_dirty;
 
-  QString mPackagePath;     /* valkyrie's install dir */
-  QString vkdocPath;        /* path to valkyrie docs dir */
-  QString vgdocPath;        /* path to valgrind docs dir */
-  QString imgPath;          /* path to images */
+   QCString m_vk_name;
+   QCString m_vk_Name;
+   QCString m_vk_version;
+   QCString m_vk_copyright;
+   QCString m_vk_author;
+   QCString m_vk_email;
+   QCString m_vg_copyright;
 
-  QString rcPath;           /* path to ~/valkyrie=X.X.X dir */
-  QString rcFileName;       /* where valkyrierc lives */
-  QString logsPath;         /* path to log dir */
-  QString dbasePath;        /* path to dbase dir */
-  /* path to user's suppression files dir.
-     default is ~/.valkyrie/suppressions */
-  QString suppPath;
+   QString m_PackagePath;     /* valkyrie's install dir */
+   QString m_vkdocPath;        /* path to valkyrie docs dir */
+   QString m_vgdocPath;        /* path to valgrind docs dir */
+   QString m_imgPath;          /* path to images */
 
-  EntryMap mEntryMap;       /* the config dict */
+   QString m_rcPath;           /* path to ~/valkyrie=X.X.X dir */
+   QString m_rcFileName;       /* where valkyrierc lives */
+   QString m_logsPath;         /* path to log dir */
+   QString m_dbasePath;        /* path to dbase dir */
+   /* path to user's suppression files dir.
+      default is ~/.valkyrie/suppressions */
+   QString m_suppPath;
 
-  /* list of the various objects */
-  VkObjectList vkObjectList;
+   EntryMap m_EntryMap;       /* the config dict */
 };
 
 

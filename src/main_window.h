@@ -18,6 +18,7 @@
 
 #include "vk_objects.h"
 #include "valkyrie_object.h"
+#include "tool_object.h"
 #include "tool_view.h"
 
 #include <qbuttongroup.h>
@@ -30,82 +31,81 @@
 /* class MainWindow ---------------------------------------------------- */
 class MainWindow : public QMainWindow
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  MainWindow( Valkyrie* valk );
-  ~MainWindow();
+   MainWindow( Valkyrie* valk );
+   ~MainWindow();
 
 public slots:
-  /* sets Valkyrie::RunMode */
-  void updateVkMode( Valkyrie::RunMode rm );
-  /* sets run and stop buttons to correct state */
-  void updateButtons( bool running );
-  /* show a message in the status bar */
-  void setStatus( QString );
-  /* dis/enable tooltips */
-  void toggleToolTips();
-  /* show toolbutton text labels (or not) */
-  void toggleToolbarLabels();
-  /* show toolview for tool set in [valgrind:tool] */
-  void showToolView( int tvid ); 
-  /* connected to optionsWin signal flagsChanged() */
-  void updateFlagsWidget();
-  /* start appropriate process for given runmode */
-  void run( Valkyrie::RunMode rm );
+   /* sets run and stop buttons to correct state */
+   void updateButtons( bool running );
+   /* show a message in the status bar */
+   void setStatus( QString );
+   /* dis/enable tooltips */
+   void toggleToolTips();
+   /* show toolbutton text labels (or not) */
+   void toggleToolbarLabels();
+   /* show toolview for tool set in [valgrind:tool] */
+   void showToolView( int tvid ); 
+   /* connected to optionsWin signal flagsChanged() */
+   void updateVgFlags();
+   /* start appropriate process for given runState */
+   void run( VkRunState::State );
+
+   Valkyrie* valkyrie() { return m_valkyrie; }
 
 signals:
-  void toolbarLabelsToggled(bool);
+   void toolbarLabelsToggled(bool);
 
 protected:
-  void resizeEvent( QResizeEvent* re );
-  void moveEvent( QMoveEvent* me );
-  void closeEvent( QCloseEvent* ce );
+   void resizeEvent( QResizeEvent* re );
+   void moveEvent( QMoveEvent* me );
+   void closeEvent( QCloseEvent* ce );
 
 private slots:
-  void runValgrind();
-  void stop();
+   void runValgrind();
+   void stop();
 
-  void showFlagsWidget( bool show );
-  void showOptionsWindow(int);
-  void showAboutInfo( int id );
-  void closeToolView();
+   void showFlagsWidget( bool show );
+   void showOptionsWindow(int);
+   void showAboutInfo( int id );
+   void closeToolView();
 
-  //void dummy() { printf("dummy()\n"); }
-  //void dummy(int n) { printf("dummy( %d )\n", n); }
-  //void dummy( bool b ) { printf("dummy( %d )\n", b ); }
-
-private:
-  void setToggles( int );
-  void mkMenuBar();
-  void mkStatusBar();
+   //void dummy() { printf("dummy()\n"); }
+   //void dummy(int n) { printf("dummy( %d )\n", n); }
+   //void dummy( bool b ) { printf("dummy( %d )\n", b ); }
 
 private:
-  ToolViewStack* viewStack;
+   void setToggles( int );
+   void mkMenuBar();
+   void mkStatusBar();
 
-  Valkyrie* valkyrie;
+private:
+   Valkyrie*      m_valkyrie;       /* access to objects */
+   ToolViewStack* m_viewStack;      /* tool views        */
 
-  HandBook* handBook;
-  OptionsWindow* optionsWin;
+   HandBook*      m_handBook;
+   OptionsWindow* m_optionsWin;
 
-  /* label to show non-default flags for current tool */
-  QLabel* flagsLabel;
-  QToolButton* flagsButton;
+   /* label to show non-default flags for current tool */
+   QLabel*      m_flagsLabel;
+   QToolButton* m_flagsButton;
 
-  /* messages label for status bar */
-  QLabel* statusMsg;
+   /* messages label for status bar */
+   QLabel*      m_statusMsg;
 
-  bool showToolTips;
-  bool showToolbarLabels;
+   bool m_showToolTips;
+   bool m_showToolbarLabels;
 
-  QPopupMenu* fileMenu;
-  enum menuIds{ FILE_RUN, FILE_STOP, FILE_CLOSE };
+   QPopupMenu* m_fileMenu;
+   enum menuIds{ FILE_RUN, FILE_STOP, FILE_CLOSE };
 
-  QPopupMenu* toolsMenu;
-  QButtonGroup* viewButtGroup;
+   QPopupMenu*   m_toolsMenu;
+   QButtonGroup* m_viewButtGroup;
 
-  QToolButton* runButton;
-  QToolButton* stopButton;
-  QToolButton* helpButton;
+   QToolButton* m_runButton;
+   QToolButton* m_stopButton;
+   QToolButton* m_helpButton;
 };
 
 

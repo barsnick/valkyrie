@@ -18,24 +18,22 @@
 class Cachegrind;
 class CachegrindView : public ToolView
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  CachegrindView( QWidget* parent, Cachegrind* cg );
-  ~CachegrindView();
+   CachegrindView( QWidget* parent, const char* name );
+   ~CachegrindView();
 
-  /* called by cachegrind: set state for buttons; set cursor state */
-  void setState( bool run );
+   /* called by cachegrind: set state for buttons; set cursor state */
+   void setState( bool run );
 
 public slots:
-  void toggleToolbarLabels( bool );
+   void toggleToolbarLabels( bool );
 
 private:
-  void mkToolBar();
-  /* overriding to avoid casting everywhere */
-  Cachegrind* tool() { return (Cachegrind*)m_tool; }
+   void mkToolBar();
 
 private:
-  QToolBar* cgToolBar;
+   QToolBar* cgToolBar;
 };
 
 

@@ -28,38 +28,38 @@
 class Option;
 class OptionWidget : public QObject
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  OptionWidget( QWidget* parent, const char* name, 
-                Option* vkopt, bool mklabel );
-  ~OptionWidget() { }
+   OptionWidget( QWidget* parent, const char* name, 
+                 Option* vkopt, bool mklabel );
+   ~OptionWidget() { }
 
-  int id();
-  QLabel*  label();
-  QWidget* widget();
-  QString currValue();
-  QString initValue();
-  void setEnabled( bool enable );
+   int id();
+   QLabel*  label();
+   QWidget* widget();
+   QString currValue();
+   QString initValue();
+   void setEnabled( bool enable );
 
-  virtual void reset() = 0;
-  virtual void resetDefault() = 0;
-  virtual void saveEdit( bool perm );
-  virtual void cancelEdit();
-  virtual QHBoxLayout* hlayout();
-  virtual QVBoxLayout* vlayout();
+   virtual void reset() = 0;
+   virtual void resetDefault() = 0;
+   virtual void saveEdit( bool perm );
+   virtual void cancelEdit();
+   virtual QHBoxLayout* hlayout();
+   virtual QVBoxLayout* vlayout();
 
 signals:
-  void valueChanged( bool, OptionWidget * );
+   void valueChanged( bool, OptionWidget * );
 
 protected:
-  QWidget* widg;
-  QLabel*  wLabel;
-  QHBoxLayout* hBox;
-  QVBoxLayout* vBox;
+   QWidget*     m_widg;
+   QLabel*      m_wLabel;
+   QHBoxLayout* m_hBox;
+   QVBoxLayout* m_vBox;
 
-  QString initialValue;
-  QString currentValue;
-  Option* opt;
+   QString      m_initialValue;
+   QString      m_currentValue;
+   Option*      m_opt;
 };
 
 
@@ -67,26 +67,26 @@ protected:
 /* class CkWidget: QCheckBox ------------------------------------------- */
 class CkWidget : public OptionWidget
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  CkWidget( QWidget* parent, Option* vkopt, bool mklabel );
-  ~CkWidget();
+   CkWidget( QWidget* parent, Option* vkopt, bool mklabel );
+   ~CkWidget();
 
-  bool isOn();
-  void reset();
-  void resetDefault();
-  void setOn( bool on );
+   bool isOn();
+   void reset();
+   void resetDefault();
+   void setOn( bool on );
 
 signals:
-  void clicked(int);
-  void changed(bool);
+   void clicked(int);
+   void changed(bool);
 
 private slots:
-  void ckChanged(bool);
+   void ckChanged(bool);
 
 private:
-  QCheckBox* cbox;
-  bool initialState;
+   QCheckBox* m_cbox;
+   bool       m_initialState;
 };
 
 
@@ -94,26 +94,26 @@ private:
 /* class RbWidget: QRadioButton ---------------------------------------- */
 class RbWidget : public OptionWidget
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  RbWidget( QWidget* parent, Option* vkopt, bool mklabel );
-  ~RbWidget();
+   RbWidget( QWidget* parent, Option* vkopt, bool mklabel );
+   ~RbWidget();
 
-  bool isOn();
-  void reset();
-  void resetDefault();
-  void setOn( bool on );
+   bool isOn();
+   void reset();
+   void resetDefault();
+   void setOn( bool on );
 
 signals:
-  void clicked(int);
-  void changed(bool);
+   void clicked(int);
+   void changed(bool);
 
 private slots:
-  void rbChanged(bool);
+   void rbChanged(bool);
 
 private:
-  QRadioButton* radio;
-  bool initialState;
+   QRadioButton* m_radio;
+   bool          m_initialState;
 };
 
 
@@ -121,31 +121,31 @@ private:
 /* class LeWidget: QLineEdit ------------------------------------------- */
 class LeWidget : public OptionWidget
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  LeWidget( QWidget* parent, Option* vkopt, bool mklabel );
-  ~LeWidget();
+   LeWidget( QWidget* parent, Option* vkopt, bool mklabel );
+   ~LeWidget();
 
-  void reset();
-  void resetDefault();
-  void setCurrValue(const QString &);
-  void addCurrValue(const QString &);
-  void addButton(QWidget* parent, const QObject* receiver, 
-                 const char* slot, QString txt=QString::null,
-                 bool icon=false );
-  void setReadOnly( bool );
-  QPushButton* button();
-  QHBoxLayout* hlayout();
+   void reset();
+   void resetDefault();
+   void setCurrValue(const QString &);
+   void addCurrValue(const QString &);
+   void addButton(QWidget* parent, const QObject* receiver, 
+                  const char* slot, QString txt=QString::null,
+                  bool icon=false );
+   void setReadOnly( bool );
+   QPushButton* button();
+   QHBoxLayout* hlayout();
 
 signals:
-  void returnPressed();
+   void returnPressed();
 
 private slots:
-  void leChanged(const QString& txt);
+   void leChanged(const QString& txt);
 
 private:
-  QLineEdit* ledit;
-  QPushButton* pb;
+   QLineEdit*   m_ledit;
+   QPushButton* m_pb;
 };
 
 
@@ -154,21 +154,21 @@ private:
 /* class CbWidget: QComboBox ------------------------------------------- */
 class CbWidget : public OptionWidget
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  CbWidget( QWidget* parent, Option* vkopt, bool mklabel );
-  ~CbWidget();
+   CbWidget( QWidget* parent, Option* vkopt, bool mklabel );
+   ~CbWidget();
 
-  void reset();
-  void resetDefault();
-  QHBoxLayout* hlayout();
+   void reset();
+   void resetDefault();
+   QHBoxLayout* hlayout();
 
 private slots:
-  void cbChanged(const QString& txt);
+   void cbChanged(const QString& txt);
 
 private:
-  int currIdx;
-  QComboBox* combo;
+   int        m_currIdx;
+   QComboBox* m_combo;
 };
 
 
@@ -177,55 +177,71 @@ private:
 /* class SpWidget: IntSpin --------------------------------------------- */
 class SpWidget : public OptionWidget
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  SpWidget(QWidget* parent, Option* vkopt, bool mklabel, int num_sections);
-  ~SpWidget();
+   SpWidget(QWidget* parent, Option* vkopt, bool mklabel, int num_sections);
+   ~SpWidget();
 
-  void reset();
-  void resetDefault();
-  void addSection( int min, int max, int defval=0,
-                   int step=1, QString sep_char=" : " );
-  QHBoxLayout* hlayout();
+   void reset();
+   void resetDefault();
+   void addSection( int min, int max, int defval=0,
+                    int step=1, QString sep_char=" : " );
+   QHBoxLayout* hlayout();
 
 private slots:
-  void spChanged( const QString &val );
+   void spChanged( const QString &val );
 
 private:
-  IntSpin* intspin;
-  int numSections;
+   IntSpin* m_intspin;
+   int      m_numSections;
 };
 
 
 
 /* class LbWidget: QListBox -------------------------------------------- 
-   this widget was specifically written to handle suppression files
-   stuff and nothing else. */
+
+   NOTE: This widget was specifically written to handle suppression files
+   stuff and nothing else.
+*/
 class LbWidget : public OptionWidget
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  LbWidget( QWidget* parent, Option* vkopt, bool mklabel );
-  ~LbWidget();
-  void reset();
-  void resetDefault();
+   LbWidget( QWidget* parent, Option* vkopt, bool mklabel );
+   ~LbWidget();
+   void reset();
+   void resetDefault();
+   void setCurrValue(const QString &);
+
 public slots:
-  void insertFile( const QString& );
+   void insertItem( const QString& );
 signals:
-  void fileSelected( const QString& );
+   void itemSelected( const QString& );
+   void listChanged();
+
 private slots:
-  void lbChanged( const QString& );
-  void popupMenu( QListBoxItem*, const QPoint & );
-  void popupAll( QListBoxItem* );
-  void popupSel( QListBoxItem* );
+   void popupMenu( QListBoxItem*, const QPoint & );
+   void selectItem( QListBoxItem* lb_item);
+   void popupSuppDirs( QListBoxItem* );
+   void popupSuppAvail( QListBoxItem* );
+   void popupSuppSel( QListBoxItem* );
+
 private:
-  void load();
+   QString lbText();
+   void lbChanged();
+   void lbLoad();
+
 private:
-  /* either [valgrind:supps-all] or [valgrind:suppressions] */
-  enum Mode{ AllSupps=0, SelSupps=1 };
-  QListBox* lbox;
-  QChar sep;      /* so we don't have to keep asking vkConfig */
-  Mode mode;
+   QListBox* m_lbox;
+   QChar     m_sep;      /* so we don't have to keep asking vkConfig */
+
+   /* 
+      LB_SUPPDIRS  = valgrind::supps-dirs   = dirs to scan for supps
+      LB_SUPPAVAIL = valgrind::supps-avail  = availalbe supps to use
+      LB_SUPPSEL   = valgrind::suppressions = selected supps
+   */
+   enum LBMode{ LB_SUPPDIRS, LB_SUPPAVAIL, LB_SUPPSEL };
+   LBMode    m_mode;
 };
 
 #endif

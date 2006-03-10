@@ -19,29 +19,22 @@
 
 class ToolView : public QMainWindow
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  ToolView( QWidget* parent, ToolObject* tool );
-  ~ToolView();
-
-  /* called by the view's object */
-  virtual void setState( bool run ) = 0;
-
-  ToolObject* tool() { return m_tool; }
+   ToolView( QWidget* parent, const char* name );
+   ~ToolView();
 
 public slots:
-  virtual void toggleToolbarLabels(bool) = 0;
+   virtual void toggleToolbarLabels(bool) = 0;
+   /* called by the view's object */
+   virtual void setState( bool run ) = 0;
 
 signals:
-  /* start appropriate process for given runmode */
-  void run( Valkyrie::RunMode rm );
-
+   /* start appropriate process for given runState */
+   void run( VkRunState::State );
 
 protected:
-  /* keep a ptr to parent tool so we can ask it to do stuff */
-  ToolObject* m_tool;
-
-  QWidget* central;
+   QWidget* central;
 };
 
 
@@ -54,26 +47,27 @@ typedef QPtrListIterator<ToolView> ToolViewListIter;
 
 class ToolViewStack : public QWidgetStack
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  ToolViewStack( QWidget * parent = 0, const char * name = 0 );
-  ToolViewStack( QWidget * parent, const char * name, WFlags f );
-  ~ToolViewStack();
+   ToolViewStack( QWidget * parent = 0, const char * name = 0 );
+   ToolViewStack( QWidget * parent, const char * name, WFlags f );
+   ~ToolViewStack();
 
-  int addView( ToolView* tv, int id );
-  void removeView( QWidget* w );
-  ToolView* view( int id ) const;
+   int addView( ToolView* tv, int id );
+   void removeView( QWidget* w );
+   ToolView* view( int id ) const;
 
-  const ToolViewList* viewList();
-  ToolView* nextView( ToolView* lastView = 0 );
+   const ToolViewList* viewList();
+   ToolView* nextView( ToolView* lastView = 0 );
 
-  ToolView* visible();   /* return currently-visible view */
+   ToolView* visible();   /* return currently-visible view */
+   int visibleId();       /* return id of currently-visible view */
 
-  void listViews();
+   void listViews();
 
 public slots:
-  void raiseView( int id );
-  void raiseView( ToolView* tv );
+   void raiseView( int id );
+   void raiseView( ToolView* tv );
 };
 
 

@@ -15,8 +15,17 @@
 #include <qstring.h>
 #include <qpalette.h>
 
+#include "valkyrie_object.h"
 
 #define DEBUG_ON 1
+#define VK_CHECK_NULL
+
+#if defined(VK_CHECK_NULL)
+#  define VK_CHECK_PTR(p) do { \
+   if ((p)==0) fprintf(stderr, "Error: Out of memory: File %s, line %d", __FILE__, __LINE__); } while(0)
+#else
+#  define VK_CHECK_PTR(p)
+#endif
 
 #define VK_STRINGIFY_ARG(contents) #contents
 #define vkStringify(macro_or_string) VK_STRINGIFY_ARG(macro_or_string)
@@ -30,33 +39,33 @@
 /* vk_assert can never be turned off :) ------------------------------- */
 extern void vk_assert_fail( const char* expr, const char* file, 
                             unsigned int line, const char* fn )
-  __attribute__ ((__noreturn__));
+     __attribute__ ((__noreturn__));
 
-#define vk_assert(expr) ((void) ((expr) ? 0 : \
-  (vk_assert_fail (VK_STRING(expr), \
+#define vk_assert(expr) ((void) ((expr) ? 0 :      \
+  (vk_assert_fail (VK_STRING(expr),                \
    __FILE__, __LINE__, __PRETTY_FUNCTION__), 0)))
 
 
 extern void vk_assert_never_reached_fail( const char* file,
                                           unsigned int line, 
                                           const char* fn )
-  __attribute__ ((__noreturn__));
+     __attribute__ ((__noreturn__));
 
-#define vk_assert_never_reached() ((void) ( \
-  (vk_assert_never_reached_fail(            \
+#define vk_assert_never_reached() ((void) (        \
+  (vk_assert_never_reached_fail(                   \
    __FILE__, __LINE__, __PRETTY_FUNCTION__), 0)))
 
 
 #if DEBUG_ON
 /* print debugging msg with file+line info to stderr ------------------- */
-#define VK_DEBUG(msg, args...) {                              \
-  fprintf(stderr, "\nDEBUG: %s : %s #%d:\n\t",                \
-                  __FILE__, __PRETTY_FUNCTION__, __LINE__ );  \
-  fprintf(stderr, msg, ## args );                             \
-  fprintf(stderr, "\n" );                                     \
+#  define VK_DEBUG(msg, args...) {                             \
+   fprintf(stderr, "\nDEBUG: %s : %s #%d:\n\t",                \
+                   __FILE__, __PRETTY_FUNCTION__, __LINE__ );  \
+   fprintf(stderr, msg, ## args );                             \
+   fprintf(stderr, "\n" );                                     \
 }
 #else
-#define VK_DEBUG(msg, args...) /*NOTHING*/
+#  define VK_DEBUG(msg, args...) /*NOTHING*/
 #endif
 
 
@@ -76,7 +85,7 @@ int str2hex( QString ver_str );
 
 /* command-line args parsing
    implemented in /src/options/parse_cmd_args.cpp ---------------------- */
-extern int parseCmdArgs( int argc, char** argv );
+extern int parseCmdArgs( int argc, char** argv, Valkyrie* vk );
 
 /* escape html entities
  * current list: '<', '>', '&' ----------------------------------------- */

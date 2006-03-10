@@ -14,7 +14,8 @@
 
 #include "tool_object.h"
 #include "tool_view.h"
-#include "vk_config.h"
+#include "vk_config.h"         // vkConfig
+#include "vk_utils.h"          // vk_assert, VK_DEBUG, etc.
 
 #include <qtimer.h>
 
@@ -22,64 +23,57 @@
 
 /* class ToolObject ---------------------------------------------------- */
 ToolObject::~ToolObject() 
-{ 
-  killProc();
-}
+{}
 
-ToolObject::ToolObject( const QString& capt, 
-                        const QString& txt, const QKeySequence& key )
-  : VkObject( capt, txt, key, true )
+ToolObject::ToolObject( const QString& capt, const QString& txt,
+                        const QKeySequence& key, int objId )
+   : VkObject( capt, txt, key, objId )
 {
-  m_view = 0;
-  proc = 0;
-
-  is_Running = false;
-  fileSaved  = true;
+   m_view      = 0;
+   m_fileSaved = true;
+   m_runState  = VkRunState::STOPPED;
 }
 
 bool ToolObject::isRunning() 
-{ return is_Running; }
-
-
-/* kill proc if it is running */
-void ToolObject::killProc()
 {
-  if ( proc != 0 ) {
-    if ( proc->isRunning() ) {
-      /* if this view is closed, don't leave the process running */
-      proc->tryTerminate();
-      QTimer::singleShot( 5000, proc, SLOT( kill() ) );
-    }
-    delete proc;
-    proc = 0;
-  }
+   return (m_runState != VkRunState::STOPPED);
 }
+
+
+void ToolObject::setRunState( VkRunState::State rs )
+{
+   m_runState = rs;
+   emit running( isRunning() );
+}
+
 
 void ToolObject::deleteView()
 {
-  emit message( "" );  /* clear the status bar */
-  vk_assert( m_view != 0 );
-  // CAB: which is correct: close or delete ?
-  m_view->close( true );
-  //  delete memcheckView;
-  m_view = 0;
+   emit message( "" );  /* clear the status bar */
+   vk_assert( m_view != 0 );
+
+   m_view->close( true/*alsoDelete*/ );
+   m_view = 0;
 }
 
-/* called from VkConfig::modFlags() when a toolview needs to know what
-   flags to set || pass to a process. */
-QStringList ToolObject::modifiedFlags()
+ToolView* ToolObject::view()
 {
-  QStringList modFlags;
+   return m_view;
+}
 
-  for ( Option* opt = optList.first(); opt; opt = optList.next() ) {
 
-    QString defVal = opt->defaultValue;     /* opt holds the default */
-    QString cfgVal = vkConfig->rdEntry( opt->longFlag, name() );
+/* called from Valkyrie::updateVgFlags() whenever flags have been changed */
+QStringList ToolObject::modifiedVgFlags()
+{
+   QStringList modFlags;
 
-    if ( defVal != cfgVal )
-      modFlags << "--" + opt->longFlag + "=" + cfgVal;
+   for ( Option* opt = m_optList.first(); opt; opt = m_optList.next() ) {
 
-  }
+      QString defVal = opt->m_defaultValue;     /* opt holds the default */
+      QString cfgVal = vkConfig->rdEntry( opt->m_longFlag, name() );
 
-  return modFlags;
+      if ( defVal != cfgVal )
+         modFlags << "--" + opt->m_longFlag + "=" + cfgVal;
+   }
+   return modFlags;
 }

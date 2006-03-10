@@ -14,87 +14,78 @@
 
 #include "tool_object.h"
 #include "memcheck_view.h"
-#include "xml_parser.h"
 #include "memcheck_options_page.h"
+#include "vk_logpoller.h"
+
+#include "vglogreader.h"
+#include "vk_process.h"
 
 
 /* class Memcheck ------------------------------------------------------ */
 class Memcheck : public ToolObject
 {
-  Q_OBJECT
+   Q_OBJECT
+
 public:
-  Memcheck();
-  ~Memcheck();
+   Memcheck( int objId );
+   ~Memcheck();
 
-  bool parseLogFile( bool checked=true );
-  bool mergeLogFiles();
-  bool run( QStringList flags );
+   /* returns the ToolView window (memcheckView) for this tool */
+   ToolView* createView( QWidget* parent );
+   /* called by MainWin::closeToolView() */
+   bool isDone();
 
-  /* returns the ToolView window (memcheckView) for this tool */
-  ToolView* createView( QWidget* parent );
-  /* called by MainWin::closeToolView() */
-  bool isDone( Valkyrie::RunMode );
+   bool start( VkRunState::State rm, QStringList vgflags );
+   bool stop();
 
-  bool start( Valkyrie::RunMode rm );
-  bool stop( Valkyrie::RunMode rm );
+   int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
-  int checkOptArg( int optid, const char* argval, bool use_gui=false );
+   enum mcOpts { 
+      LEAK_CHECK,
+      LEAK_RES,
+      SHOW_REACH,
+      PARTIAL,
+      FREELIST,
+      GCC_296,
+      ALIGNMENT,
+      LAST_CMD_OPT  = ALIGNMENT
+   };
 
-  enum mcOpts { 
-    LEAK_CHECK,
-    LEAK_RES,
-    SHOW_REACH,
-    PARTIAL,
-    FREELIST,
-    GCC_296,
-    ALIGNMENT,
-    LAST_CMD_OPT  = ALIGNMENT
-  };
+   OptionsPage* createOptionsPage( OptionsWindow* parent ) {
+      return (OptionsPage*)new MemcheckOptionsPage( parent, this );
+   }
 
-  bool optionUsesPwr2( int optId ) {
-    if (optId == ALIGNMENT) return true;
-    return false;
-  }
-
-  OptionsPage* createOptionsPage( OptionsWindow* parent ) {
-    return (OptionsPage*)new MemcheckOptionsPage( parent, this );
-  }
-
-  bool fileSaveDialog( QString fname );
+   /* returns a list of non-default flags to pass to valgrind */
+   QStringList modifiedVgFlags();
 
 public slots:
-  void loadClientOutput( const QString&, int log_fd=-1 );
+   bool fileSaveDialog( QString fname=QString() );
+
+private:
+   /* overriding to avoid casting everywhere */
+   MemcheckView* view() { return (MemcheckView*)m_view; }
+
+   void statusMsg(  QString hdr, QString msg );
+   bool queryFileSave();
+   bool saveParsedOutput( QString& fname );
+
+   bool runValgrind( QStringList vgflags );  // RM_Valgrind
+   bool parseLogFile();                      // RM_Tool0
+   bool mergeLogFiles();                     // RM_Tool1
+   bool runProcess( QStringList flags );
+
+   /* TODO: put in VKProcess */
+   void vgProcTerminate();
 
 private slots:
-  void parseOutput();
-  void processDone();
+   void processDone();
+   void readVgLog();
 
 private:
-  friend class MemcheckView;
-
-  /* overriding to avoid casting everywhere */
-  MemcheckView* view() { return (MemcheckView*)m_view; }
-
-  void emitRunning( bool );
-  bool parseLog( QString logfile );
-  QString validateFile( QString log_file );
-  void statusMsg(  QString hdr, QString msg );
-  bool queryFileSave();
-  bool saveParsedOutput( QString& fname );
-
-  void setupProc( bool init, int log_fd=-1 );
-  void setupParser( bool init );
-  bool setupFileStream( bool init );
-
-  bool runProcess( QStringList flags, int log_fd, QString fbasename );
-
-private:
-  XMLParser* xmlParser;
-  QXmlSimpleReader reader;
-  QXmlInputSource source;
-
-  QString saveFname;
-  QTextStream logStream;
+   QString      m_saveFname;
+   VgLogReader* m_vgreader;
+   VKProcess*   m_vgproc;
+   VkLogPoller* m_logpoller;
 };
 
 

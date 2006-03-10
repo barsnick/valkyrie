@@ -36,45 +36,46 @@ class FileDialogPrivate;
 /* class PixmapView ---------------------------------------------------- */
 class PixmapView : public QScrollView
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  PixmapView( QWidget *parent );
-  void setPixmap( const QPixmap &pix );
-  void drawContents( QPainter *p, int, int, int, int );
+   PixmapView( QWidget *parent );
+   void setPixmap( const QPixmap &pix );
+   void drawContents( QPainter *p, int, int, int, int );
 
 private:
-  QPixmap pixmap;
+   QPixmap m_pixmap;
 };
 
+/* class PreviewStack -------------------------------------------------- */
 class PreviewStack : public QWidgetStack
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  PreviewStack( QSplitter* parent, const char* name );
-  void previewUrl( const QUrl& u );
+   PreviewStack( QSplitter* parent, const char* name );
+   void previewUrl( const QUrl& u );
 private:
-  QTextView*  textView;
-  QTextView*  htmlView;
-  PixmapView* pixmapView;
+   QTextView*  m_textView;
+   QTextView*  m_htmlView;
+   PixmapView* m_pixmapView;
 };
 
 
 /* class RenameEdit ---------------------------------------------------- */
 class RenameEdit : public QLineEdit
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  RenameEdit( QWidget* parent );
+   RenameEdit( QWidget* parent );
 protected:
-  void keyPressEvent( QKeyEvent *e );
-  void focusOutEvent( QFocusEvent *e );
+   void keyPressEvent( QKeyEvent *e );
+   void focusOutEvent( QFocusEvent *e );
 signals:
-  void cancelRename();
-  void doRename();
+   void cancelRename();
+   void doRename();
 private slots:
-  void slotReturnPressed();
+   void slotReturnPressed();
 private:
-  bool doRenameAlreadyEmitted;
+   bool m_doRenameAlreadyEmitted;
 };
 
 
@@ -82,43 +83,43 @@ private:
 /* class FileListBox --------------------------------------------------- */
 class FileListBox : public QListBox
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  FileListBox( QWidget* parent, FileDialog* d );
+   FileListBox( QWidget* parent, FileDialog* d );
 
-  void clear();
-  void show();
-  void startRename( bool check=true );
+   void clear();
+   void show();
+   void startRename( bool check=true );
 
-  bool renaming;
-  RenameEdit* lined;
-  QListBoxItem* renameItem;
+   bool          m_renaming;
+   RenameEdit*   m_lined;
+   QListBoxItem* m_renameItem;
 
 private:
-  void keyPressEvent( QKeyEvent* ke );
-  void viewportMousePressEvent( QMouseEvent* me );
-  void viewportMouseReleaseEvent( QMouseEvent* me );
-  void viewportMouseDoubleClickEvent( QMouseEvent* me );
+   void keyPressEvent( QKeyEvent* ke );
+   void viewportMousePressEvent( QMouseEvent* me );
+   void viewportMouseReleaseEvent( QMouseEvent* me );
+   void viewportMouseDoubleClickEvent( QMouseEvent* me );
 
 private slots:
-  void rename();
-  void cancelRename();
-  void doubleClickTimeout();
-  void contentsMoved( int, int );
+   void rename();
+   void cancelRename();
+   void doubleClickTimeout();
+   void contentsMoved( int, int );
 
 private:
-  FileDialog* filedialog;
-  QTimer* renameTimer;
-  QTimer* changeDirTimer;
+   FileDialog*  m_filedialog;
+   QTimer*      m_renameTimer;
+   QTimer*      m_changeDirTimer;
 
-  int urls;
-  bool mousePressed;
-  bool firstMousePressEvent;
+   int          m_urls;
+   bool         m_mousePressed;
+   bool         m_firstMousePressEvent;
 	//RM ??
-  QPoint pressPos;
-	QPoint oldDragPos;
-  QString startDragDir;
-  QUrlOperator startDragUrl;
+   QPoint       m_pressPos;
+   QPoint       m_oldDragPos;
+   QString      m_startDragDir;
+   QUrlOperator m_startDragUrl;
 };
 
 
@@ -126,46 +127,46 @@ private:
 /* class FileListView -------------------------------------------------- */
 class FileListView : public QListView
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  FileListView( QWidget* parent, FileDialog* d );
+   FileListView( QWidget* parent, FileDialog* d );
 
-  void clear();
-  void startRename( bool check = true );
-  void setSorting( int column, bool increasing = true );
+   void clear();
+   void startRename( bool check = true );
+   void setSorting( int column, bool increasing = true );
 
-  bool renaming;
-  RenameEdit *lined;
-  QListViewItem *renameItem;
+   bool           m_renaming;
+   RenameEdit*    m_lined;
+   QListViewItem* m_renameItem;
 
 private:
-  void keyPressEvent( QKeyEvent *e );
-  void viewportMousePressEvent( QMouseEvent *e );
-  void viewportMouseDoubleClickEvent( QMouseEvent *e );
-  void viewportMouseReleaseEvent( QMouseEvent *e );
+   void keyPressEvent( QKeyEvent *e );
+   void viewportMousePressEvent( QMouseEvent *e );
+   void viewportMouseDoubleClickEvent( QMouseEvent *e );
+   void viewportMouseReleaseEvent( QMouseEvent *e );
 
 private slots:
-  void rename();
-  void cancelRename();
-  void changeSortColumn2( int column );
-  void doubleClickTimeout();
-  void contentsMoved( int, int );
+   void rename();
+   void cancelRename();
+   void changeSortColumn2( int column );
+   void doubleClickTimeout();
+   void contentsMoved( int, int );
 
 private:
-  FileDialog* filedialog;
-  QTimer* renameTimer;
-  QTimer* changeDirTimer;
-  QPoint pressPos;
-	QPoint oldDragPos;
-  QString startDragDir;
+   FileDialog* m_filedialog;
+   QTimer*     m_renameTimer;
+   QTimer*     m_changeDirTimer;
+   QPoint      m_pressPos;
+   QPoint      m_oldDragPos;
+   QString     m_startDragDir;
 
-  int urls;
-  int sortcolumn;
-  bool mousePressed;
-  bool firstMousePressEvent;
-  bool ascending;
+   int  m_urls;
+   int  m_sortcolumn;
+   bool m_mousePressed;
+   bool m_firstMousePressEvent;
+   bool m_ascending;
 
-  QUrlOperator startDragUrl;
+   QUrlOperator m_startDragUrl;
 };
 
 
@@ -173,181 +174,181 @@ private:
 /* class FileDialog ---------------------------------------------------- */
 class FileDialog : public QDialog
 {
-  Q_OBJECT
+   Q_OBJECT
 public:
-  FileDialog( const QString &dirName, 
+   FileDialog( const QString &dirName, 
                const QString &filter=QString::null,
                QWidget *parent=0, const char *name=0, 
                bool modal=false );
-  FileDialog( QWidget *parent=0, const char *name=0, bool modal=false );
-  ~FileDialog();
+   FileDialog( QWidget *parent=0, const char *name=0, bool modal=false );
+   ~FileDialog();
 
-  static QString getOpenFileName( const QString &initially = QString::null,
-                                  const QString &filter = QString::null,
-                                  QWidget *parent = 0, const char* name = 0,
-                                  const QString &caption = QString::null,
-                                  QString *selectedFilter = 0,
-                                  bool resolveSymlinks = true);
-  static QString getSaveFileName( const QString &initially = QString::null,
-                                  const QString &filter = QString::null,
-                                  QWidget *parent = 0, const char* name = 0,
-                                  const QString &caption = QString::null,
-                                  QString *selectedFilter = 0,
-                                  bool resolveSymlinks = true);
-  static QString getExistingDirectory( const QString &dir = QString::null,
-                                       QWidget *parent = 0,
-                                       const char* name = 0,
-                                       const QString &caption = QString::null,
-                                       bool dirOnly = true,
-                                       bool resolveSymlinks = true);
-  static QStringList getOpenFileNames( const QString &filter= QString::null,
-                                       const QString &dir = QString::null,
-                                       QWidget *parent = 0,
-                                       const char* name = 0,
-                                       const QString &caption = QString::null,
-                                       QString *selectedFilter = 0,
-                                       bool resolveSymlinks = true);
+   static QString getOpenFileName( const QString &initially = QString::null,
+                                   const QString &filter = QString::null,
+                                   QWidget *parent = 0, const char* name = 0,
+                                   const QString &caption = QString::null,
+                                   QString *selectedFilter = 0,
+                                   bool resolveSymlinks = true);
+   static QString getSaveFileName( const QString &initially = QString::null,
+                                   const QString &filter = QString::null,
+                                   QWidget *parent = 0, const char* name = 0,
+                                   const QString &caption = QString::null,
+                                   QString *selectedFilter = 0,
+                                   bool resolveSymlinks = true);
+   static QString getExistingDirectory( const QString &dir = QString::null,
+                                        QWidget *parent = 0,
+                                        const char* name = 0,
+                                        const QString &caption = QString::null,
+                                        bool dirOnly = true,
+                                        bool resolveSymlinks = true);
+   static QStringList getOpenFileNames( const QString &filter= QString::null,
+                                        const QString &dir = QString::null,
+                                        QWidget *parent = 0,
+                                        const char* name = 0,
+                                        const QString &caption = QString::null,
+                                        QString *selectedFilter = 0,
+                                        bool resolveSymlinks = true);
 
-  QString selectedFile() const;
-  QString selectedFilter() const;
-  virtual void setSelectedFilter( const QString& );
-  virtual void setSelectedFilter( int );
+   QString selectedFile() const;
+   QString selectedFilter() const;
+   virtual void setSelectedFilter( const QString& );
+   virtual void setSelectedFilter( int );
 
-  void setSelection( const QString &);
-  void selectAll( bool b );
+   void setSelection( const QString &);
+   void selectAll( bool b );
 
-  QStringList selectedFiles() const;
-  QString dirPath() const;
+   QStringList selectedFiles() const;
+   QString dirPath() const;
 
-  void setDir( const QDir & );
-  const QDir *dir() const;
+   void setDir( const QDir & );
+   const QDir *dir() const;
 
-  void rereadDir();
-  void resortDir();
+   void rereadDir();
+   void resortDir();
 
-  enum Mode { 
+   enum Mode { 
 		AnyFile, 
 		ExistingFile, 
 		Directory, 
 		ExistingFiles, 
 		DirectoryOnly 
 	};
-  void setMode( Mode );
-  Mode mode() const;
+   void setMode( Mode );
+   Mode mode() const;
 
-  enum ViewMode { 
+   enum ViewMode { 
 		Detail = 0, /* name, size, type, date, attribs */
 		List   = 1  /* files + dirs */
 	};
 
-//RM: ??
+   //RM: ??
 	enum StackId {
-    DetailView = 0,  /* files     */
+      DetailView = 0,  /* files     */
 		ListView   = 1,  /* moreFiles */
-    PreView    = 2   /* */
+      PreView    = 2   /* */
 	};
 
-  enum ButtonId {
-    ListDetails = 0,     /* mcol_detailView */
+   enum ButtonId {
+      ListDetails = 0,     /* mcol_detailView */
 		PreviewContents = 2  /* previewContents */
 	};
 
-  bool eventFilter( QObject *, QEvent * );
+   bool eventFilter( QObject *, QEvent * );
 
-  QUrl url() const;
+   QUrl url() const;
 
-  void addFilter( const QString &filter );
+   void addFilter( const QString &filter );
 
 public slots:
-  void done( int );
-  void setDir( const QString& );
-  void setUrl( const QUrlOperator &url );
-  void setFilter( const QString& );
-  void setFilters( const QString& );
-  void setFilters( const char ** );
-  void setFilters( const QStringList& );
+   void done( int );
+   void setDir( const QString& );
+   void setUrl( const QUrlOperator &url );
+   void setFilter( const QString& );
+   void setFilters( const QString& );
+   void setFilters( const char ** );
+   void setFilters( const QStringList& );
 
 protected:
-  void resizeEvent( QResizeEvent * );
-  void keyPressEvent( QKeyEvent * );
+   void resizeEvent( QResizeEvent * );
+   void keyPressEvent( QKeyEvent * );
 
 signals:
-  void fileHighlighted( const QString& );
-  void fileSelected( const QString& );
-  void filesSelected( const QStringList& );
-  void dirEntered( const QString& );
-  void filterSelected( const QString& );
+   void fileHighlighted( const QString& );
+   void fileSelected( const QString& );
+   void filesSelected( const QStringList& );
+   void dirEntered( const QString& );
+   void filterSelected( const QString& );
 
 private slots:
-  void detailViewSelectionChanged();
-  void listBoxSelectionChanged();
-  void changeMode();
-  void fileNameEditReturnPressed();
-  void stopCopy();
+   void detailViewSelectionChanged();
+   void listBoxSelectionChanged();
+   void changeMode();
+   void fileNameEditReturnPressed();
+   void stopCopy();
 
-  void updateFileNameEdit( QListViewItem *);
-  void selectDirectoryOrFile( QListViewItem * );
-  void popupContextMenu( QListViewItem *, const QPoint &, int );
-  void popupContextMenu( QListBoxItem *, const QPoint & );
-  void updateFileNameEdit( QListBoxItem *);
-  void selectDirectoryOrFile( QListBoxItem * );
-  void fileNameEditDone();
+   void updateFileNameEdit( QListViewItem *);
+   void selectDirectoryOrFile( QListViewItem * );
+   void popupContextMenu( QListViewItem *, const QPoint &, int );
+   void popupContextMenu( QListBoxItem *, const QPoint & );
+   void updateFileNameEdit( QListBoxItem *);
+   void selectDirectoryOrFile( QListBoxItem * );
+   void fileNameEditDone();
 
-  void okClicked();
-  void cancelClicked();
-  void cdUpClicked();
-  void goHomeClicked();
+   void okClicked();
+   void cancelClicked();
+   void cdUpClicked();
+   void goHomeClicked();
 
-  void fixupNameEdit();
+   void fixupNameEdit();
 
-  void updateGeometries();
-  void urlStart( QNetworkOperation *op );
-  void urlFinished( QNetworkOperation *op );
-  void dataTransferProgress( int bytesDone, int bytesTotal, 
-                             QNetworkOperation * );
-  void insertEntry( const QValueList<QUrlInfo> &fi, 
-                    QNetworkOperation *op );
-  void removeEntry( QNetworkOperation * );
-  void createdDirectory( const QUrlInfo &info, QNetworkOperation * );
-  void itemChanged( QNetworkOperation * );
-  void goBack();
+   void updateGeometries();
+   void urlStart( QNetworkOperation *op );
+   void urlFinished( QNetworkOperation *op );
+   void dataTransferProgress( int bytesDone, int bytesTotal, 
+                              QNetworkOperation * );
+   void insertEntry( const QValueList<QUrlInfo> &fi, 
+                     QNetworkOperation *op );
+   void removeEntry( QNetworkOperation * );
+   void createdDirectory( const QUrlInfo &info, QNetworkOperation * );
+   void itemChanged( QNetworkOperation * );
+   void goBack();
 
 private:
-  enum PopupAction {
-    PA_Open = 0,
-    PA_Delete,
-    PA_Rename,
-    PA_SortName,
-    PA_SortSize,
-    PA_SortType,
-    PA_SortDate,
-    PA_SortNone,
-    PA_Cancel,
-    PA_Reload,
-    PA_Hidden
-  };
+   enum PopupAction {
+      PA_Open = 0,
+      PA_Delete,
+      PA_Rename,
+      PA_SortName,
+      PA_SortSize,
+      PA_SortType,
+      PA_SortDate,
+      PA_SortNone,
+      PA_Cancel,
+      PA_Reload,
+      PA_Hidden
+   };
 
-  void init();
-  bool trySetSelection( bool isDir, const QUrlOperator &, bool );
-  void deleteFile( const QString &filename );
-  void popupContextMenu( const QString &filename, bool withSort,
-                         PopupAction &action, const QPoint &p );
-  void updatePreviews( const QUrl &u );
+   void init();
+   bool trySetSelection( bool isDir, const QUrlOperator &, bool );
+   void deleteFile( const QString &filename );
+   void popupContextMenu( const QString &filename, bool withSort,
+                          PopupAction &action, const QPoint &p );
+   void updatePreviews( const QUrl &u );
 
-  QDir reserved; // was cwd
-  QString fileName;
+   //  QDir    m_reserved; // was cwd
+   //  QString m_fileName;
 
-  friend class FileListView;
-  friend class FileListBox;
+   friend class FileListView;
+   friend class FileListBox;
 
-  FileDialogPrivate* d;
+   FileDialogPrivate* d;
 
-  FileListView* files;
-  FileListBox* moreFiles;
+   FileListView* m_files;
+   FileListBox*  m_moreFiles;
 
-  QLineEdit* nameEdit; // also filter
-  QPushButton* okB;
-  QPushButton* cancelB;
+   QLineEdit*    m_nameEdit; // also filter
+   QPushButton*  m_okB;
+   QPushButton*  m_cancelB;
 };
 
 #endif // #ifndef __VK_FILE_UTILS_H

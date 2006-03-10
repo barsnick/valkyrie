@@ -13,7 +13,7 @@
 #-------------------------------------------------------------------
 vk_name="valkyrie"
 Vk_Name="Valkyrie"
-VK_VERSION="1.1.0"
+VK_VERSION="1.3.0"
 VK_COPYRIGHT="(c) 2003-2005"
 VK_AUTHOR="OpenWorks LLP"
 VK_EMAIL="info@open-works.co.uk"
@@ -825,14 +825,17 @@ bins.path         = $VK_INSTALL_BIN
 
 TEMPLATE = app
 DEPENDPATH += vk_logmerge
-INCLUDEPATH += vk_logmerge
+INCLUDEPATH += vk_logmerge \
+               src/tool_utils
 
 # Input
 HEADERS += vk_logmerge/vklm_main.h \
-           vk_logmerge/vk_logmerge.h
+           src/tool_utils/vglog.h \
+           src/tool_utils/vglogreader.h
 
 SOURCES += vk_logmerge/vklm_main.cpp \
-           vk_logmerge/vk_logmerge.cpp
+           src/tool_utils/vglog.cpp \
+           src/tool_utils/vglogreader.cpp
 
 _LM_PRO_EOF
 

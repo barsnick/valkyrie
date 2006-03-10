@@ -21,43 +21,41 @@
 class Cachegrind : public ToolObject
 {
 public:
-  Cachegrind();
-  ~Cachegrind();
+   Cachegrind( int objId );
+   ~Cachegrind();
 
-  /* returns the ToolView window (cachegrindView) for this tool */
-  ToolView* createView( QWidget* parent );
-  /* called by MainWin::closeToolView() */
-  bool isDone( Valkyrie::RunMode rm );
+   /* returns the ToolView window (cachegrindView) for this tool */
+   ToolView* createView( QWidget* parent );
+   /* called by MainWin::closeToolView() */
+   bool isDone();
 
-  bool start( Valkyrie::RunMode rm );
-  bool stop( Valkyrie::RunMode rm );
-  bool run( QStringList /*flags*/ ) { return true; }
+   bool start( VkRunState::State rm, QStringList vgflags );
+   bool stop();
 
-  int checkOptArg( int optid, const char* argval, bool use_gui=false );
+   int checkOptArg( int optid, const char* argval, bool use_gui=false );
 
-  enum cgOpts {
-    I1_CACHE,
-    D1_CACHE,
-    L2_CACHE,
-    PID_FILE,
-    SHOW,
-    SORT,
-    THRESH,
-    AUTO,
-    CONTEXT,
-    INCLUDE,
-    LAST_CMD_OPT = INCLUDE 
-  };
+   enum cgOpts {
+      I1_CACHE,
+      D1_CACHE,
+      L2_CACHE,
+      PID_FILE,
+      SHOW,
+      SORT,
+      THRESH,
+      AUTO,
+      CONTEXT,
+      INCLUDE,
+      LAST_CMD_OPT = INCLUDE 
+   };
 
-  OptionsPage* createOptionsPage( OptionsWindow* parent ) {
-    return (OptionsPage*)new CachegrindOptionsPage( parent, this );
-  }
+   OptionsPage* createOptionsPage( OptionsWindow* parent ) {
+      return (OptionsPage*)new CachegrindOptionsPage( parent, this );
+   }
 
 private:
-  /* overriding to avoid casting everywhere */
-  CachegrindView* view() { return (CachegrindView*)m_view; }
-
-  void emitRunning( bool );
+   /* overriding to avoid casting everywhere */
+   CachegrindView* view() { return (CachegrindView*)m_view; }
+   bool runValgrind( QStringList /*vgflags*/ ) { return true; }
 };
 
 

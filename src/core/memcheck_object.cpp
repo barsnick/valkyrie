@@ -13,6 +13,8 @@
 #include "vk_config.h"
 #include "html_urls.h"
 #include "vk_messages.h"
+#include "vk_popt_option.h"    // PERROR* and friends 
+#include "vk_utils.h"          // vk_assert, VK_DEBUG, etc.
 
 #include <qapplication.h>
 #include <qtimer.h>
@@ -22,153 +24,194 @@
 /* class Memcheck ------------------------------------------------------ */
 Memcheck::~Memcheck()
 {
-  if ( xmlParser != 0 ) {
-    delete xmlParser;
-    xmlParser = 0;
-  }
+   if (m_vgproc) {
+      if (m_vgproc->isRunning()) {
+         m_vgproc->tryTerminate();
+         m_vgproc->kill();
+      }
+      delete m_vgproc;
+      m_vgproc = 0;
+   }
+   if (m_vgreader) {
+      delete m_vgreader;
+      m_vgreader = 0;
+   }
+
+   /* m_logpoller deleted by it's parent: 'this' */
+
+   /* unsaved log... delete our temp file */
+   if (!m_fileSaved && !m_saveFname.isEmpty())
+      QDir().remove( m_saveFname );
 }
 
 
-Memcheck::Memcheck() 
-  : ToolObject( "Memcheck", "&Memcheck", Qt::SHIFT+Qt::Key_M ) 
+Memcheck::Memcheck( int objId ) 
+   : ToolObject( "Memcheck", "&Memcheck", Qt::SHIFT+Qt::Key_M, objId ) 
 {
-  /* init vars */
-  fileSaved = true;
-  logStream.setEncoding( QTextStream::UnicodeUTF8 );
-  xmlParser = new XMLParser( this, true );
-  reader.setContentHandler( xmlParser );
-  reader.setErrorHandler( xmlParser );
-  
+   /* init vars */
+   m_fileSaved = true;
+   m_vgproc    = 0;
+   m_vgreader  = 0;
+   m_logpoller = 0;
+
 	/* these opts should be kept in exactly the same order as valgrind
-		 outputs them, as it makes keeping up-to-date a lot easier. */
-  addOpt( LEAK_CHECK,  Option::ARG_STRING, Option::COMBO, 
-          "memcheck",  '\0',               "leak-check",
-          "<no|summary|full>",  "no|summary|full",  "full",
-          "Search for memory leaks at exit:",
-          "search for memory leaks at exit?",
-          urlMemcheck::Leakcheck );
-  addOpt( LEAK_RES,    Option::ARG_STRING, Option::COMBO, 
-          "memcheck",  '\0',               "leak-resolution",
-          "<low|med|high>", "low|med|high", "low",
-          "Degree of backtrace merging:",
-          "how much backtrace merging in leak check", 
-          urlMemcheck::Leakres );
-  addOpt( SHOW_REACH,  Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",  '\0',               "show-reachable",
-          "<yes|no>",  "yes|no",           "no",
-          "Show reachable blocks in leak check",
-          "show reachable blocks in leak check?",  
-          urlMemcheck::Showreach );
-  addOpt( PARTIAL,     Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",  '\0',               "partial-loads-ok",
-          "<yes|no>",  "yes|no",           "no",
-          "Ignore errors on partially invalid addresses",
-          "too hard to explain here; see manual",
-          urlMemcheck::Partial );
-  addOpt( FREELIST,    Option::ARG_UINT,   Option::LEDIT, 
-          "memcheck",  '\0',               "freelist-vol",
-          "<number>",  "",                 "5000000",
-          "Volume of freed blocks queue:",
-          "volume of freed blocks queue",
-          urlMemcheck::Freelist );
-  addOpt( GCC_296,     Option::ARG_BOOL,   Option::CHECK, 
-          "memcheck",  '\0',               "workaround-gcc296-bugs",
-          "<yes|no>",  "yes|no",           "no",
-          "Work around gcc-296 bugs",
-          "self explanatory",  
-          urlMemcheck::gcc296 );
-  addOpt( ALIGNMENT,  Option::ARG_UINT,   Option::SPINBOX, 
-          "memcheck",  '\0',               "alignment", 
-           "<number>", "8|1048576",        "8",
-          "Minimum alignment of allocations",
-          "set minimum alignment of allocations", 
+      outputs them, as it makes keeping up-to-date a lot easier. */
+   addOpt( LEAK_CHECK,  VkOPTION::ARG_STRING, VkOPTION::WDG_COMBO, 
+           "memcheck",  '\0',                 "leak-check",
+           "<no|summary|full>",  "no|summary|full",  "full",
+           "Search for memory leaks at exit:",
+           "search for memory leaks at exit?",
+           urlMemcheck::Leakcheck );
+   addOpt( LEAK_RES,    VkOPTION::ARG_STRING, VkOPTION::WDG_COMBO, 
+           "memcheck",  '\0',                 "leak-resolution",
+           "<low|med|high>", "low|med|high", "low",
+           "Degree of backtrace merging:",
+           "how much backtrace merging in leak check", 
+           urlMemcheck::Leakres );
+   addOpt( SHOW_REACH,  VkOPTION::ARG_BOOL,   VkOPTION::WDG_CHECK, 
+           "memcheck",  '\0',                 "show-reachable",
+           "<yes|no>",  "yes|no",             "no",
+           "Show reachable blocks in leak check",
+           "show reachable blocks in leak check?",  
+           urlMemcheck::Showreach );
+   addOpt( PARTIAL,     VkOPTION::ARG_BOOL,   VkOPTION::WDG_CHECK, 
+           "memcheck",  '\0',                 "partial-loads-ok",
+           "<yes|no>",  "yes|no",             "no",
+           "Ignore errors on partially invalid addresses",
+           "too hard to explain here; see manual",
+           urlMemcheck::Partial );
+   addOpt( FREELIST,    VkOPTION::ARG_UINT,   VkOPTION::WDG_LEDIT, 
+           "memcheck",  '\0',                 "freelist-vol",
+           "<number>",  "",                   "5000000",
+           "Volume of freed blocks queue:",
+           "volume of freed blocks queue",
+           urlMemcheck::Freelist );
+   addOpt( GCC_296,     VkOPTION::ARG_BOOL,   VkOPTION::WDG_CHECK, 
+           "memcheck",  '\0',                 "workaround-gcc296-bugs",
+           "<yes|no>",  "yes|no",             "no",
+           "Work around gcc-296 bugs",
+           "self explanatory",  
+           urlMemcheck::gcc296 );
+   addOpt( ALIGNMENT,  VkOPTION::ARG_PWR2,   VkOPTION::WDG_SPINBOX, 
+           "memcheck",  '\0',                "alignment", 
+           "<number>", "8|1048576",          "8",
+           "Minimum alignment of allocations",
+           "set minimum alignment of allocations", 
            urlVgCore::Alignment );
 }
 
 
 int Memcheck::checkOptArg( int optid, const char* argval, 
-                           bool use_gui/*=false*/ )
+                           bool /*use_gui*//*=false*/ )
 {
-  int errval = PARSED_OK;
-  QString argVal( argval );
-  Option* opt = findOption( optid );
+   int errval = PARSED_OK;
+   QString argVal( argval );
+   Option* opt = findOption( optid );
 
-  switch ( optid ) {
-
-    case PARTIAL:
-    case FREELIST:
-    case LEAK_CHECK:
-    case LEAK_RES:
-    case SHOW_REACH:
-    case GCC_296:
+   switch ( (Memcheck::mcOpts)optid ) {
+   case PARTIAL:
+   case FREELIST:
+   case LEAK_CHECK:
+   case LEAK_RES:
+   case SHOW_REACH:
+   case GCC_296:
+   case ALIGNMENT:
       opt->isValidArg( &errval, argval );
       break;
 
-    case ALIGNMENT: /* check is really a number, then if is power of two */
-      opt->isPowerOfTwo( &errval, argval ); 
-      break;
+   default:
+      vk_assert_never_reached();
+   }
 
-  }
-
-  /* if this option has been called from the cmd-line, save its value
-     in valkyrierc if it has passed the checks. */
-  if ( errval == PARSED_OK && use_gui == false ) {
-    writeOptionToConfig( opt, argval );
-  }
-
-  return errval;
+   return errval;
 }
 
 
+/* called from Valkyrie::updateVgFlags() whenever flags have been changed */
+QStringList Memcheck::modifiedVgFlags()
+{
+   QStringList modFlags;
+   QString defVal, cfgVal, flag;
 
-/* returns the ToolView window (memcheckView) for this tool */
+   Option* opt;
+   for ( opt = m_optList.first(); opt; opt = m_optList.next() ) {
+      flag   = opt->m_longFlag.isEmpty() ? opt->m_shortFlag
+                                         : opt->m_longFlag;
+      defVal = opt->m_defaultValue;     /* opt holds the default */
+      cfgVal = vkConfig->rdEntry( opt->m_longFlag, name() );
+
+      switch ( (Memcheck::mcOpts)opt->m_key ) {
+
+      case LEAK_CHECK:
+         if ( defVal != cfgVal ) {
+            /* gui option disabled, so only reaches here if specified
+               on cmdline */
+            fprintf(stderr,
+                    "\nSkipping option '%s': Memcheck presets this option to 'full' when generating the required xml output.\nSee valgrind/docs/internals/xml_output.txt.\n",
+                    flag.latin1());
+            /* reset to default */
+            vkConfig->wrEntry( opt->m_defaultValue, opt->cfgKey(), name() );
+         }
+         break;
+
+      default:
+         if ( defVal != cfgVal )
+            modFlags << "--" + opt->m_longFlag + "=" + cfgVal;
+      }
+   }
+   return modFlags;
+}
+
+
+/* Creates this tool's ToolView window,
+   and sets up and connections between them */
 ToolView* Memcheck::createView( QWidget* parent )
 {
-  m_view = new MemcheckView( parent, this );
-  view()->setState( is_Running );
-  return m_view;
-}
+   m_view = new MemcheckView( parent, this->name() );
 
+   /* signals view --> tool */
+   connect( m_view, SIGNAL(saveLogFile()),
+            this, SLOT(fileSaveDialog()) );
 
-void Memcheck::emitRunning( bool run )
-{
-  is_Running = run;
-  emit running( is_Running );
-  view()->setState( is_Running );
+   /* signals tool --> view */
+   connect( this, SIGNAL(running(bool)),
+            m_view, SLOT(setState(bool)) );
+
+   setRunState( VkRunState::STOPPED );
+   return m_view;
 }
 
 
 /* outputs a message to the status bar. */
 void Memcheck::statusMsg( QString hdr, QString msg ) 
 { 
-  emit message( hdr + ": " + msg );
+   emit message( hdr + ": " + msg );
 }
 
 
 /* called by MainWin::closeToolView() */
-bool Memcheck::isDone( Valkyrie::RunMode rmode )
+bool Memcheck::isDone()
 {
-  vk_assert( view() != 0 );
+   vk_assert( view() != 0 );
 
-  /* if current process is not yet finished, ask user if they really
-     want to close */
-  if ( is_Running ) {
-    int ok = vkQuery( this->view(), "Process Running", "&Abort;&Cancel",
-                      "<p>The current process is not yet finished.</p>"
-                      "<p>Do you want to abort it ?</p>" );
-    if ( ok == MsgBox::vkYes ) {
-      bool stopped = stop( rmode );         /* abort */
-      vk_assert( stopped );
-      // TODO: what todo if can't /  won't stop?
-    } else if ( ok == MsgBox::vkNo ) {
-      return false;                         /* continue */
-    }
-  }
+   /* if current process is not yet finished, ask user if they really
+      want to close */
+   if ( isRunning() ) {
+      int ok = vkQuery( this->view(), "Process Running", "&Abort;&Cancel",
+                        "<p>The current process is not yet finished.</p>"
+                        "<p>Do you want to abort it ?</p>" );
+      if ( ok == MsgBox::vkYes ) {
+         bool stopped = stop();         /* abort */
+         vk_assert( stopped );          // TODO: what todo if couldn't stop?
+      } else if ( ok == MsgBox::vkNo ) {
+         return false;                         /* continue */
+      }
+   }
 
-  if (!queryFileSave())
-    return false;     // not saved: procrastinate.
+   if (!queryFileSave())
+      return false;     // not saved: procrastinate.
 
-  return true;
+   return true;
 }
 
 /* if current output not saved, ask user if want to save
@@ -176,197 +219,160 @@ bool Memcheck::isDone( Valkyrie::RunMode rmode )
 */
 bool Memcheck::queryFileSave()
 {
-  /* currently loaded / parsed stuff is saved to tmp file - ask user
-     if they want to save it to a 'real' file */
-  if ( !fileSaved ) {
-    int ok = vkQuery( this->view(), "Unsaved File", 
-                      "&Save;&Discard;&Cancel",
-                      "<p>The current output is not saved, "
-                      " and will be deleted.<br/>"
-                      "Do you want to save it ?</p>" );
-    if ( ok == MsgBox::vkYes ) {            /* save */
+   vk_assert( view() != 0 );
+   vk_assert( !isRunning() );
 
-      if ( !fileSaveDialog( "" ) ) {
-        /* user clicked Cancel, but we already have the
-           auto-fname saved anyway, so get outta here. */
-	return false;
+   /* currently loaded / parsed stuff is saved to tmp file - ask user
+      if they want to save it to a 'real' file */
+   if ( !m_fileSaved ) {
+      int ok = vkQuery( this->view(), "Unsaved File", 
+                        "&Save;&Discard;&Cancel",
+                        "<p>The current output is not saved, "
+                        " and will be deleted.<br/>"
+                        "Do you want to save it ?</p>" );
+      if ( ok == MsgBox::vkYes ) {            /* save */
+
+         if ( !fileSaveDialog() ) {
+            /* user clicked Cancel, but we already have the
+               auto-fname saved anyway, so get outta here. */
+            return false;
+         }
+
+      } else if ( ok == MsgBox::vkCancel ) {  /* procrastinate */
+         return false;
+      } else {                                /* discard */
+         //      fprintf(stderr, "removing tmp file '%s'\n", m_saveFname.latin1() );
+         QFile::remove( m_saveFname );
+         m_fileSaved = true;
       }
-
-    } else if ( ok == MsgBox::vkCancel ) {  /* procrastinate */
-      return false;
-    } else {                                /* discard */
-      //printf("removing tmp file '%s'\n", saveFname.latin1() );
-      QFile::remove( saveFname );
-      fileSaved = true;
-    }
-  }
-  return true;
+   }
+   return true;
 }
 
-bool Memcheck::start( Valkyrie::RunMode rm )
+
+bool Memcheck::start( VkRunState::State rs, QStringList vgflags )
 {
-  vk_assert( !is_Running );
-  bool ok = false;
+   bool ok = false;
+   vk_assert( rs != VkRunState::STOPPED );
+   vk_assert( !isRunning() );
   
-  switch ( rm ) {
-    case Valkyrie::modeParseLog:
-      ok = this->parseLogFile( false );
+   switch ( rs ) {
+   case VkRunState::VALGRIND: { ok = runValgrind( vgflags ); break; }
+   case VkRunState::TOOL1:    { ok = parseLogFile();         break; }
+   case VkRunState::TOOL2:    { ok = mergeLogFiles();        break; }
+   default:
+      vk_assert_never_reached();
+   }
+   return ok;
+}
+
+
+bool Memcheck::stop()
+{
+   vk_assert( isRunning() );
+
+   switch ( runState() ) {
+   case VkRunState::VALGRIND: { vgProcTerminate(); break; }
+
+   case VkRunState::TOOL1:
+      /* TODO: make log parsing a VkProcess.  This will allow
+         - valkyrie to stay responsive
+         - the ability to interrupt the process if taking too long */
+      VK_DEBUG("TODO: %s::stop(parse log)", name().latin1() );
       break;
 
-    case Valkyrie::modeMergeLogs:
-      ok = this->mergeLogFiles();
+   case VkRunState::TOOL2:
+      // TODO: test: { vgProcTerminate(); break; }
+      VK_DEBUG("TODO: %s::stop(merge logs)", name().latin1() );
       break;
 
-  default:
-    vk_assert_never_reached();
-  }
-  return ok;
+   default:
+      vk_assert_never_reached();
+   }
+
+   return true;
 }
 
 
-bool Memcheck::stop( Valkyrie::RunMode rm )
+/* if --vg-opt=<arg> was specified on the cmd-line, called by
+   valkyrie->runTool(); if set via the run-button in the gui, 
+   then MainWindow::run() calls valkyrie->runTool().  */
+bool Memcheck::runValgrind( QStringList vgflags )
 {
-  if ( !is_Running ) return true;
+   m_saveFname = vk_mkstemp( "mc_log", vkConfig->logsDir(), ".xml" );
+   vk_assert( !m_saveFname.isEmpty() );
 
-  switch ( rm ) {
-  case Valkyrie::modeParseLog:
-    VK_DEBUG("TODO: %s::stop(parse log)", name().latin1() );
-    break;
+   /* fill in filename in flags list */
+#if (QT_VERSION-0 >= 0x030200)
+   vgflags.gres( "--log-file-exactly", "--log-file-exactly=" + m_saveFname );
+#else // QT_VERSION < 3.2
+   QStringList::iterator it_str = vgflags.find("--log-file-exactly");
+   if (it_str != vgflags.end())
+      (*it_str) += ("=" + m_saveFname);
 
-  case Valkyrie::modeMergeLogs:
-    VK_DEBUG("TODO: %s::stop(merge logs)", name().latin1() );
-    break;
+#endif
+  
+   setRunState( VkRunState::VALGRIND );
+   m_fileSaved = false;
+   statusMsg( "Memcheck", "Running ... " );
 
-  case Valkyrie::modeParseOutput:
-    proc->tryTerminate();   /* first ask nicely. */
-    /* if proc still running after msec_timeout, terminate with prejudice */
-    QTimer::singleShot( 2000, proc, SLOT( kill() ) );   // TODO: move N to config
+   bool ok = runProcess( vgflags );
 
-    // TODO?: if kill proc while we're i parseOutput(), we could get a segfault?
-    break;
-
-  default:
-    vk_assert_never_reached();
-  }
-
-  // TODO: statusMsg() ?
-
-  return true;
+   if (!ok) {
+      statusMsg( "Memcheck", "Failed" );
+      m_fileSaved = true;
+      setRunState( VkRunState::STOPPED );
+   }
+   return ok;
 }
 
 
-/* when --view-log=<file> is set on the cmd-line, valkyrie checks the
-   file's perms + format, and writes the value to [valkyrie:view-log].
-   However, when a file is set via the open-file-dialog in the gui, or
-   is contained with in a list of logfiles-to-merge, then perms +
-   format checks must be made
-   Returns absolute path of log_file, or QString::null on error */
-QString Memcheck::validateFile( QString log_file ) 
+/* Parse log file given by [valkyrie::view-log] entry.
+   Called by valkyrie->runTool() if cmdline --view-log=<file> specified.
+   MemcheckView::openLogFile() if gui parse-log selected.
+   If 'checked' == true, file perms/format has already been checked */
+bool Memcheck::parseLogFile()
 {
-  int errval = PARSED_OK;
+   vk_assert( view() != 0 );
 
-  /* check this is a valid file, and has the right perms */
-  QString ret_file = fileCheck( &errval, log_file.latin1(), true, false );
-  if ( errval != PARSED_OK ) {
-    vkError( view(), "File Error", "%s: \n\"%s\"", 
-             parseErrString(errval), escapeEntities(log_file).latin1() );
-    return QString::null;
-  }
+   QString log_file = vkConfig->rdEntry( "view-log", "valkyrie" );
+   statusMsg( "Parsing", log_file );
 
-  /* check the file is readable, and the format is xml */
-  bool is_xml = XMLParser::xmlFormatCheck( &errval, log_file );
-  if ( errval != PARSED_OK ) {
-    vkError( view(), "File Error", "%s: \n\"%s\"", 
-             parseErrString(errval), log_file.latin1() );
-    return QString::null;
-  }
-
-  if ( !is_xml ) {
-    vkError( view(), "File Format Error", 
-             "<p>The file '%s' is not in xml format.</p>",
-             log_file.latin1() );
-    return QString::null;
-  }
-
-  return ret_file;
-}
-
-
-/* called by parseLogFile().
-   opens a logfile and feeds the contents to the parser. 
-   the logfile's existence, perms and format have all been
-   pre-validated, so no need to re-check. */
-bool Memcheck::parseLog( QString log_filename )
-{
-  QFileInfo fi( log_filename );
-  statusMsg( "Parsing", fi.fileName() );
-
-  QFile logFile( log_filename );
-  logFile.open( IO_ReadOnly );
-
-  int lineNumber = 1;
-  QTextStream stream( &logFile );
-  stream.setEncoding( QTextStream::UnicodeUTF8 );
-  QString inputData = stream.readLine();
-  source.setData( inputData );
-  bool ok = reader.parse( &source, true );
-
-  while ( ok && !stream.atEnd() ) {
-    lineNumber++;
-    inputData = stream.readLine();
-    source.setData( inputData );
-    ok = reader.parseContinue();
-  }
-
-  logFile.close();
-
-  if ( !ok ) {
-    vkError( view(), "Parse Error",
-             "<p>Parsing failed on line no %d: '%s'</p>", 
-             lineNumber, inputData.latin1() );
-  }
-  return ok;
-}
-
-
-/* if --view-log=<file> was specified on the cmd-line, called by
-   valkyrie->runTool(); if set via the open-file-dialog in the gui,
-   called by MemcheckView::openLogFile().  either way, the value in
-   [valkyrie:view-log] is what we need to know. 
-   if 'checked' == true, the file has already been checked
-   w.r.t. perms and format. */
-bool Memcheck::parseLogFile( bool checked/*=true*/ )
-{
-  /* tell valkyrie what we are doing */
-  emit setRunMode( Valkyrie::modeParseLog );
-
-  QString log_file = vkConfig->rdEntry( "view-log", "valkyrie" );
-  if ( !checked ) {
-    log_file = validateFile( log_file );
-    if ( !log_file.isNull() ) {
-      vkConfig->wrEntry( log_file, "view-log", "valkyrie" );
-    } else {
-      vkConfig->wrEntry( "", "view-log", "valkyrie" );
+   /* check this is a valid file, and has the right perms */
+   int errval = PARSED_OK;
+   QString ret_file = fileCheck( &errval, log_file.latin1(), true, false );
+   if ( errval != PARSED_OK ) {
+      vkError( view(), "File Error", "%s: \n\"%s\"", 
+               parseErrString(errval),
+               escapeEntities(log_file).latin1() );
       return false;
-    }
-  }
+   }
+  
+   /* fileSaved is always true here 'cos we are just parsing a file
+      which already exists on disk */
+   m_fileSaved = true;
+   setRunState( VkRunState::TOOL1 );
 
-  /* fileSaved is always true here 'cos we are just parsing a file
-     which already exists on disk */
-  fileSaved = true;
+   /* Could be a very large file, so at least get ui up-to-date now */
+   qApp->processEvents( 1000/*max msecs*/ );
 
-  emitRunning( true );
-  setupParser( true );
+   /* Parse the log */
+   VgLogReader vgLogFileReader( view()->vgLogPtr() );
+   bool success = vgLogFileReader.parse( log_file );
+   if (!success) {
+      statusMsg( "Parsing", "Error" );
+      vkError( view(), "XML Parse Error",
+               "<p>%s</p>", vgLogFileReader.handler()->errorMsg.ascii() );
+   }
 
-  bool success = parseLog( log_file);
-
-  setupParser( false );
-  emitRunning( false );
-
-  QString hdr = ( success ) ? "Loaded" : "Parse failed";
-  statusMsg( hdr, log_file );
-
-  return success;
+   if (success) {
+      m_saveFname = log_file;
+      statusMsg( "Loaded", log_file );
+   } else {
+      statusMsg( "Parse failed", log_file );
+   }
+   setRunState( VkRunState::STOPPED );
+   return success;
 }
 
 
@@ -376,390 +382,323 @@ bool Memcheck::parseLogFile( bool checked/*=true*/ )
    [valkyrie:merge] is what we need to know */
 bool Memcheck::mergeLogFiles()
 {
-  /* tell valkyrie what we are doing */
-  emit setRunMode( Valkyrie::modeMergeLogs );
+   QString fname_logList = vkConfig->rdEntry( "merge", "valkyrie" );
+   statusMsg( "Merging logs in file-list", fname_logList );
  
-  QString fname_logList = vkConfig->rdEntry( "merge", "valkyrie" );
-  statusMsg( "Merging", fname_logList );
- 
-  QStringList flags;
-  flags << vkConfig->rdEntry( "merge-exec","valkyrie");
-  flags << "-f";
-  flags << fname_logList;
- 
-  /* read from stdout */
-  int log_fd =  1;
- 
-  return runProcess( flags, log_fd, "mc_merged" );
-}
+   m_saveFname = vk_mkstemp( "mc_merged", vkConfig->logsDir(), ".xml" );
+   vk_assert( !m_saveFname.isEmpty() );
 
+   QStringList flags;
+   flags << vkConfig->rdEntry( "merge-exec","valkyrie");
+   flags << "-f";
+   flags << fname_logList;
+   flags << "-o";
+   flags << m_saveFname;
 
-/* if --vg-opt=<arg> was specified on the cmd-line, called by
-   valkyrie->runTool(); if set via the run-button in the gui, 
-   then MainWindow::run() calls valkyrie->runTool().  */
-bool Memcheck::run( QStringList flags )
-{
-  /* tell valkyrie what we are doing */
-  emit setRunMode( Valkyrie::modeParseOutput );
+   setRunState( VkRunState::TOOL2 );
+   m_fileSaved = false;
+   statusMsg( "Merge Logs", "Running ... " );
 
-  /* Read from log_fd */
-  int log_fd =  vkConfig->rdInt( "log-fd", "valgrind" );
+   bool ok = runProcess( flags );
 
-  return runProcess( flags, log_fd, "mc_output" );
+   if (!ok) {
+      statusMsg( "Merge Logs", "Failed" );
+      m_fileSaved = true;
+      setRunState( VkRunState::STOPPED );
+   }
+   return ok;
 }
 
 
 /* Run a VKProcess, as given by 'flags'.
-   Listens to output on 'log_fd', loading this output to the toolView
-   via xmlParser::loadItem(XmlOutput*).
-   Output to stdout, stderr is also gathered and sent to toolView via
-   loadClientOutput().
-   Note: 'log_fd' takes precedence over stdout/stderr, so if the fd's
-   overlap, output will be taken from 'log_fd', not stdout/stderr.
-   Auto-saves log_fd output to a unique fname starting with 'fbasename'.
+   Reads ouput from file, loading this to the listview.
 */
-bool Memcheck::runProcess( QStringList flags, int log_fd,
-                           QString fbasename )
+bool Memcheck::runProcess( QStringList flags )
 {
-#if 0
-  for ( unsigned int i=0; i<flags.count(); i++ )
-    printf("flag[%d] --> %s\n", i, flags[i].latin1() );
-#endif
+   //  fprintf(stderr, "\nMemcheck::runProcess()\n");
+   //  for ( unsigned int i=0; i<flags.count(); i++ )
+   //    fprintf(stderr, "flag[%d] --> %s\n", i, flags[i].latin1() );
+   vk_assert( view() != 0 );
 
-  fileSaved = false;
-  emitRunning( true );
+   /* new m_vgreader - view() may be recreated, so need up-to-date ptr */
+   vk_assert( m_vgreader == 0 );
+   m_vgreader = new VgLogReader( view()->vgLogPtr() );
 
-  /* init the auto-save filename and stream */
-  saveFname = vk_mkstemp( fbasename, vkConfig->logsDir(), ".xml" );
-  //printf("saveFname = %s\n", saveFname.latin1() );
-  if ( ! setupFileStream( true ) ) {
-    emitRunning( false );
-    setupFileStream( false );
-    vkError( this->view(), "Open File Error", 
-             "<p>Unable to open file '%s' for writing.</p>", 
-             saveFname.latin1() );
-    return false;
-  }
+   /* start the log parse - nothing written yet tho */
+   if (!m_vgreader->parse( m_saveFname, true )) {
+      QString errMsg = m_vgreader->handler()->errorMsg;
+      if (m_vgreader != 0) {
+         delete m_vgreader;
+         m_vgreader = 0;
+      }
+      VK_DEBUG("m_vgreader failed to start parsing empty log\n");
+      vkError( view(), "XML Parse Error",
+               "<p>%s</p>", errMsg.ascii() );
+      return false;
+   }
 
-  setupParser( true );
+   /* start a new process, listening on exit signal */
+   vk_assert( m_vgproc == 0 );
+   m_vgproc = new VKProcess( flags, this );
+   connect( m_vgproc, SIGNAL(processExited()),
+            this, SLOT(processDone()) );
 
-  bool ok = reader.parse( &source, true );
-  if ( !ok ) {
-    /* if we get here, it means either:
-       a) Output from valgrind run is bad
-       b) Output from vk_logmerge run is bad
-       - neither should happen, so die.
-       Not very nice, but output-to-date is saved in the auto-log file.
-       TODO: do sthng nicer here - but rem not to block this function!
-    */
-    vk_assert_never_reached();
-  }
+   if ( !m_vgproc->start() ) {
+      if (m_vgreader != 0) {
+         delete m_vgreader;
+         m_vgreader = 0;
+      }
+      if (m_vgproc != 0) {
+         delete m_vgproc;
+         m_vgproc = 0;
+      }
+      VK_DEBUG("m_vgproc failed to start\n");
+      vkError( this->view(), "Error", "<p>VG Process failed to start: <br>%s</p>",
+               flags.join(" ").latin1() );
+      return false;
+   }
 
-  /* fork a new process in non-blocking mode */
-  setupProc( true, log_fd );
+   /* poll log for updates */
+   m_logpoller = new VkLogPoller( this, "memcheck logpoller" );
+   //   m_logpoller->setLog(  );
+   connect( m_logpoller, SIGNAL(logUpdated()), this, SLOT(readVgLog()) );
+   m_logpoller->start();
 
-  /* stuff the cmd-line flags/non-default opts into the process */
-  proc->setArguments( flags );
-
-  if ( ! proc->start() ) {
-    emitRunning( false );
-    fileSaved = true;
-    setupProc( false );
-    setupParser( false );
-    setupFileStream( false );
-    vkError( this->view(), "Error", "<p>Process failed to start: <br>%s</p>",
-                           flags.join(" ").latin1() );
-    return false;
-  }
-
-  return true;
+   //  fprintf(stderr, "\n - END MC::runProcess()\n" );
+   return true;
 }
 
 
-/* slot, connected to proc's signal readyReadStd***().
-   read and process the data, which might be output in chunks.
-   output is auto-saved to a logfile in ~/.valkyrie/logs/
-   Note: This function must not block, else vkprocess can finish
-   and be deleted before this unblocks and returns to vkprocess,
-   leading to a segfault.
+
+/* Terminate m_vgproc
+   TODO: put this in VKProcess
 */
-void Memcheck::parseOutput()
+void Memcheck::vgProcTerminate()
 {
-  statusMsg( "Memcheck", "Parsing output ... " );
+   //   fprintf(stderr, "\nMemcheck::vgProcTerminate()\n");
+   vk_assert( m_vgproc != 0 );
+   vk_assert( m_vgproc->isRunning() );
+   vk_assert( m_logpoller != 0 );
+   vk_assert( m_logpoller->isActive() );
 
-  QString data;
-  int lineNumber = 0;
+   m_logpoller->stop();
 
-  int log_fd = proc->getFDout();
+   /* Try to stop m_vgproc - ask nicely, then kill */
+   m_vgproc->tryTerminate();   /* first ask nicely. */
 
-  // TODO: proc->readLineXXX() doesn't respect client output formatting
-
-  /* FDout: takes precedence over stdout/stderr,
-     so even if FDout == 1|2, we'll still get the data here. */
-  while ( proc->canReadLineFDout() ) {
-    lineNumber++;
-    data = proc->readLineFDout();
-//    printf("MC::parseOutput(fd=%d): '%s'\n", log_fd, data.latin1() );
-    logStream << data << "\n";
-    source.setData( data );
-    bool ok = reader.parseContinue();
-    if ( !ok ) {
-      fprintf(stderr, "\nMemcheck::parseOutput(fd=%d): '%s'\n",
-                      log_fd, data.latin1() );
-      /* if we get here, it means either:
-         a) Output from valgrind run is bad
-         b) Output from vk_logmerge run is bad
-          - neither should happen, so die.
-         Not very nice, but output-to-date is saved in the auto-log file.
-         TODO: do sthng nicer here - but rem not to block this function!
-       */
-      vk_assert_never_reached();
-    }
-  }
-
-  /* Stdout: anything read here will be from client prog */
-  while ( proc->canReadLineStdout() ) {
-    data = proc->readLineStdout();
-    //printf("\nMC::parseOutput(): Stdout: '%s'\n", data.latin1() );
-    loadClientOutput( data, 1 );
-  }
-
-  /* Stderr: if valgrind failed to start, may output to stderr;
-     else will be client prog output. */
-  while ( proc->canReadLineStderr() ) {
-    data = proc->readLineStderr();
-    //printf("\nMC::parseOutput(): Stderr: '%s'\n", data.latin1() );
-    loadClientOutput( data, 2 );
-  }
+   /* if proc still running after msec_timeout, terminate with prejudice
+      - still sends signal processExited -> processDone() */
+   // TODO: move to config
+   int ms_kill_timeout = 2000;
+   QTimer::singleShot( ms_kill_timeout, m_vgproc, SLOT( kill() ) );
 }
 
 
-/* slot, connected to proc's signal processExited().
-   parsing of valgrind's output is finished, successfully or otherwise.
-   if the user passed either 'log-file' or 'log-file-exactly' on the
-   cmd-line, save the output immediately to whatever they specified.
-   log-file == <file>.pid<pid> || log-file-exactly == <file> */
+/* Called on m_vgproc exit - stop logpoller, but send one more signal.
+   m_vgproc may:
+   - exit from self
+   - be terminated by the user via valkyrie
+   - be terminated from vgReadLog because of an xml parse error
+*/
 void Memcheck::processDone()
 {
-  statusMsg( "Memcheck", "Parsing complete" );
-  /* did valgrind exit normally ? */
-  if ( proc->normalExit() ) {
-    // - then we can trust exitStatus()
-    int ret = proc->exitStatus();
-    if (ret != 0) { // process exited with error
-      vkError( view(), "Process Run Error",
-               "<p>Process exited with error: %d</p>", ret );
-    }
-  } else {
-    vkError( view(), "Process Run Error",
-             "<p>Process crashed or was killed.</p>" );
-  }
+   //   fprintf(stderr, "\nMemcheck::processDone()\n");
+   vk_assert( m_vgproc != 0 );
+   vk_assert( m_logpoller != 0 );
 
-  /* grab the process id in case we need it later */
-  long currentPid = proc->processIdentifier();
-
-  setupFileStream( false );  /* close down auto-save log stuff */
-  setupParser( false );      /* disconnect the parser */
-  setupProc( false );        /* disconnect and delete the proc */
-
-  /* try for --log-file-exactly first */
-  QString fname = vkConfig->rdEntry( "log-file-exactly","valgrind" );
-  if ( fname.isEmpty() ) {
-    /* try with --log-file */
-    fname = vkConfig->rdEntry( "log-file","valgrind" );
-    if ( !fname.isEmpty() && currentPid != -1 ) {
-      /* tack the pid on the end */
-      fname += ".pid" + QString::number( currentPid );
-    }
-  }
-
-  if ( !fname.isEmpty() ) {
-    /* Save output to logfile <fname> */
-    fileSaveDialog( fname );
-    /* ignoring return value: either saved ok, or user clicked Cancel
-       if the latter, we have the auto-fname saved anyway. */
-  }
-
-  emitRunning( false );
+   /* Stop signals to readVgLog()... */
+   m_logpoller->stop( /*...bar one last chance:*/true );
 }
+
+
+/* Read memcheck xml log output
+   Called by m_logpoller signals, and on m_vgproc exit signal
+
+   Deals with cleanup of m_vgproc and m_vgreader, and only emits
+   running(false) when both of these are done and dusted.
+   - we assume that at some point m_vgproc will die, and use this as
+   a condition to do a final cleanup if necessary.
+*/
+void Memcheck::readVgLog()
+{
+   //   fprintf(stderr, "\nMemcheck::readVgLog()\n");
+   vk_assert( view() != 0 );
+
+   if (m_vgreader != 0) {
+      //      fprintf(stderr, " - parseContinue\n");
+      VgLogHandler* hnd = m_vgreader->handler();
+
+      /* Note: xml log may not be completed by valgrind,
+         meaning hnd never reaches 'finished' - this is taken care of by
+         the final cleanup on m_vgproc death
+      */
+      if (m_vgreader->parseContinue()) {
+         /* Parsing succeeded */
+         if (hnd->finished) {  /* We're done */
+            //            fprintf(stderr, " - finished\n");
+
+            /* cleanup reader */
+            delete m_vgreader;
+            m_vgreader = 0;
+
+            if (runState() == VkRunState::VALGRIND)
+               statusMsg( "Memcheck", "Finished" );
+            else
+               statusMsg( "Merge Logs", "Finished" );
+
+            /* Only stop running if m_vgproc done and dusted */
+            if (m_vgproc == 0)
+               setRunState( VkRunState::STOPPED );
+         }
+      } else {
+         //            fprintf(stderr, " - parse failed on line %d\n", hnd->errorLine);
+         /* Parsing failed: kill m_vgproc, if alive
+            - will trigger another read, but m_vgreader == 0 */
+
+         /* cleanup reader */
+         QString errMsg = hnd->errorMsg;
+         delete m_vgreader;
+         m_vgreader = 0;
+
+         if (m_vgproc->isRunning())
+            vgProcTerminate();
+
+         if (runState() == VkRunState::VALGRIND)
+            statusMsg( "Memcheck", "Error parsing output log" );
+         else
+            statusMsg( "Merge Logs", "Error parsing output log" );
+
+         vkError( view(), "XML Parse Error",
+                  "<p>%s</p>", errMsg.ascii() );
+
+         /* Only stop running if m_vgproc done and dusted */
+         if (m_vgproc == 0)
+            setRunState( VkRunState::STOPPED );
+      }
+   }
+
+   /* If m_vgproc stopped but not cleaned up, cleanup. */
+   if (m_vgproc != 0 && !m_vgproc->isRunning()) {
+      //      fprintf(stderr, " - cleaning up m_vgproc\n");
+      delete m_vgproc;
+      m_vgproc = 0;
+
+      /* m_vgproc is dead, but it's possible the last signals haven't
+         called us yet.  However, we can't wait and see else m_vgreader
+         may not get deallocated. */
+      if (m_vgreader != 0) {
+         readVgLog();
+
+         /* still not finished => error
+            valgrind xml output has not been completed properly */
+         if (m_vgreader != 0) {
+            delete m_vgreader;
+            m_vgreader = 0;
+
+            if (runState() == VkRunState::VALGRIND)
+               statusMsg( "Memcheck", "Error - incomplete output log" );
+            else
+               statusMsg( "Merge Logs", "Error - incomplete output log" );
+
+            vkError( view(), "XML Parse Error",
+                     "<p>valgrind xml output is incomplete</p>" );
+         }
+      }
+
+      /* Ok, we're sure nothing is alive anymore */
+      setRunState( VkRunState::STOPPED );
+   }
+}
+
 
 /* brings up a fileSaveDialog until successfully saved,
    or user pressed Cancel.
    if fname.isEmpty, ask user for a name first.
    returns false on user pressing Cancel, else true.
 */
-bool Memcheck::fileSaveDialog( QString fname )
+bool Memcheck::fileSaveDialog( QString fname/*=QString()*/ )
 {
-  QFileDialog dlg;
-  dlg.setShowHiddenFiles( true );
-  QString flt = "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)";
-  QString cptn = "Save Log File As";
+   vk_assert( view() != 0 );
 
-  /* Ask fname if don't have one already */
-  if ( fname.isEmpty() ) {
-    /* start dlg in dir of last saved logfile */
-    QString start_path = QFileInfo( saveFname ).dirPath();
-    fname = dlg.getSaveFileName( start_path, flt, this->view(), "fsdlg", cptn );
-    if ( fname.isEmpty() )
-      return false;
-  }
+   QFileDialog dlg;
+   dlg.setShowHiddenFiles( true );
+   QString flt = "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)";
+   QString cptn = "Save Log File As";
 
-  /* try to save file until succeed, or user Cancels */
-  while ( !saveParsedOutput( fname ) ) {
-    QString start_path = QFileInfo( fname ).dirPath();
-    fname = dlg.getSaveFileName( start_path, flt, this->view(), "fsdlg", cptn );
-    if ( fname.isEmpty() )
-      return false;
-  }
+   /* Ask fname if don't have one already */
+   if ( fname.isEmpty() ) {
+      /* start dlg in dir of last saved logfile */
+      QString start_path = QFileInfo( m_saveFname ).dirPath();
+      fname = dlg.getSaveFileName( start_path, flt, this->view(), "fsdlg", cptn );
+      if ( fname.isEmpty() )
+         return false;
+   }
 
-  return true;
+   /* try to save file until succeed, or user Cancels */
+   while ( !saveParsedOutput( fname ) ) {
+      QString start_path = QFileInfo( fname ).dirPath();
+      fname = dlg.getSaveFileName( start_path, flt, this->view(), "fsdlg", cptn );
+      if ( fname.isEmpty() )   /* Cancelled */
+         return false;
+   }
+
+   return true;
 }
 
+/* Save to file
+   - we already have everything in m_saveFname logfile, so just copy that
+*/
 bool Memcheck::saveParsedOutput( QString& fname )
 {
-  //printf("saveParsedOutput(%s)\n", fname.latin1() );
-  vk_assert( !fname.isEmpty() );
+   //printf("saveParsedOutput(%s)\n", fname.latin1() );
+   vk_assert( view() != 0 );
+   vk_assert( !fname.isEmpty() );
 
-  if ( fname.find('/') == -1 ) {
-    /* no abs or rel path given, so save in default dir */
-    /* TODO: Not sure about this...
-       - normally, even if no './' is given, it is still implied... */
-    fname = vkConfig->logsDir() + fname;
-  }
-  /* make sure path is absolute */
-  fname = QFileInfo( fname ).absFilePath();
+   /* checks on destination fname */
+   if ( fname.find('/') == -1 ) {
+      /* no abs or rel path given, so save in default dir */
+      /* TODO: Not sure about this...
+         - normally, even if no './' is given, it is still implied... */
+      fname = vkConfig->logsDir() + fname;
+   }
+   /* make sure path is absolute */
+   fname = QFileInfo( fname ).absFilePath();
 
-  /* if this filename already exists, check if we should over-write it */
-  if ( QFile::exists( fname ) ) {
-    int ok = vkQuery( this->view(), 2, "Overwrite File",
-                      "<p>Over-write existing file '%s' ?</p>", 
-                      fname.latin1() );
-    if ( ok == MsgBox::vkNo ) {
+   /* if this filename already exists, check if we should over-write it */
+   if ( QFile::exists( fname ) ) {
+      int ok = vkQuery( this->view(), 2, "Overwrite File",
+                        "<p>Over-write existing file '%s' ?</p>", 
+                        fname.latin1() );
+      if ( ok == MsgBox::vkNo ) {
+         /* nogo: return and try again */
+         return false;
+      }
+   }
+
+   /* save log (=copy/rename) */
+   bool ok;
+   if (!m_fileSaved) {
+      /* first save after a run, so just rename m_saveFname => fname */
+      //printf("renaming: '%s' -> '%s'\n", m_saveFname.latin1(), fname.latin1() );
+      ok = QDir().rename( m_saveFname, fname );
+   } else {
+      /* we've saved once already: must now copy m_saveFname => fname */
+      //printf("copying: '%s' -> '%s'\n", m_saveFname.latin1(), fname.latin1() );
+      QUrlOperator *op = new QUrlOperator();
+      op->copy( m_saveFname, fname, false, false ); 
+      /* TODO: check copied ok */
+      ok = true;
+   }
+   if (ok) {
+      m_saveFname = fname;
+      m_fileSaved = true;
+      statusMsg( "Saved", m_saveFname );
+   } else {
       /* nogo: return and try again */
-      return false;
-    }
-  }
-
-  bool ok;
-  if (!fileSaved) {
-    /* first save after a run, so just rename auto-saveFname => fname */
-    //printf("renaming: '%s' -> '%s'\n", saveFname.latin1(), fname.latin1() );
-    ok = QDir().rename( saveFname, fname );
-  } else {
-    /* we've saved once already: must now copy saveFname => fname */
-    //printf("copying: '%s' -> '%s'\n", saveFname.latin1(), fname.latin1() );
-    QUrlOperator *op = new QUrlOperator();
-    op->copy( saveFname, fname, false, false ); 
-    /* TODO: check copied ok */
-    ok = true;
-  }
-  if (ok) {
-    saveFname = fname;
-    fileSaved = true;
-  } else {
-    vkInfo( this->view(), "Save Failed", 
-	    "<p>Failed to save file to '%s'",  fname.latin1() );
-  }
-  statusMsg( "Saved", saveFname );
-  return true;
-}
-
-
-/* fork a new process in non-blocking mode; connect the pipes:
-   log_fd || stdout || stderr
-   on init, sets proc to use file descriptor log_fd
-*/
-void Memcheck::setupProc( bool init, int log_fd/*=-1*/ )
-{
-  if ( init ) {                   /* starting up */
-    vk_assert( proc == 0 );
-    vk_assert( log_fd >= 1 );
-    proc = new VKProcess( this, "mc_proc" );
-    proc->setCommunication( VKProcess::Stdin  | VKProcess::Stdout | 
-                            VKProcess::Stderr | VKProcess::FDin   |
-                            VKProcess::FDout );
-    proc->setFDout( log_fd );
-    connect( proc, SIGNAL( processExited() ),
-             this, SLOT( processDone() ) );
-    connect( proc, SIGNAL( readyReadFDout() ),
-             this, SLOT( parseOutput() ) );
-    connect( proc, SIGNAL( readyReadStdout() ),
-             this, SLOT( parseOutput() ) );
-    connect( proc, SIGNAL( readyReadStderr() ),
-             this, SLOT( parseOutput() ) );
-  } else {                        /* closing down */
-    vk_assert( log_fd == -1 );    /* just ensure proper use */
-    disconnect( proc, SIGNAL( processExited() ),
-                this, SLOT( processDone() ) );
-    disconnect( proc, SIGNAL( readyReadFDout() ),
-                this, SLOT( parseOutput() ) );
-    disconnect( proc, SIGNAL( readyReadStdout() ),
-                this, SLOT( parseOutput() ) );
-    disconnect( proc, SIGNAL( readyReadStderr() ),
-                this, SLOT( parseOutput() ) );
-    delete proc;
-    proc = 0;
-  }
-}
-
-
-/* connect this lot up, reset source and parser,
-   and tell the reader we are parsing incrementally */
-void Memcheck::setupParser( bool init )
-{
-  if ( init ) {                   /* starting up */
-    view()->clear();
-    xmlParser->reset();
-    source.reset();
-    source.setData( "" );
- 
-    connect( xmlParser,    SIGNAL(loadItem(XmlOutput *)),
-             this->view(), SLOT(loadItem(XmlOutput *)) );
-    connect( xmlParser,    SIGNAL(updateErrors(ErrCounts*)),
-             this->view(), SLOT(updateErrors(ErrCounts*)) );
-    connect( xmlParser,    SIGNAL(updateStatus()),
-             this->view(), SLOT(updateStatus()) );
-    connect( xmlParser,    SIGNAL(loadClientOutput(const QString&)),
-             this,         SLOT(loadClientOutput(const QString&)) );
-
-  } else {                        /* closing down */
-    disconnect( xmlParser,    SIGNAL(loadItem(XmlOutput *)),
-                this->view(), SLOT(loadItem(XmlOutput *)) );
-    disconnect( xmlParser,    SIGNAL(updateErrors(ErrCounts*)),
-                this->view(), SLOT(updateErrors(ErrCounts*)) );
-    disconnect( xmlParser,    SIGNAL(updateStatus()),
-                this->view(), SLOT(updateStatus()) );
-    disconnect( xmlParser,    SIGNAL(loadClientOutput(const QString&)),
-                this,         SLOT(loadClientOutput(const QString&)) );
-  }
-}
-
-
-bool Memcheck::setupFileStream( bool init )
-{
-  bool ok = true;
-
-  if ( init ) {
-    QFile* logFile = new QFile( saveFname );
-    ok = logFile->open( IO_WriteOnly );
-    logStream.setDevice( logFile );
-  } else {
-    QFile* logFile = (QFile*)logStream.device();
-    logStream.unsetDevice();
-    logFile->close();
-    delete logFile;
-  }
-  
-  return ok;
-}
-
-
-
-void Memcheck::loadClientOutput( const QString& client_output, int log_fd/*=-1*/ )
-{
-  if (log_fd == -1)
-    log_fd = vkConfig->rdInt( "log-fd", "valgrind" );
-
-  this->view()->loadClientOutput(client_output, log_fd);
+      vkInfo( this->view(), "Save Failed", 
+              "<p>Failed to save file to '%s'",  fname.latin1() );
+      statusMsg( "Failed Save", m_saveFname );
+   }
+   return ok;
 }
 

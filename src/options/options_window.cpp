@@ -20,51 +20,54 @@
 #include "vk_utils.h"
 #include "vk_objects.h"
 #include "vk_config.h"
+#include "main_window.h"
+#include "vk_messages.h"
+
 
 /* class Categories ---------------------------------------------------- */
 Categories::Categories( QWidget* parent )
-  : QListBox( parent, "cat_listbox" ) 
+   : QListBox( parent, "cat_listbox" ) 
 {
-  QFont fnt = font();
-  fnt.setWeight( QFont::Bold );
-  setFont( fnt );
+   QFont fnt = font();
+   fnt.setWeight( QFont::Bold );
+   setFont( fnt );
 
-  QFontMetrics fm = fontMetrics();
-  categht = fm.height() * 2; 
+   QFontMetrics fm = fontMetrics();
+   m_categht = fm.height() * 2; 
 }
 
 int Categories::categHeight() 
-{ return categht; }
+{ return m_categht; }
 
 
 /* class CategItem ----------------------------------------------------- */
 CategItem::CategItem( QListBox* parent, OptionsPage* page,
                       const QString &txt, int id )
-  : QListBoxItem(parent), catid(id), optpage( page )
+   : QListBoxItem(parent), m_catid(id), m_optpage( page )
 { setText( txt ); }
 
 int CategItem::height( const QListBox * ) const
 { return ((Categories*)listBox())->categHeight(); }
 
 int CategItem::catId() const 
-{ return catid; }
+{ return m_catid; }
 
 void CategItem::setWidget( OptionsPage* page ) 
 { 
-  vk_assert( optpage == NULL ); 
-  optpage = page; 
+   vk_assert( m_optpage == NULL ); 
+   m_optpage = page; 
 }
 
 OptionsPage * CategItem::page() const 
-{ return optpage; }
+{ return m_optpage; }
 
 void CategItem::paint( QPainter *painter )
 {
-  int itemHeight = height( listBox() );
-  QFontMetrics fm = painter->fontMetrics();
-  int xPos = fm.width("x");
-  int yPos = ( ( itemHeight - fm.height() ) / 2 ) + fm.ascent();
-  painter->drawText( xPos, yPos, text() );
+   int itemHeight = height( listBox() );
+   QFontMetrics fm = painter->fontMetrics();
+   int xPos = fm.width("x");
+   int yPos = ( ( itemHeight - fm.height() ) / 2 ) + fm.ascent();
+   painter->drawText( xPos, yPos, text() );
 }
 
 
@@ -72,258 +75,290 @@ void CategItem::paint( QPainter *painter )
 
 /* class OptionsWindow ------------------------------------------------- */
 OptionsWindow::~OptionsWindow()
-{ optPages.clear(); }
+{ m_optPages.clear(); }
 
 
 OptionsWindow::OptionsWindow( QWidget* parent ) 
-  : QMainWindow( parent, "options_win" )
+   : QMainWindow( parent, "options_win" )
 {
-  capt.sprintf("%s Options: ", vkConfig->vkName() );
-  setCaption( capt );
-  statusBar()->setSizeGripEnabled( false );
+   m_capt.sprintf("%s Options: ", vkConfig->vkName() );
+   setCaption( m_capt );
+   statusBar()->setSizeGripEnabled( false );
 
-  optPages.setAutoDelete( true );
-  xpos = ypos = -1;
+   m_optPages.setAutoDelete( true );
+   m_xpos = m_ypos = -1;
 
-  /* status bar */
-  QFrame *statusFrame = new QFrame( statusBar() );
-  statusBar()->addWidget( statusFrame, 10, true );
-  QHBoxLayout* buttLayout = new QHBoxLayout(statusFrame, 5, -1 );
+   /* status bar */
+   QFrame *statusFrame = new QFrame( statusBar() );
+   statusBar()->addWidget( statusFrame, 10, true );
+   QHBoxLayout* buttLayout = new QHBoxLayout(statusFrame, 5, -1 );
 
-  /* reset button: reset default options */
-  QPushButton* pb = new QPushButton( "Reset Defaults", statusFrame );
-  connect( pb, SIGNAL(clicked() ), this, SLOT(resetDefaults()));
-  buttLayout->addWidget( pb );
-  buttLayout->addStretch( 10 );
+   /* reset button: reset default options */
+   QPushButton* pb = new QPushButton( "&Defaults", statusFrame );
+   connect( pb, SIGNAL(clicked() ), this, SLOT(resetDefaults()));
+   buttLayout->addWidget( pb );
+   buttLayout->addStretch( 10 );
 
-  int w = fontMetrics().width( "X&CancelX" );
-  /* okay button: apply and quit in one go */
-  pb = new QPushButton( "&Ok", statusFrame );
-  pb->setFixedWidth( w );
-  pb->setDefault( true );
-  buttLayout->addWidget( pb );
-  connect( pb, SIGNAL(clicked() ), this, SLOT(accept()) );
-  /* cancel button: forget everything I just said, and quit */
-  pb = new QPushButton( "&Cancel", statusFrame );
-  pb->setFixedWidth( w );
-  buttLayout->addWidget( pb );
-  connect( pb, SIGNAL(clicked() ), this, SLOT(reject()));
-  /* apply button: do what I said, but let me change my mind */
-  applyButton = new QPushButton( "&Apply", statusFrame );
-  applyButton->setFixedWidth( w );
-  buttLayout->addWidget( applyButton );
-  connect( applyButton, SIGNAL(clicked() ), this, SLOT(apply()));
-  applyButton->setEnabled( false );  /* nothing to apply yet */
+   int w = fontMetrics().width( "X&CancelX" );
+   /* okay button: apply and quit in one go */
+   pb = new QPushButton( "&Ok", statusFrame );
+   pb->setFixedWidth( w );
+   pb->setDefault( true );
+   buttLayout->addWidget( pb );
+   connect( pb, SIGNAL(clicked() ), this, SLOT(accept()) );
 
-  QSplitter* splitter = new QSplitter( this );
-  setCentralWidget( splitter );
+   /* reset button: undo everything since last apply */
+   m_resetButton = new QPushButton( "&Reset", statusFrame );
+   m_resetButton->setFixedWidth( w );
+   buttLayout->addWidget( m_resetButton );
+   connect( m_resetButton, SIGNAL(clicked() ), this, SLOT(reject()));
+   m_resetButton->setEnabled( false );  /* nothing to reset yet */
 
-  /* category chooser */
-  categories = new Categories( splitter );
-  splitter->setResizeMode( categories, QSplitter::FollowSizeHint );
-  connect( categories, SIGNAL( clicked( QListBoxItem *) ),
-           this,       SLOT( categoryClicked( QListBoxItem *) ) );
+   /* apply button: apply edits - no going back */
+   m_applyButton = new QPushButton( "&Apply", statusFrame );
+   m_applyButton->setFixedWidth( w );
+   buttLayout->addWidget( m_applyButton );
+   connect( m_applyButton, SIGNAL(clicked() ), this, SLOT(apply()));
+   m_applyButton->setEnabled( false );  /* nothing to apply yet */
 
-  /* stack for the various widgets */
-  wStack = new QWidgetStack( splitter );
+   QSplitter* splitter = new QSplitter( this );
+   setCentralWidget( splitter );
 
-  /* we create the containers, but don't actually initialise them
-     until the user wants to view a page.*/
-  VkObjectList objList = vkConfig->vkObjList();
-  VkObject* obj;
-  for ( obj = objList.first(); obj; obj = objList.next() ) {
-    addCategory( obj );
-  }
+   /* category chooser */
+   m_categories = new Categories( splitter );
+   splitter->setResizeMode( m_categories, QSplitter::FollowSizeHint );
+   connect( m_categories, SIGNAL( clicked( QListBoxItem *) ),
+            this,           SLOT( categoryClicked( QListBoxItem *) ) );
+
+   /* stack for the various widgets */
+   m_wStack = new QWidgetStack( splitter );
+
+   VkObjectList objList = ((MainWindow*)parent)->valkyrie()->vkObjList();
+   for ( VkObject* obj = objList.first(); obj; obj = objList.next() ) {
+      addCategory( obj );
+   }
 }
 
 
 void OptionsWindow::addCategory( VkObject* obj )
 {
-  int cid = vkConfig->vkObjectId( obj );
-  OptionsPage* page = NULL;
-  wStack->addWidget( page, cid );
-  new CategItem( categories, page, obj->title(), cid );
+   /* to look up object later to call obj->createOptionsPage() */
+   int catid = obj->objId();
+   OptionsPage* page = NULL;
+   m_wStack->addWidget( page, catid );
+   new CategItem( m_categories, page, obj->title(), catid );
 }
 
 
 void OptionsWindow::setCategory( int catid )
 {
-  if ( catid != -1 ) {
-    categories->setCurrentItem( catid );
-    categoryClicked( categories->item(catid) );
-  }
+   if ( catid != -1 ) {
+      m_categories->setCurrentItem( catid );
+      categoryClicked( m_categories->item(catid) );
+   }
 }
 
 
 /* we make the widgets on demand here */
 void OptionsWindow::categoryClicked( QListBoxItem *item )
 {
-  if ( item ) {
-    CategItem* cit = (CategItem*)item;
-    setCaption( capt + item->text() );
+   if ( item ) {
+      CategItem* cit = (CategItem*)item;
 
-    /* first time this item has been selected */
-    if ( !cit->page() ) {
-      OptionsPage* page = mkOptionsPage( cit->catId() );
-      if ( !page ) {
-        VK_DEBUG("cit->text = %s", cit->text().latin1() );
-        return;
-      } else {
-        cit->setWidget( page );
-        wStack->addWidget( page, cit->catId() );
-      } 
-    }
+      /* check no uncommited edits in last page */
+      OptionsPage* last_page = (OptionsPage*)m_wStack->visibleWidget();
 
-    wStack->raiseWidget( cit->page() );
-  }
+      if (last_page != 0 &&                  /* moving from previous */
+          last_page != cit->page()) {        /* prev not same as next */
+         /* first pull back to the right item selection */
+         m_categories->setSelected( last_page->optId(), true );
+
+         if (m_applyButton->isEnabled()) {
+            /* choose to apply/reset edits */
+            CategItem* last_cit = (CategItem*)m_categories->item( last_page->optId());
+            int ok = vkQuery( this, "Apply/Reset Edits",
+                              "&Apply;&Reset;&Cancel",
+                              "<p>There are non-committed edits in option page %s.<br/>"
+                              "Would you like to Apply or Reset these edits?</p>",
+                              last_cit->text().latin1() );
+            switch ( ok ) {
+            case MsgBox::vkYes:    apply(); break;
+            case MsgBox::vkNo:     reject(); break;
+            case MsgBox::vkCancel: return;  /* jump back to last page */
+            default:
+               vk_assert_never_reached();
+            }
+         }
+      }
+
+      setCaption( m_capt + item->text() );
+
+      /* first time this item has been selected */
+      if ( cit->page() == 0 ) {
+         OptionsPage* page = mkOptionsPage( cit->catId() );
+         if ( page == 0 ) {
+            VK_DEBUG("cit->text = %s", cit->text().latin1() );
+            return;
+         }
+         cit->setWidget( page );
+         m_wStack->addWidget( page, cit->catId() );
+      }
+
+      /* make sure the item seletion is sync'd */
+      m_categories->setSelected( cit->catId(), true );
+      cit->page()->init();
+      m_wStack->raiseWidget( cit->page() );
+   }
 
 }
 
 
-OptionsPage * OptionsWindow::mkOptionsPage( int catid )
+OptionsPage* OptionsWindow::mkOptionsPage( int catid )
 {
-  VkObject* obj = vkConfig->vkObject( catid );
-  OptionsPage* page = obj->createOptionsPage( this );
-  vk_assert( page != 0 );
+   VkObject* obj = ((MainWindow*)parent())->valkyrie()->vkObject( catid );
+   OptionsPage* page = obj->createOptionsPage( this );
+   vk_assert( page != 0 );
 
-  optPages.append( page );
-  connect( page, SIGNAL(modified()), this, SLOT(modified()) );
-  connect( page, SIGNAL(apply()), this, SLOT(apply()) );
+   m_optPages.append( page );
+   connect( page, SIGNAL(modified()), this, SLOT(modified()) );
 
-  return page;
+   /* handle e.g. user pressing return in an ledit */
+   connect( page, SIGNAL(apply()), this, SLOT(apply()) );
+
+   return page;
 }
 
 
 void OptionsWindow::showPage( int catid )
 {
-  if ( isMinimized() ) {
-    setCategory( catid );
-    showNormal();
-    return;
-  }  
+   if ( isMinimized() ) {
+      setCategory( catid );
+      showNormal();
+      return;
+   }  
 
-  /* been there, done that ... */
-  if ( xpos != -1 && ypos != -1 ) {
-    setCategory( catid );
-    show();
-    return;
-  }
+   /* been there, done that ... */
+   if ( m_xpos != -1 && m_ypos != -1 ) {
+      setCategory( catid );
+      show();
+      return;
+   }
 
-  /* first time we've been shown */
-  if ( !isVisible() ) {
-    adjustSize();
-    adjustPosition();
-    setCategory( catid );
-    show();
-  }
+   /* first time we've been shown */
+   if ( !isVisible() ) {
+      adjustSize();
+      adjustPosition();
+      setCategory( catid );
+      show();
+   }
 }
 
 
 void OptionsWindow::adjustPosition()
 {
-  /* need to make sure these events are already sent to be sure our
-     information below is correct */
-  QApplication::sendPostedEvents( this, QEvent::LayoutHint );
-  QApplication::sendPostedEvents( this, QEvent::Resize );
+   /* need to make sure these events are already sent to be sure our
+      information below is correct */
+   QApplication::sendPostedEvents( this, QEvent::LayoutHint );
+   QApplication::sendPostedEvents( this, QEvent::Resize );
 
-  QWidget *w = topLevelWidget();
-  int scrn   = QApplication::desktop()->screenNumber( w );
-  QRect desk = QApplication::desktop()->availableGeometry( scrn );
+   QWidget *w = topLevelWidget();
+   int scrn   = QApplication::desktop()->screenNumber( w );
+   QRect desk = QApplication::desktop()->availableGeometry( scrn );
   
-  int extraw = w->geometry().x() - w->x();
-  int extrah = w->geometry().y() - w->y();
-  /* sanity check for decoration frames.  with embedding, we might get
-     extraordinary values */
-  if ( extraw == 0 || extrah == 0 || extraw >= 10 || extrah >= 40 ) {
-    extrah = 40;
-    extraw = 10;
-  }
+   int extraw = w->geometry().x() - w->x();
+   int extrah = w->geometry().y() - w->y();
+   /* sanity check for decoration frames.  with embedding, we might get
+      extraordinary values */
+   if ( extraw == 0 || extrah == 0 || extraw >= 10 || extrah >= 40 ) {
+      extrah = 40;
+      extraw = 10;
+   }
 
-  QPoint p( 0, 0 );
-  /* use mapToGlobal rather than geometry() in case w might be
-     embedded in another application */
-  QPoint pp = w->mapToGlobal( QPoint(0,0) );
-  p = QPoint( pp.x() + w->width()/2,
-              pp.y() + w->height()/ 2 );
-  /* p = origin of this */
-  p = QPoint( p.x()-width()/2  - extraw,
-              p.y()-height()/2 - extrah );
+   QPoint p( 0, 0 );
+   /* use mapToGlobal rather than geometry() in case w might be
+      embedded in another application */
+   QPoint pp = w->mapToGlobal( QPoint(0,0) );
+   p = QPoint( pp.x() + w->width()/2,
+               pp.y() + w->height()/ 2 );
+   /* p = origin of this */
+   p = QPoint( p.x()-width()/2  - extraw,
+               p.y()-height()/2 - extrah );
 
-  if ( p.x() + extraw + width() > desk.x() + desk.width() ) {
-    p.setX( desk.x() + desk.width() - width() - extraw );
-  }
-  if ( p.x() < desk.x() ) {
-    p.setX( desk.x() );
-  }
-  if ( p.y() + extrah + height() > desk.y() + desk.height() ) {
-    p.setY( desk.y() + desk.height() - height() - extrah );
-  }
-  if ( p.y() < desk.y() ) {
-    p.setY( desk.y() );
-  }
+   if ( p.x() + extraw + width() > desk.x() + desk.width() ) {
+      p.setX( desk.x() + desk.width() - width() - extraw );
+   }
+   if ( p.x() < desk.x() ) {
+      p.setX( desk.x() );
+   }
+   if ( p.y() + extrah + height() > desk.y() + desk.height() ) {
+      p.setY( desk.y() + desk.height() - height() - extrah );
+   }
+   if ( p.y() < desk.y() ) {
+      p.setY( desk.y() );
+   }
   
-  move( p.x(), p.y() );
+   move( p.x(), p.y() );
 }
 
 
+/* accept any edits and quit */
 void OptionsWindow::accept()
 {
-  OptionsPage* page;
-  for ( page = optPages.first(); page; page = optPages.next() ) {
-    if ( !page->acceptEdits() ) {
-      VK_DEBUG("Failed to save edits");
-      return;  /* don't close window */
-    }
-  }
-  /* let the toolviews know that the flags (may) have changed */
-  emit flagsChanged();
-  close();
+   OptionsPage* page;
+   for ( page = m_optPages.first(); page; page = m_optPages.next() ) {
+      if ( !page->applyEdits() ) {
+         VK_DEBUG("Failed to save edits");
+         return;  /* don't close window */
+      }
+   }
+   /* let the toolviews know that the flags (may) have changed */
+   emit flagsChanged();
+   close();
 }
 
 
 void OptionsWindow::reject()
 {
-  OptionsPage* page;
-  for ( page = optPages.first(); page; page = optPages.next() ) {
-    if ( !page->rejectEdits() ) {
-      VK_DEBUG("Failed to reject edits");
-    }
-  }
-  /* let the toolviews know that the flags (may) have changed */
-  emit flagsChanged();
-  close(); 
+   OptionsPage* page;
+   for ( page = m_optPages.first(); page; page = m_optPages.next() ) {
+      if ( !page->rejectEdits() ) {
+         VK_DEBUG("Failed to reject edits");
+      }
+   }
+   /* let the toolviews know that the flags (may) have changed */
+   emit flagsChanged();
 }
 
 
 void OptionsWindow::apply()
 {
-  OptionsPage* page;
-  for ( page = optPages.first(); page; page = optPages.next() ) {
-    if ( !page->applyEdits() ) {
-      VK_DEBUG("Failed to apply edits");
-    }
-  }
-  /* let the toolviews know that the flags (may) have changed */
-  emit flagsChanged();
+   OptionsPage* page;
+   for ( page = m_optPages.first(); page; page = m_optPages.next() ) {
+      if ( !page->applyEdits() ) {
+         VK_DEBUG("Failed to apply edits");
+      }
+   }
+   /* let the toolviews know that the flags (may) have changed */
+   emit flagsChanged();
 }
 
 
 void OptionsWindow::resetDefaults()
 {
-  /* get the current page */
-  int catid = categories->currentItem();
-  if ( catid != -1 ) {
-    CategItem* cit = (CategItem*)categories->item(catid);
-    OptionsPage* optpage = cit->page();
-    optpage->resetDefaults();
-  }
+   /* get the current page */
+   int catid = m_categories->currentItem();
+   if ( catid != -1 ) {
+      CategItem* cit = (CategItem*)m_categories->item(catid);
+      OptionsPage* optpage = cit->page();
+      optpage->resetDefaults();
+   }
 }
 
 
 void OptionsWindow::moveEvent( QMoveEvent* me )
 { 
-  xpos = me->pos().x();
-  ypos = me->pos().y();
+   m_xpos = me->pos().x();
+   m_ypos = me->pos().y();
 }
 
 
@@ -333,14 +368,15 @@ void OptionsWindow::closeEvent( QCloseEvent * )
 
 void OptionsWindow::modified()
 {
-  bool edited = false;
-  OptionsPage* page;
-  for ( page = optPages.first(); page; page = optPages.next() ) {
-    if ( page->isModified() ) {
-      edited = true;
-      break;
-    }
-  }
+   bool edited = false;
+   OptionsPage* page;
+   for ( page = m_optPages.first(); page; page = m_optPages.next() ) {
+      if ( page->isModified() ) {
+         edited = true;
+         break;
+      }
+   }
 
-  applyButton->setEnabled( edited );
+   m_applyButton->setEnabled( edited );
+   m_resetButton->setEnabled( edited );
 }
