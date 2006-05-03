@@ -81,10 +81,9 @@ VkConfig::VkConfig( Valkyrie* vk, bool *ok ) : QObject( 0, "vkConfig" )
    m_sep      = ',';         /* separator for lists of strings */
    m_dirty    = false;
 
-   m_PackagePath = PREFIX;
-   m_vkdocPath    = m_PackagePath + VK_DOC_PATH;
-   m_vgdocPath    = m_PackagePath + VG_DOC_PATH;
-   m_imgPath      = m_PackagePath + VK_ICONS_PATH;
+   QString packagePath = VK_INSTALL_PREFIX;
+   m_vkdocPath    = packagePath + VK_DOC_PATH;
+   m_vgdocPath    = packagePath + VG_DOC_PATH;
 
    m_vk_name      = Vk_Name;
    m_vk_Name      = VK_NAME;
@@ -702,10 +701,10 @@ void VkConfig::writeConfigDefaults()
 	/* Set our 'configured' valgrind paths, if we have them */
    {
       rcMap[ EntryKey( "valkyrie", "merge-exec" )  ].mValue
-         = CFG_MERGE_EXEC_PATH;
+         = VK_LOGMERGE;
 
       rcMap[ EntryKey( "valkyrie", "vg-exec" )     ].mValue
-         = CFG_VG_EXEC_PATH;
+         = VG_EXEC_PATH;
 
       rcMap[ EntryKey( "valgrind", "suppressions" )].mValue
          = "";

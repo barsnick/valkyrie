@@ -18,7 +18,7 @@
 #include "html_urls.h"
 #include "vk_include.h"        // VK_VERSION
 #include "vk_popt_option.h"    // PERROR* and friends 
-#include "vk_include.h"        // CFG_VG_EXEC_PATH
+#include "vk_include.h"        // VG_EXEC_PATH
 
 #include <qapplication.h>
 
@@ -92,7 +92,7 @@ Valkyrie::Valkyrie()
    /* path to valgrind executable (maybe found by configure) */
    addOpt( VG_EXEC,      VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
            "valkyrie",   '\0',                 "vg-exec",
-           "",           "",                   CFG_VG_EXEC_PATH,
+           "",           "",                   VG_EXEC_PATH,
            "Valgrind:",  "",                   urlValkyrie::vgDir );
    addOpt( BINARY,       VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT,
            "valkyrie",   '\0',                 "binary", 

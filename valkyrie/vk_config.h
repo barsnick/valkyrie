@@ -150,10 +150,8 @@ private:
    QCString m_vk_email;
    QCString m_vg_copyright;
 
-   QString m_PackagePath;     /* valkyrie's install dir */
    QString m_vkdocPath;        /* path to valkyrie docs dir */
    QString m_vgdocPath;        /* path to valgrind docs dir */
-   QString m_imgPath;          /* path to images */
 
    QString m_rcPath;           /* path to ~/valkyrie=X.X.X dir */
    QString m_rcFileName;       /* where valkyrierc lives */
