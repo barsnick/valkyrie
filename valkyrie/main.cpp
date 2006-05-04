@@ -93,7 +93,6 @@ QPalette vkPalette()
 }
 
 
-#include "vk_include.h"
 
 
 int main ( int argc, char* argv[] )

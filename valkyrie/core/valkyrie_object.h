@@ -43,7 +43,7 @@ public:
                     bool use_gui=false );
 
    enum vkOpts {
-      HELP,        VERSION,   VGHELP,
+      HELP,        OPT_VERSION,   VGHELP,
       TOOLTIP,     PALETTE,   ICONTXT,
       FONT_SYSTEM, FONT_USER, SRC_EDITOR, SRC_LINES,
       VG_EXEC,      /* path to valgrind executable */

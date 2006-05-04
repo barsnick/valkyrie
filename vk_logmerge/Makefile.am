@@ -25,21 +25,19 @@ vk_logmerge_SOURCES = \
 	vklm_main.cpp \
 	../valkyrie/tool_utils/vglog.cpp \
 	../valkyrie/tool_utils/vglogreader.cpp \
-	$(vk_logmerge_MOC)
-
-BUILT_SOURCES = $(valkyrie_MOC)
-
-noinst_HEADERS = \
+	$(vk_logmerge_MOC) \
 	vklm_main.h \
 	../valkyrie/tool_utils/vglog.h \
 	../valkyrie/tool_utils/vglogreader.h
 
-# Note: for UIC stuff, refer to autoqt docs
+# make the moc's first, so dependencies work out.
+BUILT_SOURCES = $(vk_logmerge_MOC)
 
-# Enable compile and link with QT
+# Note: if need UIC stuff, see autoqt docs
+
 
 # Compile flags
-vk_logmerge_CXXFLAGS = -pipe -O0 -g -W -Wall -Wundef -Wredundant-decls -Wno-unreachable-code -fno-inline -D_REENTRANT -I../valkyrie/tool_utils -I/usr/X11R6/include -I$(QTDIR)/mkspecs/linux-g++ $(QT_CXXFLAGS)
+vk_logmerge_CXXFLAGS = -pipe -O0 -g -W -Wall -Wundef -Wredundant-decls -Wno-unreachable-code -fno-inline -D_REENTRANT -I$(srcdir)/../valkyrie/tool_utils -I/usr/X11R6/include -I$(QTDIR)/mkspecs/linux-g++ $(QT_CXXFLAGS)
 
 # Link flags
 vk_logmerge_LDADD := $(QT_LIBS) -lfreetype -lm -lpthread

@@ -2,7 +2,7 @@
 
 docdir = $(prefix)/doc/
 
-doc_DATA = \
+dist_doc_DATA = \
 	about_gpl.html \
 	about_qt.html \
 	about_vk.html \

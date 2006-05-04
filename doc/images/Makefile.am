@@ -2,7 +2,7 @@
 
 docdir = $(prefix)/doc/images
 
-doc_DATA = \
+dist_doc_DATA = \
 	home.png \
 	hr_blue.png \
 	li-blue.png \

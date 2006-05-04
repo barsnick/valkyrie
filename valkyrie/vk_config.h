@@ -72,7 +72,7 @@ public:
 
    void dontSync();  /* don't write back to disk on exit */
 
-   /* these fns return the values set in vk_include.h ------------------- */
+   /* these fns return the values set in config.h ------------------- */
    const char* vkname();
    const char* vkName();
    const char* vkVersion();

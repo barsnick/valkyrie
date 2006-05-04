@@ -9,16 +9,14 @@
  */
 
 #include "valkyrie_object.h"
+#include "config.h"            // PACKAGE_VERSION, BIN_VALGRIND
 #include "valgrind_object.h"
 #include "tool_object.h"
-
 #include "vk_config.h"
 #include "vk_messages.h"
 #include "vk_utils.h"          // vk_assert(), vk_strcmp(), vkPrint()
 #include "html_urls.h"
-#include "vk_include.h"        // VK_VERSION
 #include "vk_popt_option.h"    // PERROR* and friends 
-#include "vk_include.h"        // VG_EXEC_PATH
 
 #include <qapplication.h>
 
@@ -51,9 +49,9 @@ Valkyrie::Valkyrie()
            "",           'h',                  "help", 
            "",           "",                   "", 
            "",           "show this help message and exit", urlNone );
-   addOpt( VERSION,      VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
+   addOpt( OPT_VERSION,  VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
            "",           'v',                  "version", 
-           "",           "",                   VK_VERSION, 
+           "",           "",                   PACKAGE_VERSION, 
            "",           "display version information and exit", urlNone );
    addOpt( VGHELP,       VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
            "",           'V',                  "valgrind-opts", 
@@ -92,7 +90,7 @@ Valkyrie::Valkyrie()
    /* path to valgrind executable (maybe found by configure) */
    addOpt( VG_EXEC,      VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
            "valkyrie",   '\0',                 "vg-exec",
-           "",           "",                   VG_EXEC_PATH,
+           "",           "",                   BIN_VALGRIND,
            "Valgrind:",  "",                   urlValkyrie::vgDir );
    addOpt( BINARY,       VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT,
            "valkyrie",   '\0',                 "binary", 
@@ -177,7 +175,7 @@ int Valkyrie::checkOptArg( int optid, const char* argval,
    /* ignore these opts */
    case HELP:
    case VGHELP:
-   case VERSION:
+   case OPT_VERSION:
       break;
    }
 

@@ -8,7 +8,7 @@
  */
 
 #include "vk_utils.h"
-#include "vk_include.h"
+#include "config.h"                 // PACKAGE_BUGREPORT
 
 #include <stdlib.h>                 // mkstemp()
 #include <stdarg.h>                 // va_start, va_end
@@ -70,7 +70,7 @@ __attribute__ ((noreturn))
           "in %s:%u %s\n", file, line, fn );
    printf("Hopefully, you should never see this message.\n"
           "If you are, then Something Really Bad just happened.\n"
-          "Please report this bug to: %s\n", VK_EMAIL );
+          "Please report this bug to: %s\n", PACKAGE_BUGREPORT );
    printf("In the bug report, please send the the above text.\n"
           "Thanks.\n\n");
    exit(1);

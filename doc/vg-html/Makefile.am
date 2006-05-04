@@ -2,7 +2,7 @@
 
 docdir = $(prefix)/doc/vg-html
 
-doc_DATA = \
+dist_doc_DATA = \
 	ac-manual.html \
 	cg-manual.html \
 	cg-tech-docs.html \

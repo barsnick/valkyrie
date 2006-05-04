@@ -87,15 +87,10 @@ valkyrie_SOURCES = \
 	tool_views/memcheck_view.cpp \
 	tool_views/tool_view.cpp \
 	tool_views/vglogview.cpp \
-	$(valkyrie_MOC)
-
-BUILT_SOURCES = $(valkyrie_MOC)
-
-noinst_HEADERS = \
+	$(valkyrie_MOC) \
 	main_window.h \
 	vk_config.h \
 	vk_file_utils.h \
-	vk_include.h \
 	vk_utils.h \
 	../icons/filedlg_icons.h \
 	../icons/memcheck_icons.h \
@@ -139,11 +134,15 @@ noinst_HEADERS = \
 	tool_views/tool_view.h \
 	tool_views/vglogview.h
 
+# make these first, so dependencies work out.
+BUILT_SOURCES = \
+	$(valkyrie_MOC)
 
-# Note: for UIC stuff, refer to autoqt docs
+
+# Note: if need UIC stuff, see autoqt docs
 
 # Compile flags
-valkyrie_CXXFLAGS = -pipe -O0 -g -W -Wall -Wundef -Wredundant-decls -Wno-unreachable-code -fno-inline -D_REENTRANT -Ihelp -Icore -Ioptions -Itool_views -I../icons -Itool_utils -I/usr/X11R6/include -I$(QTDIR)/mkspecs/linux-g++ $(QT_CXXFLAGS)
+valkyrie_CXXFLAGS = -pipe -O0 -g -W -Wall -Wundef -Wredundant-decls -Wno-unreachable-code -fno-inline -D_REENTRANT -I$(srcdir)/help -I$(srcdir)/core -I$(srcdir)/options -I$(srcdir)/tool_views  -I$(srcdir)/tool_utils -I$(srcdir)/../icons -I/usr/X11R6/include -I$(QTDIR)/mkspecs/linux-g++ $(QT_CXXFLAGS)
 
 # Link flags
 valkyrie_LDADD := $(QT_LIBS) -lfreetype -lm -lpthread

@@ -9,15 +9,14 @@
  */
 
 #include "valgrind_object.h"
+#include "config.h"            // VK_CFG_DIR, VK_SUPPS_DIR
 #include "vk_config.h"
 #include "html_urls.h"
-
 #include "memcheck_object.h"
 #include "cachegrind_object.h"
 #include "massif_object.h"
 #include "vk_popt_option.h"    // PERROR* and friends 
 #include "vk_utils.h"          // vk_assert, VK_DEBUG, etc.
-#include "vk_include.h"        // Vk_Name, VK_SUPPS_DIR
 
 
 /* class Valgrind ------------------------------------------------------ */
@@ -174,7 +173,7 @@ Valgrind::Valgrind()
 
    /*--------------------------------------------------------------- */
    /* Can't access vkConfig->suppDir(): config created after us! */
-   QString defSuppDir = QDir::homeDirPath() + "/." + Vk_Name + VK_SUPPS_DIR;
+   QString defSuppDir = QDir::homeDirPath() + "/" + VK_CFG_DIR + VK_SUPPS_DIR;
    /* list of dirs holding suppression files */
    addOpt( SUPPS_DIRS,  VkOPTION::NOT_POPT,   VkOPTION::WDG_LISTBOX, 
            "valgrind",  '\0',                 "supps-dirs",

@@ -9,7 +9,7 @@
  */
 
 #include "vk_config.h"
-#include "vk_include.h"
+#include "config.h"
 #include "vk_utils.h"       /* VK_DEBUG */
 #include "vk_messages.h"
 
@@ -85,12 +85,12 @@ VkConfig::VkConfig( Valkyrie* vk, bool *ok ) : QObject( 0, "vkConfig" )
    m_vkdocPath    = packagePath + VK_DOC_PATH;
    m_vgdocPath    = packagePath + VG_DOC_PATH;
 
-   m_vk_name      = Vk_Name;
-   m_vk_Name      = VK_NAME;
-   m_vk_version   = VK_VERSION;
+   m_vk_name      = PACKAGE;
+   m_vk_Name      = PACKAGE_NAME;
+   m_vk_version   = PACKAGE_VERSION;
    m_vk_copyright = VK_COPYRIGHT;
    m_vk_author    = VK_AUTHOR;
-   m_vk_email     = VK_EMAIL;
+   m_vk_email     = PACKAGE_BUGREPORT;
    m_vg_copyright = VG_COPYRIGHT;
 
    m_rcPath.sprintf( "%s/.%s", QDir::homeDirPath().latin1(), vkname() );
@@ -147,7 +147,7 @@ VkConfig::VkConfig( Valkyrie* vk, bool *ok ) : QObject( 0, "vkConfig" )
 
 /* misc. make-life-easier stuff ---------------------------------------- */
 
-/* these fns return vars initialised from the #defines set in vk_include.h */
+/* these fns return vars initialised from the #defines set in config.h */
 const char* VkConfig::vkname()      { return m_vk_name.data();      }
 const char* VkConfig::vkName()      { return m_vk_Name.data();      }
 const char* VkConfig::vkVersion()   { return m_vk_version.data();   }
@@ -701,10 +701,10 @@ void VkConfig::writeConfigDefaults()
 	/* Set our 'configured' valgrind paths, if we have them */
    {
       rcMap[ EntryKey( "valkyrie", "merge-exec" )  ].mValue
-         = VK_LOGMERGE;
+         = BIN_LOGMERGE;
 
       rcMap[ EntryKey( "valkyrie", "vg-exec" )     ].mValue
-         = VG_EXEC_PATH;
+         = BIN_VALGRIND;
 
       rcMap[ EntryKey( "valgrind", "suppressions" )].mValue
          = "";

@@ -2,7 +2,7 @@
 
 docdir = $(prefix)/doc/vg-html/images
 
-doc_DATA = \
+dist_doc_DATA = \
 	home.png \
 	massif-graph.png \
 	massif-graph-sm.png \
