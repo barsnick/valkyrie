@@ -39,7 +39,7 @@ noinst_HEADERS = \
 # Enable compile and link with QT
 
 # Compile flags
-vk_logmerge_CXXFLAGS = -pipe -O0 -g -W -Wall -Werror -Wundef -Wredundant-decls -Wno-unreachable-code -fno-inline -D_REENTRANT -I../valkyrie/tool_utils -I/usr/X11R6/include -I$(QTDIR)/mkspecs/linux-g++ $(QT_CXXFLAGS)
+vk_logmerge_CXXFLAGS = -pipe -O0 -g -W -Wall -Wundef -Wredundant-decls -Wno-unreachable-code -fno-inline -D_REENTRANT -I../valkyrie/tool_utils -I/usr/X11R6/include -I$(QTDIR)/mkspecs/linux-g++ $(QT_CXXFLAGS)
 
 # Link flags
 vk_logmerge_LDADD := $(QT_LIBS) -lfreetype -lm -lpthread

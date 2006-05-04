@@ -143,7 +143,7 @@ noinst_HEADERS = \
 # Note: for UIC stuff, refer to autoqt docs
 
 # Compile flags
-valkyrie_CXXFLAGS = -pipe -O0 -g -W -Wall -Werror -Wundef -Wredundant-decls -Wno-unreachable-code -fno-inline -D_REENTRANT -Ihelp -Icore -Ioptions -Itool_views -I../icons -Itool_utils -I/usr/X11R6/include -I$(QTDIR)/mkspecs/linux-g++ $(QT_CXXFLAGS)
+valkyrie_CXXFLAGS = -pipe -O0 -g -W -Wall -Wundef -Wredundant-decls -Wno-unreachable-code -fno-inline -D_REENTRANT -Ihelp -Icore -Ioptions -Itool_views -I../icons -Itool_utils -I/usr/X11R6/include -I$(QTDIR)/mkspecs/linux-g++ $(QT_CXXFLAGS)
 
 # Link flags
 valkyrie_LDADD := $(QT_LIBS) -lfreetype -lm -lpthread
