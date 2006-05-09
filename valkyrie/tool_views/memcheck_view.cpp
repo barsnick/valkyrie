@@ -172,7 +172,7 @@ void MemcheckView::openMergeFile()
    /* TODO: Multiple xml files instead of single list file
       QStringList files = QFileDialog::getOpenFileNames() */
    merge_file = QFileDialog::getOpenFileName( QString::null,
-                                              "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)", 
+                                              "XML Log Lists (*.loglst);;All Files (*)", 
                                               this, "fdlg", "Select Log File" );
    /* user might have clicked Cancel */
    if ( merge_file.isEmpty() )

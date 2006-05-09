@@ -560,6 +560,9 @@ void Memcheck::readVgLog()
          /* Parsing failed: kill m_vgproc, if alive
             - will trigger another read, but m_vgreader == 0 */
 
+         /* gather first stderr line */
+         QString str_err = m_vgproc->readLineStderr();
+
          /* cleanup reader */
          QString errMsg = hnd->errorMsg;
          delete m_vgreader;
@@ -568,13 +571,16 @@ void Memcheck::readVgLog()
          if (m_vgproc->isRunning())
             vgProcTerminate();
 
-         if (runState() == VkRunState::VALGRIND)
+         if (runState() == VkRunState::VALGRIND) {
             statusMsg( "Memcheck", "Error parsing output log" );
-         else
+            vkError( view(), "XML Parse Error",
+                     "<p>%s</p>", errMsg.ascii() );
+         } else {
             statusMsg( "Merge Logs", "Error parsing output log" );
-
-         vkError( view(), "XML Parse Error",
-                  "<p>%s</p>", errMsg.ascii() );
+            if (str_err.isEmpty()) str_err = "";
+            vkError( view(), "Parse Error",
+                     "<p>%s</p>", escapeEntities(str_err).latin1() );
+         }
 
          /* Only stop running if m_vgproc done and dusted */
          if (m_vgproc == 0)
@@ -585,6 +591,10 @@ void Memcheck::readVgLog()
    /* If m_vgproc stopped but not cleaned up, cleanup. */
    if (m_vgproc != 0 && !m_vgproc->isRunning()) {
       //      fprintf(stderr, " - cleaning up m_vgproc\n");
+
+      /* gather first stderr line */
+      QString str_err = m_vgproc->readLineStderr();
+
       delete m_vgproc;
       m_vgproc = 0;
 
@@ -595,18 +605,21 @@ void Memcheck::readVgLog()
          readVgLog();
 
          /* still not finished => error
-            valgrind xml output has not been completed properly */
+            valgrind xml output has not been completed properly, or merge failed */
          if (m_vgreader != 0) {
             delete m_vgreader;
             m_vgreader = 0;
 
-            if (runState() == VkRunState::VALGRIND)
+            if (runState() == VkRunState::VALGRIND) {
                statusMsg( "Memcheck", "Error - incomplete output log" );
-            else
+               vkError( view(), "XML Parse Error",
+                        "<p>valgrind xml output is incomplete</p>" );
+            } else {
                statusMsg( "Merge Logs", "Error - incomplete output log" );
-
-            vkError( view(), "XML Parse Error",
-                     "<p>valgrind xml output is incomplete</p>" );
+               if (str_err.isEmpty()) str_err = "";
+               vkError( view(), "Parse Error",
+                        "<p>%s</p>", escapeEntities(str_err).latin1() );
+            }
          }
       }
 
