@@ -27,6 +27,7 @@ public:
 private slots:
    void suppDirsChanged();
    void updateSuppsAvail();
+   void updateSuppsSel(const QString&);
    void getDbBin();
    void dummy();
 

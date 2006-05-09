@@ -19,6 +19,10 @@
 #include "html_urls.h"
 #include "vk_popt_option.h"    // PERROR* and friends 
 
+/* from valgrind/coregrind/pub_core_options.h
+   = maximum number of suppression files */
+#define VG_CLO_MAX_SFILES 10
+
 
 /* this page is different from the others in that it uses three tabs
    because there are just too many options to put on one page.
@@ -214,6 +218,11 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    m_itemList.insert( Valgrind::SUPPS_SEL,                 /* listbox */
                       optionWidget( Valgrind::SUPPS_SEL, tabSupps, true ) );
 
+   /*
+     NOTE: suppression listbox widgets have knowledge about what they
+           are and what they should do.  Ick, fix asap!
+   */
+
    LbWidget* lbDirs  = (LbWidget*)m_itemList[Valgrind::SUPPS_DIRS];
    LbWidget* lbAvail = (LbWidget*)m_itemList[Valgrind::SUPPS_AVAIL];
    LbWidget* lbSel   = (LbWidget*)m_itemList[Valgrind::SUPPS_SEL];
@@ -224,7 +233,7 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
 
    /* lbSel and lbAvail update each other */
    connect( lbAvail, SIGNAL(itemSelected(const QString&)), 
-            lbSel,     SLOT(insertItem(const QString&)) );
+            this,      SLOT(updateSuppsSel(const QString&)) );
    connect( lbSel,   SIGNAL(listChanged()), 
             this,      SLOT(updateSuppsAvail()) );
 
@@ -354,3 +363,22 @@ void ValgrindOptionsPage::updateSuppsAvail()
 
    lbAvail->setCurrValue( suppsAvail.join( m_sep ) );
 }
+
+
+/* Called by selecting an item in suppsAvail listbox.
+   Adds item to selected supps listbox (up to limit)
+*/
+void ValgrindOptionsPage::updateSuppsSel(const QString& suppr)
+{
+   LbWidget* lbSel = (LbWidget*)m_itemList[Valgrind::SUPPS_SEL];
+
+   if (((QListBox*)lbSel->widget())->numRows() < VG_CLO_MAX_SFILES) {
+      lbSel->insertItem(suppr);
+   } else {
+      /* valgrind doesn't accept any more suppression files */
+      vkError( this, "Error",
+               "Valgrind won't accept more than %d suppression files", 
+               VG_CLO_MAX_SFILES );      
+   }
+}
+
