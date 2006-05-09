@@ -82,8 +82,9 @@ QString checkFile( int* err_val, const char* fname )
 
    if ( QFile::exists(file_name) ) {
       absPath = QFileInfo( file_name ).absFilePath();
-   } else {
-      /* else try to find in $PATH environment variable */
+   } else if ( file_name.find('/') == -1 ) {
+      /* else (if no '/' in file_name)
+           try to find in $PATH environment variable */
       char* pEnv = getenv( "PATH" );
       QStringList paths( QStringList::split(QChar(':'), pEnv) );
       for ( QStringList::Iterator p = paths.begin(); p != paths.end(); ++p ) {
