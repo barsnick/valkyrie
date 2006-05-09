@@ -146,11 +146,20 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
 /* called when user clicks "Apply" / "Ok" / "Reset" buttons.  */
 bool ValkyrieOptionsPage::applyOptions( int optId )
 { 
-   bool retval = true;
    vk_assert( optId <= Valkyrie::LAST_CMD_OPT );
 
-   switch ( optId ) {
+   /* check option */
+   QString argval = m_itemList[optId]->currValue();
+   int errval = m_vkObj->checkOptArg( optId, argval );
+   if ( errval != PARSED_OK ) {
+      vkError( this, "Invalid Entry", "%s:\n\"%s\"", 
+               parseErrString(errval), argval.latin1() );
+      m_itemList[optId]->cancelEdit();
+      return false;
+   }
 
+   /* apply option */
+   switch ( optId ) {
    case Valkyrie::TOOLTIP: {
       MainWindow* vkWin = (MainWindow*)qApp->mainWidget();
       vkWin->toggleToolTips();
@@ -169,18 +178,10 @@ bool ValkyrieOptionsPage::applyOptions( int optId )
    } break;
 
    default:
-      QString argval = m_itemList[optId]->currValue();
-      int errval = m_vkObj->checkOptArg( optId, argval );
-      if ( errval != PARSED_OK ) {
-         vkError( this, "Invalid Entry", "%s:\n\"%s\"", 
-                  parseErrString(errval), argval.latin1() );
-         m_itemList[optId]->cancelEdit();
-         retval = false;
-      }
       break;
    }
 
-   return retval;
+   return true;
 }
 
 

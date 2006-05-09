@@ -10,6 +10,7 @@
 
 #include "massif_options_page.h"
 #include "massif_object.h"
+#include "vk_messages.h"
 #include "vk_utils.h"
 #include "vk_popt_option.h"    // PERROR* and friends 
 
@@ -103,10 +104,21 @@ bool MassifOptionsPage::applyOptions( int optId )
 { 
    vk_assert( optId <= Massif::LAST_CMD_OPT );
 
-   VK_DEBUG( "nothing implemented in here yet" );
+   /* check option */
+   QString argval = m_itemList[optId]->currValue();
+   int errval = m_vkObj->checkOptArg( optId, argval );
+   if ( errval != PARSED_OK ) {
+      vkError( this, "Invalid Entry", "%s:\n\"%s\"", 
+               parseErrString(errval), argval.latin1() );
+      m_itemList[optId]->cancelEdit();
+      return false;
+   }
 
-   /* TODO: Call m_vkObj->checkOptArg() for other options ?
-      They're restriced via the widgets, but good 'extra' test... */
+   /* apply option */
+   switch ( optId ) {
+   default:
+      break;
+   }
 
    return true;
 }

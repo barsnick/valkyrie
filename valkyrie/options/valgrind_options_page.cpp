@@ -269,24 +269,25 @@ void ValgrindOptionsPage::init()
 /* called when user clicks "Apply" / "Ok" / "Reset" buttons. */
 bool ValgrindOptionsPage::applyOptions( int optId )
 { 
-   bool retval = true;
    vk_assert( optId <= Valgrind::LAST_CMD_OPT );
 
-   switch ( optId ) {
+   /* check option */
+   QString argval = m_itemList[optId]->currValue();
+   int errval = m_vkObj->checkOptArg( optId, argval );
+   if ( errval != PARSED_OK ) {
+      vkError( this, "Invalid Entry", "%s:\n\"%s\"", 
+               parseErrString(errval), argval.latin1() );
+      m_itemList[optId]->cancelEdit();
+      return false;
+   }
 
+   /* apply option */
+   switch ( optId ) {
    default:
-      QString argval = m_itemList[optId]->currValue();
-      int errval = m_vkObj->checkOptArg( optId, argval );
-      if ( errval != PARSED_OK ) {
-         vkError( this, "Invalid Entry", "%s:\n\"%s\"", 
-                  parseErrString(errval), argval.latin1() );
-         m_itemList[optId]->cancelEdit();
-         retval = false;
-      }
       break;
    }
 
-   return retval;
+   return true;
 }
 
 

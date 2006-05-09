@@ -9,7 +9,6 @@
  */
 
 #include "memcheck_view.h"
-#include "memcheck_object.h"
 
 #include "vk_config.h"
 #include "memcheck_icons.h"

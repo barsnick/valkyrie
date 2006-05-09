@@ -141,38 +141,25 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
 /* called when user clicks "Apply" / "Ok" / "Reset" buttons. */
 bool CachegrindOptionsPage::applyOptions( int optId )
 { 
-   bool retval = true;
    vk_assert( optId <= Cachegrind::LAST_CMD_OPT );
 
+   /* check option */
+   QString argval = m_itemList[optId]->currValue();
+   int errval = m_vkObj->checkOptArg( optId, argval );
+   if ( errval != PARSED_OK ) {
+      vkError( this, "Invalid Entry", 
+               "%s:\n\"%s\"", parseErrString(errval), argval.latin1() );
+      m_itemList[optId]->cancelEdit();
+      return false;
+   }
+
+   /* apply option */
    switch ( optId ) {
-
-   case Cachegrind::I1_CACHE:
-   case Cachegrind::D1_CACHE:
-   case Cachegrind::L2_CACHE:
-   case Cachegrind::PID_FILE:
-   case Cachegrind::INCLUDE: {
-      QString argval = m_itemList[optId]->currValue();
-      int errval = m_vkObj->checkOptArg( optId, argval );
-      if ( errval != PARSED_OK ) {
-         vkError( this, "Invalid Entry", 
-                  "%s:\n\"%s\"", parseErrString(errval), argval.latin1() );
-         m_itemList[optId]->cancelEdit();
-         retval = false;
-      }
-   } break;
-
-   case Cachegrind::SHOW:
-   case Cachegrind::SORT:
-   case Cachegrind::THRESH:
-   case Cachegrind::AUTO:
-   case Cachegrind::CONTEXT:
    default:
-      /* TODO: Call m_vkObj->checkOptArg() for other options ?
-         They're restriced via the widgets, but good 'extra' test... */
       break;
    }
 
-   return retval;
+   return true;
 }
 
 

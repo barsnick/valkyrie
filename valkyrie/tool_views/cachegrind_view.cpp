@@ -9,7 +9,6 @@
  */
 
 #include "cachegrind_view.h"
-#include "cachegrind_object.h"
 
 #include <qcursor.h>
 #include <qlayout.h>

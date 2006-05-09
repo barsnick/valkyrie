@@ -11,10 +11,11 @@
 #define __VK_TOOL_VIEW_H
 
 
+#include "tool_object.h"  // VkRunState
+
+#include <qmainwindow.h>
 #include <qwidget.h>
 #include <qwidgetstack.h>
-
-#include "tool_object.h"
 
 
 class ToolView : public QMainWindow
