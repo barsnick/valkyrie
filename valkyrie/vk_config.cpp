@@ -20,19 +20,16 @@
 
 
 VkConfig::~VkConfig()
-{ 
-   sync();
-}
+{}
 
 
-/* set m_dirty to false in order to stop config from writing any
-   entries-set-so-far to disk.  called by main() after
-   parseOptions() returns false. --------------------------------------- */
-void VkConfig::dontSync() 
-{ m_dirty = false; }
+/* test if config holds data difft to that held on disk */
+bool VkConfig::isDirty()
+{ return m_dirty; }
 
 
-/* write-sync is only necessary if there are dirty entries ------------- */
+/* write config entries to disk
+   called by user from menu 'Options::Save as Default' ---------------------- */
 void VkConfig::sync()
 {
    if ( !m_dirty ) return;
@@ -327,7 +324,11 @@ QColor VkConfig::rdColor( const QString &pKey )
 
 
 /* write functions ----------------------------------------------------- 
-   the vkConfig object is dirty now */
+   called from
+    - parseCmdArgs()
+    - OptionWidget::saveEdit()/cancelEdit()
+    - MainWindow::~MainWindow()
+ */
 void VkConfig::wrEntry( const QString &pValue,
                         const QString &pKey, const QString &pGroup )
 {
@@ -344,6 +345,13 @@ void VkConfig::wrEntry( const QString &pValue,
    }
 
    m_dirty = true;
+   /* the vkConfig object is dirty now - no going back. */
+   /* TODO?
+      currently no option for getting back to non-dirty state,
+      for e.g. nicer dis/enable of menu item Options::Save_as_Default
+      dirty = (current == initial vals (held in struct or reread from disk))
+      do we really care? */
+
    /* set new value */
    EntryData entryData( pValue, true );
    /* rewrite the new value */
@@ -666,9 +674,9 @@ x-pos=400\n\
 y-pos=0\n\n";
 
    char * dbase = "[Database]\n\
-user=root\n\
+user=auser\n\
 host=localhost\n\
-pword=Poniarl7\n\
+pword=123\n\
 dbase=valkyrie\n\
 logging=true\n\
 logfile=\n\n";

@@ -30,7 +30,7 @@ const char* parseErrString( const int error )
    case PERROR_BADARG:
       return "Invalid argument";
    case PERROR_BADOPT:
-      return "Unknown option";
+      return "Unknown/Disabled option";
    case PERROR_BADOPERATION:
       return "Mutually exclusive logical operations requested";
    case PERROR_NULLARG:

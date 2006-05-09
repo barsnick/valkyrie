@@ -229,13 +229,13 @@ Valgrind::Valgrind()
 }
 
 
-int Valgrind::checkOptArg( int optid, const char* argval, 
-                           bool /*use_gui*//*=false*/ )
+/* check argval for this option, updating if necessary.
+   called by parseCmdArgs() and gui option pages -------------------- */
+int Valgrind::checkOptArg( int optid, QString& argval )
 {
    vk_assert( optid >= 0 && optid <= LAST_CMD_OPT );
 
    int errval = PARSED_OK;
-   QString argVal( argval );
    Option* opt = findOption( optid );
 
    switch ( (Valgrind::vgOpts)optid ) {
@@ -251,7 +251,7 @@ int Valgrind::checkOptArg( int optid, const char* argval,
    case INPUT_FD:
    case SHOW_BELOW:
    case MAX_SFRAME:
-      opt->isValidArg( &errval, argval );
+      opt->isValidArg( &errval, argval.latin1() );
       break;
 
    case TRACK_FDS:
@@ -266,8 +266,8 @@ int Valgrind::checkOptArg( int optid, const char* argval,
       break;
 
    case TRACE_CH: {
-      if ( opt->isValidArg( &errval, argval ) ) {
-         if ( argVal == "yes" ) {
+      if ( opt->isValidArg( &errval, argval.latin1() ) ) {
+         if ( argval == "yes" ) {
             if ( vkConfig->rdBool( "db-attach", "valgrind" ) )
                errval = PERROR_DB_CONFLICT;
          }
@@ -276,21 +276,21 @@ int Valgrind::checkOptArg( int optid, const char* argval,
 
 
    case XML_OUTPUT:
-      opt->isValidArg( &errval, argval );
+      opt->isValidArg( &errval, argval.latin1() );
       break;
 
    case DB_COMMAND: {   /* gdb -nw %f %p */
-      int pos = argVal.find( ' ' );
-      QString tmp = argVal.left( pos );
-      argVal = binaryCheck( &errval, tmp );
-      argVal += tmp.right( tmp.length() - pos+1 );
-      // printf("db_command: %s\n", argVal.latin1() );
+      int pos = argval.find( ' ' );
+      QString tmp = argval.left( pos );
+      argval = binaryCheck( &errval, tmp );
+      argval += tmp.right( tmp.length() - pos+1 );
+      // printf("db_command: %s\n", argval.latin1() );
    } break;
 
    /* check for conflict with --trace-children */
    case DB_ATTACH:
-      if ( opt->isValidArg( &errval, argval ) ) {
-         if ( vk_strcmp( argval, "yes" ) ) {
+      if ( opt->isValidArg( &errval, argval.latin1() ) ) {
+         if ( argval == "yes" ) {
             if ( vkConfig->rdBool( "trace-children","valgrind" ) )
                errval = PERROR_DB_CONFLICT;
          }
@@ -300,14 +300,23 @@ int Valgrind::checkOptArg( int optid, const char* argval,
       break;
 
    /* logging options */
-   case LOG_FD:
-      opt->isValidArg( &errval, argval );
-      break;
+   /* for all tools we use --log-file-exactly=xyz.
+      this is set in Valkyrie::runTool(), and updated by the tool.
+      all logging options are therefore ignored */
    case LOG_FILE:
+   case LOG_FD:
    case LOG_PID:
    case LOG_QUAL:
    case LOG_SOCKET:
+      /* Note: gui options disabled, so only reaches here from cmdline */
+      errval = PERROR_BADOPT;
+      fprintf(stderr,
+              "\nOption disabled '--%s': Valkyrie sets its own logging options to gather data from Valgrind.\n",
+              opt->m_longFlag.latin1());
       break;
+
+   default:
+      vk_assert_never_reached();
    }
 
    return errval;
@@ -382,22 +391,14 @@ QStringList Valgrind::modifiedVgFlags( const ToolObject* tool_obj )
          break;
 
       /* for all tools we use --log-file-exactly=xyz.
-         this is set in Valkyrie::runTool(), and updated by the tool
-         all logging options are therefore ignored */
+         this is set in Valkyrie::runTool(), and updated by the tool.
+         all logging options should therefore not be used */
       case LOG_FILE:
       case LOG_FD:
       case LOG_PID:
       case LOG_QUAL:
       case LOG_SOCKET:
-         if ( defVal != cfgVal ) {
-            /* gui options disabled, so only reaches here if specified
-               on cmdline */
-            fprintf(stderr,
-                    "\nSkipped option '%s': Valkyrie sets its own logging options.\n",
-                    flag.latin1());
-            /* reset to default */
-            vkConfig->wrEntry( opt->m_defaultValue, opt->cfgKey(), name() );
-         }
+         /* ignore these opts */
          break;
 
       default:

@@ -87,13 +87,13 @@ Cachegrind::Cachegrind( int objId )
 }
 
 
-int Cachegrind::checkOptArg( int optid, const char* argval, 
-                             bool /*use_gui*//*=false*/ )
+/* check argval for this option, updating if necessary.
+   called by parseCmdArgs() and gui option pages -------------------- */
+int Cachegrind::checkOptArg( int optid, QString& argval )
 { 
    vk_assert( optid >= 0 && optid <= LAST_CMD_OPT );
 
    int errval = PARSED_OK;
-   QString argVal( argval );
    Option* opt = findOption( optid );
 
    switch ( optid ) {
@@ -101,7 +101,7 @@ int Cachegrind::checkOptArg( int optid, const char* argval,
    case I1_CACHE:
    case D1_CACHE:
    case L2_CACHE: {
-      QStringList aList = QStringList::split( ",", argVal );
+      QStringList aList = QStringList::split( ",", argval );
       if ( aList.count() != 3 ) {
          errval = PERROR_BADARG;
       }  else {
@@ -128,13 +128,13 @@ int Cachegrind::checkOptArg( int optid, const char* argval,
    } break;
 
    case PID_FILE:
-      argVal = fileCheck( &errval, argVal, true, false );
+      argval = fileCheck( &errval, argval, true, false );
       break;
 
    case THRESH:
    case AUTO:
    case CONTEXT:
-      opt->isValidArg( &errval, argVal );
+      opt->isValidArg( &errval, argval.latin1() );
       break;
 
       /* TODO: not sure how to handle these just yet :( */
@@ -143,7 +143,7 @@ int Cachegrind::checkOptArg( int optid, const char* argval,
       break;
 
    case INCLUDE: {
-      QStringList aList = QStringList::split( ",", argVal );
+      QStringList aList = QStringList::split( ",", argval );
       for ( unsigned int i=0; i<aList.count(); i++ ) {
          QString tmp    = aList[i].simplifyWhiteSpace();
          QString srcdir = dirCheck( &errval, tmp.latin1(), true, false );
@@ -153,7 +153,7 @@ int Cachegrind::checkOptArg( int optid, const char* argval,
             errval = PERROR_DEFAULT;
             break;
          } 
-         argVal = aList.join( "," );
+         argval = aList.join( "," );
       } 
    } break;
 

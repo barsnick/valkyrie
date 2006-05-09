@@ -51,7 +51,24 @@
 
 
 /* class MainWindow ---------------------------------------------------- */
-MainWindow::~MainWindow() { }
+MainWindow::~MainWindow()
+{
+   /* Write window attributes to config on exit.
+      Want to ignore any outstanding dirty config vals, but vkConfig
+      doesn't hold originals... simplest just to use a clean vkConfig... */
+
+   bool ok;
+   VkConfig tmp_vkConfig( m_valkyrie, &ok );
+   if (ok) {
+      tmp_vkConfig.wrInt( this->height(), "height", "MainWin" );
+      tmp_vkConfig.wrInt( this->width(),  "width",  "MainWin" );
+      tmp_vkConfig.wrInt( this->x(),      "x-pos",  "MainWin" );
+      tmp_vkConfig.wrInt( this->y(),      "y-pos",  "MainWin" );
+
+      // save opts to disk...
+      tmp_vkConfig.sync();
+   }
+}
 
 MainWindow::MainWindow( Valkyrie* vk ) : QMainWindow( 0, "mainWindow" )
 {
@@ -152,6 +169,18 @@ void MainWindow::run( VkRunState::State runState )
    if ( !currTool->isDone() )
       return;
 
+   /* if running valgrind, make sure there's a valid binary
+      just 'cos it made it into the config doesn't mean it's valid */
+   if( runState == VkRunState::VALGRIND ) {
+      int errval  = PARSED_OK;
+      QString bin = vkConfig->rdEntry( "binary", "valkyrie" );
+      binaryCheck( &errval, bin.latin1() );
+      if ( errval != PARSED_OK ) {
+         vkError( this, "Run Tool", "Invalid Binary: Please set a valid binary in Options::Valkyrie." );
+         return;
+      }
+   }
+
    if ( !valkyrie()->runTool( m_viewStack->visibleId(), runState ) ) {
       vkError( this, "Run Tool",
                "Failed to complete execution." );
@@ -192,6 +221,23 @@ void MainWindow::showOptionsWindow( int view_id )
 { 
    m_optionsWin->showPage( view_id ); 
    m_optionsWin->raise();
+}
+
+
+/* save options to disk --------------------------------------------- */
+void MainWindow::saveOptions()
+{ 
+   // should only get here if any current opts difft to stored config
+   vk_assert( vkConfig->isDirty() == true );
+
+   // save opts to disk...
+   vkConfig->sync();
+
+   // disable menu item
+   m_optsMenu->setItemEnabled( OPTS_SAVE, false );
+
+// TODO: something - sync() may have failed...
+//   vk_assert(vkConfig->isDirty() == false);
 }
 
 
@@ -293,33 +339,10 @@ void MainWindow::updateVgFlags()
    if ( m_flagsLabel->isVisible() ) {
       showFlagsWidget( true );
    }
-}
 
-
-void MainWindow::resizeEvent( QResizeEvent *re )
-{
-   QWidget::resizeEvent( re );
-#if 0
-   QSize sz = size();
-   vkConfig->wrInt( sz.width(),  "width",  "MainWin" );
-   vkConfig->wrInt( sz.height(), "height", "MainWin" );
-#else
-   vkConfig->wrInt( frameGeometry().width(),  "width",  "MainWin" );
-   vkConfig->wrInt( frameGeometry().height(), "height", "MainWin" );
-#endif
-}
-
-
-void MainWindow::moveEvent( QMoveEvent* )
-{ 
-#if 0
-   QPoint pt = pos();
-   vkConfig->wrInt( pt.x(), "x-pos", "MainWin" );
-   vkConfig->wrInt( pt.y(), "y-pos", "MainWin" );
-#else
-   vkConfig->wrInt( frameGeometry().x(), "x-pos", "MainWin" );
-   vkConfig->wrInt( frameGeometry().y(), "y-pos", "MainWin" );
-#endif
+   /* if flags changed, enable 'save as default' item */
+   if (vkConfig->isDirty())
+      m_optsMenu->setItemEnabled( OPTS_SAVE, true );
 }
 
 
@@ -440,16 +463,21 @@ void MainWindow::mkMenuBar()
 
    /* options / preferences et al --------------------------------------- */
    index++;
-   QPopupMenu* optsMenu = new QPopupMenu( this, "options_menu" );
+   m_optsMenu = new QPopupMenu( this, "options_menu" );
    VkObjectList objList = valkyrie()->vkObjList();
    for ( VkObject* obj = objList.first(); obj; obj = objList.next() ) {
-      optsMenu->insertItem( obj->title(), this, 
-                            SLOT(showOptionsWindow(int)),
-                            0, obj->objId() );
+      m_optsMenu->insertItem( obj->title(), this, 
+                              SLOT(showOptionsWindow(int)),
+                              0, obj->objId() );
    }
-   id = mainMenu->insertItem( "O&ptions", optsMenu, -1, index );
+   m_optsMenu->insertSeparator();
+   m_optsMenu->insertItem( QPixmap(filesave_xpm),
+                           "Save as &Default", this, SLOT(saveOptions()), 
+                           CTRL+Key_D, OPTS_SAVE );
+   m_optsMenu->setItemEnabled( OPTS_SAVE, false );  /* starts up disabled */
+   id = mainMenu->insertItem( "O&ptions", m_optsMenu, -1, index );
    mainMenu->setAccel( ALT+Key_P, id );
-   ContextHelp::add( optsMenu, urlValkyrie::optionsMenu );
+   ContextHelp::add( m_optsMenu, urlValkyrie::optionsMenu );
 
    /* spacer between popup menus and tool-buttons ----------------------- */
    index++;

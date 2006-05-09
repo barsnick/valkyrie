@@ -110,11 +110,11 @@ bool MemcheckOptionsPage::applyOptions( int optId )
    switch ( optId ) {
 
    case Memcheck::FREELIST: {
-      const char* argval = m_itemList[optId]->currValue().latin1();
-      int errval = m_vkObj->checkOptArg( optId, argval, true );
+      QString argval = m_itemList[optId]->currValue();
+      int errval = m_vkObj->checkOptArg( optId, argval );
       if ( errval != PARSED_OK ) {
          vkInfo( this, "Invalid Entry", "%s:\n\"%s\"", 
-                 parseErrString(errval), argval );
+                 parseErrString(errval), argval.latin1() );
          m_itemList[optId]->cancelEdit();
          retval = false;
       }

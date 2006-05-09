@@ -70,7 +70,8 @@ public:
    VkConfig( Valkyrie* vk, bool *ok );
    ~VkConfig();
 
-   void dontSync();  /* don't write back to disk on exit */
+   bool isDirty();   /* config holds data difft to that held on disk */
+   void sync();      /* write config to disk */
 
    /* these fns return the values set in config.h ------------------- */
    const char* vkname();
@@ -121,7 +122,6 @@ public:
 private:
    enum RetVal { Okay=1, BadFilename, NoDir, NoPerms,
                  CreateRcFile, Fail };
-   void sync();
 
    bool    checkDirs();
    bool    checkPaths();

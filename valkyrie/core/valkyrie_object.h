@@ -39,8 +39,9 @@ public:
    /* update flags for current tool */
    void updateVgFlags( int tId );
 
-   int checkOptArg( int optid, const char* argval,
-                    bool use_gui=false );
+   /* check argval for this option, updating if necessary.
+      called by parseCmdArgs() and gui option pages */
+   int checkOptArg( int optid, QString& argval );
 
    enum vkOpts {
       HELP,        OPT_VERSION,   VGHELP,

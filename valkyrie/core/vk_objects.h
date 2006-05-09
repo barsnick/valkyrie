@@ -48,9 +48,9 @@ public:
    QString accelTitle()    const { return m_accelText;       }
    QKeySequence accelKey() const { return m_accel_Key;       }
 
-   /* called by parseCmdArgs() in parse_cmd_args.cpp,
-      and from the gui options pages */
-   virtual int checkOptArg(int optid, const char* argval, bool gui=false) = 0; 
+   /* check argval for this option, updating if necessary.
+      called by parseCmdArgs() and gui option pages */
+   virtual int checkOptArg(int optid, QString& argval ) = 0; 
 
    /* returns a list of options to be written to the config file */
    virtual QString configEntries();

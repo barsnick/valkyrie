@@ -18,6 +18,7 @@
 #include "html_urls.h"
 #include "vk_popt_option.h"    // PERROR* and friends 
 
+#include <stdio.h>
 #include <qapplication.h>
 
 
@@ -119,11 +120,11 @@ Valkyrie::Valkyrie()
 }
 
 
-int Valkyrie::checkOptArg( int optid, const char* argval, 
-                           bool /*use_gui*//*=false*/ )
+/* check argval for this option, updating if necessary.
+   called by parseCmdArgs() and gui option pages -------------------- */
+int Valkyrie::checkOptArg( int optid, QString& argval )
 { 
    int errval = PARSED_OK;
-   QString argVal( argval );
    // Option* opt = findOption( optid );
 
    switch ( (Valkyrie::vkOpts)optid ) {
@@ -143,11 +144,11 @@ int Valkyrie::checkOptArg( int optid, const char* argval,
    case SRC_EDITOR:
    case MERGE_EXEC:
    case VG_EXEC:
-      argVal = binaryCheck( &errval, argval );
+      argval = binaryCheck( &errval, argval );
       break;
 
    case VIEW_LOG:
-      argVal = fileCheck( &errval, argval, true, false );
+      argval = fileCheck( &errval, argval, true, false );
       if ( errval == PARSED_OK )
          m_startRunState = VkRunState::TOOL1;
       break;
@@ -157,19 +158,19 @@ int Valkyrie::checkOptArg( int optid, const char* argval,
          of two logfiles. Validating each file is done at merge-time, as
          we will then skip any files which we can't read. */
    case MERGE_LOGS:
-      argVal = fileCheck( &errval, argval, true, false );
+      argval = fileCheck( &errval, argval, true, false );
       if ( errval == PARSED_OK )
          m_startRunState = VkRunState::TOOL2;
       break;
 
    case BINARY:
-      argVal = binaryCheck( &errval, argval );
+      argval = binaryCheck( &errval, argval );
       if ( errval == PARSED_OK )
          m_startRunState = VkRunState::VALGRIND;
       break;
 
+   /* can't really test this */
    case BIN_FLAGS:
-      argVal = argval;
       break;
 
    /* ignore these opts */
@@ -245,6 +246,11 @@ QStringList Valkyrie::modifiedVgFlags()
 {
    Option*     opt    = findOption( BINARY );
    QString     cfgVal = vkConfig->rdEntry( opt->m_longFlag, name() );
+
+   /* cfgVal may not be valid here (may be empty, or old),
+      but checked in MainWindow::run() anyway. */
+
+   /* only add binary & bin_flags if binary present */
    QStringList modFlags;
    if ( cfgVal != opt->m_defaultValue ) {
       modFlags << cfgVal;

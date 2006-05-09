@@ -139,6 +139,8 @@ int parseCmdArgs( int argc, char** argv, Valkyrie* vk )
 {
    int rc;                 // check fn return value / err value
    char argVal[512];       // store argument values for checking
+   Option* vk_opt = NULL;
+   QString qs_argval;
 
    /* fetch all object options */
    VkObjectList objList = vk->vkObjList();
@@ -167,12 +169,18 @@ int parseCmdArgs( int argc, char** argv, Valkyrie* vk )
     
       VkObject* obj = vk->vkObject( opt->objectId );
       vk_assert( obj != NULL );
-      rc = obj->checkOptArg( opt->optKey, argVal );
+      qs_argval = argVal;
+      rc = obj->checkOptArg( opt->optKey, qs_argval );
 
       if ( rc != PARSED_OK ) {
          parseError( optCon, rc );
          goto done;
       }
+
+      /* else ok: write option to config (but not to disk yet) */
+      vk_opt = obj->findOption( opt->optKey );
+      vk_assert(vk_opt != NULL);
+      vkConfig->wrEntry( qs_argval, vk_opt->cfgKey(), vk_opt->cfgGroup() );
 
    }   /* end while ... */
 
@@ -190,11 +198,17 @@ int parseCmdArgs( int argc, char** argv, Valkyrie* vk )
       really do have a valid prog-to-debug here.  if yes, then all
       flags that follow it on the cmd line are assumed to belong to it. */
    if ( vkPoptPeekArg(optCon) != NULL ) {
-      rc = vk->checkOptArg( Valkyrie::BINARY, vkPoptGetArg(optCon) );
+      qs_argval = vkPoptGetArg(optCon);
+      rc = vk->checkOptArg( Valkyrie::BINARY, qs_argval );
       if ( rc != PARSED_OK ) {
          parseError( optCon, rc );
          goto done;
       }
+
+      /* else ok: write option to config (but not to disk yet) */
+      vk_opt = vk->findOption( Valkyrie::BINARY );
+      vk_assert(vk_opt != NULL);
+      vkConfig->wrEntry( qs_argval, vk_opt->cfgKey(), vk_opt->cfgGroup() );
 
       /* get client flags, if any */
       const char **args = vkPoptGetArgs( optCon );
@@ -205,15 +219,18 @@ int parseCmdArgs( int argc, char** argv, Valkyrie* vk )
          i++;
       }
       QString flags = aList.join( " " );
-      if (!flags.isNull()) {
-         rc = vk->checkOptArg( Valkyrie::BIN_FLAGS, flags.latin1() );
-      } else {
-         rc = vk->checkOptArg( Valkyrie::BIN_FLAGS, "" );
-      }
+      qs_argval = !flags.isNull() ? flags : "";
+      rc = vk->checkOptArg( Valkyrie::BIN_FLAGS, qs_argval );
+
       if ( rc != PARSED_OK ) {
          parseError( optCon, rc );
          goto done;
       }
+
+      /* else ok: write option to config (but not to disk yet) */
+      vk_opt = vk->findOption( Valkyrie::BIN_FLAGS );
+      vk_assert(vk_opt != NULL);
+      vkConfig->wrEntry( qs_argval, vk_opt->cfgKey(), vk_opt->cfgGroup() );
    }
 
  done:

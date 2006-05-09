@@ -58,8 +58,6 @@ signals:
    void toolbarLabelsToggled(bool);
 
 protected:
-   void resizeEvent( QResizeEvent* re );
-   void moveEvent( QMoveEvent* me );
    void closeEvent( QCloseEvent* ce );
 
 private slots:
@@ -68,6 +66,7 @@ private slots:
 
    void showFlagsWidget( bool show );
    void showOptionsWindow(int);
+   void saveOptions();
    void showAboutInfo( int id );
    void closeToolView();
 
@@ -97,10 +96,10 @@ private:
    bool m_showToolTips;
    bool m_showToolbarLabels;
 
-   QPopupMenu* m_fileMenu;
-   enum menuIds{ FILE_RUN, FILE_STOP, FILE_CLOSE };
-
+   enum menuIds{ FILE_RUN, FILE_STOP, FILE_CLOSE, OPTS_SAVE=99/*>vkobj_id*/ };
+   QPopupMenu*   m_fileMenu;
    QPopupMenu*   m_toolsMenu;
+   QPopupMenu*   m_optsMenu;
    QButtonGroup* m_viewButtGroup;
 
    QToolButton* m_runButton;

@@ -133,13 +133,13 @@ int main ( int argc, char* argv[] )
       this is a re-run which uses the settings stored in vkConfig. */
    if ( argc > 1 ) {
       /* parse the command-line args, and overwrite vkConfig's current
-         options with any options we see there.  but if the user typed
-         --help || --version || --valgrind-opts, or there were parsing
-         errors, do the right thing, then exit immediately.
+         options with any options we see there (but not to disk yet).
+         but if user typed --help || --version || --valgrind-opts,
+         or there were parsing errors, do the right thing, then exit
+         immediately.
          return values: error < 0, ok = 0, show-help-and-exit = 1 */
       int retval = parseCmdArgs( argc, argv, &valkyrie );
       if ( retval != 0 ) {
-         vkConfig->dontSync();
          res = ( retval < 0 ) ? EXIT_FAILURE : EXIT_SUCCESS;
          goto cleanup_and_exit;
       }
@@ -190,13 +190,14 @@ int main ( int argc, char* argv[] )
    res = app->exec();
 
  cleanup_and_exit:
-   if ( vkConfig ) { 
-      delete vkConfig;
-      vkConfig = 0;
-   }
    if ( vkWin ) {
       delete vkWin;
       vkWin = 0;
+   }
+   /* delete vkConfig last */
+   if ( vkConfig ) { 
+      delete vkConfig;
+      vkConfig = 0;
    }
 
    return res;

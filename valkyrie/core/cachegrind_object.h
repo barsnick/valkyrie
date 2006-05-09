@@ -32,7 +32,9 @@ public:
    bool start( VkRunState::State rm, QStringList vgflags );
    bool stop();
 
-   int checkOptArg( int optid, const char* argval, bool use_gui=false );
+   /* check argval for this option, updating if necessary.
+      called by parseCmdArgs() and gui option pages */
+   int checkOptArg( int optid, QString& argval );
 
    enum cgOpts {
       I1_CACHE,

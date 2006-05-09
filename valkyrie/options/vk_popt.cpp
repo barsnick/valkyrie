@@ -141,7 +141,8 @@ static const char * vkExpandNextArg( const char * s )
 
 /* get next option opt_ret
    returns 0 on success, 1 on last item, PERROR_* on error */
-int vkPoptGetNextOpt( vkPoptContext con, char *arg_val,
+int vkPoptGetNextOpt( vkPoptContext con,
+                      char *arg_val/*OUT*/,
                       const vkPoptOption** opt_ret/*OUT*/ )
 {
    const vkPoptOption * opt = NULL;

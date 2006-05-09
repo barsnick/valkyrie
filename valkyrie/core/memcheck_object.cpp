@@ -101,23 +101,33 @@ Memcheck::Memcheck( int objId )
 }
 
 
-int Memcheck::checkOptArg( int optid, const char* argval, 
-                           bool /*use_gui*//*=false*/ )
+/* check argval for this option, updating if necessary.
+   called by parseCmdArgs() and gui option pages -------------------- */
+int Memcheck::checkOptArg( int optid, QString& argval )
 {
    int errval = PARSED_OK;
-   QString argVal( argval );
    Option* opt = findOption( optid );
 
    switch ( (Memcheck::mcOpts)optid ) {
    case PARTIAL:
    case FREELIST:
-   case LEAK_CHECK:
    case LEAK_RES:
    case SHOW_REACH:
    case GCC_296:
    case ALIGNMENT:
-      opt->isValidArg( &errval, argval );
+      opt->isValidArg( &errval, argval.latin1() );
       break;
+
+      /* when using xml output from valgrind, this option is preset to
+         'full' by valgrind, so this option should not be used. */
+   case LEAK_CHECK:
+      /* Note: gui options disabled, so only reaches here from cmdline */
+      errval = PERROR_BADOPT;
+      fprintf(stderr,
+              "\nOption disabled '--%s': Memcheck presets this option to 'full' when generating the required xml output.\nSee valgrind/docs/internals/xml_output.txt.\n",
+              opt->m_longFlag.latin1());
+      break;
+
 
    default:
       vk_assert_never_reached();
@@ -142,16 +152,10 @@ QStringList Memcheck::modifiedVgFlags()
 
       switch ( (Memcheck::mcOpts)opt->m_key ) {
 
+      /* when using xml output from valgrind, this option is preset to
+         'full' by valgrind, so this option should not be used. */
       case LEAK_CHECK:
-         if ( defVal != cfgVal ) {
-            /* gui option disabled, so only reaches here if specified
-               on cmdline */
-            fprintf(stderr,
-                    "\nSkipping option '%s': Memcheck presets this option to 'full' when generating the required xml output.\nSee valgrind/docs/internals/xml_output.txt.\n",
-                    flag.latin1());
-            /* reset to default */
-            vkConfig->wrEntry( opt->m_defaultValue, opt->cfgKey(), name() );
-         }
+         /* ignore this opt */
          break;
 
       default:

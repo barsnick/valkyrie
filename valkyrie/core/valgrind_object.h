@@ -27,7 +27,9 @@ public:
    /* returns a list of non-default flags to pass to valgrind */
    QStringList modifiedVgFlags( const ToolObject* tool_obj );
 
-   int checkOptArg( int optid, const char* argval, bool use_gui=false );
+   /* check argval for this option, updating if necessary.
+      called by parseCmdArgs() and gui option pages */
+   int checkOptArg( int optid, QString& argval );
 
    enum vgOpts {
       TOOL,           // --tool

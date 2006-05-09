@@ -69,8 +69,9 @@ Massif::Massif( int objId )
 }
 
 
-int Massif::checkOptArg( int optid, const char* argval, 
-                         bool /*use_gui*//*=false*/ )
+/* check argval for this option, updating if necessary.
+   called by parseCmdArgs() and gui option pages -------------------- */
+int Massif::checkOptArg( int optid, QString& argval )
 {
    vk_assert( optid >= 0 && optid <= LAST_CMD_OPT );
 
@@ -85,7 +86,7 @@ int Massif::checkOptArg( int optid, const char* argval,
    case DEPTH:
    case FORMAT:
    case ALIGNMENT:
-      opt->isValidArg( &errval, argval );
+      opt->isValidArg( &errval, argval.latin1() );
       break;
 
       /* how on earth can this be checked ? */

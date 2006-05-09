@@ -127,7 +127,7 @@ bool OptionsPage::applyEdits()
    if ( m_editList.isEmpty() && m_mod == false ) 
       return true;
 
-   /* user clicked OK / apply after editing some items */
+   /* user clicked Ok/Apply after editing some items */
    OptionWidget* optw;
    QPtrList<OptionWidget> tmpList;
 
