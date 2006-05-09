@@ -255,6 +255,11 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    m_itemList[Valgrind::LOG_FILE   ]->setEnabled( false );
    m_itemList[Valgrind::LOG_SOCKET ]->setEnabled( false );
 //   m_itemList[Valgrind::LOG_QUAL   ]->setEnabled( false );
+
+
+   /* Disabled for now - can't deal with the multiple xml files this generates */
+   /* Note: Also disabled in Valgrind::checkOptArg() */
+   m_itemList[Valgrind::TRACE_CH   ]->setEnabled( false );
 }
 
 

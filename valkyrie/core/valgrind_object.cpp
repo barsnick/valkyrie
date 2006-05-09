@@ -266,12 +266,21 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       break;
 
    case TRACE_CH: {
+#if 0
       if ( opt->isValidArg( &errval, argval.latin1() ) ) {
          if ( argval == "yes" ) {
             if ( vkConfig->rdBool( "db-attach", "valgrind" ) )
                errval = PERROR_DB_CONFLICT;
          }
       }
+#else
+      /* Disabled for now - can't deal with the multiple xml files this generates */
+      /* Note: Also disabled in ValgrindOptionsPage() */
+      errval = PERROR_BADOPT;
+      fprintf(stderr,
+              "\nOption disabled '--%s': Valkyrie can't yet handle the multiple xml files this generates.\n",
+              opt->m_longFlag.latin1());
+#endif
    } break;
 
 
