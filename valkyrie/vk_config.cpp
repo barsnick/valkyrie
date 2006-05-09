@@ -90,6 +90,7 @@ VkConfig::VkConfig( Valkyrie* vk, bool *ok ) : QObject( 0, "vkConfig" )
    m_vk_email     = PACKAGE_BUGREPORT;
    m_vg_copyright = VG_COPYRIGHT;
 
+   /* set full rc paths (see config.h) */
    m_rcPath.sprintf( "%s/.%s", QDir::homeDirPath().latin1(), vkname() );
    m_rcFileName.sprintf( "%s/%src", m_rcPath.latin1(), vkname() );
    m_dbasePath = m_rcPath + VK_DBASE_DIR;
@@ -155,15 +156,11 @@ const char* VkConfig::vgCopyright() { return m_vg_copyright.data(); }
 
 /* these fns return values held in private vars */
 QString VkConfig::vkdocDir()  { return m_vkdocPath; }
-
 QString VkConfig::vgdocDir()  { return m_vgdocPath; }
-/* ~/.valkyrie/ */
+/* rc paths (see config.h) */
 QString VkConfig::rcDir()     { return m_rcPath;    }
-/* ~/.valkyrie/dbase/ */
 QString VkConfig::dbaseDir()  { return m_dbasePath; }
-/* ~/.valkyrie/logs/ */
 QString VkConfig::logsDir()   { return m_logsPath;  }
-/* ~/.valkyrie/suppressions/ */
 QString VkConfig::suppDir()   { return m_suppPath;  }
 
 
@@ -735,11 +732,7 @@ void VkConfig::writeConfigDefaults()
 /* ~/.PACKAGE is a sine qua non ---------------------------------------- 
    checks to see if ~/valkyrie/ and its required sub-dirs are
    all present and correct.  If not, tries to create them.
-   ~/valkyrie/ 
-   - valkyrierc
-   - dbase/
-   - logs/
-   - suppressions/ 
+   (see config.h for #defines)
 */
 bool VkConfig::checkDirs()
 {
@@ -773,9 +766,9 @@ bool VkConfig::checkDirs()
             else if ( fi->isFile() && fi->isReadable() &&
                       fi->fileName() == "valkyrierc" ) ;
             else if ( fi->isDir() && fi->isReadable() ) {
-               if ( fi->fileName() == "dbase" ) ;
-               else if ( fi->fileName() == "logs" ) ;
-               else if ( fi->fileName() == "suppressions" ) ;
+               if      ( ("/" + fi->fileName() +"/") == VK_DBASE_DIR ) ;
+               else if ( ("/" + fi->fileName() +"/") == VK_LOGS_DIR ) ;
+               else if ( ("/" + fi->fileName() +"/") == VK_SUPPS_DIR ) ;
                else { /* problem */
                   state = GIVE_UP;
                   break;
@@ -786,20 +779,20 @@ bool VkConfig::checkDirs()
       } break;
 
       /* first time ever startup --------------------------------------- */
-      case MK_TOP_DIR:       /* create '~/PACKAGE' */
+      case MK_TOP_DIR:       /* create '~/PACKAGE' dir */
          state = vk_dir.mkdir( m_rcPath ) ? MK_DB_DIR : GIVE_UP;
          break;
 
-      case MK_DB_DIR:        /* create sub-dir '/dbase' */
+      case MK_DB_DIR:        /* create dbase sub-dir */
          state = vk_dir.mkdir( m_dbasePath ) ? MK_LOG_DIR : GIVE_UP;
          break;
 
-      case MK_LOG_DIR:       /* create sub-dir '/logs' */
+      case MK_LOG_DIR:       /* create logs sub-dir */
          state = vk_dir.mkdir( m_logsPath ) ? MK_SUPP_DIR : GIVE_UP;
          break;
 
          /* last case statement MUST set 'state = DONE || GIVE_UP' */
-      case MK_SUPP_DIR:      /* create sub-dir '/suppressions' */
+      case MK_SUPP_DIR:      /* create suppressions sub-dir */
          state = vk_dir.mkdir( m_suppPath ) ? DONE : GIVE_UP;
          if ( state == DONE )
             break;

@@ -122,10 +122,10 @@ AC_DEFINE_UNQUOTED(VK_DOC_PATH,       "/doc/",              [valkyrie install do
 AC_DEFINE_UNQUOTED(VG_DOC_PATH,       "/doc/vg-html/",      [valgrind install doc path])
 
 # valkyrie config paths
-AC_DEFINE_UNQUOTED(VK_CFG_DIR,   ".$PACKAGE", [valkyrie config dir])
-AC_DEFINE_UNQUOTED(VK_DBASE_DIR, "/dbase/",   [valkyrie config dbase dir])
-AC_DEFINE_UNQUOTED(VK_LOGS_DIR,  "/logs/",    [valkyrie config logs dir])
-AC_DEFINE_UNQUOTED(VK_SUPPS_DIR, "/supps/",   [valkyrie config supps dir])
+AC_DEFINE_UNQUOTED(VK_CFG_DIR,   ".$PACKAGE",      [valkyrie config dir])
+AC_DEFINE_UNQUOTED(VK_DBASE_DIR, "/dbase/",        [valkyrie config dbase dir])
+AC_DEFINE_UNQUOTED(VK_LOGS_DIR,  "/logs/",         [valkyrie config logs dir])
+AC_DEFINE_UNQUOTED(VK_SUPPS_DIR, "/suppressions/", [valkyrie config supps dir])
 
 # programs
 AC_DEFINE_UNQUOTED(BIN_VALGRIND, "$VALGRIND",                          [valgrind executable])
