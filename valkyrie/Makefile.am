@@ -142,7 +142,7 @@ BUILT_SOURCES = \
 # Note: if need UIC stuff, see autoqt docs
 
 # Compile flags
-valkyrie_CXXFLAGS = -pipe -O0 -g -W -Wall -Wundef -Wredundant-decls -Wno-unreachable-code -fno-inline -D_REENTRANT -I$(srcdir)/help -I$(srcdir)/core -I$(srcdir)/options -I$(srcdir)/tool_views  -I$(srcdir)/tool_utils -I$(srcdir)/../icons -I/usr/X11R6/include -I$(QTDIR)/mkspecs/linux-g++ $(QT_CXXFLAGS)
+valkyrie_CXXFLAGS = -pipe -O0 -g -W -Wall -Wno-non-virtual-dtor -Wundef -Wredundant-decls -Wno-unreachable-code -fno-inline -D_REENTRANT -I$(srcdir)/help -I$(srcdir)/core -I$(srcdir)/options -I$(srcdir)/tool_views  -I$(srcdir)/tool_utils -I$(srcdir)/../icons -I/usr/X11R6/include -I$(QTDIR)/mkspecs/linux-g++ $(QT_CXXFLAGS)
 
 # Link flags
 valkyrie_LDADD := $(QT_LIBS) -lfreetype -lm -lpthread
