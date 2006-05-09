@@ -351,6 +351,7 @@ bool Memcheck::parseLogFile()
                escapeEntities(log_file).latin1() );
       return false;
    }
+   log_file = ret_file;
   
    /* fileSaved is always true here 'cos we are just parsing a file
       which already exists on disk */

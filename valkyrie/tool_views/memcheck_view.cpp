@@ -157,6 +157,7 @@ void MemcheckView::openLogFile()
    if ( log_file.isEmpty() )
       return;
 
+   vkConfig->wrEntry( log_file, "view-log", "valkyrie" );
    emit run( VkRunState::TOOL1 );
 #endif
 }
@@ -177,6 +178,7 @@ void MemcheckView::openMergeFile()
    if ( merge_file.isEmpty() )
       return;
 
+   vkConfig->wrEntry( merge_file, "merge", "valkyrie" );
    /* returns the filename the merge has been saved to */
    emit run( VkRunState::TOOL2 );
 }

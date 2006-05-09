@@ -198,8 +198,6 @@ QString Valkyrie::configEntries()
          widget */
       if (opt->m_key == Valkyrie::HELP       ) continue;
       if (opt->m_key == Valkyrie::VGHELP     ) continue;
-      if (opt->m_key == Valkyrie::VIEW_LOG   ) continue;
-      if (opt->m_key == Valkyrie::MERGE_LOGS ) continue;
 
       cfgEntry += opt->m_longFlag + "=" + opt->m_defaultValue + "\n";
    }
