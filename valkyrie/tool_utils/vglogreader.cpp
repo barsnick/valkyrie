@@ -117,7 +117,6 @@ bool VgLogHandler::endElement( const QString&, const QString&,
          not exec() under valgrind.  When the process forks, you wind up
          with 2 V's attached to the same logfile, which doesn't get
          sorted out until the child does exec().
-         So what to do... try returning true...
       */
       finished = true;
    }
