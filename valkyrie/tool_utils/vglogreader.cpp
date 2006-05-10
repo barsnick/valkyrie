@@ -180,7 +180,11 @@ bool VgLogHandler::fatalError( const QXmlParseException& exception )
    if (finished) {
       /* If we finished before we got the error, this is probably the
          result of Valgrind's fork-no-exec problem. */
-      m_errorMsg += "\nError after document closing tag - looks like a victim of Valgrind's fork-no-exec log problem";
+      m_errorMsg 
+         += "\nError after document closing tag.  This may be\n"
+            "caused by the Valgrinded application doing fork() but\n"
+            "not exec().  If so, ensure each fork() has a matching\n"
+            "exec() call.\n";
    }
 
    return QXmlDefaultHandler::fatalError( exception );
