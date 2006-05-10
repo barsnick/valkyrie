@@ -25,19 +25,19 @@ Cachegrind::Cachegrind( int objId )
    /* cachegrind flags */
    addOpt( I1_CACHE,     VkOPTION::ARG_UINT,   VkOPTION::WDG_SPINBOX, 
            "cachegrind", '\0',                 "I1",
-           "<size,assoc,line_size>", "",       "0,0,0",
+           "<size,assoc,line_size>", "",       "1,0,1",
            "I1 cache configuration:",
            "set I1 cache manually",
            urlCachegrind::Cacheopts );
    addOpt( D1_CACHE,     VkOPTION::ARG_UINT,   VkOPTION::WDG_SPINBOX, 
            "cachegrind", '\0',                 "D1", 
-           "<size,assoc,line_size>", "",       "0,0,0",
+           "<size,assoc,line_size>", "",       "1,0,1",
            "D1 cache configuration:",        
            "Set D1 cache manually",
            urlCachegrind::Cacheopts );
    addOpt( L2_CACHE,     VkOPTION::ARG_UINT,   VkOPTION::WDG_SPINBOX, 
            "cachegrind", '\0',                 "L2",
-           "<size,assoc,line_size>", "",       "0,0,0",
+           "<size,assoc,line_size>", "",       "1,0,1",
            "L2 cache configuration:",
            "set L2 cache manually",
            urlCachegrind::Cacheopts );

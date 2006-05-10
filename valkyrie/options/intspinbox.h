@@ -94,7 +94,6 @@ public:
    QString separator() const;
 
 private:
-   int power( int idx );
    int getPowIndex( int v );
 
 private:

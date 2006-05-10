@@ -357,14 +357,12 @@ void SpinWidget::setDownEnabled( bool on )
 
 
 
-/* class NumberSection ------------------------------------------------- 
-   of course '0' isn't a power of two - but we have to have some sort
-   of default 'not used' units :) */
-#define MAX_POW 18
+/* class NumberSection ---------------------------------------------  */
+#define MAX_POW 20
 static int powers[MAX_POW+1] = {
-   0,   4,      8,      16,    32,     64,     128, 
-   256,    512,    1024,  2048,   4096,   8192, 
-   16384,  32768,  65536, 131072, 262144, 1048576
+   1,      2,      4,      8,      16,     32,     64,
+   128,    256,    512,    1024,   2048,   4096,   8192,
+   16384,  32768,  65536,  131072, 262144, 524288, 1048576
 };
 
 NumberSection::NumberSection( int idx/*=-1*/, QString sep_char/*=" : "*/ )
@@ -387,24 +385,20 @@ void NumberSection::setValues( int _min, int _max,
       val  = _val;
       step = _step; 
    } else {
+      /* min,max,val will be used as powers of 2... */
+      /* preset boundary min/max, then find user-set min/max */
       min  = 0;
       max  = MAX_POW;
-      val  = getPowIndex( _val );
-      val  = (val == -1) ? 0 : val;
+      min  = getPowIndex( _min );  vk_assert(min != -1);
+      max  = getPowIndex( _max );  vk_assert(max != -1);
+      val  = getPowIndex( _val );  vk_assert(val != -1);
       step = 1;
    }
 }
 
-int NumberSection::power( int idx )
-{ 
-   val = idx;
-   vk_assert( (val >= 0) && (val <= MAX_POW) );
-   return powers[val]; 
-}
-
 int NumberSection::getPowIndex( int v )
 {
-   for ( int i=min; i<max; i++ ) {
+   for ( int i=min; i<=max; i++ ) {
       if ( v == powers[i] )
          return i;
    }
@@ -447,7 +441,7 @@ void NumberSection::setValue( int v )
       val = v; 
    else {
       val = getPowIndex( v );
-      val = ( val == -1 ) ? 0 : val;
+      val = ( val == -1 ) ? min : val;
    }
 }
 

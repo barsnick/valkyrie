@@ -35,25 +35,25 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
    /* specify I1 cache configuration */
    opt = m_vkObj->findOption( Cachegrind::I1_CACHE );
    spinw = new SpWidget( group1, opt, true, 3 );
-   spinw->addSection( 0, 1048576, 0, 0 );  /* min, max, def, step/pwr2 */
+   spinw->addSection( 1, 1048576, 1, 0 );  /* min, max, def, step/pwr2 */
    spinw->addSection( 0, 8,       0, 1 );
-   spinw->addSection( 0, 8192,    0, 0 );
+   spinw->addSection( 1, 8192,    1, 0 );
    m_itemList.insert( Cachegrind::I1_CACHE, spinw );
 
    /* specify D1 cache configuration */
    opt = m_vkObj->findOption( Cachegrind::D1_CACHE );
    spinw = new SpWidget( group1, opt, true, 3 );
-   spinw->addSection( 0, 1048576, 0, 0 );  /* min, max, def, use_powers */
+   spinw->addSection( 1, 1048576, 1, 0 );  /* min, max, def, use_powers */
    spinw->addSection( 0, 8,       0, 1 );
-   spinw->addSection( 0, 8192,    0, 0 );
+   spinw->addSection( 1, 8192,    1, 0 );
    m_itemList.insert( Cachegrind::D1_CACHE, spinw );
 
    /* specify L2 cache configuration */
    opt = m_vkObj->findOption( Cachegrind::L2_CACHE );
    spinw = new SpWidget( group1, opt, true, 3 );
-   spinw->addSection( 0, 1048576, 0, 0 );  /* min, max, def, use_powers */
+   spinw->addSection( 1, 1048576, 1, 0 );  /* min, max, def, use_powers */
    spinw->addSection( 0, 8,       0, 1 );
-   spinw->addSection( 0, 8192,    0, 0 );
+   spinw->addSection( 1, 8192,    1, 0 );
    m_itemList.insert( Cachegrind::L2_CACHE, spinw );
 
    /* grid layout for group1 */
