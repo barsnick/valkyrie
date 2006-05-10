@@ -365,9 +365,10 @@ bool Memcheck::parseLogFile()
    VgLogReader vgLogFileReader( view()->vgLogPtr() );
    bool success = vgLogFileReader.parse( log_file );
    if (!success) {
+      VgLogHandler* hnd = vgLogFileReader.handler();
       statusMsg( "Parsing", "Error" );
       vkError( view(), "XML Parse Error",
-               "<p>%s</p>", vgLogFileReader.handler()->errorMsg.ascii() );
+               "<p>%s</p>", escapeEntities(hnd->errorString()).latin1() );
    }
 
    if (success) {
@@ -431,7 +432,7 @@ bool Memcheck::runProcess( QStringList flags )
 
    /* start the log parse - nothing written yet tho */
    if (!m_vgreader->parse( m_saveFname, true )) {
-      QString errMsg = m_vgreader->handler()->errorMsg;
+      QString errMsg = m_vgreader->handler()->errorString();
       if (m_vgreader != 0) {
          delete m_vgreader;
          m_vgreader = 0;
@@ -564,7 +565,7 @@ void Memcheck::readVgLog()
          QString str_err = m_vgproc->readLineStderr();
 
          /* cleanup reader */
-         QString errMsg = hnd->errorMsg;
+         QString errMsg = hnd->errorString();
          delete m_vgreader;
          m_vgreader = 0;
 

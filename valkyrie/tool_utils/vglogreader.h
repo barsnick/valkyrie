@@ -84,13 +84,16 @@ public:
    // error handler
    bool fatalError( const QXmlParseException& exception );
 
-   QString errorMsg;
+   QString errorString();
+
    bool finished;
 
 private:
    QDomDocument doc;
    VgLog* vglog;
    QDomNode node;
+
+   QString m_errorMsg;
 };
 
 #endif // #ifndef __VK_XMLPARSER_H
