@@ -122,7 +122,6 @@ valkyrie_SOURCES = \
 	options/valkyrie_options_page.h \
 	options/vk_option.h \
 	options/vk_popt.h \
-	options/vk_popt_option.h \
 	tool_utils/async_process.h \
 	tool_utils/vglog.h \
 	tool_utils/vglogreader.h \
