@@ -13,7 +13,7 @@
 
 #include "vk_utils.h"
 #include "vk_popt.h"
-#include "vk_popt_option.h"  /* namespace OPTION */
+#include "vk_option.h"       /* namespace VkOPTION */
 #include "vk_config.h"
 
 /* return values: error < 0, ok = 0(PARSED_OK), show-help-and-exit = 1 */

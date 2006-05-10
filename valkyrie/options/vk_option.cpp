@@ -8,7 +8,6 @@
  */
 
 #include "vk_option.h"
-#include "vk_popt_option.h" /* namespace OPTION */
 #include "vk_utils.h"       /* vk_assert(), free(), malloc() */
 
 #include <ctype.h>
@@ -19,7 +18,7 @@
 #include <qdir.h>
 
 
-/* these enums are defined in vk_popt_option.h ------------------------- */
+/* these enums are defined in vk_option.h --------------------------- */
 const char* parseErrString( const int error )
 {
    switch ( error ) {

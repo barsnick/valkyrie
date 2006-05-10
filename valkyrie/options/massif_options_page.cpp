@@ -12,7 +12,6 @@
 #include "massif_object.h"
 #include "vk_messages.h"
 #include "vk_utils.h"
-#include "vk_popt_option.h"    // PERROR* and friends 
 
 
 MassifOptionsPage::MassifOptionsPage( QWidget* parent, VkObject* obj )

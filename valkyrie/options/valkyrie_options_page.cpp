@@ -18,7 +18,6 @@
 #include "vk_messages.h"
 #include "context_help.h"
 #include "html_urls.h"
-#include "vk_popt_option.h"    // PERROR* and friends 
 
 
 ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )

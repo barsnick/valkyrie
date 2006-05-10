@@ -22,7 +22,7 @@
 
 #include "vk_objects.h"
 #include "vk_config.h"
-#include "vk_popt_option.h"    // PERROR* and friends 
+#include "vk_option.h"         // PERROR* and friends 
 #include "vk_utils.h"          // vk_assert, VK_DEBUG, etc.
 #include "vk_messages.h"       // vkInfo() and friends
 #include "html_urls.h"

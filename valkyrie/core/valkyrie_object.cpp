@@ -16,7 +16,7 @@
 #include "vk_messages.h"
 #include "vk_utils.h"          // vk_assert(), vk_strcmp(), vkPrint()
 #include "html_urls.h"
-#include "vk_popt_option.h"    // PERROR* and friends 
+#include "vk_option.h"         // PERROR* and friends 
 
 #include <stdio.h>
 #include <qapplication.h>

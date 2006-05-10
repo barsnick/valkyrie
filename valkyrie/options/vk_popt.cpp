@@ -8,7 +8,7 @@
  */
 
 #include "vk_popt.h"
-#include "vk_popt_option.h"      /* namespace OPTION */
+#include "vk_option.h"           /* namespace VkOPTION */
 
 /* return a vkPoptOption initialised to null */
 vkPoptOption nullOpt()

@@ -15,7 +15,7 @@
 #include "memcheck_object.h"
 #include "cachegrind_object.h"
 #include "massif_object.h"
-#include "vk_popt_option.h"    // PERROR* and friends 
+#include "vk_option.h"         // PERROR* and friends 
 #include "vk_utils.h"          // vk_assert, VK_DEBUG, etc.
 
 

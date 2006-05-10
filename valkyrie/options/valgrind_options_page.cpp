@@ -17,7 +17,6 @@
 #include "vk_utils.h"
 #include "context_help.h"
 #include "html_urls.h"
-#include "vk_popt_option.h"    // PERROR* and friends 
 
 /* from valgrind/coregrind/pub_core_options.h
    = maximum number of suppression files */

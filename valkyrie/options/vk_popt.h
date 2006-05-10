@@ -14,8 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "vk_popt_option.h"      /* parseErrString() */
-
+#include <vk_option.h>
 
 #define OPTION_DEPTH  10
 
