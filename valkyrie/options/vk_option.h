@@ -83,7 +83,6 @@ public:
    void print();                /* for debugging */
 
 public:
-   bool        m_modified;
    VkOPTION::ArgType    m_argType;  /* option type, eg. ARG_UINT   */
    VkOPTION::WidgetType m_widgType; /* eg. VkOPTION::WDG_LEDIT     */
    int         m_key;               /* eg. LEAK_CHK                */

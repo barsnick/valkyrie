@@ -312,7 +312,6 @@ Option::Option( int opt_key, VkOPTION::ArgType arg_type, VkOPTION::WidgetType w_
    m_shortHelp    = shelp;
    m_longHelp     = lhelp;
    m_urlHelp      = url;
-   m_modified     = false;
 
 
    /* Assert is valid option ---------------------------------------- */
@@ -449,7 +448,6 @@ void Option::setPossibleValues( QStringList vals )
 void Option::print()
 {
    printf( "m_key          = %d\n", m_key );
-   printf( "m_modified     = %d\n", m_modified );
    printf( "m_widgType     = %d\n", m_widgType );
    printf( "m_argType      = %d\n", m_argType );
    printf( "m_shortFlag    = %c\n", m_shortFlag.latin1() );

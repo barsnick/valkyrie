@@ -27,8 +27,7 @@ void catch_ctrl_c(int /*sig_num*/)
     fflush(stderr);
 
     qApp->exit(1);
-    qApp->processEvents();
-    /* Still hangs around until window system pokes it.. how to bypass that? */
+    qApp->wakeUpGuiThread();
 }
 
 
