@@ -303,7 +303,7 @@ bool Memcheck::stop()
    then MainWindow::run() calls valkyrie->runTool().  */
 bool Memcheck::runValgrind( QStringList vgflags )
 {
-   m_saveFname = vk_mkstemp( "mc_log", vkConfig->logsDir(), ".xml" );
+   m_saveFname = vk_mkstemp( vkConfig->logsDir() + "mc_log", "xml" );
    vk_assert( !m_saveFname.isEmpty() );
 
    /* fill in filename in flags list */
@@ -391,7 +391,7 @@ bool Memcheck::mergeLogFiles()
    QString fname_logList = vkConfig->rdEntry( "merge", "valkyrie" );
    statusMsg( "Merging logs in file-list", fname_logList );
  
-   m_saveFname = vk_mkstemp( "mc_merged", vkConfig->logsDir(), ".xml" );
+   m_saveFname = vk_mkstemp( vkConfig->logsDir() + "mc_merged", "xml" );
    vk_assert( !m_saveFname.isEmpty() );
 
    QStringList flags;

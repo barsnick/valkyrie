@@ -78,7 +78,7 @@ extern void vkPrintErr( const char *, ... )
      __attribute__ ((format (printf, 1, 2)));
 
 /* create a unique filename -------------------------------------------- */
-QString vk_mkstemp( QString fname, QString path, QString ext=QString::null );
+QString vk_mkstemp( QString filepath, QString ext=QString::null );
 
 /* 3.0.5 --> 0x030005 -------------------------------------------------- */
 int str2hex( QString ver_str );

@@ -386,17 +386,25 @@ void VkConfig::insertData( const EntryKey &ekey,
 
 void VkConfig::backupConfigFile()
 {
-	QString dt = QDateTime::currentDateTime().toString( "_yyyy.MM.dd_hh.mm.ss");
-	QString bak = m_rcFileName + dt + ".bak";
-	QDir d;
-	if ( !d.exists(m_rcFileName) ) {
-		// TODO: Err
+   QString bakfile = vk_mkstemp( m_rcFileName, "bak" );
+   if (bakfile.isNull()) {
+      /* rather unlikely... */
+      VK_DEBUG( "failed to backup rc file" );
+      return;
+   }
+	if ( !QFile::exists(m_rcFileName) ) {
+      /* not much we can do about that... */
+      VK_DEBUG( "no rc file to backup!" );
 		return;
 	}
-	d.rename( m_rcFileName, bak );
+	if ( !QDir().rename( m_rcFileName, bakfile ) ) {
+      /* oh well... */
+      VK_DEBUG( "rename failed: couldn't backup rc file" );
+      return;
+   }
    vkInfo( 0, "Writing Config File",
            "<p>Backed up previous config file to '%s'.</p>", 
-           bak.latin1() );
+           bakfile.latin1() );
 }
 
 bool VkConfig::parseFile( Valkyrie* vk, /*OUT*/EntryMap& dstMap )

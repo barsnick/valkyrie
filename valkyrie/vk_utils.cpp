@@ -78,74 +78,29 @@ __attribute__ ((noreturn))
 
 
 /* Create a unique filename, with an optional extension ---------------- */
-QString vk_mkstemp( QString fname, QString path, 
-                    QString ext/*=QString::null*/ )
+QString vk_mkstemp( QString filepath, QString ext/*=QString::null*/ )
 {
-#if 0
-   int len = fname.length() + path.length() + 10;
-   char* filename = vk_str_malloc( len );
-   sprintf( filename, "%s%s-XXXXXX", path.latin1(), fname.latin1() );
-   int fd = mkstemp( filename );
-   if ( fd == -1 ) {
-      /* something went wrong */
-      VK_DEBUG("vk_mkstemp(): failed to create tmp file '%s'", filename );
-      return QString::null;
+   /* create tempfiles with datetime, so can sort easily if they stay around */
+
+   QString datetime = QDateTime::currentDateTime().toString( "-yyyy.MM.dd-hh.mm.ss");
+	QString unique = filepath + datetime;
+   if (!ext.isNull()) unique +=  "." + ext;
+
+   if ( QFile::exists(unique) ) {
+      /* fall back on mkstemp */
+      char* tmpname = vk_str_malloc( unique.length() + 10 );
+      sprintf( tmpname, "%s.XXXXXX", unique.latin1() );
+      int fd = mkstemp( tmpname );
+      if ( fd == -1 ) {
+         /* something went wrong */
+         VK_DEBUG("failed to create unique filename from '%s'.",
+                  filepath.latin1() );
+         return QString::null;
+      }
+      unique = QString( tmpname );
+      tmpname = vk_str_free( tmpname );
    }
-
-   QString ret_fname( filename );
-   filename = vk_str_free( filename );
-
-   /* add eg. '.xml' to filename */
-   if ( !ext.isNull() ) {
-      QFileInfo fi( ret_fname );
-      QDir dir( fi.dir() );
-      if ( dir.rename( fi.fileName(), ret_fname + ext ) )
-         ret_fname += ext;
-   }
-
-#else
-   int n_digits = 5;  // num digits to use in log filename
-
-   QString date = QDate::currentDate().toString("yyyy.MM.dd");
-   fname += "-" + date + "-";  // add pre-number separator
-  
-   /* get a *sorted* list of all log files */
-   QDir logdir( path );
-   QString n_filter;
-   for (int i=0; i<n_digits; i++) { n_filter += "[0-9]"; }
-   QStringList logfiles = logdir.entryList( fname + n_filter + ext );
-
-   /* find last N used */
-   int last_n = -1;
-   if (!logfiles.isEmpty()) {
-      QString n_str = logfiles.last().mid( fname.length(), n_digits );
-      bool ok;
-      last_n = n_str.toInt( &ok );
-      vk_assert( ok ); // should be ok, if we filtered the files properly
-   }
-
-   /* new filename */
-   QString num_string;
-   num_string.sprintf("%0*d", n_digits, last_n + 1);
-   QString ret_fname( path + fname + num_string + ext );
-
-   /* check we haven't run out of numbers! */
-   int max_n=9;
-   for (int i=0; i<n_digits-1; i++) { max_n = max_n*10 + 9; }
-   if (last_n >= max_n) {
-      /* TODO: Popup saying "Move/delete the old files / give a new basename" */
-      fprintf(stderr, "Error: vk_mkstemp(): max_n reached, failed to create tmp file '%s'",
-              ret_fname.latin1() );
-      return QString::null;
-   }
-
-   /* Create file */
-   QFile new_logfile( ret_fname );
-   new_logfile.open( IO_ReadWrite );
-   new_logfile.close(); 
-#endif
-   //  printf("ret_fname: '%s'\n", ret_fname.latin1() );
-   return ret_fname;
+   return unique;
 }
 
 

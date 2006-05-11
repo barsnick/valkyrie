@@ -275,7 +275,7 @@ void ValkyrieOptionsPage::getVgExec()
 
    /* now check the version */
    QString cmd, vg_version, tmp_fname;
-   tmp_fname = vk_mkstemp( "vg-version", vkConfig->rcDir() );
+   tmp_fname = vk_mkstemp( vkConfig->rcDir() + "vg-version" );
    cmd.sprintf( "%s --version | sed \"s/valgrind-//g\" > %s", 
                 vg_exec_path.latin1(), tmp_fname.latin1() );
    system( cmd.latin1() );
