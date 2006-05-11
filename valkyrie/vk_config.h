@@ -132,6 +132,7 @@ private:
    void     insertData( const EntryKey &key, const EntryData &data );
    void     backupConfigFile();
    EntryMap parseFile( Valkyrie* vk, bool *ok );
+   EntryMap updateCfgFile( EntryMap &newMap, EntryMap &rcMap, bool *ok );
    RetVal   checkAccess() const;
 
 private:

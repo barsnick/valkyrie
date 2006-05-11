@@ -431,7 +431,6 @@ void VkConfig::backupConfigFile()
 
 EntryMap VkConfig::parseFile( Valkyrie* vk, bool *ok )
 {
-   EntryMap rcMap, newMap;
    QFile rFile( m_rcFileName );
    if ( !rFile.open( IO_ReadOnly ) ) {
 		/* Error: Failed to open file. */
@@ -446,9 +445,12 @@ EntryMap VkConfig::parseFile( Valkyrie* vk, bool *ok )
 
 	/* beam me up, scotty */
 	QTextStream stream( &rFile );
-	rcMap = parseConfigToMap( stream );
+	EntryMap rcMap = parseConfigToMap( stream );
 	rFile.close();
 
+   QString defaultConfig = mkConfigDefaults( vk );
+   QTextStream strm( &defaultConfig, IO_ReadOnly );
+   EntryMap defaultMap = parseConfigToMap( strm );
 
 	/* Check for correct rc version number
 	   - if mismatch, print warning, update entries */
@@ -462,34 +464,67 @@ EntryMap VkConfig::parseFile( Valkyrie* vk, bool *ok )
 
 		/* Create new default config, bringing over any old values */
 		fprintf(stderr, "Updating configuration file...\n\n");
-		QString new_config = mkConfigDefaults( vk );
-		QTextStream strm( &new_config, IO_ReadOnly );
-      newMap = parseConfigToMap( strm );
 
-		/* loop over entries in old rc:
-         if (entry exists in new map) copy value from old */
+      /* update config file, returning new config map */
+      return updateCfgFile( defaultMap, rcMap, ok );
+   }
+
+
+   /* check our default config has the same entry keys as the config file */
+   /* entries are sorted, so we can easily test them */
+   bool cfg_ok=true;
+   if (rcMap.count() != defaultMap.count()) {
+      cfg_ok = false;
+   } else {
+		/* loop over entries in config file: same entries should exist in default cfg */
 		EntryMapIterator aIt;
 		for ( aIt = rcMap.begin(); aIt != rcMap.end(); ++aIt) {
 			const EntryKey  &rcKey = aIt.key();
-			if ( newMap.find(rcKey) != newMap.end() ) {
-				newMap[ rcKey ] = aIt.data();
+			if ( defaultMap.find(rcKey) == defaultMap.end() ) {
+            /* missing key */
+            cfg_ok = false;
+            break;
 			}
 		}
-		/* but keep the new version! */
-		newMap[ EntryKey( "valkyrie", "version" ) ].mValue = vkVersion();
+   }
+   if (!cfg_ok) {
+		fprintf(stderr, "Warning: Detected problem with configuration file:\n");
+		fprintf(stderr, "Attempting to fix...\n\n");
 
-		/* write out new config */
-		*ok = writeConfig( newMap, true );
-		if (!*ok) {
-			fprintf(stderr, "Error: parseFile(): Failed to write new configuration file\n");
-			// TODO
-		}
+      /* update config file, returning new config map */
+      return updateCfgFile( defaultMap, rcMap, ok );
+   }
 
-		/* and return new map */
-		return newMap;
-	}
 	/* return map */
 	return rcMap;
+}
+
+
+EntryMap VkConfig::updateCfgFile( EntryMap &newMap, EntryMap &rcMap, bool *ok )
+{
+   /* loop over entries in old rc:
+      if (entry exists in new map) copy value from old */
+   EntryMapIterator aIt;
+   for ( aIt = rcMap.begin(); aIt != rcMap.end(); ++aIt) {
+      const EntryKey  &rcKey = aIt.key();
+      if ( newMap.find(rcKey) != newMap.end() ) {
+         newMap[ rcKey ] = aIt.data();
+      }
+   }
+   /* but keep the new version! */
+   newMap[ EntryKey( "valkyrie", "version" ) ].mValue = vkVersion();
+   
+   /* write out new config */
+   *ok = writeConfig( newMap, true );
+   if (!*ok) {
+      vkFatal( 0, "Update Config File",
+               "<p>Failed to write configuration file (%s).<br>"
+               "%s cannot run without this file.</p>", 
+               m_rcFileName.latin1(), vkName() );
+   }
+   
+   /* and return new map */
+   return newMap;
 }
 
 
@@ -708,8 +743,6 @@ void VkConfig::writeConfigDefaults( Valkyrie* vk )
 		// TODO: Err
 		return;
 	}
-
-   //newConfigFile = true;
 }
 
 
