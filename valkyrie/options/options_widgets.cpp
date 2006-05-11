@@ -66,7 +66,6 @@ void OptionWidget::saveEdit()
 void OptionWidget::cancelEdit()
 {
    m_currentValue = m_initialValue;
-   vkConfig->wrEntry( m_currentValue, m_opt->cfgKey(), m_opt->cfgGroup() );
    emit valueChanged( false, this );
    reset();
 }
@@ -123,8 +122,7 @@ CkWidget::CkWidget( QWidget* parent, Option* vkopt, bool mklabel )
    m_cbox = new QCheckBox( m_opt->m_shortHelp, parent, "check_box" );
    m_widg = m_cbox;
 
-   m_initialState = vkConfig->rdBool( m_opt->cfgKey(), m_opt->cfgGroup() );
-   m_cbox->setChecked( m_initialState );
+   m_cbox->setChecked( vkConfig->strToBool( m_initialValue ) );
    connect( m_cbox, SIGNAL(toggled(bool)), 
             this,     SLOT(ckChanged(bool)) );
 
@@ -143,7 +141,7 @@ void CkWidget::ckChanged( bool on )
 }
 
 void CkWidget::reset()
-{ m_cbox->setChecked( m_initialState ); }
+{ m_cbox->setChecked( vkConfig->strToBool( m_initialValue ) ); }
 
 void CkWidget::resetDefault()
 {
@@ -175,8 +173,7 @@ RbWidget::RbWidget( QWidget* parent, Option* vkopt, bool mklabel )
    m_radio = new QRadioButton( m_opt->m_shortHelp, parent, "radio_button" );
    m_widg  = m_radio;
 
-   m_initialState = vkConfig->rdBool( m_opt->cfgKey(), m_opt->cfgGroup() );
-   m_radio->setChecked( m_initialState );
+   m_radio->setChecked( vkConfig->strToBool( m_initialValue ) );
    connect( m_radio, SIGNAL(toggled(bool)), 
             this, SLOT(rbChanged(bool)) );
 
@@ -195,7 +192,7 @@ void RbWidget::rbChanged( bool on )
 }
 
 void RbWidget::reset()
-{ m_radio->setChecked( m_initialState ); }
+{ m_radio->setChecked( vkConfig->strToBool( m_initialValue ) ); }
 
 void RbWidget::resetDefault()
 {

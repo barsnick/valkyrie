@@ -98,6 +98,9 @@ public:
    /* Returns the tool id of [valgrind:tool] */
    int mainToolObjId();
 
+   /* util functions */
+   bool strToBool( QString str );
+
    /* read fns ---------------------------------------------------------- */
    QString rdEntry( const QString &pKey, const QString &pGroup );
    int     rdInt  ( const QString &pKey, const QString &pGroup );

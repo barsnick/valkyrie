@@ -86,7 +86,6 @@ private slots:
 
 private:
    QCheckBox* m_cbox;
-   bool       m_initialState;
 };
 
 
@@ -113,7 +112,6 @@ private slots:
 
 private:
    QRadioButton* m_radio;
-   bool          m_initialState;
 };
 
 

@@ -201,16 +201,20 @@ int VkConfig::rdInt( const QString &pKey, const QString &pGroup )
 }
 
 
-bool VkConfig::rdBool( const QString &pKey, const QString &pGroup )
+bool VkConfig::strToBool( QString str )
 {
-   QString aValue = rdEntry( pKey, pGroup );
-
-   if ( aValue == "true" || aValue == "on"   || 
-        aValue == "yes"  || aValue == "1"    ||
-        aValue == "T" )
+   if ( str == "true" || str == "on"   || 
+        str == "yes"  || str == "1"    ||
+        str == "T" )
       return true;
 
    return false;
+}
+
+
+bool VkConfig::rdBool( const QString &pKey, const QString &pGroup )
+{
+   return strToBool( rdEntry( pKey, pGroup ) );
 }
 
 
