@@ -179,7 +179,6 @@ int vkPoptGetNextOpt( vkPoptContext con,
          if ( origOptString == NULL ) {
             return PERROR_BADOPT;
          }
-         /* FIX: catch cases where eg. -- flag=xx */
          if ( strcmp(origOptString, "--") == 0 ) {
             return PERROR_BADQUOTE;
          }

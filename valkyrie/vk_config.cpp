@@ -16,6 +16,7 @@
 #include <unistd.h>         /* close, access */
 #include <qdatetime.h>
 #include <qdir.h>
+#include <qfile.h>
 #include <qfiledialog.h>
 
 
@@ -30,19 +31,18 @@ bool VkConfig::isDirty()
 
 /* write config entries to disk
    called by user from menu 'Options::Save as Default' ---------------------- */
-void VkConfig::sync( Valkyrie* vk )
+bool VkConfig::sync( Valkyrie* vk )
 {
-   if ( !m_dirty ) return;
+   if ( !m_dirty )
+      return true;
 
    /* read config file from disk, and fill the temporary structure 
       with entries from the file */
-	bool ok;
-	EntryMap rcMap = parseFile( vk, &ok );
-	if (!ok) {
-		fprintf(stderr, "Error: sync(): Failed to parse configuration file\n");
-		// TODO
-		return;
-	}
+	EntryMap rcMap;
+   if ( !parseFile( vk, rcMap )) {
+      VK_DEBUG( "failed to parse config file" );
+      return false;
+   }
 
    /* augment this structure with the dirty entries from the
       config object */
@@ -58,14 +58,13 @@ void VkConfig::sync( Valkyrie* vk )
    }
 
 	/* write out updated config */
-   ok = writeConfig( rcMap );
-	if (!ok) {
-		fprintf(stderr, "Error: sync(): Failed to write configuration file\n");
-		// TODO
-		return;
-	}
+   if ( !writeConfig( rcMap ) ) {
+      VK_DEBUG( "failed to write updated config file" );
+      return false;
+   }
 
-	m_dirty = false;
+   m_dirty = false;
+   return true;
 }
 
 
@@ -98,50 +97,19 @@ VkConfig::VkConfig() : QObject( 0, "vkConfig" )
 }
 
 
+/* try to create and/or parse the config file */
 bool VkConfig::initCfg( Valkyrie* vk )
 {
-   bool ok=false;
-
-   if ( !checkDirs() )
+   if ( !checkRCTree( vk ) ||
+        !parseFile( vk, m_EntryMap ) ) {
+      vkFatal( 0, "Initialising Config",
+               "<p>Initialisation of Config failed.<br/>"
+               "Please check existence/permissions of the "
+               "config dir '%s', and its files/sub-directories.</p>",
+               m_rcPath.latin1() );
       return false;
-
-   /* try to create and/or parse the config file */
-   int num_tries = 0;
- retry:
-   if ( num_tries > 1 )
-      return false;
-
-   RetVal rval = checkAccess();
-   switch ( rval ) {
-   case Okay:
-       m_EntryMap = parseFile( vk, &ok );
-       break;
-
-   case CreateRcFile:
-      vkInfo( 0, "Configuration",
-              "<p>The configuration file '%s' does not exist, "
-              "and %s cannot run without this file.<br>"
-              "Creating it now ...</p>", 
-              m_rcFileName.latin1(), vkName() );
-      writeConfigDefaults( vk );
-      num_tries++;
-      goto retry;      /* try again */
-      break;
-
-   case NoPerms:
-      vkFatal( 0, "Configuration",
-               "<p>You do not have read/write permissions set"
-               "on the directory %s</p>", m_rcPath.latin1() );
-      break;
-
-   case BadFilename:
-   case NoDir:
-   case Fail:
-      vkFatal( 0, "Config Creation Failed",
-               "<p>Initialisation of Config failed.</p>" );
-      break;
    }
-   return ok;
+   return true;
 }
 
 
@@ -426,26 +394,26 @@ void VkConfig::backupConfigFile()
 		return;
 	}
 	d.rename( m_rcFileName, bak );
-	fprintf(stderr, "Backed up old config file to: %s\n", bak.latin1());
+   vkInfo( 0, "Writing Config File",
+           "<p>Backed up previous config file to '%s'.</p>", 
+           bak.latin1() );
 }
 
-EntryMap VkConfig::parseFile( Valkyrie* vk, bool *ok )
+bool VkConfig::parseFile( Valkyrie* vk, /*OUT*/EntryMap& dstMap )
 {
    QFile rFile( m_rcFileName );
    if ( !rFile.open( IO_ReadOnly ) ) {
 		/* Error: Failed to open file. */
-		vkFatal( 0, "Parse Config File",
-               "<p>Failed to open the file %s for reading.<br>"
+		vkError( 0, "Parsing Config File",
+               "<p>Failed to open config file '%s' for reading.<br>"
                "%s cannot run without this file.</p>", 
                m_rcFileName.latin1(), vkName() );
-		*ok = false;
-      return EntryMap();
+      return false;
    }
-	*ok = true;
 
 	/* beam me up, scotty */
 	QTextStream stream( &rFile );
-	EntryMap rcMap = parseConfigToMap( stream );
+	EntryMap fileMap = parseConfigToMap( stream );
 	rFile.close();
 
    QString defaultConfig = mkConfigDefaults( vk );
@@ -454,58 +422,62 @@ EntryMap VkConfig::parseFile( Valkyrie* vk, bool *ok )
 
 	/* Check for correct rc version number
 	   - if mismatch, print warning, update entries */
-	QString vk_ver_rc = rcMap[ EntryKey( "valkyrie", "version" ) ].mValue;
+	QString vk_ver_rc = fileMap[ EntryKey( "valkyrie", "version" ) ].mValue;
 	QString vk_ver    = vkVersion();
 
 	if (vk_ver_rc != vk_ver) {  /* Version mismatch - fix rc file */
-		fprintf(stderr, "Warning: Configuration file version mismatch:\n");
-		fprintf(stderr, "Configuration file: %s\n", vk_ver_rc.latin1());
-		fprintf(stderr, "Valkyrie:    %s\n", vkVersion());
+      vkInfo( 0, "Parsing Config File",
+              "<p>Valkyrie version mismatch<br/>"
+              "Config file: %s<br/>"
+              "Valkyrie:    %s<br/>"
+              "<br/>"
+              "Updating configuration file...</p>",
+              vk_ver_rc.latin1(), vkVersion() );
 
-		/* Create new default config, bringing over any old values */
-		fprintf(stderr, "Updating configuration file...\n\n");
+      /* dstMap = (defaultMap updated with fileMap values)*/
+      return updateCfgFile( defaultMap, fileMap, dstMap );
 
-      /* update config file, returning new config map */
-      return updateCfgFile( defaultMap, rcMap, ok );
-   }
-
-
-   /* check our default config has the same entry keys as the config file */
-   /* entries are sorted, so we can easily test them */
-   bool cfg_ok=true;
-   if (rcMap.count() != defaultMap.count()) {
-      cfg_ok = false;
    } else {
-		/* loop over entries in config file: same entries should exist in default cfg */
-		EntryMapIterator aIt;
-		for ( aIt = rcMap.begin(); aIt != rcMap.end(); ++aIt) {
-			const EntryKey  &rcKey = aIt.key();
-			if ( defaultMap.find(rcKey) == defaultMap.end() ) {
-            /* missing key */
-            cfg_ok = false;
-            break;
-			}
-		}
-   }
-   if (!cfg_ok) {
-		fprintf(stderr, "Warning: Detected problem with configuration file:\n");
-		fprintf(stderr, "Attempting to fix...\n\n");
 
-      /* update config file, returning new config map */
-      return updateCfgFile( defaultMap, rcMap, ok );
+      /* check our default config has the same entry keys as the config file */
+      /* entries are sorted, so we can easily test them */
+      bool fileCfgOk=false;
+      if (fileMap.count() == defaultMap.count()) {
+         fileCfgOk = true;
+         /* loop over entries in config file: same entries should exist in default cfg */
+         EntryMapIterator aIt;
+         for ( aIt = fileMap.begin(); aIt != fileMap.end(); ++aIt) {
+            const EntryKey  &rcKey = aIt.key();
+            if ( defaultMap.find(rcKey) == defaultMap.end() ) {
+               /* missing key */
+               fileCfgOk = false;
+               break;
+            }
+         }
+      }
+      if (!fileCfgOk) {
+         vkInfo( 0, "Parsing Config File",
+                 "<p>Detected bad/missing config entry keys.<br/>"
+                 "Attempting to fix...</p>" );
+         
+         /* dstMap = (defaultMap updated with fileMap values)*/
+         return updateCfgFile( defaultMap, fileMap, dstMap );
+      }
    }
 
-	/* return map */
-	return rcMap;
+	/* fileMap is fine: use that */
+   dstMap = fileMap;
+   return true;
 }
 
 
-EntryMap VkConfig::updateCfgFile( EntryMap &newMap, EntryMap &rcMap, bool *ok )
+bool VkConfig::updateCfgFile( EntryMap &newMap, EntryMap &fileMap,
+                              /*OUT*/EntryMap& dstMap )
 {
    /* loop over entries in old rc:
       if (entry exists in new map) copy value from old */
    EntryMapIterator aIt;
-   for ( aIt = rcMap.begin(); aIt != rcMap.end(); ++aIt) {
+   for ( aIt = fileMap.begin(); aIt != fileMap.end(); ++aIt) {
       const EntryKey  &rcKey = aIt.key();
       if ( newMap.find(rcKey) != newMap.end() ) {
          newMap[ rcKey ] = aIt.data();
@@ -515,16 +487,14 @@ EntryMap VkConfig::updateCfgFile( EntryMap &newMap, EntryMap &rcMap, bool *ok )
    newMap[ EntryKey( "valkyrie", "version" ) ].mValue = vkVersion();
    
    /* write out new config */
-   *ok = writeConfig( newMap, true );
-   if (!*ok) {
-      vkFatal( 0, "Update Config File",
-               "<p>Failed to write configuration file (%s).<br>"
-               "%s cannot run without this file.</p>", 
-               m_rcFileName.latin1(), vkName() );
+   if ( !writeConfig( newMap, true ) ) {
+      VK_DEBUG( "failed to write config file" );
+      return false;
    }
    
    /* and return new map */
-   return newMap;
+   dstMap = newMap;
+   return true;
 }
 
 
@@ -579,7 +549,9 @@ bool VkConfig::writeConfig( EntryMap rcMap, bool backup/*=false*/ )
       Write it out to disk. */
    QFile outF( m_rcFileName );
    if ( !outF.open( IO_WriteOnly ) ) {
-		// TODO
+		vkError( 0, "Writing Config File",
+               "<p>Failed to open config file '%s' for writing.</p>", 
+               m_rcFileName.latin1() );
 		return false;
 	}
 	QTextStream aStream( &outF );
@@ -609,51 +581,6 @@ bool VkConfig::writeConfig( EntryMap rcMap, bool backup/*=false*/ )
 	outF.close();
 	return true;
 }
-
-
-VkConfig::RetVal VkConfig::checkAccess() const
-{
-   /* 0. first things first .... */
-   if ( m_rcFileName.isEmpty() ) {
-      VK_DEBUG( "checkAccess( %s )\n"
-                "m_rcFileName is empty", VK_STRLOC );
-      return BadFilename;
-   }
-
-   /* 1. check the /rc/ directory actually exists */
-   if ( 0 != access( m_rcPath, F_OK ) ) {
-      VK_DEBUG("checkAccess( %s )\n" 
-               "The directory '%s' does not exist", 
-               VK_STRLOC, m_rcPath.latin1() );
-      return NoDir;
-   }
-
-   /* 2. ... and that the user has read/write permissions set.  
-      can we allow the write?  we can, if the program does not run
-      SUID.  but if it runs SUID, we must check if the user would be
-      allowed to write if it wasn't SUID. */
-   if ( 0 != access( m_rcPath, R_OK & W_OK ) ) {
-      return NoPerms;
-   }
-
-   /* 3. check the rcfile actually exists. If not, create it now */
-   if ( 0 != access( m_rcFileName, F_OK ) ) {
-      return CreateRcFile;
-   }
-
-   /* 4. if it already exists, can we read / write it? */
-   if ( 0 != access( m_rcFileName, R_OK & W_OK ) ) {
-      vkInfo( 0, "Configuration",
-              "<p>The file %s seems to be corrupted, and "
-              "valkyrie cannot run without this file.</p>"
-              "<p>Re-creating it now ... .. </p>", 
-              m_rcFileName.latin1() );
-      return CreateRcFile;
-   }
-
-   return Okay;
-}
-
 
 
 /* Create the default configuration file.  -----------------------------
@@ -716,7 +643,7 @@ logfile=\n\n";
    The first time valkyrie is started, vkConfig looks to see if this
    file is present in the user's home dir.  If not, it writes the
    relevant data to ~/.PACKAGE/PACKAGErc */
-void VkConfig::writeConfigDefaults( Valkyrie* vk )
+bool VkConfig::writeConfigDefaults( Valkyrie* vk )
 {
 	QString default_config = mkConfigDefaults( vk );
 	QTextStream strm( &default_config, IO_ReadOnly );
@@ -739,100 +666,106 @@ void VkConfig::writeConfigDefaults( Valkyrie* vk )
 
 	/* write out new config */
 	if ( !writeConfig( rcMap, true ) ) {
-		fprintf(stderr, "Error: writeConfigDefaults(): Failed to write configuration file\n");
-		// TODO: Err
-		return;
+      VK_DEBUG( "failed to write default config file" );
+		return false;
 	}
+   return true;
+}
+
+
+/* check rc file or dir exists, is read & writeable */
+bool VkConfig::checkRCEntry( QString path, Valkyrie* vk)
+{
+   QFileInfo fi( path );
+   if ( !fi.exists() ) {
+      VK_DEBUG("creating config entry '%s'.", path.latin1() );
+      /* if it's a dir, create it */
+      if ( path.endsWith("/") ) {      // TODO: more robust but abstract way to do this?
+         QDir dir;
+         if (!dir.mkdir( path ) ) {
+            VK_DEBUG("failed creation of new dir '%s'.", path.latin1() );
+            return false;
+         }
+      } else {
+         /* if it's a file... */
+         if (path == m_rcFileName) {
+            /* create shiny new rc file */
+            if ( !writeConfigDefaults( vk ) ) {
+               VK_DEBUG("failed to create default config file '%s'.",
+                        path.latin1() );
+               return false;
+            }
+         }
+      }
+   }
+
+   /* still doesn't exist?! */
+   if ( !fi.exists() ) {
+      VK_DEBUG("rc entry '%s' doesn't exist.", fi.filePath().latin1() );
+      return false;
+   }
+   /* permissions ok? */
+   if ( !fi.isReadable() ) {
+      VK_DEBUG("rc entry '%s' not readable.", fi.filePath().latin1() );
+      return false;
+   }
+   if ( !fi.isWritable() ) {
+      VK_DEBUG("rc entry '%s' not writable.", fi.filePath().latin1() );
+      return false;
+   }
+   if ( fi.isDir() && !fi.isExecutable() ) {
+      VK_DEBUG("rc dir '%s' not executable.", fi.filePath().latin1() );
+      return false;
+   }
+   return true;
 }
 
 
 /* ~/.PACKAGE is a sine qua non ---------------------------------------- 
-   checks to see if ~/valkyrie/ and its required sub-dirs are
+   checks to see if ~/valkyrie/ and its required files/sub-dirs are
    all present and correct.  If not, tries to create them.
    (see config.h for #defines)
 */
-bool VkConfig::checkDirs()
+bool VkConfig::checkRCTree( Valkyrie* vk )
 {
-   QString msg = "";
-   bool success = true;
+   QStringList entries;
+   entries << m_rcPath << m_rcFileName
+           << m_dbasePath << m_logsPath << m_suppPath;
 
-   QDir vk_dir( m_rcPath );
+   /* Note: don't just run through and test/fix: want to tell the user
+      if there was a problem with a previous config dir tree.
+      Missing files can be recreated from default.
+      Bad permissions problems are left to the user */
 
-   enum State { 
-      CHECK_DIR=0, CHECK_SUB_DIRS, MK_TOP_DIR, MK_DB_DIR, 
-      MK_LOG_DIR,  MK_SUPP_DIR, DONE, GIVE_UP };
-   State state = CHECK_DIR;
-
-   bool not_done = true;
-   while ( not_done ) {
-
-      switch ( state ) {
-
-         /* normal startup checks ----------------------------------------- */
-      case CHECK_DIR:        /* does ~/.PACKAGE/ exist ? */
-         state = vk_dir.exists() ? CHECK_SUB_DIRS : MK_TOP_DIR;
+   /* first just find out if anything's missing... */
+   bool ok = true;
+   QStringList::Iterator it;
+   for ( it = entries.begin(); it != entries.end(); ++it) {
+      if ( !QFile::exists(*it) ) {
+         VK_DEBUG("rc entry '%s' doesn't exist.", (*it).latin1() );
+         ok = false;
          break;
-
-      case CHECK_SUB_DIRS: { /* check sub-dirs */
-         const QFileInfoList * files = vk_dir.entryInfoList();
-         QFileInfoListIterator it( *files );
-         QFileInfo * fi;
-         while ( ( fi=it.current() ) != 0 ) {
-            ++it;
-            if ( fi->fileName() == "." || fi->fileName() == ".." ) ;
-            else if ( fi->isFile() && fi->isReadable() &&
-                      fi->fileName() == "valkyrierc" ) ;
-            else if ( fi->isDir() && fi->isReadable() ) {
-               if      ( ("/" + fi->fileName() +"/") == VK_DBASE_DIR ) ;
-               else if ( ("/" + fi->fileName() +"/") == VK_LOGS_DIR ) ;
-               else if ( ("/" + fi->fileName() +"/") == VK_SUPPS_DIR ) ;
-               else { /* problem */
-                  state = GIVE_UP;
-                  break;
-               }
-            }
-         }
-         state = (state == GIVE_UP) ? state : DONE;
-      } break;
-
-      /* first time ever startup --------------------------------------- */
-      case MK_TOP_DIR:       /* create '~/PACKAGE' dir */
-         state = vk_dir.mkdir( m_rcPath ) ? MK_DB_DIR : GIVE_UP;
-         break;
-
-      case MK_DB_DIR:        /* create dbase sub-dir */
-         state = vk_dir.mkdir( m_dbasePath ) ? MK_LOG_DIR : GIVE_UP;
-         break;
-
-      case MK_LOG_DIR:       /* create logs sub-dir */
-         state = vk_dir.mkdir( m_logsPath ) ? MK_SUPP_DIR : GIVE_UP;
-         break;
-
-         /* last case statement MUST set 'state = DONE || GIVE_UP' */
-      case MK_SUPP_DIR:      /* create suppressions sub-dir */
-         state = vk_dir.mkdir( m_suppPath ) ? DONE : GIVE_UP;
-         if ( state == DONE )
-            break;
-
-      case GIVE_UP:
-         not_done = false;
-         success = false;
-         msg.sprintf( "<p>There is a problem with '%s'.<br>"
-                      "Either some files or sub-directories do not exist, "
-                      "or the permissions are not set correctly."
-                      "<p>Please check and retry.</p>", m_rcPath.latin1() );
-         break;
-
-      case DONE:
-         not_done = false;
-         break;
-
-      }  /* end switch ( state ) */
-   }    /* end while (1) */
-
-   if ( !msg.isEmpty() ) {
-      vkError( 0, "Directory Error", msg.latin1() );
+      }
    }
 
-   return success;
+   if (!ok) { /* rc tree !exists or !well */
+      /* this an existing tree?
+         if so, tell the user there was a problem */
+      if (QFile::exists(m_rcPath)) {
+         vkInfo( 0, "Checking Config Setup",
+                 "<p>Detected missing configuration files/dirs.<br/>"
+                 "Attempting to recreate from defaults...</p>" );
+      }
+      // else clean tree to setup: just do it.
+   }
+
+   /* run through rc entries, checking existence/permissions and
+      creating them if necessary */
+   for ( it = entries.begin(); it != entries.end(); ++it) {
+      if (!checkRCEntry(*it, vk)) {
+         return false;
+      }
+   }
+
+   return true;
 }

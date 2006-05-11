@@ -64,7 +64,7 @@ MainWindow::~MainWindow()
       cfg.wrInt( this->x(),      "x-pos",  "MainWin" );
       cfg.wrInt( this->y(),      "y-pos",  "MainWin" );
 
-      // save opts to disk...
+      // save opts to disk... don't care if it fails
       cfg.sync( m_valkyrie );
    }
 }
@@ -230,13 +230,10 @@ void MainWindow::saveOptions()
    vk_assert( vkConfig->isDirty() == true );
 
    // save opts to disk...
-   vkConfig->sync( m_valkyrie );
-
-   // disable menu item
-   m_optsMenu->setItemEnabled( OPTS_SAVE, false );
-
-// TODO: something - sync() may have failed...
-//   vk_assert(vkConfig->isDirty() == false);
+   if (vkConfig->sync( m_valkyrie )) {
+      // disable menu item
+      m_optsMenu->setItemEnabled( OPTS_SAVE, false );
+   }
 }
 
 

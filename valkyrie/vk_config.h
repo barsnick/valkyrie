@@ -73,7 +73,7 @@ public:
    bool initCfg( Valkyrie* vk );
 
    bool isDirty();   /* config holds data difft to that held on disk */
-   void sync( Valkyrie* vk );  /* write config to disk */
+   bool sync( Valkyrie* vk );  /* write config to disk */
 
    /* these fns return the values set in config.h ------------------- */
    const char* vkname();
@@ -118,22 +118,19 @@ public:
                   const QString &pKey,   const QString &pGroup );
 
 private:
-   enum RetVal { Okay=1, BadFilename, NoDir, NoPerms,
-                 CreateRcFile, Fail };
-
-   bool    checkDirs();
-   bool    checkPaths();
+   bool    checkRCEntry( QString path, Valkyrie* vk );
+   bool    checkRCTree( Valkyrie* vk );
    QString mkConfigHeader( void );
    QString mkConfigDefaults( Valkyrie* vk );
-   void    writeConfigDefaults( Valkyrie* vk );
+   bool    writeConfigDefaults( Valkyrie* vk );
 
    bool     writeConfig( EntryMap rcMap, bool backup=false );
    EntryMap parseConfigToMap( QTextStream &stream );
    void     insertData( const EntryKey &key, const EntryData &data );
    void     backupConfigFile();
-   EntryMap parseFile( Valkyrie* vk, bool *ok );
-   EntryMap updateCfgFile( EntryMap &newMap, EntryMap &rcMap, bool *ok );
-   RetVal   checkAccess() const;
+   bool     parseFile( Valkyrie *vk, /*OUT*/EntryMap &map );
+   bool     updateCfgFile( EntryMap &newMap, EntryMap &rcMap,
+                           /*OUT*/EntryMap &dstMap );
 
 private:
    QChar m_sep;
