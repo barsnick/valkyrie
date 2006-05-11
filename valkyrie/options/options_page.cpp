@@ -140,7 +140,7 @@ bool OptionsPage::applyEdits()
    /* if we got to here, then we passed all checks */
    for ( optw=m_editList.first(); optw; optw=m_editList.next() ) {
       /* no signal emitted: optw is still in m_editList */
-      optw->saveEdit( true );
+      optw->saveEdit();
       tmpList.append( optw );
    }
    /* now remove all the saved items from m_editList */

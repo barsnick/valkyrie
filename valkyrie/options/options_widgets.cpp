@@ -57,11 +57,9 @@ QString OptionWidget::currValue()
 QString OptionWidget::initValue()
 { return m_initialValue; }
 
-void OptionWidget::saveEdit( bool perm )
+void OptionWidget::saveEdit()
 {
-   if ( perm ) {
-      m_initialValue = m_currentValue;
-   } 
+   m_initialValue = m_currentValue;
    vkConfig->wrEntry( m_currentValue, m_opt->cfgKey(), m_opt->cfgGroup() );
 }
 
@@ -137,8 +135,7 @@ CkWidget::CkWidget( QWidget* parent, Option* vkopt, bool mklabel )
 void CkWidget::ckChanged( bool on )
 {
    m_currentValue = (on) ? m_opt->m_possValues[0] : m_opt->m_possValues[1];
-   bool edited = m_currentValue != vkConfig->rdEntry( m_opt->cfgKey(),
-                                                      m_opt->cfgGroup() );
+   bool edited = m_currentValue != m_initialValue;
    emit valueChanged( edited, this );
    /* for dis/enabling associated widgets */
    emit changed( on );
@@ -190,8 +187,7 @@ RbWidget::RbWidget( QWidget* parent, Option* vkopt, bool mklabel )
 void RbWidget::rbChanged( bool on )
 {
    m_currentValue = (on) ? m_opt->m_possValues[0] : m_opt->m_possValues[1];
-   bool edited = m_currentValue != vkConfig->rdEntry( m_opt->cfgKey(),
-                                                      m_opt->cfgGroup() );
+   bool edited = m_currentValue != m_initialValue;
    emit valueChanged( edited, this );
    /* for dis/enabling associated widgets */
    emit changed( on );
@@ -265,8 +261,7 @@ void LeWidget::addCurrValue( const QString& txt )
 void LeWidget::leChanged( const QString& txt )
 {
    m_currentValue = txt;
-   bool edited  = m_currentValue != vkConfig->rdEntry( m_opt->cfgKey(),
-                                                       m_opt->cfgGroup() );
+   bool edited  = m_currentValue != m_initialValue;
    emit valueChanged( edited, this );
 }
 
@@ -364,8 +359,7 @@ void CbWidget::cbChanged( const QString& txt )
    } else {
       m_currIdx = m_combo->currentItem();
       m_currentValue = m_combo->currentText();
-      bool edited = m_currentValue != vkConfig->rdEntry( m_opt->cfgKey(),
-                                                         m_opt->cfgGroup() );
+      bool edited = m_currentValue != m_initialValue;
       emit valueChanged( edited, this );
    }
 }
@@ -422,8 +416,7 @@ void SpWidget::addSection( int min, int max, int defval,
 void SpWidget::spChanged( const QString &val )
 {
    m_currentValue = val;
-   bool edited  = m_currentValue != vkConfig->rdEntry( m_opt->cfgKey(),
-                                                       m_opt->cfgGroup() );
+   bool edited  = m_currentValue != m_initialValue;
    emit valueChanged( edited, this );
 }
 
@@ -590,9 +583,7 @@ void LbWidget::lbChanged()
 
    case LbWidget::LB_SUPPDIRS:
    case LbWidget::LB_SUPPSEL: {
-      QString cfgVal = 
-         vkConfig->rdEntry(m_opt->cfgKey(), m_opt->cfgGroup());
-      bool edited = m_currentValue != cfgVal;
+      bool edited = m_currentValue != m_initialValue;
       emit valueChanged( edited, this );
       emit listChanged();
    } break;

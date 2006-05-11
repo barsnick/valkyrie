@@ -43,7 +43,7 @@ public:
 
    virtual void reset() = 0;
    virtual void resetDefault() = 0;
-   virtual void saveEdit( bool perm );
+   virtual void saveEdit();
    virtual void cancelEdit();
    virtual QHBoxLayout* hlayout();
    virtual QVBoxLayout* vlayout();
