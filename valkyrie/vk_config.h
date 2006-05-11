@@ -67,11 +67,13 @@ typedef QMap<EntryKey, EntryData>::Iterator EntryMapIterator;
 class VkConfig : public QObject
 {
 public:
-   VkConfig( Valkyrie* vk, bool *ok );
+   VkConfig();
    ~VkConfig();
 
+   bool initCfg( Valkyrie* vk );
+
    bool isDirty();   /* config holds data difft to that held on disk */
-   void sync();      /* write config to disk */
+   void sync( Valkyrie* vk );  /* write config to disk */
 
    /* these fns return the values set in config.h ------------------- */
    const char* vkname();
@@ -90,13 +92,6 @@ public:
    QString dbaseDir();
    QString suppDir();
    QChar sepChar() { return m_sep; }
-
-   /* Returns a ptr to the tool currently set in [valgrind:tool] */
-   ToolObject* mainToolObj();
-   /* Returns the name of the current tool in [valgrind:tool] */
-   QString mainToolObjName();
-   /* Returns the tool id of [valgrind:tool] */
-   int mainToolObjId();
 
    /* util functions */
    bool strToBool( QString str );
@@ -129,19 +124,17 @@ private:
    bool    checkDirs();
    bool    checkPaths();
    QString mkConfigHeader( void );
-   QString mkConfigDefaults( void );
-   void    writeConfigDefaults();
+   QString mkConfigDefaults( Valkyrie* vk );
+   void    writeConfigDefaults( Valkyrie* vk );
 
    bool     writeConfig( EntryMap rcMap, bool backup=false );
    EntryMap parseConfigToMap( QTextStream &stream );
    void     insertData( const EntryKey &key, const EntryData &data );
    void     backupConfigFile();
-   EntryMap parseFile( bool *ok );
+   EntryMap parseFile( Valkyrie* vk, bool *ok );
    RetVal   checkAccess() const;
 
 private:
-   Valkyrie* m_valkyrie;       /* access to objects */
-
    QChar m_sep;
    bool  m_dirty;
 

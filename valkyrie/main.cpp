@@ -118,8 +118,8 @@ int main ( int argc, char* argv[] )
       and paths are set correctly. If the rc file is corrupted or
       missing or it's an old version, inform user, and (re)create it. 
       Initialises the various valkyrie / valgrind tool objects */
-   bool ok = false;
-   vkConfig = new VkConfig( &valkyrie, &ok );
+   vkConfig = new VkConfig();
+   bool ok = vkConfig->initCfg( &valkyrie );
    if ( !ok ) {
       res = EXIT_FAILURE;
       goto cleanup_and_exit;
@@ -177,7 +177,16 @@ int main ( int argc, char* argv[] )
    } else {
       /* start up with the tool currently set in vkConfig (either the
          default, the last-used, or whatever was set on the cmd-line) */
-      vkWin->showToolView( vkConfig->mainToolObjId() );
+
+       QString toolname = vkConfig->rdEntry("tool", "valgrind");
+       ToolObjList tools = valkyrie.valgrind()->toolObjList();
+       for ( ToolObject* tool=tools.first(); tool; tool=tools.next() ) {
+	   if ( tool->name() == toolname ) {
+	       vkWin->showToolView( tool->objId() );
+	       break;
+	   }
+       }
+
    }
    qApp->processEvents();
 

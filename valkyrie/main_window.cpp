@@ -57,16 +57,15 @@ MainWindow::~MainWindow()
       Want to ignore any outstanding dirty config vals, but vkConfig
       doesn't hold originals... simplest just to use a clean vkConfig... */
 
-   bool ok;
-   VkConfig tmp_vkConfig( m_valkyrie, &ok );
-   if (ok) {
-      tmp_vkConfig.wrInt( this->height(), "height", "MainWin" );
-      tmp_vkConfig.wrInt( this->width(),  "width",  "MainWin" );
-      tmp_vkConfig.wrInt( this->x(),      "x-pos",  "MainWin" );
-      tmp_vkConfig.wrInt( this->y(),      "y-pos",  "MainWin" );
+   VkConfig cfg;
+   if ( cfg.initCfg( m_valkyrie ) ) {
+      cfg.wrInt( this->height(), "height", "MainWin" );
+      cfg.wrInt( this->width(),  "width",  "MainWin" );
+      cfg.wrInt( this->x(),      "x-pos",  "MainWin" );
+      cfg.wrInt( this->y(),      "y-pos",  "MainWin" );
 
       // save opts to disk...
-      tmp_vkConfig.sync();
+      cfg.sync( m_valkyrie );
    }
 }
 
@@ -231,7 +230,7 @@ void MainWindow::saveOptions()
    vk_assert( vkConfig->isDirty() == true );
 
    // save opts to disk...
-   vkConfig->sync();
+   vkConfig->sync( m_valkyrie );
 
    // disable menu item
    m_optsMenu->setItemEnabled( OPTS_SAVE, false );

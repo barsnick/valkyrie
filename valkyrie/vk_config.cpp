@@ -30,14 +30,14 @@ bool VkConfig::isDirty()
 
 /* write config entries to disk
    called by user from menu 'Options::Save as Default' ---------------------- */
-void VkConfig::sync()
+void VkConfig::sync( Valkyrie* vk )
 {
    if ( !m_dirty ) return;
 
    /* read config file from disk, and fill the temporary structure 
       with entries from the file */
 	bool ok;
-	EntryMap rcMap = parseFile( &ok );
+	EntryMap rcMap = parseFile( vk, &ok );
 	if (!ok) {
 		fprintf(stderr, "Error: sync(): Failed to parse configuration file\n");
 		// TODO
@@ -70,10 +70,8 @@ void VkConfig::sync()
 
 
 /* class VkConfig ------------------------------------------------------ */
-VkConfig::VkConfig( Valkyrie* vk, bool *ok ) : QObject( 0, "vkConfig" )
+VkConfig::VkConfig() : QObject( 0, "vkConfig" )
 {
-   m_valkyrie = vk;
-
    m_EntryMap.clear();
    m_sep      = ',';         /* separator for lists of strings */
    m_dirty    = false;
@@ -96,25 +94,28 @@ VkConfig::VkConfig( Valkyrie* vk, bool *ok ) : QObject( 0, "vkConfig" )
    m_dbasePath = m_rcPath + VK_DBASE_DIR;
    m_logsPath  = m_rcPath + VK_LOGS_DIR;
    m_suppPath  = m_rcPath + VK_SUPPS_DIR;
-
-   if ( !checkDirs() ) {     /* we always do this on startup */
-      *ok = false;
-      return;
-   }
    m_rcPath    += "/";
+}
 
 
+bool VkConfig::initCfg( Valkyrie* vk )
+{
+   bool ok=false;
+
+   if ( !checkDirs() )
+      return false;
+
+   /* try to create and/or parse the config file */
    int num_tries = 0;
  retry:
    if ( num_tries > 1 )
-      return;
+      return false;
 
    RetVal rval = checkAccess();
    switch ( rval ) {
-
    case Okay:
-		m_EntryMap = parseFile( ok );
-      break;
+       m_EntryMap = parseFile( vk, &ok );
+       break;
 
    case CreateRcFile:
       vkInfo( 0, "Configuration",
@@ -122,7 +123,7 @@ VkConfig::VkConfig( Valkyrie* vk, bool *ok ) : QObject( 0, "vkConfig" )
               "and %s cannot run without this file.<br>"
               "Creating it now ...</p>", 
               m_rcFileName.latin1(), vkName() );
-      writeConfigDefaults();
+      writeConfigDefaults( vk );
       num_tries++;
       goto retry;      /* try again */
       break;
@@ -140,6 +141,7 @@ VkConfig::VkConfig( Valkyrie* vk, bool *ok ) : QObject( 0, "vkConfig" )
                "<p>Initialisation of Config failed.</p>" );
       break;
    }
+   return ok;
 }
 
 
@@ -427,7 +429,7 @@ void VkConfig::backupConfigFile()
 	fprintf(stderr, "Backed up old config file to: %s\n", bak.latin1());
 }
 
-EntryMap VkConfig::parseFile( bool *ok )
+EntryMap VkConfig::parseFile( Valkyrie* vk, bool *ok )
 {
    EntryMap rcMap, newMap;
    QFile rFile( m_rcFileName );
@@ -460,7 +462,7 @@ EntryMap VkConfig::parseFile( bool *ok )
 
 		/* Create new default config, bringing over any old values */
 		fprintf(stderr, "Updating configuration file...\n\n");
-		QString new_config = mkConfigDefaults();
+		QString new_config = mkConfigDefaults( vk );
 		QTextStream strm( &new_config, IO_ReadOnly );
       newMap = parseConfigToMap( strm );
 
@@ -618,28 +620,6 @@ VkConfig::RetVal VkConfig::checkAccess() const
 }
 
 
-/* Returns a ptr to be tool currently set in [valgrind:tool] */
-ToolObject* VkConfig::mainToolObj()
-{
-   QString name = rdEntry("tool", "valgrind");
-   ToolObjList tools = m_valkyrie->valgrind()->toolObjList();
-   for ( ToolObject* tool=tools.first(); tool; tool=tools.next() ) {
-      if ( tool->name() == name )
-         return tool;
-   }
-   vk_assert_never_reached();
-   return NULL;
-}
-
-/* returns the name of the current tool in [valgrind:tool] */
-QString VkConfig::mainToolObjName()
-{ return rdEntry("tool", "valgrind"); }
-
-/* returns the tool id of [valgrind:tool] */
-int VkConfig::mainToolObjId()
-{ return mainToolObj()->objId(); }
-
-
 
 /* Create the default configuration file.  -----------------------------
  */
@@ -652,7 +632,7 @@ QString VkConfig::mkConfigHeader( void )
 	return hdr;
 }
 
-QString VkConfig::mkConfigDefaults( void )
+QString VkConfig::mkConfigDefaults( Valkyrie* vk )
 {
 	QString str;
 	QTextStream ts( &str, IO_WriteOnly );
@@ -689,7 +669,7 @@ logfile=\n\n";
       if it were hard-wired in. Better safe than sorry: just get all
       tools that are present to spew their options/flags out to disk. */
    VkObject* vkobj;
-   VkObjectList vkObjecList = m_valkyrie->vkObjList();
+   VkObjectList vkObjecList = vk->vkObjList();
    for ( vkobj = vkObjecList.first(); vkobj; vkobj = vkObjecList.next() ) {
 		ts << vkobj->configEntries();
 	}
@@ -701,9 +681,9 @@ logfile=\n\n";
    The first time valkyrie is started, vkConfig looks to see if this
    file is present in the user's home dir.  If not, it writes the
    relevant data to ~/.PACKAGE/PACKAGErc */
-void VkConfig::writeConfigDefaults()
+void VkConfig::writeConfigDefaults( Valkyrie* vk )
 {
-	QString default_config = mkConfigDefaults();
+	QString default_config = mkConfigDefaults( vk );
 	QTextStream strm( &default_config, IO_ReadOnly );
 	EntryMap rcMap = parseConfigToMap( strm );
 	
