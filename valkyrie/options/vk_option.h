@@ -14,8 +14,8 @@
 #include <qstringlist.h>
 
 namespace VkOPTION {
-   /* NOT_POPT: ignore options in cmdline option parsing
-      ARG_*   : arg type for this option (NONE = no args) */
+   /* NOT_POPT: ignore this option in cmdline option parsing
+      ARG_*   : arg type for this option (ARG_NONE = no args) */
    enum ArgType { NOT_POPT=-1, ARG_NONE=0, ARG_STRING=1,
                   ARG_UINT=2, ARG_PWR2=3, ARG_BOOL=4 };
 

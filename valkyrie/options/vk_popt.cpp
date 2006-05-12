@@ -396,7 +396,7 @@ static int leftColWidth = -1;
 
 static const char * vkGetHelpDesc( const vkPoptOption * opt )
 {
-   // TODO: WHY THIS?!
+   /* if ARG_NONE: no arguments to describe */
    if ( opt->argType == VkOPTION::ARG_NONE )
       return NULL;
 

@@ -313,13 +313,80 @@ Option::Option( int opt_key, VkOPTION::ArgType arg_type, VkOPTION::WidgetType w_
    m_longHelp     = lhelp;
    m_urlHelp      = url;
 
+   /* augment m_longHelp if m_defaultValue not empty */
+   if ( m_argType != VkOPTION::NOT_POPT &&
+        !m_defaultValue.isEmpty() )
+      m_longHelp += " [" + m_defaultValue + "]";
 
    /* Assert is valid option ---------------------------------------- */
    if (0) { print(); printf("\n"); }
 
+   /* we always expect the following fields */
+   vk_assert( !m_configGroup.isEmpty() );
+   vk_assert( !m_longFlag.isEmpty() );
+   vk_assert( !m_longHelp.isEmpty() || !m_shortHelp.isEmpty() );
+
+   /* if ARG_NONE, we don't expect any argument related stuff */
+   if (m_argType == VkOPTION::ARG_NONE) {
+      vk_assert( m_flagDescrip.isEmpty() );
+      vk_assert( m_possValues.isEmpty() );
+   }
+
+   /* NOT_POPT options: not for command-line processing */
    if (m_argType == VkOPTION::NOT_POPT) {
       /* vk_popt option parsing relies on at least these being non-empty: */
       vk_assert( !m_shortFlag.isNull() || !m_longFlag.isEmpty() );
+      /* only short help wanted: used for gui widget text */
+      vk_assert( !m_shortHelp.isEmpty() );
+      vk_assert( m_longHelp.isEmpty() );
+   }
+
+   /* ARG_PWR2 options */
+   if (m_argType == VkOPTION::ARG_PWR2) {
+      /* min|max */
+      vk_assert( m_possValues.count() == 2 );
+      /* m_defaultValue, m_possValues must all be powers of 2 */
+      int errval;
+      vk_assert( isPowerOfTwo( &errval, m_defaultValue.latin1()  ) );
+      vk_assert( isPowerOfTwo( &errval, m_possValues[0].latin1() ) );
+      vk_assert( isPowerOfTwo( &errval, m_possValues[1].latin1() ) );
+      /* min <= default <= max */
+      unsigned long dflt = str2ULong( &errval, m_defaultValue.latin1() );
+      unsigned long min  = str2ULong( &errval, m_possValues[0].latin1() );
+      unsigned long max  = str2ULong( &errval, m_possValues[1].latin1() );
+      vk_assert( min <= dflt );
+      vk_assert( dflt <= max );
+   }
+
+   /* ARG_UINT options */
+   if (m_argType == VkOPTION::ARG_UINT) {
+      /* except don't test cachegrind's horrible cache options */
+      bool dontTest = ( m_configGroup == "cachegrind" &&
+                        ( m_longFlag == "I1" |
+                          m_longFlag == "D1" |
+                          m_longFlag == "L2" ) );
+      if (!dontTest) {
+         /* min|max */
+         vk_assert( m_possValues.count() == 2 );
+         /* min <= default <= max */
+         int errval;
+         unsigned long dflt = str2ULong( &errval, m_defaultValue.latin1() );
+         unsigned long min  = str2ULong( &errval, m_possValues[0].latin1() );
+         unsigned long max  = str2ULong( &errval, m_possValues[1].latin1() );
+         vk_assert( min <= dflt );
+         vk_assert( dflt <= max );
+      }
+   }
+
+   /* ARG_BOOL options */
+   if (m_argType == VkOPTION::ARG_BOOL) {
+      /* true|false (in various guises) */
+      vk_assert( m_possValues.count() == 2 );
+      /* accepted bool forms: */
+      QString t = m_possValues[0];
+      QString f = m_possValues[1];
+      vk_assert( t == "true"  || t == "on"  || t == "yes" || t == "1" || t == "T" );
+      vk_assert( f == "false" || f == "off" || f == "no"  || f == "0" || f == "F" );
    }
 
    /* OptWidget relies on bool values being in order <true|false> */
@@ -363,12 +430,11 @@ bool Option::isValidArg( int* err_val, const char* argval  )
    case VkOPTION::ARG_PWR2: {
       vk_assert( m_possValues.count() == 2 );
       /* is this a number? */
-      unsigned int val = str2UInt( err_val, argval );
+      unsigned int val = str2ULong( err_val, argval );
       if ( *err_val == PARSED_OK ) { /* looking good ... */
          /* is this a power of 2? */
          isPowerOfTwo( err_val, argval ); 
          if ( *err_val == PARSED_OK ) { /* looking better ... */
-            /* TODO: Both min/max should be +ve pwrs of 2 */
             unsigned int min = m_possValues[0].toUInt();
             unsigned int max = m_possValues[1].toUInt();
             if ( val < min || val > max ) {
@@ -416,15 +482,18 @@ bool Option::isPowerOfTwo( int *err_val, const char *argval )
 {
    *err_val = PERROR_BADNUMBER;
 
-   unsigned int val = str2UInt( err_val, argval );
+   unsigned long val = str2ULong( err_val, argval );
+   
    if ( *err_val != PARSED_OK )
       goto bye;
 
    switch ( val ) {
-   case 4:      case 8:      case 16:    case 32:    case 64:
-   case 128:    case 256:    case 512:   case 1024:  case 2048:
-   case 4096:   case 8192:   case 16384: case 32768: case 65536:
-   case 131072: case 262144: case 1048576:
+   case 1:       case 2:       case 4:       case 8:
+   case 16:      case 32:      case 64:      case 128:
+   case 256:     case 512:     case 1024:    case 2048:
+   case 4096:    case 8192:    case 16384:   case 32768:
+   case 65536:   case 131072:  case 262144:  case 524288:
+   case 1048576: case 2097152: case 4194304: case 8388608:
       break;
    default:
       *err_val = PERROR_POWER_OF_TWO;

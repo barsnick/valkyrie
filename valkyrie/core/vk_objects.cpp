@@ -76,10 +76,6 @@ void VkObject::addOpt(
                       QString flag_desc, QString poss_vals,        QString default_val, 
                       QString shelp,     QString lhelp,            const char* url )
 {
-   /* augment lhelp if default_val present */
-   if ( !default_val.isEmpty() )
-      lhelp += " [" + default_val + "]";
-
    m_optList.append( new Option( opt_key,   arg_type,   w_type, 
                                  cfg_group, short_flag, long_flag, 
                                  flag_desc, poss_vals,  default_val, 

@@ -78,19 +78,20 @@ vkPoptOption* getObjOptions( /*IN */VkObject* obj,
    for ( opt = optList.first(); opt; opt = optList.next() ) {
       vk_assert( opt != NULL );
 
-      /* only add me if i'm a popt option */
-      if ( opt->m_argType != VkOPTION::NOT_POPT ) {
-         vkPoptOption* vkopt = &vkOpts[idx++];
-         vkopt->optKey    = opt->m_key;
-         vkopt->argType   = opt->m_argType;
-         vkopt->shortFlag = opt->m_shortFlag.latin1();
-         vkopt->longFlag  = opt->m_longFlag.latin1();
-         vkopt->arg       = 0;
-         vkopt->helptxt   = opt->m_longHelp.latin1();
-         vkopt->helpdesc  = opt->m_flagDescrip.latin1();
-         /* to later call obj->checkOptArg() */
-         vkopt->objectId  = obj->objId();
-      }
+      /* ignore non-popt options */
+      if ( opt->m_argType == VkOPTION::NOT_POPT )
+         continue;
+
+      vkPoptOption* vkopt = &vkOpts[idx++];
+      vkopt->optKey    = opt->m_key;
+      vkopt->argType   = opt->m_argType;
+      vkopt->shortFlag = opt->m_shortFlag.latin1();
+      vkopt->longFlag  = opt->m_longFlag.latin1();
+      vkopt->arg       = 0;
+      vkopt->helptxt   = opt->m_longHelp.latin1();
+      vkopt->helpdesc  = opt->m_flagDescrip.latin1();
+      /* to later call obj->checkOptArg() */
+      vkopt->objectId  = obj->objId();
    }
    /* null entry terminator */
    vkOpts[idx] = nullOpt();

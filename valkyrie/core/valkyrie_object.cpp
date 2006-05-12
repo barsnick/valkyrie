@@ -47,15 +47,15 @@ Valkyrie::Valkyrie()
 
 
    addOpt( HELP,         VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
-           "",           'h',                  "help", 
+           "valkyrie",   'h',                  "help", 
            "",           "",                   "", 
            "",           "show this help message and exit", urlNone );
    addOpt( OPT_VERSION,  VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
-           "",           'v',                  "version", 
+           "valkyrie",   'v',                  "version", 
            "",           "",                   PACKAGE_VERSION, 
            "",           "display version information and exit", urlNone );
    addOpt( VGHELP,       VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
-           "",           'V',                  "valgrind-opts", 
+           "valkyrie",   'V',                  "valgrind-opts", 
            "",           "",                   "", 
            "",           "Show valgrind options too, and exit", urlNone );
    addOpt( TOOLTIP,      VkOPTION::NOT_POPT,   VkOPTION::WDG_CHECK, 
@@ -77,7 +77,7 @@ Valkyrie::Valkyrie()
    addOpt( FONT_USER,    VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
            "valkyrie",   '\0',                 "user-font", 
            "",           "",                   "Luxi Sans,10,-1,5,50,0,0,0,0,0", 
-           "",           "",                   urlValkyrie::userFont );
+           "Choose Font",   "",                urlValkyrie::userFont );
    addOpt( SRC_EDITOR,   VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
            "valkyrie",   '\0',                 "src-editor", 
            "",           "",                   "/usr/bin/emacs", 

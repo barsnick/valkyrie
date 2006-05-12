@@ -23,7 +23,6 @@
 #include <stdarg.h>
 #include <assert.h>
 
-/* TODO: ? put all classes bar VgLog in .cpp, so private */
 
 
 /**********************************************************************/
