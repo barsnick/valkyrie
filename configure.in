@@ -134,7 +134,7 @@ AC_DEFINE_UNQUOTED(BIN_LOGMERGE, "$VK_INSTALL_PREFIX/bin/vk_logmerge", [log-merg
 # misc
 AC_DEFINE_UNQUOTED(VK_COPYRIGHT, "(c) 2003-2006", [copyright])
 AC_DEFINE_UNQUOTED(VK_AUTHOR,    "OpenWorks LLP", [author])
-AC_DEFINE_UNQUOTED(VG_COPYRIGHT, "(c) 2000-2006, and GNU GPLd, by Julian Seward et al.", [valgrind copyright])
+AC_DEFINE_UNQUOTED(VG_COPYRIGHT, "(c) 2000-2006 and GNU GPL'd by Julian Seward et al.", [valgrind copyright])
 
 
 
