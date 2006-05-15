@@ -1864,6 +1864,15 @@ VKProcessManager::VKProcessManager() : sn(0)
                      }
 
 
+/* stop, one way or another */
+void VKProcess::stop( int msec_kill_timeout/*=2000*/ )
+{
+   /* first ask nicely.
+      if still running after msec_timeout, terminate with prejudice */
+   tryTerminate();
+   QTimer::singleShot( msec_kill_timeout, this, SLOT( kill() ) );
+}
+
                      /* Asks the process to terminate. Processes can ignore this if they
                         wish. If you want to be certain that the process really terminates,
                         you can use kill() instead.

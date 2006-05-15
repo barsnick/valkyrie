@@ -76,9 +76,6 @@ private:
    bool mergeLogFiles();                     // RM_Tool1
    bool runProcess( QStringList flags );
 
-   /* TODO: put in VKProcess */
-   void vgProcTerminate();
-
 private slots:
    void processDone();
    void readVgLog();

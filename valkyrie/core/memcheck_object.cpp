@@ -278,7 +278,16 @@ bool Memcheck::stop()
    vk_assert( isRunning() );
 
    switch ( runState() ) {
-   case VkRunState::VALGRIND: { vgProcTerminate(); break; }
+   case VkRunState::VALGRIND: {
+      vk_assert( m_vgproc != 0 );
+      vk_assert( m_vgproc->isRunning() );
+      m_vgproc->stop();
+
+      vk_assert( m_logpoller != 0 );
+      vk_assert( m_logpoller->isActive() );
+      m_logpoller->stop();
+      break;
+   }
 
    case VkRunState::TOOL1:
       /* TODO: make log parsing a VkProcess.  This will allow
@@ -288,7 +297,7 @@ bool Memcheck::stop()
       break;
 
    case VkRunState::TOOL2:
-      // TODO: test: { vgProcTerminate(); break; }
+      // TODO: stop merge 
       VK_DEBUG("TODO: %s::stop(merge logs)", name().latin1() );
       break;
 
@@ -477,31 +486,6 @@ bool Memcheck::runProcess( QStringList flags )
 }
 
 
-
-/* Terminate m_vgproc
-   TODO: put this in VKProcess
-*/
-void Memcheck::vgProcTerminate()
-{
-   //   fprintf(stderr, "\nMemcheck::vgProcTerminate()\n");
-   vk_assert( m_vgproc != 0 );
-   vk_assert( m_vgproc->isRunning() );
-   vk_assert( m_logpoller != 0 );
-   vk_assert( m_logpoller->isActive() );
-
-   m_logpoller->stop();
-
-   /* Try to stop m_vgproc - ask nicely, then kill */
-   m_vgproc->tryTerminate();   /* first ask nicely. */
-
-   /* if proc still running after msec_timeout, terminate with prejudice
-      - still sends signal processExited -> processDone() */
-   // TODO: move to config
-   int ms_kill_timeout = 2000;
-   QTimer::singleShot( ms_kill_timeout, m_vgproc, SLOT( kill() ) );
-}
-
-
 /* Called on m_vgproc exit - stop logpoller, but send one more signal.
    m_vgproc may:
    - exit from self
@@ -572,7 +556,7 @@ void Memcheck::readVgLog()
          m_vgreader = 0;
 
          if (m_vgproc->isRunning())
-            vgProcTerminate();
+            stop();
 
          if (runState() == VkRunState::VALGRIND) {
             statusMsg( "Memcheck", "Error parsing output log" );

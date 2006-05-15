@@ -235,6 +235,7 @@ signals:
 
 public slots:
    // end the execution
+   void stop( int msec_kill_timeout=2000 );
    void tryTerminate() const;
    void kill() const;
 
