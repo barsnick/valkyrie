@@ -13,7 +13,6 @@
 #include <ctype.h>
 #include <math.h>
 #include <malloc.h>
-#include <limits.h>          /* ULONG_MAX et al */
 
 #include <qdir.h>
 
@@ -193,112 +192,12 @@ QString dirCheck( int* err_val, const char* dir,
 }
 
 
-/* [Ip address : port num], eg. --logsocket=192.168.0.1:12345 
-   if port-num omitted, default of 1500 used.
-   check arg format, should all be ints && dots */
-QString formatCheck( int* err_val, const char* argval ) 
-{
-   *err_val = PARSED_OK;
-
-   QString sockArg( argval );
-   /* first check if we have a semi-colon present */
-   QString ip, port;
-   int scpos = sockArg.find( ':' );
-   if ( scpos != -1 ) {  /* we have a semi-colon */
-      ip   = sockArg.left( scpos );
-      port = sockArg.right( sockArg.length() - scpos-1 );
-   } else {
-      ip   = sockArg;
-      port = "1500";      /* default */
-   }
-
-   int dots = 0;
-   for ( uint i = 0; i < ip.length(); i++ ) {
-      if ( ip[i] == '.' || ip[i].isDigit() ) {
-         if ( ip[i] == '.' )
-            dots++;
-         if ( dots > 3 ) {
-            *err_val = PERROR_BADARG;
-            break;
-         }
-      } else {
-         *err_val = PERROR_BADARG;
-         break;
-      }
-   }
-
-   if ( *err_val == PARSED_OK ) { /* so far, so good */
-      /* only parse this if not the default */
-      if ( scpos != -1 ) {
-         for ( uint i=0; i<port.length(); i++ ) {
-            if ( !port[i].isDigit() ) {
-               *err_val = PERROR_BADARG;
-               break;
-            }
-         }
-      }
-   }
-
-   return ip + ":" + port;
-}
-
-
-unsigned long str2ULong( int *err_val, const char *str )
-{
-   *err_val = PERROR_BADNUMBER;
-   char *p    = (char*)str;
-   unsigned long val = 0;
-   const unsigned long max_mult = ULONG_MAX / 10;
-
-   if ( !p ) {
-      *err_val = PERROR_BADNUMBER;
-      goto bye;
-   }
-
-   while ( isspace((uchar) *p) )    /* skip leading space */
-      p++;
-   if ( *p == '+' )
-      p++;
-   if ( !isdigit((uchar) *p) ) {
-      *err_val = PERROR_BADNUMBER;
-      goto bye;
-   }
-
-   while ( isdigit((uchar) *p) ) {
-      if ( val > max_mult || (val == max_mult && (*p-'0') > 5) ) {
-         *err_val = PERROR_OVERFLOW;
-         goto bye;
-      }
-      val = 10*val + (*p++ - '0');
-   }
-
-   while ( isspace((uchar) *p) )    /* skip trailing space */
-      p++;
-   if ( *p == '\0' )
-      *err_val = PARSED_OK;
-
- bye:
-   return val;
-}
-
-
-unsigned int str2UInt( int *err_val, const char *str )
-{
-   *err_val = PERROR_BADNUMBER;
-
-   /* word up to 64 bit unsigned */
-   unsigned long val = str2ULong( err_val, str );
-
-   return (unsigned int)val;
-}
-
-
 
 /* class Option -------------------------------------------------------- */
 Option::Option( int opt_key, VkOPTION::ArgType arg_type, VkOPTION::WidgetType w_type, 
                 QString cfg_group, QChar short_flag,  QString long_flag, 
                 QString flag_desc, QString poss_vals, QString default_val, 
-                QString shelp,     QString lhelp,     const char* url ) 
+                QString shelp,     QString lhelp,     QString url ) 
 {
    m_key          = opt_key;
    m_argType      = arg_type;
@@ -346,14 +245,17 @@ Option::Option( int opt_key, VkOPTION::ArgType arg_type, VkOPTION::WidgetType w_
       /* min|max */
       vk_assert( m_possValues.count() == 2 );
       /* m_defaultValue, m_possValues must all be powers of 2 */
-      int errval;
-      vk_assert( isPowerOfTwo( &errval, m_defaultValue.latin1()  ) );
-      vk_assert( isPowerOfTwo( &errval, m_possValues[0].latin1() ) );
-      vk_assert( isPowerOfTwo( &errval, m_possValues[1].latin1() ) );
+      vk_assert( isPowerOfTwo( m_defaultValue  ) );
+      vk_assert( isPowerOfTwo( m_possValues[0] ) );
+      vk_assert( isPowerOfTwo( m_possValues[1] ) );
       /* min <= default <= max */
-      unsigned long dflt = str2ULong( &errval, m_defaultValue.latin1() );
-      unsigned long min  = str2ULong( &errval, m_possValues[0].latin1() );
-      unsigned long max  = str2ULong( &errval, m_possValues[1].latin1() );
+      bool ok;
+      unsigned long dflt = m_defaultValue.toULong(&ok);
+      vk_assert(ok);
+      unsigned long min  = m_possValues[0].toULong(&ok);
+      vk_assert(ok);
+      unsigned long max  = m_possValues[1].toULong(&ok);
+      vk_assert(ok);
       vk_assert( min <= dflt );
       vk_assert( dflt <= max );
    }
@@ -369,10 +271,13 @@ Option::Option( int opt_key, VkOPTION::ArgType arg_type, VkOPTION::WidgetType w_
          /* min|max */
          vk_assert( m_possValues.count() == 2 );
          /* min <= default <= max */
-         int errval;
-         unsigned long dflt = str2ULong( &errval, m_defaultValue.latin1() );
-         unsigned long min  = str2ULong( &errval, m_possValues[0].latin1() );
-         unsigned long max  = str2ULong( &errval, m_possValues[1].latin1() );
+         bool ok;
+         unsigned long dflt = m_defaultValue.toULong(&ok);
+         vk_assert(ok);
+         unsigned long min  = m_possValues[0].toULong(&ok);
+         vk_assert(ok);
+         unsigned long max  = m_possValues[1].toULong(&ok);
+         vk_assert(ok);
          vk_assert( min <= dflt );
          vk_assert( dflt <= max );
       }
@@ -404,7 +309,7 @@ Option::Option( int opt_key, VkOPTION::ArgType arg_type, VkOPTION::WidgetType w_
 }
 
 
-bool Option::isValidArg( int* err_val, const char* argval  )
+bool Option::isValidArg( int* err_val, QString argval  )
 {
    *err_val = PARSED_OK;
    switch ( m_argType ) {
@@ -413,13 +318,15 @@ bool Option::isValidArg( int* err_val, const char* argval  )
    case VkOPTION::ARG_UINT: {
       vk_assert( m_possValues.count() == 2 );
       /* is this a number? */
-      unsigned int val = str2UInt( err_val, argval );
-      if ( *err_val == PARSED_OK ) { /* looking good ... */
-         /* TODO: test for -ve values */
-         unsigned int min = m_possValues[0].toUInt();
-         /* if max == -1, then no upper bound */
-         unsigned int max = (m_possValues[1] == "-1") 
-            ? UINT_MAX : m_possValues[1].toUInt();
+      bool ok;
+      unsigned int val = argval.toUInt(&ok);
+      if (!ok)
+         *err_val = PERROR_BADNUMBER;
+      else { /* looking good ... */
+         unsigned int min = m_possValues[0].toUInt(&ok);
+         vk_assert(ok);
+         unsigned int max = m_possValues[1].toUInt(&ok);
+         vk_assert(ok);
          if ( val < min || val > max ) {
             *err_val = PERROR_OUTOFRANGE;
          }
@@ -430,13 +337,15 @@ bool Option::isValidArg( int* err_val, const char* argval  )
    case VkOPTION::ARG_PWR2: {
       vk_assert( m_possValues.count() == 2 );
       /* is this a number? */
-      unsigned int val = str2ULong( err_val, argval );
-      if ( *err_val == PARSED_OK ) { /* looking good ... */
+      bool ok;
+      unsigned long val = argval.toULong(&ok);
+      if (!ok)
+         *err_val = PERROR_BADNUMBER;
+      else { /* looking good ... */
          /* is this a power of 2? */
-         isPowerOfTwo( err_val, argval ); 
-         if ( *err_val == PARSED_OK ) { /* looking better ... */
-            unsigned int min = m_possValues[0].toUInt();
-            unsigned int max = m_possValues[1].toUInt();
+         if ( isPowerOfTwo( argval, err_val ) ) { /* looking better ... */
+            unsigned long min = m_possValues[0].toULong();
+            unsigned long max = m_possValues[1].toULong();
             if ( val < min || val > max ) {
                *err_val = PERROR_OUTOFRANGE;
             }
@@ -453,8 +362,8 @@ bool Option::isValidArg( int* err_val, const char* argval  )
    /* m_possValues == { yes|true, no|false } or whatever */
    case VkOPTION::ARG_BOOL: {
       vk_assert( m_possValues.count() == 2 );
-      if ( ( !vk_strcmp( argval, m_possValues[0] ) ) && 
-           ( !vk_strcmp( argval, m_possValues[1] ) ) ) {
+      if ( argval != m_possValues[0] && 
+           argval != m_possValues[1] ) {
          *err_val = PERROR_BADARG;
       }
    } break;
@@ -478,14 +387,16 @@ bool Option::isValidArg( int* err_val, const char* argval  )
 
 
 // static fn
-bool Option::isPowerOfTwo( int *err_val, const char *argval )
+bool Option::isPowerOfTwo( QString argval, int *err_val/*=0*/  )
 {
-   *err_val = PERROR_BADNUMBER;
-
-   unsigned long val = str2ULong( err_val, argval );
+   bool ok;
+   unsigned long val = argval.toULong(&ok);
    
-   if ( *err_val != PARSED_OK )
-      goto bye;
+   if ( !ok ) {
+      if (err_val)
+         *err_val = PERROR_BADNUMBER;
+      return false;
+   }
 
    switch ( val ) {
    case 1:       case 2:       case 4:       case 8:
@@ -496,12 +407,14 @@ bool Option::isPowerOfTwo( int *err_val, const char *argval )
    case 1048576: case 2097152: case 4194304: case 8388608:
       break;
    default:
-      *err_val = PERROR_POWER_OF_TWO;
-      break;
+      if (err_val)
+         *err_val = PERROR_POWER_OF_TWO;
+      return false;
    }
 
- bye:
-   return (*err_val == PARSED_OK);
+   if (err_val)
+      *err_val = PARSED_OK;
+   return true;
 }
 
 

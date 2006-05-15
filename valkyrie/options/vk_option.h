@@ -69,15 +69,15 @@ public:
    Option( int opt_key, VkOPTION::ArgType arg_type, VkOPTION::WidgetType w_type, 
            QString cfg_group, QChar short_flag,  QString long_flag, 
            QString flag_desc, QString poss_vals, QString default_val, 
-           QString shelp,     QString lhelp,     const char* url );
+           QString shelp,     QString lhelp,     QString url );
 
    QString cfgKey()    { return m_longFlag; }
    QString cfgGroup()  { return m_configGroup; }
    QString defValue()  { return m_defaultValue; }
    QString url() const { return m_urlHelp; }
 
-   bool isValidArg( int* err_val, const char* argval );
-   static bool isPowerOfTwo( int* err_val, const char* argval );
+   bool isValidArg( int* err_val, QString argval );
+   static bool isPowerOfTwo( QString argval, int* err_val=0 );
 
    void setPossibleValues( QStringList vals );
    void print();                /* for debugging */

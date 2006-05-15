@@ -251,7 +251,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    case INPUT_FD:
    case SHOW_BELOW:
    case MAX_SFRAME:
-      opt->isValidArg( &errval, argval.latin1() );
+      opt->isValidArg( &errval, argval );
       break;
 
    case TRACK_FDS:
@@ -267,7 +267,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
 
    case TRACE_CH: {
 #if 0
-      if ( opt->isValidArg( &errval, argval.latin1() ) ) {
+      if ( opt->isValidArg( &errval, argval ) ) {
          if ( argval == "yes" ) {
             if ( vkConfig->rdBool( "db-attach", "valgrind" ) )
                errval = PERROR_DB_CONFLICT;
@@ -285,7 +285,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
 
 
    case XML_OUTPUT:
-      opt->isValidArg( &errval, argval.latin1() );
+      opt->isValidArg( &errval, argval );
       break;
 
    case DB_COMMAND: {   /* gdb -nw %f %p */
@@ -298,7 +298,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
 
    /* check for conflict with --trace-children */
    case DB_ATTACH:
-      if ( opt->isValidArg( &errval, argval.latin1() ) ) {
+      if ( opt->isValidArg( &errval, argval ) ) {
          if ( argval == "yes" ) {
             if ( vkConfig->rdBool( "trace-children","valgrind" ) )
                errval = PERROR_DB_CONFLICT;

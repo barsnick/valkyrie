@@ -110,18 +110,18 @@ int Cachegrind::checkOptArg( int optid, QString& argval )
          /* 1st number */
          opt->setPossibleValues( possvals );
          if ( opt->isValidArg( &errval, aList[0] ) &&
-              Option::isPowerOfTwo( &errval, aList[0].latin1() ) ) {
+              Option::isPowerOfTwo( aList[0], &errval ) ) {
             /* 2nd number */
             possvals[0] = "0";
             possvals[1] = "8";
             opt->setPossibleValues( possvals );
-            if ( opt->isValidArg( &errval, aList[1].latin1() ) ) {
+            if ( opt->isValidArg( &errval, aList[1] ) ) {
                /* 3rd number */
                possvals[0] = "4";
                possvals[1] = "8192";
                opt->setPossibleValues( possvals );
                if ( opt->isValidArg( &errval, aList[2] ) )
-                  Option::isPowerOfTwo( &errval, aList[2].latin1() );
+                  Option::isPowerOfTwo( aList[2], &errval );
             }
          }
       }
@@ -134,7 +134,7 @@ int Cachegrind::checkOptArg( int optid, QString& argval )
    case THRESH:
    case AUTO:
    case CONTEXT:
-      opt->isValidArg( &errval, argval.latin1() );
+      opt->isValidArg( &errval, argval );
       break;
 
       /* TODO: not sure how to handle these just yet :( */

@@ -86,7 +86,7 @@ int Massif::checkOptArg( int optid, QString& argval )
    case DEPTH:
    case FORMAT:
    case ALIGNMENT:
-      opt->isValidArg( &errval, argval.latin1() );
+      opt->isValidArg( &errval, argval );
       break;
 
       /* how on earth can this be checked ? */

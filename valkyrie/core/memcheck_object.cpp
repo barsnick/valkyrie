@@ -115,7 +115,7 @@ int Memcheck::checkOptArg( int optid, QString& argval )
    case SHOW_REACH:
    case GCC_296:
    case ALIGNMENT:
-      opt->isValidArg( &errval, argval.latin1() );
+      opt->isValidArg( &errval, argval );
       break;
 
       /* when using xml output from valgrind, this option is preset to
@@ -355,7 +355,7 @@ bool Memcheck::parseLogFile()
 
    /* check this is a valid file, and has the right perms */
    int errval = PARSED_OK;
-   QString ret_file = fileCheck( &errval, log_file.latin1(), true, false );
+   QString ret_file = fileCheck( &errval, log_file, true, false );
    if ( errval != PARSED_OK ) {
       vkError( view(), "File Error", "%s: \n\"%s\"", 
                parseErrString(errval),
