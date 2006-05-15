@@ -49,7 +49,7 @@ public:
    /* creates and init's this tool's ToolView window */
    virtual ToolView* createView( QWidget* parent ) = 0;
    /* called by MainWin::closeToolView() */
-   virtual bool isDone() = 0;
+   virtual bool queryDone() = 0;
    virtual void deleteView();
    ToolView* view();
 

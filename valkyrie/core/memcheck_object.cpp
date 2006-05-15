@@ -193,8 +193,10 @@ void Memcheck::statusMsg( QString hdr, QString msg )
 }
 
 
-/* called by MainWin::closeToolView() */
-bool Memcheck::isDone()
+/* are we done and dusted?
+   anything we need to check/do before being deleted/closed?
+*/
+bool Memcheck::queryDone()
 {
    vk_assert( view() != 0 );
 

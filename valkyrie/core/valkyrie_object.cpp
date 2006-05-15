@@ -305,6 +305,15 @@ bool Valkyrie::runTool( int tId, VkRunState::State runState )
 }
 
 
+bool Valkyrie::queryToolDone( int tId )
+{
+   ToolObject* tool = valgrind()->toolObj( tId );
+   vk_assert( tool != 0 );
+
+   return tool->queryDone();
+}
+
+
 /* Run the tool with given runState */
 VkRunState::State Valkyrie::startRunState()
 { return m_startRunState; }

@@ -161,11 +161,8 @@ void MainWindow::run( VkRunState::State runState )
    if ( m_viewStack->visible() == 0 )
       return;
 
-   ToolObject* currTool = valkyrie()->valgrind()->toolObj( m_viewStack->visibleId() );
-
-   // TODO: put this in Vk
    /* last process might not be done ... */
-   if ( !currTool->isDone() )
+   if ( !valkyrie()->queryToolDone( m_viewStack->visibleId() ) )
       return;
 
    /* if running valgrind, make sure there's a valid binary
@@ -349,7 +346,7 @@ void MainWindow::closeEvent( QCloseEvent *ce )
 {
    ToolObjList tools = valkyrie()->valgrind()->toolObjList();
    for ( ToolObject* tool = tools.first(); tool; tool = tools.next() ) {
-      if ( tool->view() != 0 && !tool->isDone() ) {
+      if ( tool->view() != 0 && !tool->queryDone() ) {
          ce->ignore();
          return;
       }
@@ -378,7 +375,7 @@ void MainWindow::closeToolView()
    vk_assert(currTool->view() == m_viewStack->visible());
 
    /* process might still be running, or whatever ... */
-   if ( !currTool->isDone() ) return;
+   if ( !currTool->queryDone() ) return;
 
    /* remove view from stack (doesn't delete) */
    m_viewStack->removeView( m_viewStack->widget( currViewId ) );

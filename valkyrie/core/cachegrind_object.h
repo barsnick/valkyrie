@@ -27,7 +27,7 @@ public:
    /* returns the ToolView window (cachegrindView) for this tool */
    ToolView* createView( QWidget* parent );
    /* called by MainWin::closeToolView() */
-   bool isDone();
+   bool queryDone();
 
    bool start( VkRunState::State rm, QStringList vgflags );
    bool stop();

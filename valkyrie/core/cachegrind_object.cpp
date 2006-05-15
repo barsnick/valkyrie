@@ -182,7 +182,7 @@ ToolView* Cachegrind::createView( QWidget* parent )
 
 
 /* called by MainWin::closeToolView() */
-bool Cachegrind::isDone()
+bool Cachegrind::queryDone()
 {
    vk_assert( view() != 0 );
 

@@ -33,6 +33,7 @@ public:
 
    bool runTool( int tId, VkRunState::State runState );
    void stopTool( int tId );
+   bool queryToolDone( int tId );
 
    /* returns a '\n' separated list of current relevant flags */
    QString getDisplayFlags();

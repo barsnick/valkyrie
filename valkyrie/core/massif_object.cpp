@@ -116,7 +116,7 @@ ToolView* Massif::createView( QWidget* parent )
 
 
 /* called by MainWin::closeToolView() */
-bool Massif::isDone()
+bool Massif::queryDone()
 {
    vk_assert( view() != 0 );
 
