@@ -9,6 +9,8 @@
 
 #include "vk_popt.h"
 #include "vk_option.h"           /* namespace VkOPTION */
+#include "vk_utils.h"
+
 
 /* return a vkPoptOption initialised to null */
 vkPoptOption nullOpt()
@@ -332,7 +334,7 @@ int vkPoptGetNextOpt( vkPoptContext con,
          if (con->finalArgv != NULL && con->os->nextArg) {
             char* s = (char*)malloc( strlen(con->os->nextArg)+1 );
             if (s == NULL) {
-               fprintf(stderr, "virtual memory exhausted.\n");
+               vkPrintErr("virtual memory exhausted.");
                exit(EXIT_FAILURE);
             } else {
                con->finalArgv[con->finalArgvCount++] =
@@ -595,7 +597,7 @@ void vkPoptPrintHelp( vkPoptContext con, FILE * fp,
          if ( opt->helptxt )
             fprintf( fp, "\n%s options:\n", opt->helptxt );
          else
-            fprintf(stderr, "Error: vkPoptPrintHelp(): No match found for table '%s'\n", tableName);
+            vkPrintErr("Error: vkPoptPrintHelp(): No match found for table '%s'.", tableName);
          vkTableHelp( fp, opt->arg );
       }
    }

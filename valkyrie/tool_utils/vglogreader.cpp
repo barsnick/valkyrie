@@ -7,7 +7,8 @@
  * See the file LICENSE.GPL for the full license details.
  */
 
-#include <vglogreader.h>
+#include "vglogreader.h"
+#include "vglog.h"
 
 /**********************************************************************/
 /* VgLogReader */
@@ -70,7 +71,7 @@ VgLogHandler::~VgLogHandler()
 /* gets <?xml...> element */
 bool VgLogHandler::processingInstruction( const QString& target, const QString& data )
 {
-   //  fprintf(stderr, "VgLogHandler::processingInstruction: %s, %s\n", target.latin1(), data.latin1());
+   //  vkPrintErr("VgLogHandler::processingInstruction: %s, %s", target.latin1(), data.latin1());
    node.appendChild( doc.createProcessingInstruction( target, data ) );
    return true;
 }
@@ -79,7 +80,7 @@ bool VgLogHandler::startElement( const QString&, const QString&,
                                  const QString& tag,
                                  const QXmlAttributes& )
 {
-   //  fprintf(stderr, "VgLogHandler::startElement: '%s'\n", tag.latin1());
+   //  vkPrintErr("VgLogHandler::startElement: '%s'", tag.latin1());
    QDomNode n = doc.createElement( tag );
    node.appendChild( n );
    node = n;
@@ -97,7 +98,7 @@ bool VgLogHandler::startElement( const QString&, const QString&,
 bool VgLogHandler::endElement( const QString&, const QString&,
                                const QString& /*tag*/ )
 {
-   //  fprintf(stderr, "VgLogHandler::endElement: %s\n", tag.latin1());
+   //  vkPrintErr("VgLogHandler::endElement: %s", tag.latin1());
    // Should never have end element at doc level
    if ( node == doc )
       return false;
@@ -126,7 +127,7 @@ bool VgLogHandler::endElement( const QString&, const QString&,
 
 bool VgLogHandler::characters( const QString&  ch )
 {
-   //  fprintf(stderr, "characters: '%s'\n", ch.latin1());
+   //  vkPrintErr("characters: '%s'", ch.latin1());
    // No text as child of some document
    if ( node == doc )
       return false;
@@ -139,7 +140,7 @@ bool VgLogHandler::characters( const QString&  ch )
    QString chars = ch.simplifyWhiteSpace();
    if ( !chars.isEmpty() ) {
       node.appendChild( doc.createTextNode( chars ) );
-      //    fprintf(stderr, "chars: '%s'\n", chars.latin1());
+      //    vkPrintErr("chars: '%s'", chars.latin1());
    }
 
    return true;
@@ -148,7 +149,7 @@ bool VgLogHandler::characters( const QString&  ch )
 /* Called by xml reader at start of parsing */
 bool VgLogHandler::startDocument()
 {
-   //   fprintf(stderr, "VgLogHandler::startDocument()\n");
+   //   vkPrintErr("VgLogHandler::startDocument()\n");
 
    doc = QDomDocument();
    node = doc;
@@ -163,7 +164,7 @@ bool VgLogHandler::startDocument()
 */
 bool VgLogHandler::endDocument()
 {
-   //   fprintf(stderr, "VgLogHandler::endDocument()\n");
+   //   vkPrintErr("VgLogHandler::endDocument()\n");
    finished = true;
    if (node != doc)
       return false;
@@ -172,7 +173,7 @@ bool VgLogHandler::endDocument()
 
 bool VgLogHandler::fatalError( const QXmlParseException& exception )
 {
-   //  fprintf(stderr, "fatalError\n");
+   //  vkPrintErr("fatalError\n");
    m_errorMsg = exception.message() +
       " (line: " + QString::number(exception.lineNumber()) +
       ", col: " + QString::number(exception.columnNumber()) + ")";

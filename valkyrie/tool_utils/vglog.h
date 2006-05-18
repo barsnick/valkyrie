@@ -17,12 +17,10 @@
 #include <qmap.h>
 #include <qstring.h>
 
-
 #include <unistd.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-
 
 
 /**********************************************************************/

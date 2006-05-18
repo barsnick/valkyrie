@@ -24,6 +24,9 @@
 extern void vklmPrint( int verb, const char *, ... )
      __attribute__((format (printf, 2, 3)));
 
+extern void vklmPrintErr( const char *, ... )
+     __attribute__((format (printf, 1, 2)));
+
 extern int vklm_verbosity;
 
 #endif // #ifndef __VKLM_MAIN_H

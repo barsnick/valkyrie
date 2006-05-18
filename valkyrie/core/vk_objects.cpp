@@ -66,7 +66,7 @@ VkObject::VkObject( const QString& capt, const QString& txt,
    m_accelText = txt;
    m_accel_Key = key;
    m_objId     = objId;
-   //  fprintf(stderr, "VkObject::VkObject( %d: %s )\n", objId, capt.latin1() );
+   //  vkPrintErr("VkObject::VkObject( %d: %s )", objId, capt.latin1() );
 }
 
 

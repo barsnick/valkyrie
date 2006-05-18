@@ -8,9 +8,10 @@
  * See the file LICENSE.GPL for the full license details.
  */
 
-#include <vglogview.h>
-#include <vk_utils.h>        /* VK_DEBUG */
-#include <vglogview_icons.h>
+#include "vglogview.h"
+#include "vk_utils.h"        /* VK_DEBUG */
+#include "vglogview_icons.h"
+
 #include <qfileinfo.h>
 
 

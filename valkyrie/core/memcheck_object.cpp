@@ -123,11 +123,10 @@ int Memcheck::checkOptArg( int optid, QString& argval )
    case LEAK_CHECK:
       /* Note: gui options disabled, so only reaches here from cmdline */
       errval = PERROR_BADOPT;
-      fprintf(stderr,
-              "\nOption disabled '--%s': Memcheck presets this option to 'full' when generating the required xml output.\nSee valgrind/docs/internals/xml_output.txt.\n",
-              opt->m_longFlag.latin1());
+      vkPrintErr("Option disabled '--%s'", opt->m_longFlag.latin1());
+      vkPrintErr(" - Memcheck presets this option to 'full' when generating the required xml output.");
+      vkPrintErr(" - See valgrind/docs/internals/xml_output.txt.");
       break;
-
 
    default:
       vk_assert_never_reached();
@@ -247,7 +246,6 @@ bool Memcheck::queryFileSave()
       } else if ( ok == MsgBox::vkCancel ) {  /* procrastinate */
          return false;
       } else {                                /* discard */
-         //      fprintf(stderr, "removing tmp file '%s'\n", m_saveFname.latin1() );
          QFile::remove( m_saveFname );
          m_fileSaved = true;
       }
@@ -432,9 +430,9 @@ bool Memcheck::mergeLogFiles()
 */
 bool Memcheck::runProcess( QStringList flags )
 {
-   //  fprintf(stderr, "\nMemcheck::runProcess()\n");
-   //  for ( unsigned int i=0; i<flags.count(); i++ )
-   //    fprintf(stderr, "flag[%d] --> %s\n", i, flags[i].latin1() );
+   //   vkPrint("Memcheck::runProcess()");
+   //   for ( unsigned int i=0; i<flags.count(); i++ )
+   //      vkPrint("flag[%d] --> %s", i, flags[i].latin1() );
    vk_assert( view() != 0 );
 
    /* new m_vgreader - view() may be recreated, so need up-to-date ptr */
@@ -460,6 +458,12 @@ bool Memcheck::runProcess( QStringList flags )
    connect( m_vgproc, SIGNAL(processExited()),
             this, SLOT(processDone()) );
 
+   /* gather vgproc's stdout/stderr, and forward to our stdout/stderr */
+   connect( m_vgproc, SIGNAL(readyReadStdout()),
+            this, SLOT(readProcStdout()) );
+   connect( m_vgproc, SIGNAL(readyReadStderr()),
+            this, SLOT(readProcStderr()) );
+
    if ( !m_vgproc->start() ) {
       if (m_vgreader != 0) {
          delete m_vgreader;
@@ -481,8 +485,32 @@ bool Memcheck::runProcess( QStringList flags )
    connect( m_logpoller, SIGNAL(logUpdated()), this, SLOT(readVgLog()) );
    m_logpoller->start();
 
-   //  fprintf(stderr, "\n - END MC::runProcess()\n" );
+   //  vkPrint(" - END MC::runProcess()" );
    return true;
+}
+
+
+/* forward vgproc's stdout to our stdout */
+void Memcheck::readProcStdout()
+{
+   /* read as much data as we can */
+   // TODO: might we spend too much time in here?
+   while ( m_vgproc->canReadLineStdout() ) {
+      QString str_stdout = m_vgproc->readLineStdout();
+      /* forward to our stdout */
+      fprintf(stdout, "%s\n", str_stdout.latin1());
+   }
+}
+
+/* forward vgproc's stderr to our stderr */
+void Memcheck::readProcStderr()
+{
+   /* read as much data as we can */
+   // TODO: might we spend too much time in here?
+   while ( m_vgproc->canReadLineStderr() ) {
+      QString str_stderr = m_vgproc->readLineStderr();
+      fprintf(stderr, "%s\n", str_stderr.latin1());
+   }
 }
 
 
@@ -494,7 +522,7 @@ bool Memcheck::runProcess( QStringList flags )
 */
 void Memcheck::processDone()
 {
-   //   fprintf(stderr, "\nMemcheck::processDone()\n");
+   //   vkPrint("Memcheck::processDone()");
    vk_assert( m_vgproc != 0 );
    vk_assert( m_logpoller != 0 );
 
@@ -513,11 +541,11 @@ void Memcheck::processDone()
 */
 void Memcheck::readVgLog()
 {
-   //   fprintf(stderr, "\nMemcheck::readVgLog()\n");
+      vkPrint("Memcheck::readVgLog()");
    vk_assert( view() != 0 );
 
    if (m_vgreader != 0) {
-      //      fprintf(stderr, " - parseContinue\n");
+      //      vkPrint(" - parseContinue");
       VgLogHandler* hnd = m_vgreader->handler();
 
       /* Note: xml log may not be completed by valgrind,
@@ -527,7 +555,7 @@ void Memcheck::readVgLog()
       if (m_vgreader->parseContinue()) {
          /* Parsing succeeded */
          if (hnd->finished) {  /* We're done */
-            //            fprintf(stderr, " - finished\n");
+            //            vkPrint(" - finished");
 
             /* cleanup reader */
             delete m_vgreader;
@@ -543,7 +571,7 @@ void Memcheck::readVgLog()
                setRunState( VkRunState::STOPPED );
          }
       } else {
-         //            fprintf(stderr, " - parse failed on line %d\n", hnd->errorLine);
+         //            vkPrint(" - parse failed on line %d", hnd->errorLine);
          /* Parsing failed: kill m_vgproc, if alive
             - will trigger another read, but m_vgreader == 0 */
 
@@ -577,10 +605,11 @@ void Memcheck::readVgLog()
 
    /* If m_vgproc stopped but not cleaned up, cleanup. */
    if (m_vgproc != 0 && !m_vgproc->isRunning()) {
-      //      fprintf(stderr, " - cleaning up m_vgproc\n");
+      //      vkPrint(" - cleaning up m_vgproc");
 
-      /* gather first stderr line */
-      QString str_err = m_vgproc->readLineStderr();
+      /* make sure nothing left on stdout/stderr */
+      readProcStdout();
+      readProcStderr();
 
       delete m_vgproc;
       m_vgproc = 0;
@@ -600,12 +629,11 @@ void Memcheck::readVgLog()
             if (runState() == VkRunState::VALGRIND) {
                statusMsg( "Memcheck", "Error - incomplete output log" );
                vkError( view(), "XML Parse Error",
-                        "<p>valgrind xml output is incomplete</p>" );
+                        "<p>Valgrind XML output is incomplete</p>" );
             } else {
                statusMsg( "Merge Logs", "Error - incomplete output log" );
-               if (str_err.isEmpty()) str_err = "";
                vkError( view(), "Parse Error",
-                        "<p>%s</p>", escapeEntities(str_err).latin1() );
+                        "<p>Failed to parse merge result</p>" );
             }
          }
       }
@@ -655,7 +683,7 @@ bool Memcheck::fileSaveDialog( QString fname/*=QString()*/ )
 */
 bool Memcheck::saveParsedOutput( QString& fname )
 {
-   //printf("saveParsedOutput(%s)\n", fname.latin1() );
+   //vkPrint("saveParsedOutput(%s)", fname.latin1() );
    vk_assert( view() != 0 );
    vk_assert( !fname.isEmpty() );
 
@@ -684,11 +712,11 @@ bool Memcheck::saveParsedOutput( QString& fname )
    bool ok;
    if (!m_fileSaved) {
       /* first save after a run, so just rename m_saveFname => fname */
-      //printf("renaming: '%s' -> '%s'\n", m_saveFname.latin1(), fname.latin1() );
+      //vkPrint("renaming: '%s' -> '%s'", m_saveFname.latin1(), fname.latin1() );
       ok = QDir().rename( m_saveFname, fname );
    } else {
       /* we've saved once already: must now copy m_saveFname => fname */
-      //printf("copying: '%s' -> '%s'\n", m_saveFname.latin1(), fname.latin1() );
+      //vkPrint("copying: '%s' -> '%s'", m_saveFname.latin1(), fname.latin1() );
       QUrlOperator *op = new QUrlOperator();
       op->copy( m_saveFname, fname, false, false ); 
       /* TODO: check copied ok */

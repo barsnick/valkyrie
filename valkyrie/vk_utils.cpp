@@ -9,9 +9,12 @@
 
 #include "vk_utils.h"
 #include "config.h"                 // PACKAGE_BUGREPORT
+#include "vk_config.h"              // vkname()
 
 #include <stdlib.h>                 // mkstemp()
 #include <stdarg.h>                 // va_start, va_end
+#include <sys/types.h>              // getpid
+#include <unistd.h>                 // getpid
 
 #include <qapplication.h>
 #include <qfileinfo.h>
@@ -21,6 +24,10 @@
 #include <qregexp.h>
 
 
+/* TODO: add user-opt to output valkyrie messages to different fd... a-la valgrind
+    - keeps stdout/err clean for client program output
+    fdopen?
+*/
 
 /* prints various info msgs to stdout --------------------------------- */
 void vkPrint( const char* msg, ... )
@@ -28,10 +35,11 @@ void vkPrint( const char* msg, ... )
    va_list ap;
    va_start( ap, msg );
    va_end( ap );
-   fprintf( stdout, "\n" ); 
+   fprintf( stdout, "===%s:%d=== ", vkConfig->vkname(), (int)getpid() ); 
    vfprintf( stdout, msg, ap );
    va_end( ap );
-   fprintf( stdout, "\n\n" );
+   fprintf( stdout, "\n" );
+   fflush(stdout);
 }
 
 
@@ -41,11 +49,23 @@ void vkPrintErr( const char* msg, ... )
    va_list ap;
    va_start( ap, msg );
    va_end( ap );
-   fprintf( stderr, "\n" ); 
+   fprintf( stderr, "===%s:%d=== ", vkConfig->vkname(), (int)getpid() ); 
    vfprintf( stderr, msg, ap );
    va_end( ap );
-   fprintf( stderr, "\n\n" );
+   fprintf( stderr, "\n" );
+   fflush(stderr);
 }
+
+
+/* Kludge to keep vglog happy
+   - Want vk_logmerge to print messages from class VgLog, but keep that
+     class within valkyrie...
+   - Hmm... perhaps shove that class into vk_logmerge after all...
+   TODO: Figure out what we want and implement it!
+ */
+void vklmPrint( int, const char*, ... ) { /* nada */ }
+void vklmPrintErr( const char*, ... )   { /* nada */ }
+
 
 
 /* prints an "Assertion failed" message and exits ---------------------- */
@@ -53,9 +73,8 @@ __attribute__ ((noreturn))
    void vk_assert_fail( const char* expr, const char* file,
                         unsigned int line, const char* fn )
 { 
-   vkPrintErr("\n%s:%u\n"
-              "     %s: Assertion '%s' failed.\n",
-              file, line, fn, expr );
+   vkPrintErr("Assertion failed '%s':", expr );
+   vkPrintErr("   at %s#%u:%s\n", file, line, fn );
    exit(1);
 }
 
@@ -66,13 +85,13 @@ __attribute__ ((noreturn))
                                       unsigned int line, 
                                       const char* fn )
 {
-   printf("\nAssertion 'never reached' failed,\n"
-          "in %s:%u %s\n", file, line, fn );
-   printf("Hopefully, you should never see this message.\n"
-          "If you are, then Something Really Bad just happened.\n"
-          "Please report this bug to: %s\n", PACKAGE_BUGREPORT );
-   printf("In the bug report, please send the the above text.\n"
-          "Thanks.\n\n");
+   vkPrintErr("Assertion 'never reached' failed,");
+   vkPrintErr("   at %s#%u:%s", file, line, fn );
+   vkPrintErr("Hopefully, you should never see this message.");
+   vkPrintErr("If you are, then Something Really Bad just happened.");
+   vkPrintErr("Please report this bug to: %s", PACKAGE_BUGREPORT );
+   vkPrintErr("In the bug report, please send the the above text.");
+   vkPrintErr("Thanks.\n");
    exit(1);
 }
 

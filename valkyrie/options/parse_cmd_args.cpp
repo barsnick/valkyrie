@@ -54,10 +54,11 @@ void parseError( vkPoptContext con, const int err )
 {
    /* don't print anything; sender is dealing with msgs */
    if ( err != PERROR_DEFAULT ) {
-      fprintf( stderr, "Parse error [%s] : %s\n", 
+      fprintf( stderr, "%s: Parse error [%s] : %s\n", 
+               vkConfig->vkname(),
                vkPoptBadOption(con), parseErrString( err )  );
-      fprintf( stderr, 
-               "Try 'valkyrie --help' for more information.\n" );
+      fprintf( stderr, "%s: Use --help for more information.\n",
+               vkConfig->vkname() );
    }
 }           
 

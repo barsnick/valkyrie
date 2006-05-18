@@ -9,6 +9,7 @@
  */
 
 #include "tool_view.h"
+#include "vk_utils.h"
 
 #include <qlayout.h>
 
@@ -81,12 +82,12 @@ int ToolViewStack::visibleId()
 
 void ToolViewStack::listViews()
 {
-   printf("=============\n");
+   vkPrint("=============");
    const ToolViewList* views = viewList();
    ToolViewListIter it( *views ); // iterate over the views
    ToolView* view;
    for (; ((view = it.current()) != 0); ++it ) {
-      printf("ToolView: id(%d), name(%s)\n", id(view), view->name());
+      vkPrint("ToolView: id(%d), name(%s)", id(view), view->name());
    }
 }
 

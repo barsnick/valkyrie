@@ -18,6 +18,7 @@
 #include "context_help.h"
 #include "html_urls.h"
 #include "tool_object.h"       // VkRunState
+#include "vk_utils.h"
 
 #include <qcursor.h>
 #include <qfiledialog.h>
@@ -31,7 +32,7 @@
 
 
 void MemcheckView::showSuppEditor()
-{ printf("TODO: Memcheck::showSuppEditor()\n"); }
+{ vkPrint("TODO: Memcheck::showSuppEditor()"); }
 
 
 

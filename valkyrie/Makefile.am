@@ -118,6 +118,7 @@ valkyrie_SOURCES = \
 	options/options_page.h \
 	options/options_widgets.h \
 	options/options_window.h \
+	options/parse_cmd_args.h \
 	options/valgrind_options_page.h \
 	options/valkyrie_options_page.h \
 	options/vk_option.h \

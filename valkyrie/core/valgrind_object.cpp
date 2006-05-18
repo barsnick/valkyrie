@@ -262,7 +262,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    case SUPPS_AVAIL:
    case SUPPS_SEL:
    case SMC_CHECK:
-      printf("TODO: check Valgrind opts\n");
+      vkPrintErr("TODO: check Valgrind opts");
       break;
 
    case TRACE_CH: {
@@ -277,9 +277,8 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       /* Disabled for now - can't deal with the multiple xml files this generates */
       /* Note: Also disabled in ValgrindOptionsPage() */
       errval = PERROR_BADOPT;
-      fprintf(stderr,
-              "\nOption disabled '--%s': Valkyrie can't yet handle the multiple xml files this generates.\n",
-              opt->m_longFlag.latin1());
+      vkPrintErr("Option disabled '--%s'", opt->m_longFlag.latin1());
+      vkPrintErr(" - Valkyrie can't yet handle the multiple xml files this generates.");
 #endif
    } break;
 
@@ -293,7 +292,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       QString tmp = argval.left( pos );
       argval = binaryCheck( &errval, tmp );
       argval += tmp.right( tmp.length() - pos+1 );
-      // printf("db_command: %s\n", argval.latin1() );
+      // vkPrint("db_command: %s", argval.latin1() );
    } break;
 
    /* check for conflict with --trace-children */
@@ -319,9 +318,8 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    case LOG_SOCKET:
       /* Note: gui options disabled, so only reaches here from cmdline */
       errval = PERROR_BADOPT;
-      fprintf(stderr,
-              "\nOption disabled '--%s': Valkyrie sets its own logging options to gather data from Valgrind.\n",
-              opt->m_longFlag.latin1());
+      vkPrintErr("Option disabled '--%s'", opt->m_longFlag.latin1());
+      vkPrintErr(" - Valkyrie sets its own logging options to gather data from Valgrind.");
       break;
 
    default:
@@ -375,7 +373,7 @@ QStringList Valgrind::modifiedVgFlags( const ToolObject* tool_obj )
                modFlags << "--" + opt->cfgKey() + "=" + cfgVal;
          break;
 
-      /* memcheck presets/ignores these options */
+      /* memcheck presets/ignores these options for xml output */
       case VERBOSITY:
       case TRACK_FDS:
       case TIME_STAMP:
@@ -387,12 +385,13 @@ QStringList Valgrind::modifiedVgFlags( const ToolObject* tool_obj )
          if ( defVal != cfgVal ) {
             /* gui options not disabled: other tools use these options */
             if ( tool_obj->name() == "memcheck") {
-               /* TODO: somehow inform user we skipped this option
+               /* TODO: inform user we skipped this option
                   - but not every time! */
-               if (0)
-                  fprintf(stderr,
-                          "\nSkipped option '%s': Memcheck presets/ignores this option when generating (required) xml output.\nSee valgrind/docs/internals/xml_output.txt.\n",
-                          flag.latin1());
+               if (0) {
+                  vkPrintErr("Skipped option '%s'", flag.latin1());
+                  vkPrintErr(" - Memcheck presets/ignores this option when generating (required) xml output.");
+                  vkPrintErr(" - See valgrind/docs/internals/xml_output.txt.\n");
+               }
             } else {
                modFlags << "--" + opt->cfgKey() + "=" + cfgVal;
             }
@@ -451,7 +450,7 @@ int Valgrind::toolObjId( const QString& name )
 /* Returns a ToolObject based on its objectId */
 ToolObject* Valgrind::toolObj( int tid )
 {
-   //   fprintf(stderr, "Valgrind::toolObj( int tid=%d )\n", tid);
+   //   vkPrint("Valgrind::toolObj( int tid=%d )", tid);
    vk_assert( tid >= ID_TOOL0 );
    ToolObject* tool = m_toolObjList.at( tid - ID_TOOL0 );
    vk_assert( tool != 0 );

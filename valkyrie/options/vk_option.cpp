@@ -218,7 +218,7 @@ Option::Option( int opt_key, VkOPTION::ArgType arg_type, VkOPTION::WidgetType w_
       m_longHelp += " [" + m_defaultValue + "]";
 
    /* Assert is valid option ---------------------------------------- */
-   if (0) { print(); printf("\n"); }
+   if (0) { print(); }
 
    /* we always expect the following fields */
    vk_assert( !m_configGroup.isEmpty() );
@@ -429,21 +429,19 @@ void Option::setPossibleValues( QStringList vals )
 /* for debugging */
 void Option::print()
 {
-   printf( "m_key          = %d\n", m_key );
-   printf( "m_widgType     = %d\n", m_widgType );
-   printf( "m_argType      = %d\n", m_argType );
-   printf( "m_shortFlag    = %c\n", m_shortFlag.latin1() );
-   printf( "m_longFlag     = %s\n", m_longFlag.latin1() );
-   printf( "m_flagDescrip  = %s\n", m_flagDescrip.latin1() );
-   printf( "m_shortHelp    = %s\n", m_shortHelp.latin1() );
-   printf( "m_longHelp     = %s\n", m_longHelp.latin1() );
-   printf( "m_urlHelp      = %s\n", m_urlHelp.latin1() );
-   printf( "m_defaultValue = %s\n", m_defaultValue.latin1() );
-   printf( "m_configGroup  = %s\n", m_configGroup.latin1() );
-   printf( "m_possValues   = |" );
-   for ( uint i=0; i<m_possValues.count(); i++ )
-      printf("%s|", m_possValues[i].latin1() );
-   printf("\n");
+   vkPrint( "m_key          = %d", m_key );
+   vkPrint( "m_widgType     = %d", m_widgType );
+   vkPrint( "m_argType      = %d", m_argType );
+   vkPrint( "m_shortFlag    = %c", m_shortFlag.latin1() );
+   vkPrint( "m_longFlag     = %s", m_longFlag.latin1() );
+   vkPrint( "m_flagDescrip  = %s", m_flagDescrip.latin1() );
+   vkPrint( "m_shortHelp    = %s", m_shortHelp.latin1() );
+   vkPrint( "m_longHelp     = %s", m_longHelp.latin1() );
+   vkPrint( "m_urlHelp      = %s", m_urlHelp.latin1() );
+   vkPrint( "m_defaultValue = %s", m_defaultValue.latin1() );
+   vkPrint( "m_configGroup  = %s", m_configGroup.latin1() );
+   vkPrint( "m_possValues   = |%s|", m_possValues.join("|").latin1() );
+   vkPrint( " " );
 }
 
 

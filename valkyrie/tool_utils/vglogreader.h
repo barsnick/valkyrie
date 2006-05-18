@@ -10,8 +10,6 @@
 #ifndef __VK_XMLPARSER_H
 #define __VK_XMLPARSER_H
 
-#include <vglog.h>
-
 #include <qdom.h>
 #include <qlistview.h>
 #include <qvaluelist.h>
@@ -31,36 +29,12 @@
 
 /**********************************************************************/
 /*
-  Simple subclass of QXmlSimpleReader,
-  to setup VgLogHandler for this reader
-*/
-class VgLogHandler;
-class VgLogReader : public QXmlSimpleReader
-{
-public:
-   VgLogReader( VgLog* vglog );
-   ~VgLogReader();
-
-   bool parse( QString filepath, bool incremental=false );
-   bool parseContinue();
-
-   VgLogHandler* handler() { return vghandler; }
-
-private:
-   VgLogHandler* vghandler;
-   QXmlInputSource* source;
-   QFile file;
-};
-
-
-
-/**********************************************************************/
-/*
   Simple xml handler class for valgrind logs:
   - creates node tree from input
   - hands off complete top-level branches to VgLog
   (e.g. preamble, error etc)
 */
+class VgLog;
 class VgLogHandler : public QXmlDefaultHandler
 {
 public:
@@ -94,6 +68,30 @@ private:
    QDomNode node;
 
    QString m_errorMsg;
+};
+
+
+
+/**********************************************************************/
+/*
+  Simple subclass of QXmlSimpleReader,
+  to setup VgLogHandler for this reader
+*/
+class VgLogReader : public QXmlSimpleReader
+{
+public:
+   VgLogReader( VgLog* vglog );
+   ~VgLogReader();
+
+   bool parse( QString filepath, bool incremental=false );
+   bool parseContinue();
+
+   VgLogHandler* handler() { return vghandler; }
+
+private:
+   VgLogHandler* vghandler;
+   QXmlInputSource* source;
+   QFile file;
 };
 
 #endif // #ifndef __VK_XMLPARSER_H

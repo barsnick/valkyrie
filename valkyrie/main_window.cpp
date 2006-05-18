@@ -419,8 +419,6 @@ void MainWindow::mkMenuBar()
    QMenuBar* mainMenu = new QMenuBar( this, "main menubar" );
    ContextHelp::add( mainMenu, urlValkyrie::menuBar );
 
-   mainMenu->setMargin( 0 );
-
    int index = -1;
 
    /* file menu --------------------------------------------------------- */

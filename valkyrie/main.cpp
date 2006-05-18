@@ -11,7 +11,8 @@
 #include <qdir.h>
 #include <signal.h>    /* signal name macros, and the signal() prototype */
 
-#include "vk_utils.h"              // vk_assert(), parseCmdArgs()
+#include "vk_utils.h"              // vk_assert(), vkPrint() etc
+#include "parse_cmd_args.h"        // parseCmdArgs()
 #include "vk_config.h"             // VkConfig
 #include "vk_messages.h"           // vkFatal()
 #include "main_window.h"           // MainWindow
@@ -19,11 +20,10 @@
 #include "valkyrie_object.h"
 #include "tool_object.h"           // VkRunState
 
-/* catch Ctrl-C, and die nicely */
+/* catch ctrl-c, and die nicely */
 void catch_ctrl_c(int /*sig_num*/)
 {
-    fprintf(stderr, "Ctrl-C caught: Cleaning up and exiting...\n\n");
-    fflush(stderr);
+    vkPrint("Interrupted: Cleaning up and exiting...");
 
     qApp->exit(1);
     qApp->wakeUpGuiThread();

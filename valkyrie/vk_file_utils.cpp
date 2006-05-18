@@ -10,6 +10,7 @@
 #include "vk_file_utils.h"
 #include "filedlg_icons.h"
 #include "vk_messages.h"
+#include "vk_utils.h"
 
 #include <qapplication.h>
 #include <qbitmap.h>
@@ -1564,7 +1565,7 @@ void FileDialog::setDir( const QString & pathstr )
       return;
 
 #if defined(Q_OS_UNIX)
-	printf("setDir() - defined(Q_OS_UNIX)\n");
+	vkPrint("setDir() - defined(Q_OS_UNIX)\n");
    if ( dr.length() && dr[0] == '~' ) {
       int i = 0;
       while( i < (int)dr.length() && dr[i] != '/' )
@@ -1582,7 +1583,7 @@ void FileDialog::setDir( const QString & pathstr )
             user = name;
          else
 #else
-				printf("setDir() - else\n");
+				vkPrint("setDir() - else\n");
          user = ::getlogin();
          if ( !user )
 #endif
@@ -3072,7 +3073,7 @@ void FileDialog::dataTransferProgress( int bytesDone, int bytesTotal,
       label = label.arg( u.path() ).arg( u.host() );
    }
 
-	printf("bytesDone = %d, bytesTotal = %d\n", bytesDone, bytesTotal );
+	vkPrint("bytesDone = %d, bytesTotal = %d\n", bytesDone, bytesTotal );
 }
 
 void FileDialog::insertEntry( const QValueList<QUrlInfo> &lst, 

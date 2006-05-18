@@ -306,7 +306,7 @@ bool ValgrindOptionsPage::applyOptions( int optId )
 
 void ValgrindOptionsPage::getDbBin()
 {
-   fprintf(stderr, "TODO: ValgrindOptionsPage::getDbBin()\n");
+   vkPrintErr("TODO: ValgrindOptionsPage::getDbBin()\n");
 }
 
 

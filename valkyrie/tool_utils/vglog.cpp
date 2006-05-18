@@ -8,14 +8,16 @@
  * See the file LICENSE.GPL for the full license details.
  */
 
-#include <vglog.h>
+#include "vglog.h"
 
 #include <qtextstream.h>
 #include <assert.h>
 
-/* redefined for vk_logmerge */
-#define vklmPrint(msg, args...) /* nothing */
-
+/* different implementations for valkyrie/vk_logmerge */
+extern void vklmPrint( int verb, const char* msg, ... )
+   __attribute__((format (printf, 2, 3)));
+extern void vklmPrintErr( const char* msg, ... )
+   __attribute__((format (printf, 1, 2)));
 
 
 /**********************************************************************/
@@ -87,12 +89,12 @@ VgError::ErrKindMap VgError::errKindMap = setupErrKindMap();
 */
 VgElement VgElement::getFirstElem( QString tagname ) const
 {
-   //  fprintf(stderr, "getFirstElem(): %s\n", tagname.latin1());
+   //  vklmPrintErr("getFirstElem(): %s", tagname.latin1());
 
    QDomElement e;
    for ( e = firstChild().toElement(); !e.isNull();
          e = e.nextSibling().toElement() ) {
-      //    fprintf(stderr, " - %s\n",e.tagName().latin1());
+      //    vklmPrintErr(" - %s",e.tagName().latin1());
       if (e.tagName() == tagname)
          return (VgElement&)e;
    }
@@ -483,7 +485,7 @@ VgError::ErrKind VgError::errKind()
    QString kind = getFirstElem("kind").text();
    ErrKindMap::Iterator it = errKindMap.find( kind );
    if ( it == errKindMap.end() ) {
-      fprintf(stderr, "Error: VgError::errKind: bad kind; %s\n", kind.latin1());
+      vklmPrintErr("VgError::errKind(): bad kind; %s", kind.latin1());
       return VgError::NUM_EKS;
    }
    return it.data(); 
@@ -536,13 +538,13 @@ bool VgLog::init( QDomProcessingInstruction xml_insn, QString doc_tag )
 bool VgLog::appendNode( QDomNode node )
 {
    if (log.isNull() || docroot().isNull()) {
-      fprintf(stderr, "VgLog::appendElement(): log not initialised\n");
+      vklmPrintErr("VgLog::appendNode(): log not initialised");
       return false;
    }
 
    QDomElement e = node.toElement();
    if (e.isNull()) {
-      fprintf(stderr, "VgLog::appendElement(): node not an element\n");
+      vklmPrintErr("VgLog::appendNode(): node not an element");
       return false;
    }
 
@@ -552,14 +554,14 @@ bool VgLog::appendNode( QDomNode node )
 
    VgElement::ElemType type = elem.elemType();
    if ( type == VgElement::NUM_ELEMS ) {
-      fprintf(stderr, "Error: unrecognised tagname: %s\n", elem.tagName().latin1());
+      vklmPrintErr("VgLog::appendNode(): unrecognised tagname: %s", elem.tagName().latin1());
       return false;
    }
 
    switch ( type ) {
    case VgElement::PROTOCOL:
       if ( elem.text() != "1" && elem.text() != "2" ) {
-         fprintf(stderr, "Error: bad xml protocol version\n");
+         vklmPrintErr("VgLog::appendNode(): bad xml protocol version");
          return false;
       }
       break;
@@ -576,7 +578,7 @@ bool VgLog::appendNode( QDomNode node )
    case VgElement::SUPPCOUNTS:
       break;
    default:
-      fprintf(stderr, "Error: not a top-level tagname: %s\n", elem.tagName().latin1());
+      vklmPrintErr("VgLog::appendNode(): not a top-level tagname: %s", elem.tagName().latin1());
       return false;
       break;
    }
@@ -908,7 +910,7 @@ bool VgLog::mergeErrors( VgErrorList sErrors,
          }
          vklmPrint( 3, " " );
       }
-      vklmPrint( 2, "\n" );
+      vklmPrint( 2, " ");
    }
 
    vklmPrint( 2, "--- append non-matches (n=%d) --- ", sErrors.count() );
@@ -982,7 +984,7 @@ bool VgLog::mergeLeakErrors( VgErrorList sLeakErrors )
          }
          vklmPrint( 3, " " );
       }
-      vklmPrint( 2, "\n" );
+      vklmPrint( 2, " ");
    }
 
    vklmPrint( 2, "--- append non-matches (n=%d) ---", sLeakErrors.count() );
@@ -1042,7 +1044,7 @@ bool VgLog::mergeSuppCounts( VgSuppCounts sSuppCnts )
          }
          vklmPrint( 2, " " );
       }
-      vklmPrint( 2, "\n" );
+      vklmPrint( 2, " " );
    }
 
    vklmPrint( 2, "--- append non-matches (n=%d) ---",
@@ -1094,7 +1096,7 @@ bool VgLog::merge( VgLog& slave )
 
    /* check the same tool was used */
    if (slave.tool().text() != tool().text()) {
-      vklmPrint( 0, "error: different tool used for this logfile" );
+      vklmPrintErr( "Different tool used for this logfile" );
       return false;
    }
 
@@ -1102,13 +1104,14 @@ bool VgLog::merge( VgLog& slave )
    QDomElement sExe = slave.args().getFirstElem( "argv" ).getFirstElem( "exe" );
    QDomElement mExe = args().getFirstElem( "argv" ).getFirstElem( "exe" );
    if (sExe.text() != mExe.text()) {
-      vklmPrint( 0, "error: different executable used for this logfile" );
+      vklmPrintErr( "Different executable used for this logfile" );
       return false;
    }
 
    /* merge errors */
-   vklmPrint( 2, "\n" );
-   vklmPrint( 2, "=== MERGE ERRORS ===\n" );
+   vklmPrint( 2, " " );
+   vklmPrint( 2, "=== MERGE ERRORS ===" );
+   vklmPrint( 2, " " );
    VgErrorList sErrors = slave.errors();
    if ( sErrors.count() != 0) {
       if ( ! mergeErrors( slave.errors(), slave.errorcounts() ) )
@@ -1118,8 +1121,9 @@ bool VgLog::merge( VgLog& slave )
    }
 
    /* merge suppcounts */
-   vklmPrint( 2, "\n\n" );
-   vklmPrint( 2, "=== MERGE SUPPCOUNTS ===\n" );
+   vklmPrint( 2, " " );
+   vklmPrint( 2, "=== MERGE SUPPCOUNTS ===" );
+   vklmPrint( 2, " " );
    VgSuppCounts sSuppCounts = slave.suppcounts();
    if ( sSuppCounts.childNodes().count() != 0) {
       if ( ! mergeSuppCounts( sSuppCounts ) )
@@ -1129,8 +1133,9 @@ bool VgLog::merge( VgLog& slave )
    }
 
    /* merge leaks */
-   vklmPrint( 2, "\n\n" );
-   vklmPrint( 2, "=== MERGE LEAKS ===\n" );
+   vklmPrint( 2, " " );
+   vklmPrint( 2, "=== MERGE LEAKS ===" );
+   vklmPrint( 2, " " );
    VgErrorList sLeakErrors = slave.leaks();
    if ( sLeakErrors.count() != 0) {
       if ( ! mergeLeakErrors( sLeakErrors ) )
@@ -1138,7 +1143,7 @@ bool VgLog::merge( VgLog& slave )
    } else {
       vklmPrint( 2, "no leak errors to merge" );
    }
-   vklmPrint( 2, "\n" );
+   vklmPrint( 2, " " );
 
    return true;
 }

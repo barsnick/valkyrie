@@ -70,10 +70,6 @@ private slots:
    void showAboutInfo( int id );
    void closeToolView();
 
-   //void dummy() { printf("dummy()\n"); }
-   //void dummy(int n) { printf("dummy( %d )\n", n); }
-   //void dummy( bool b ) { printf("dummy( %d )\n", b ); }
-
 private:
    void setToggles( int );
    void mkMenuBar();

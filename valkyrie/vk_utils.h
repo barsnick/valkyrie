@@ -13,16 +13,13 @@
 #include <stdio.h>          // printf and friends
 
 #include <qstring.h>
-#include <qpalette.h>
-
-#include "valkyrie_object.h"
 
 #define DEBUG_ON 1
 #define VK_CHECK_NULL
 
 #if defined(VK_CHECK_NULL)
 #  define VK_CHECK_PTR(p) do { \
-   if ((p)==0) fprintf(stderr, "Error: Out of memory: File %s, line %d", __FILE__, __LINE__); } while(0)
+   if ((p)==0) vkPrintErr("Out of memory: %s#%d", __FILE__, __LINE__); } while(0)
 #else
 #  define VK_CHECK_PTR(p)
 #endif
@@ -59,10 +56,10 @@ extern void vk_assert_never_reached_fail( const char* file,
 #if DEBUG_ON
 /* print debugging msg with file+line info to stderr ------------------- */
 #  define VK_DEBUG(msg, args...) {                             \
-   fprintf(stderr, "\nDEBUG: %s : %s #%d:\n\t",                \
-                   __FILE__, __PRETTY_FUNCTION__, __LINE__ );  \
-   fprintf(stderr, msg, ## args );                             \
-   fprintf(stderr, "\n" );                                     \
+   vkPrintErr("DEBUG: %s#%d:%s:",                              \
+               __FILE__, __LINE__, __PRETTY_FUNCTION__ );      \
+   vkPrintErr(msg, ## args );                                  \
+   vkPrintErr(" ");                                            \
 }
 #else
 #  define VK_DEBUG(msg, args...) /*NOTHING*/
@@ -77,15 +74,19 @@ extern void vkPrint( const char *, ... )
 extern void vkPrintErr( const char *, ... )
      __attribute__ ((format (printf, 1, 2)));
 
+
+/* kludge to keep vglog happy ------------------------------------------ */
+extern void vklmPrint( int, const char*, ... )
+   __attribute__((format (printf, 2, 3)));
+extern void vklmPrintErr( const char*, ... )
+   __attribute__((format (printf, 1, 2)));
+
+
 /* create a unique filename -------------------------------------------- */
 QString vk_mkstemp( QString filepath, QString ext=QString::null );
 
 /* 3.0.5 --> 0x030005 -------------------------------------------------- */
 int str2hex( QString ver_str );
-
-/* command-line args parsing
-   implemented in /src/options/parse_cmd_args.cpp ---------------------- */
-extern int parseCmdArgs( int argc, char** argv, Valkyrie* vk );
 
 /* escape html entities
  * current list: '<', '>', '&' ----------------------------------------- */
