@@ -18,6 +18,7 @@
 #include <qdir.h>
 #include <qfile.h>
 #include <qfiledialog.h>
+#include <qstylefactory.h>  /* vkStyle() */
 
 
 VkConfig::~VkConfig()
@@ -132,6 +133,64 @@ QString VkConfig::rcDir()     { return m_rcPath;    }
 QString VkConfig::dbaseDir()  { return m_dbasePath; }
 QString VkConfig::logsDir()   { return m_logsPath;  }
 QString VkConfig::suppDir()   { return m_suppPath;  }
+
+/* valkyrie's default palette */
+QStyle* VkConfig::vkStyle()
+{
+   return QStyleFactory::create( "windows" ); 
+}
+
+/* valkyrie's default palette */
+QPalette VkConfig::vkPalette()
+{
+   QColor bg = rdColor( "background" );
+   QColor base = rdColor( "base" );
+   QColor text = rdColor( "text" );
+   QColor dkgray = rdColor( "dkgray" );
+   QColor hilite = rdColor( "highlight" );
+   if ( !bg.isValid()   || !base.isValid()   ||
+        !text.isValid() || !dkgray.isValid() || !hilite.isValid() )
+      return qApp->palette();
+
+   /* 3 colour groups: active, inactive, disabled */
+   QPalette pal( bg, bg );
+   /* bg colour for text entry widgets */
+   pal.setColor( QPalette::Active,   QColorGroup::Base, base );
+   pal.setColor( QPalette::Inactive, QColorGroup::Base, base );
+   pal.setColor( QPalette::Disabled, QColorGroup::Base, base );
+   /* general bg colour */
+   pal.setColor( QPalette::Active,   QColorGroup::Background, bg );
+   pal.setColor( QPalette::Inactive, QColorGroup::Background, bg );
+   pal.setColor( QPalette::Disabled, QColorGroup::Background, bg );
+   /* same as bg */
+   pal.setColor( QPalette::Active,   QColorGroup::Button, bg );
+   pal.setColor( QPalette::Inactive, QColorGroup::Button, bg );
+   pal.setColor( QPalette::Disabled, QColorGroup::Button, bg );
+   /* general fg colour - same as Text */
+   pal.setColor( QPalette::Active,   QColorGroup::Foreground, text );
+   pal.setColor( QPalette::Inactive, QColorGroup::Foreground, text );
+   pal.setColor( QPalette::Disabled, QColorGroup::Foreground, dkgray );
+   /* same as fg */
+   pal.setColor( QPalette::Active,   QColorGroup::Text, text );
+   pal.setColor( QPalette::Inactive, QColorGroup::Text, text );
+   pal.setColor( QPalette::Disabled, QColorGroup::Text, dkgray );
+   /* same as text and fg */
+   pal.setColor( QPalette::Active,   QColorGroup::ButtonText, text );
+   pal.setColor( QPalette::Inactive, QColorGroup::ButtonText, text );
+   pal.setColor( QPalette::Disabled, QColorGroup::ButtonText, dkgray );
+   /* highlight */
+   pal.setColor( QPalette::Active,   QColorGroup::Highlight, hilite );
+   pal.setColor( QPalette::Inactive, QColorGroup::Highlight, hilite );
+   pal.setColor( QPalette::Disabled, QColorGroup::Highlight, hilite );
+   /* contrast with highlight */
+   pal.setColor( QPalette::Active,
+                 QColorGroup::HighlightedText, base );
+   pal.setColor( QPalette::Inactive,
+                 QColorGroup::HighlightedText, base );
+   pal.setColor( QPalette::Disabled,
+                 QColorGroup::HighlightedText, base );
+   return pal;
+}
 
 
 /* read functions ------------------------------------------------------ */

@@ -9,7 +9,6 @@
 
 #include <qapplication.h>
 #include <qdir.h>
-#include <qstylefactory.h>
 #include <signal.h>    /* signal name macros, and the signal() prototype */
 
 #include "vk_utils.h"              // vk_assert(), parseCmdArgs()
@@ -36,62 +35,6 @@ void catch_ctrl_c(int /*sig_num*/)
 VkConfig* vkConfig = 0;
 
 
-/* valkyrie's default palette ------------------------------------------ */
-QPalette vkPalette()
-{
-   QColor bg = vkConfig->rdColor( "background" );
-   if ( !bg.isValid() ) return qApp->palette();
-   QColor base = vkConfig->rdColor( "base" );
-   if ( !base.isValid() ) return qApp->palette();
-   QColor text = vkConfig->rdColor( "text" );
-   if ( !text.isValid() ) return qApp->palette();
-   QColor dkgray = vkConfig->rdColor( "dkgray" );
-   if ( !dkgray.isValid() ) return qApp->palette();
-   QColor hilite = vkConfig->rdColor( "highlight" );
-   if ( !hilite.isValid() )  return qApp->palette();
-
-   /* 3 colour groups: active, inactive, disabled */
-   QPalette pal( bg, bg );
-   /* bg colour for text entry widgets */
-   pal.setColor( QPalette::Active,   QColorGroup::Base, base );
-   pal.setColor( QPalette::Inactive, QColorGroup::Base, base );
-   pal.setColor( QPalette::Disabled, QColorGroup::Base, base );
-   /* general bg colour */
-   pal.setColor( QPalette::Active,   QColorGroup::Background, bg );
-   pal.setColor( QPalette::Inactive, QColorGroup::Background, bg );
-   pal.setColor( QPalette::Disabled, QColorGroup::Background, bg );
-   /* same as bg */
-   pal.setColor( QPalette::Active,   QColorGroup::Button, bg );
-   pal.setColor( QPalette::Inactive, QColorGroup::Button, bg );
-   pal.setColor( QPalette::Disabled, QColorGroup::Button, bg );
-   /* general fg colour - same as Text */
-   pal.setColor( QPalette::Active,   QColorGroup::Foreground, text );
-   pal.setColor( QPalette::Inactive, QColorGroup::Foreground, text );
-   pal.setColor( QPalette::Disabled, QColorGroup::Foreground, dkgray );
-   /* same as fg */
-   pal.setColor( QPalette::Active,   QColorGroup::Text, text );
-   pal.setColor( QPalette::Inactive, QColorGroup::Text, text );
-   pal.setColor( QPalette::Disabled, QColorGroup::Text, dkgray );
-   /* same as text and fg */
-   pal.setColor( QPalette::Active,   QColorGroup::ButtonText, text );
-   pal.setColor( QPalette::Inactive, QColorGroup::ButtonText, text );
-   pal.setColor( QPalette::Disabled, QColorGroup::ButtonText, dkgray );
-   /* highlight */
-   pal.setColor( QPalette::Active,   QColorGroup::Highlight, hilite );
-   pal.setColor( QPalette::Inactive, QColorGroup::Highlight, hilite );
-   pal.setColor( QPalette::Disabled, QColorGroup::Highlight, hilite );
-   /* contrast with highlight */
-   pal.setColor( QPalette::Active,
-                 QColorGroup::HighlightedText, base );
-   pal.setColor( QPalette::Inactive,
-                 QColorGroup::HighlightedText, base );
-   pal.setColor( QPalette::Disabled,
-                 QColorGroup::HighlightedText, base );
-
-   return pal;
-}
-
-
 
 
 int main ( int argc, char* argv[] )
@@ -109,9 +52,6 @@ int main ( int argc, char* argv[] )
 
    /* start turning the engine over... ---------------------------------- */
    app = new QApplication( argc, argv );
-
-   /* style ----------------------------------------------------------- */
-   app->setStyle( QStyleFactory::create( "windows" ) );
 
    /* vkConfig ---------------------------------------------------------- 
       Check the configuration dir+file ~/.PACKAGE/PACKAGErc is present,
@@ -144,6 +84,9 @@ int main ( int argc, char* argv[] )
       }
    }
 
+   /* style ----------------------------------------------------------- */
+   app->setStyle( vkConfig->vkStyle() );
+
    /* font: allow user to specify an app-wide font setting ------------ */
    if ( !vkConfig->rdBool( "use-system-font", "valkyrie" ) ) {
       QFont vkfnt = vkConfig->rdFont( "user-font", "valkyrie" );
@@ -153,7 +96,7 @@ int main ( int argc, char* argv[] )
    /* palette: allow user to choose between app. default palette
       and the default palette assigned by their system ---------------- */
    if ( vkConfig->rdBool( "use-vk-palette", "valkyrie" ) ) {
-      app->setPalette( vkPalette(), true );
+      app->setPalette( vkConfig->vkPalette(), true );
    }
     
    /* we have lift-off: start up the gui ------------------------------ */

@@ -141,7 +141,6 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
 }
 
 
-
 /* called when user clicks "Apply" / "Ok" / "Reset" buttons.  */
 bool ValkyrieOptionsPage::applyOptions( int optId )
 { 
@@ -174,6 +173,16 @@ bool ValkyrieOptionsPage::applyOptions( int optId )
       QFont fnt; 
       fnt.fromString( m_itemList[Valkyrie::FONT_USER]->currValue() );
       qApp->setFont( fnt, true );
+   } break;
+
+   case Valkyrie::PALETTE: {
+      bool useVkPalette = ((CkWidget*)m_itemList[Valkyrie::PALETTE])->isOn();
+      if ( useVkPalette ) {
+         QApplication::setPalette( vkConfig->vkPalette(), true );
+      } else {
+         /* setting qapp style resets palette: better way to do this? */
+         QApplication::setStyle( vkConfig->vkStyle() );
+      }
    } break;
 
    default:

@@ -14,7 +14,6 @@
 
 #include <qfiledialog.h>
 #include <qmenubar.h>
-#include <qmotifstyle.h>
 #include <qpaintdevicemetrics.h>
 #include <qpainter.h>
 #include <qprinter.h>
@@ -269,7 +268,6 @@ void HandBook::pathSelected( const QString &path )
 void HandBook::mkMenuToolBars()
 {
    mainMenu = new QMenuBar( this, "help_menubar" );
-   mainMenu->setStyle( new QMotifStyle() );
 
    /* file menu --------------------------------------------------------- */
    QPopupMenu* fileMenu = new QPopupMenu( this );
@@ -360,7 +358,7 @@ void HandBook::mkMenuToolBars()
 
 
    /* toolbar ----------------------------------------------------------- */
-   QToolBar* toolbar = new QToolBar( this );
+   QToolBar* toolbar = new QToolBar( this, "handbook_toolbar" );
    addToolBar( toolbar, "Toolbar");
 
    QToolButton* button;

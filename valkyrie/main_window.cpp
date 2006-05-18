@@ -10,7 +10,6 @@
 
 #include <qapplication.h>
 #include <qlayout.h>
-#include <qmotifstyle.h>
 #include <qmenubar.h>
 #include <qpopupmenu.h>
 #include <qstatusbar.h>
@@ -416,8 +415,9 @@ void MainWindow::mkMenuBar()
    /* show toolbutton text labels (or not) */
    m_showToolbarLabels = vkConfig->rdBool("show-butt-text","valkyrie");
 
+   /* --------------------------------------------------------------- */
+   /* Main Menu ----------------------------------------------------- */
    QMenuBar* mainMenu = new QMenuBar( this, "main menubar" );
-   mainMenu->setStyle( new QMotifStyle() );
    ContextHelp::add( mainMenu, urlValkyrie::menuBar );
 
    mainMenu->setMargin( 0 );
@@ -472,52 +472,10 @@ void MainWindow::mkMenuBar()
    mainMenu->setAccel( ALT+Key_P, id );
    ContextHelp::add( m_optsMenu, urlValkyrie::optionsMenu );
 
-   /* spacer between popup menus and tool-buttons ----------------------- */
-   index++;
-   QLabel* lbl = new QLabel( this, "lbl_spacer" );
-   lbl->setText( "     " );
-   mainMenu->insertItem( lbl, -1, index );
 
-   /* run button -------------------------------------------------------- */
-   index++;
-   m_runButton = new QToolButton( this, "tb_rerun" );
-   m_runButton->setIconSet( QPixmap(run_xpm) );
-   m_runButton->setTextLabel( "&Run Valgrind" );
-#if (QT_VERSION-0 >= 0x030200)
-   m_runButton->setTextPosition( QToolButton::BesideIcon );
-#else // QT_VERSION < 3.2
-   m_runButton->setTextPosition( QToolButton::Right );
-#endif
-   m_runButton->setUsesTextLabel( m_showToolbarLabels );
-   m_runButton->setAutoRaise( true );
-   m_runButton->setAccel( CTRL+Key_R );
-   connect( m_runButton, SIGNAL( clicked() ), 
-            this,          SLOT( runValgrind() ) );
-   QToolTip::add( m_runButton, "Run valgrind with specified executable" );
-   mainMenu->insertItem( m_runButton, -1, index );
-   ContextHelp::add( m_runButton, urlValkyrie::runButton );
+   /* Note: 'windows' style horizontal menu's seem to right-justify anything
+      after a non-QPopupMenu */
 
-   /* stop button ------------------------------------------------------- */
-   index++;
-   m_stopButton = new QToolButton( this, "tb_stop" );
-   m_stopButton->setIconSet( QPixmap(stop_xpm) );
-   m_stopButton->setTextLabel( "S&top" );
-#if (QT_VERSION-0 >= 0x030200)
-   m_stopButton->setTextPosition( QToolButton::BesideIcon );
-#else // QT_VERSION < 3.2
-   m_stopButton->setTextPosition( QToolButton::Right );
-#endif
-   m_stopButton->setUsesTextLabel( m_showToolbarLabels );
-   m_stopButton->setAutoRaise( true );
-   m_stopButton->setAccel( CTRL+Key_T );
-   connect( m_stopButton, SIGNAL( clicked() ),
-            this,           SLOT( stop() ) );
-   QToolTip::add( m_stopButton, "Terminate program execution immediately" );
-   mainMenu->insertItem( m_stopButton, -1, index );
-   ContextHelp::add( m_stopButton, urlValkyrie::stopButton );
-
-   index++;
-   mainMenu->insertSeparator( index );
 
    /* help button ------------------------------------------------------- */
    index++;
@@ -556,6 +514,53 @@ void MainWindow::mkMenuBar()
    QToolTip::add( ctxtButton, "This is a <b>Context Help</b> button. "
                   "Clicking on a widget will open the relevant manual help page");
    mainMenu->insertItem( ctxtButton, -1, index );
+
+
+   /* --------------------------------------------------------------- */
+   /* Valgrind Control Toolbar -------------------------------------- */
+   QToolBar* vgCtlToolBar = new QToolBar( this, "vg_ctl_toolbar" );
+   vgCtlToolBar->setLabel( "Valgrind Control Toolbar" );
+
+   /* run button ---------------------------------------------------- */
+   index++;
+   m_runButton = new QToolButton( vgCtlToolBar, "tb_rerun" );
+   m_runButton->setIconSet( QPixmap(run_xpm) );
+   m_runButton->setTextLabel( "&Run Valgrind" );
+#if (QT_VERSION-0 >= 0x030200)
+   m_runButton->setTextPosition( QToolButton::BesideIcon );
+#else // QT_VERSION < 3.2
+   m_runButton->setTextPosition( QToolButton::Right );
+#endif
+   m_runButton->setUsesTextLabel( m_showToolbarLabels );
+   m_runButton->setAutoRaise( true );
+   m_runButton->setAccel( CTRL+Key_R );
+   connect( m_runButton, SIGNAL( clicked() ), 
+            this,          SLOT( runValgrind() ) );
+   QToolTip::add( m_runButton, "Run valgrind with specified executable" );
+   ContextHelp::add( m_runButton, urlValkyrie::runButton );
+
+   /* stop button --------------------------------------------------- */
+   index++;
+   m_stopButton = new QToolButton( vgCtlToolBar, "tb_stop" );
+   m_stopButton->setIconSet( QPixmap(stop_xpm) );
+   m_stopButton->setTextLabel( "S&top" );
+#if (QT_VERSION-0 >= 0x030200)
+   m_stopButton->setTextPosition( QToolButton::BesideIcon );
+#else // QT_VERSION < 3.2
+   m_stopButton->setTextPosition( QToolButton::Right );
+#endif
+   m_stopButton->setUsesTextLabel( m_showToolbarLabels );
+   m_stopButton->setAutoRaise( true );
+   m_stopButton->setAccel( CTRL+Key_T );
+   connect( m_stopButton, SIGNAL( clicked() ),
+            this,           SLOT( stop() ) );
+   QToolTip::add( m_stopButton, "Terminate program execution immediately" );
+   ContextHelp::add( m_stopButton, urlValkyrie::stopButton );
+
+
+   /* strech toolbar to right --------------------------------------- */
+   QLabel* lbl_extend = new QLabel( vgCtlToolBar, "lbl_extend" );
+   vgCtlToolBar->setStretchableWidget( lbl_extend );
 }
 
 

@@ -92,6 +92,8 @@ public:
    QString dbaseDir();
    QString suppDir();
    QChar sepChar() { return m_sep; }
+   QStyle* vkStyle();
+   QPalette vkPalette();
 
    /* util functions */
    bool strToBool( QString str );

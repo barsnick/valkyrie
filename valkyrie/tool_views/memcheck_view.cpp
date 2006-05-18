@@ -23,7 +23,6 @@
 #include <qfiledialog.h>
 #include <qheader.h>
 #include <qtoolbar.h>
-#include <qmotifstyle.h>
 #include <qtoolbutton.h>
 #include <qtooltip.h>
 #include <qpopupmenu.h>
@@ -186,10 +185,9 @@ void MemcheckView::openMergeFile()
 
 void MemcheckView::mkToolBar()
 {
-   mcToolBar = new QToolBar( "Memcheck ToolBar", this,
-                             DockTop, false, "mc_toolbar" );
+   mcToolBar = new QToolBar( this, "mc_toolbar" );
+   mcToolBar->setLabel( "Memcheck ToolBar" );
 
-   mcToolBar->setStyle( new QMotifStyle() );
    bool show_text = vkConfig->rdBool( "show-butt-text", "valkyrie" );
 
    /* open-all items button --------------------------------------------- */
