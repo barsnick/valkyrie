@@ -404,7 +404,6 @@ void MainWindow::toggleToolbarLabels()
    m_showToolbarLabels = !m_showToolbarLabels;
    m_runButton->setUsesTextLabel( m_showToolbarLabels );
    m_stopButton->setUsesTextLabel( m_showToolbarLabels );
-   m_helpButton->setUsesTextLabel( m_showToolbarLabels );
    /* tell the toolviews to follow suit */
    emit toolbarLabelsToggled( m_showToolbarLabels );
 }
@@ -436,8 +435,7 @@ void MainWindow::mkMenuBar()
                            CTRL+Key_W, FILE_CLOSE );
    m_fileMenu->insertItem( "E&xit", qApp, 
                            SLOT(closeAllWindows()), CTRL+Key_X );
-   int id = mainMenu->insertItem( "&File", m_fileMenu, -1, index );
-   mainMenu->setAccel( ALT+Key_F, id );
+   mainMenu->insertItem( "&File", m_fileMenu, -1, index );
    ContextHelp::add( m_fileMenu, urlValkyrie::fileMenu );
 
    /* toolview menu ----------------------------------------------------- */
@@ -450,8 +448,7 @@ void MainWindow::mkMenuBar()
                                this, SLOT( showToolView(int) ),
                                tool->accelKey(), tool->objId() );
    }
-   id = mainMenu->insertItem( "&Tools", m_toolsMenu, -1, index );
-   mainMenu->setAccel( ALT+Key_T, id );
+   mainMenu->insertItem( "&Tools", m_toolsMenu, -1, index );
    ContextHelp::add( m_toolsMenu, urlValkyrie::toolMenu );
 
    /* options / preferences et al --------------------------------------- */
@@ -468,45 +465,31 @@ void MainWindow::mkMenuBar()
                            "Save as &Default", this, SLOT(saveOptions()), 
                            CTRL+Key_D, OPTS_SAVE );
    m_optsMenu->setItemEnabled( OPTS_SAVE, false );  /* starts up disabled */
-   id = mainMenu->insertItem( "O&ptions", m_optsMenu, -1, index );
-   mainMenu->setAccel( ALT+Key_P, id );
+   mainMenu->insertItem( "O&ptions", m_optsMenu, -1, index );
    ContextHelp::add( m_optsMenu, urlValkyrie::optionsMenu );
 
 
+   /* help menu ----------------------------------------------------- */
+   index++;
+   m_helpMenu = new QPopupMenu( this, "help_menu" );
+   m_helpMenu->insertItem( "Handbook", m_handBook, SLOT(showYourself()), Key_F1 );
+   m_helpMenu->insertSeparator();
+   m_helpMenu->insertItem( "About Valkyrie", this, 
+                           SLOT(showAboutInfo(int)), 0, HelpAbout::ABOUT_VK );
+   m_helpMenu->insertItem( "About Qt", this, 
+                           SLOT(showAboutInfo(int)), 0, HelpAbout::ABOUT_QT );
+   m_helpMenu->insertSeparator();
+   m_helpMenu->insertItem( "License", this, 
+                           SLOT(showAboutInfo(int)), 0, HelpAbout::LICENSE );
+   m_helpMenu->insertItem( "Support", this, 
+                           SLOT(showAboutInfo(int)), 0, HelpAbout::SUPPORT );
+   QToolTip::add( m_helpMenu, "Show help manual / information" );
+   mainMenu->insertItem( "&Help", m_helpMenu, -1, index );
+   QToolTip::add( m_helpMenu, "Show help manual / information" );
+   ContextHelp::add( m_helpMenu, urlValkyrie::helpMenu );
+
    /* Note: 'windows' style horizontal menu's seem to right-justify anything
       after a non-QPopupMenu */
-
-
-   /* help button ------------------------------------------------------- */
-   index++;
-   m_helpButton = new QToolButton( this );
-   m_helpButton->setIconSet( QPixmap(help_xpm) );
-   m_helpButton->setTextLabel( "&Help" );
-#if (QT_VERSION-0 >= 0x030200)
-   m_helpButton->setTextPosition( QToolButton::BesideIcon );
-#else // QT_VERSION < 3.2
-   m_helpButton->setTextPosition( QToolButton::Right );
-#endif
-   m_helpButton->setUsesTextLabel( m_showToolbarLabels );
-   m_helpButton->setAutoRaise( true );
-   m_helpButton->setAccel( ALT+Key_H );
-   QPopupMenu* helpMenu = new QPopupMenu( m_helpButton );
-   helpMenu->insertItem( "Handbook", m_handBook, SLOT(showYourself()), Key_F1 );
-   helpMenu->insertSeparator();
-   helpMenu->insertItem( "About Valkyrie", this, 
-                         SLOT(showAboutInfo(int)), 0, HelpAbout::ABOUT_VK );
-   helpMenu->insertItem( "About Qt", this, 
-                         SLOT(showAboutInfo(int)), 0, HelpAbout::ABOUT_QT );
-   helpMenu->insertSeparator();
-   helpMenu->insertItem( "License", this, 
-                         SLOT(showAboutInfo(int)), 0, HelpAbout::LICENSE );
-   helpMenu->insertItem( "Support", this, 
-                         SLOT(showAboutInfo(int)), 0, HelpAbout::SUPPORT );
-   m_helpButton->setPopup( helpMenu );
-   m_helpButton->setPopupDelay( 1 );
-   QToolTip::add( m_helpButton, "Show help manual / information" );
-   mainMenu->insertItem( m_helpButton, -1, index );
-   ContextHelp::add( m_helpButton, urlValkyrie::helpMenu );
 
    /* application-wide context help button ------------------------------ */
    index++;

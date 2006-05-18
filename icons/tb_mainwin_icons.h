@@ -488,6 +488,7 @@ static const char* run_xpm[] = {
 "                                  "};
 
 
+#if 0
 /* XPM */
 static const char* help_xpm[] = {
 "22 22 69 1",
@@ -582,6 +583,7 @@ static const char* help_xpm[] = {
 "        @ +D8+@       ",
 "           @+@        ",
 "                      "};
+#endif
 
 /* XPM */
 static const char* filesave_xpm[] = {

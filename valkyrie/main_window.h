@@ -100,11 +100,11 @@ private:
    QPopupMenu*   m_fileMenu;
    QPopupMenu*   m_toolsMenu;
    QPopupMenu*   m_optsMenu;
+   QPopupMenu*   m_helpMenu;
    QButtonGroup* m_viewButtGroup;
 
    QToolButton* m_runButton;
    QToolButton* m_stopButton;
-   QToolButton* m_helpButton;
 };
 
 
