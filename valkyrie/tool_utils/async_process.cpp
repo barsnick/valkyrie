@@ -77,7 +77,7 @@ bool AsyncProcess::spawn( QStringList arglist, AsyncFlags flags )
             child.  the purpose of the intermediate child is to exit, so we
             can waitpid() it immediately.  then the grandchild will not
             become a zombie.  */
-         int grandchild_pid = grandchild_pid = fork();
+         int grandchild_pid = fork();
          if ( grandchild_pid < 0 ) {
             /* report -1 as child PID */
             aProc->writeAll( child_pid_report_pipe[1], 
