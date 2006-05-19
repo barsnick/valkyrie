@@ -541,7 +541,7 @@ void Memcheck::processDone()
 */
 void Memcheck::readVgLog()
 {
-      vkPrint("Memcheck::readVgLog()");
+   // vkPrint("Memcheck::readVgLog()");
    vk_assert( view() != 0 );
 
    if (m_vgreader != 0) {
