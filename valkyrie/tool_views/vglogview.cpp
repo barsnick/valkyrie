@@ -13,6 +13,7 @@
 #include "vglogview_icons.h"
 
 #include <qfileinfo.h>
+#include <qstringlist.h>
 
 
 /**********************************************************************/

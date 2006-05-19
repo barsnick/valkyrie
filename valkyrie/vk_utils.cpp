@@ -32,10 +32,11 @@
 /* prints various info msgs to stdout --------------------------------- */
 void vkPrint( const char* msg, ... )
 {
+   const char* vkname = vkConfig ? vkConfig->vkname() : "";
    va_list ap;
    va_start( ap, msg );
    va_end( ap );
-   fprintf( stdout, "===%s:%d=== ", vkConfig->vkname(), (int)getpid() ); 
+   fprintf( stdout, "===%s:%d=== ", vkname, (int)getpid() ); 
    vfprintf( stdout, msg, ap );
    va_end( ap );
    fprintf( stdout, "\n" );
@@ -46,10 +47,11 @@ void vkPrint( const char* msg, ... )
 /* prints error msg -------------------------------------------------- */
 void vkPrintErr( const char* msg, ... )
 {
+   const char* vkname = vkConfig ? vkConfig->vkname() : "";
    va_list ap;
    va_start( ap, msg );
    va_end( ap );
-   fprintf( stderr, "===%s:%d=== ", vkConfig->vkname(), (int)getpid() ); 
+   fprintf( stderr, "===%s:%d=== ", vkname, (int)getpid() ); 
    vfprintf( stderr, msg, ap );
    va_end( ap );
    fprintf( stderr, "\n" );
@@ -87,10 +89,14 @@ __attribute__ ((noreturn))
 {
    vkPrintErr("Assertion 'never reached' failed,");
    vkPrintErr("   at %s#%u:%s", file, line, fn );
+   vkPrintErr("%s version: %s", vkConfig->vkName(), PACKAGE_VERSION);
+   vkPrintErr("Built with QT version:   %s", QT_VERSION_STR);
+   vkPrintErr("Running with QT version: %s", qVersion());
    vkPrintErr("Hopefully, you should never see this message.");
    vkPrintErr("If you are, then Something Really Bad just happened.");
    vkPrintErr("Please report this bug to: %s", PACKAGE_BUGREPORT );
-   vkPrintErr("In the bug report, please send the the above text.");
+   vkPrintErr("In the bug report, please send the the above text,");
+   vkPrintErr("along with the output of `uname -a`.");
    vkPrintErr("Thanks.\n");
    exit(1);
 }
