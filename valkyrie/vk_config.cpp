@@ -553,6 +553,9 @@ bool VkConfig::updateCfgFile( EntryMap &newMap, EntryMap &fileMap,
    /* but keep the new version! */
    newMap[ EntryKey( "valkyrie", "version" ) ].mValue = vkVersion();
    
+   /* ... and keep the new path to vk_logmerge */
+   newMap[ EntryKey( "valkyrie", "merge-exec" ) ].mValue = BIN_LOGMERGE;
+
    /* write out new config */
    if ( !writeConfig( newMap, true ) ) {
       VK_DEBUG( "failed to write config file" );
