@@ -473,9 +473,13 @@ bool Memcheck::runProcess( QStringList flags )
          delete m_vgproc;
          m_vgproc = 0;
       }
-      VK_DEBUG("m_vgproc failed to start\n");
-      vkError( this->view(), "Error", "<p>VG Process failed to start: <br>%s</p>",
-               flags.join(" ").latin1() );
+      VK_DEBUG("process failed to start\n");
+      QString path_errmsg = (runState() == VkRunState::VALGRIND)
+         ? "Please verify the path to valgrind - this can be updated via Options::Valkyrie."
+         : ""; /* TODO: same for vk_logmerge... and provide option widgets to update path... */
+      vkError( this->view(), "Error", "<p>VG Process failed to start: <br>%s</br>%s</p>",
+               flags.join(" ").latin1(),
+               path_errmsg.latin1() );
       return false;
    }
 

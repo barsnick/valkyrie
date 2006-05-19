@@ -565,7 +565,6 @@ void MainWindow::mkStatusBar()
    m_flagsLabel->setPaletteBackgroundColor( Qt::white );
    m_flagsLabel->setAlignment( AlignLeft );
    m_flagsLabel->setTextFormat( Qt::PlainText );
-   m_flagsLabel->setText( vkConfig->rdEntry( "vg-exec", "valkyrie" ) );
    ContextHelp::add( m_flagsLabel, urlValkyrie::flagsWidget );
    m_flagsLabel->hide();
 

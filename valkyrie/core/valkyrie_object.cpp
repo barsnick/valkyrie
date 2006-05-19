@@ -269,9 +269,13 @@ void Valkyrie::updateVgFlags( int tId )
 {
    ToolObject* tool = valgrind()->toolObj( tId );
 
+   QString vg_exec = vkConfig->rdEntry( "vg-exec","valkyrie");
+   if (vg_exec.isEmpty())
+      vg_exec = "valgrind";    /* hope it's in $PATH */
+
    /* modifiedVgFlags() functions return non-default flags */
    m_flags.clear();
-   m_flags << vkConfig->rdEntry( "vg-exec","valkyrie"); // path/to/valgrind
+   m_flags << vg_exec;                                  // path/to/valgrind
    m_flags << "--tool=" + tool->name();                 // tool
    m_flags += valgrind()->modifiedVgFlags( tool );      // valgrind opts
    m_flags += tool->modifiedVgFlags();                  // tool opts
