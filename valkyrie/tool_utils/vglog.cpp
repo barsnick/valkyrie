@@ -295,21 +295,21 @@ bool VgFrame::operator!=( const VgFrame& frame2 ) const
 
 /* ref: coregrind/m_debuginfo/symtab.c :: VG_(describe_IP) */
 /* CAB: why don't print dirname for non-xml ? */
-QString VgFrame::describe_IP()
+QString VgFrame::describe_IP( bool withPath/*=false*/ )
 {
    QDomNodeList frame_details = childNodes();
    assert( frame_details.count() >= 1 );  /* only ip guaranteed */
    QDomElement ip     = frame_details.item( 0 ).toElement();
    QDomElement obj    = frame_details.item( 1 ).toElement();
    QDomElement fn     = frame_details.item( 2 ).toElement();
-   //  QDomElement dir    = frame_details.item( 3 ).toElement();
+   QDomElement dir    = frame_details.item( 3 ).toElement();
    QDomElement srcloc = frame_details.item( 4 ).toElement();
    QDomElement line   = frame_details.item( 5 ).toElement();
 
    bool  know_fnname  = !fn.isNull();
    bool  know_objname = !obj.isNull();
    bool  know_srcloc  = !srcloc.isNull() && !line.isNull();
-   //  bool  know_dirinfo = !dir.isNull();
+   bool  know_dirinfo = !dir.isNull();
 
    QString str = ip.text() + ": ";
    if (know_fnname) {
@@ -322,7 +322,11 @@ QString VgFrame::describe_IP()
       str += "???";
    }
    if (know_srcloc) {
-      str += " (" + srcloc.text() + ":" + line.text() + ")";
+      QString path;
+      if ( withPath && know_dirinfo )
+         path = dir.text() + "/";
+      path += srcloc.text();
+      str += " (" + path + ":" + line.text() + ")";
    }
    return str;
 }

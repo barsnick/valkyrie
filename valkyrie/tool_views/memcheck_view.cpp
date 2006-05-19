@@ -86,8 +86,8 @@ MemcheckView::MemcheckView( QWidget* parent, const char* name )
 
    savelogButton->setEnabled( false );
    openOneButton->setEnabled( false );
-   openAllButton->setEnabled( false );
-   srcPathButton->setEnabled( false );
+   openAllButton->setEnabled( true );  /* TODO: enable only if lview populated */
+   srcPathButton->setEnabled( true );  /* TODO: enable only if lview populated */
 
    /* enable | disable show*Item buttons */
    connect( lView, SIGNAL(selectionChanged()),
@@ -199,7 +199,7 @@ void MemcheckView::mkToolBar()
    connect( openAllButton, SIGNAL( toggled(bool) ), 
             this,          SLOT( openAllItems(bool) ) );
    QToolTip::add( openAllButton, 
-                  "Open / Close all errors (and their call chains)" );
+                  "Open / Close all errors" );
    ContextHelp::add( openAllButton, urlValkyrie::openAllButton );
 
    /* open-one item button ---------------------------------------------- */
@@ -219,7 +219,7 @@ void MemcheckView::mkToolBar()
    connect( srcPathButton, SIGNAL( clicked() ), 
             this,          SLOT( showSrcPath() ) );
    QToolTip::add( srcPathButton, 
-                  "Show file paths (for current frame)" );
+                  "Show source paths" );
    ContextHelp::add( srcPathButton, urlValkyrie::srcPathButton );
 
    /* fake motif-style separator ---------------------------------------- */
@@ -334,23 +334,26 @@ void MemcheckView::launchEditor( QListViewItem*, const QPoint&, int )
 
 /* opens all error items plus their children. 
    ignores the status, preamble, et al. items. */
-void MemcheckView::openAllItems( bool )//state )
-{ 
-#if 0
-   XmlOutputItem* op_item = (XmlOutputItem*)lView->firstChild()->firstChild();
-   if ( !op_item ) return;
+void MemcheckView::openAllItems( bool open )
+{
+   if (!lView->firstChild()) /* listview populated at all? */
+      return;
+
+   VgOutputItem* op_item = (VgOutputItem*)lView->firstChild()->firstChild();
+   vk_assert(op_item);
 
    /* move down till we get to the first error */
-   while ( op_item && op_item->itemType() != XmlOutput::ERROR ) {
+   while ( op_item && op_item->elemType() != VgElement::ERROR ) {
       op_item = op_item->nextSibling();
    }
 
    QListViewItemIterator it( op_item );
    while ( it.current() ) {
-      it.current()->setOpen( state );
+      if ( ((VgOutputItem*)it.current())->elemType() == VgElement::SUPPCOUNTS )
+         break;                        /* stop when we hit suppressions */
+      it.current()->setOpen( open );
       ++it;
    }
-#endif
 }
 
 
@@ -358,7 +361,6 @@ void MemcheckView::openAllItems( bool )//state )
    also set open.  when closing, only the selected item is closed */
 void MemcheckView::openOneItem()
 {
-#if 0
    QListViewItem* lv_item = lView->currentItem();
    if ( !lv_item ) return;
 
@@ -379,76 +381,49 @@ void MemcheckView::openOneItem()
          }
       }
    }
-#endif
 }
                    
 
-/* shows the file paths in the currently selected error */
+/* shows the file paths for all frames under current item */
 void MemcheckView::showSrcPath()
 {
-#if 0
    QListViewItem* lv_item = lView->currentItem();
    if ( !lv_item ) return;
-  
-   XmlOutputItem* op_item = (XmlOutputItem*)lv_item;
-   if ( op_item->itemType() == XmlOutput::ERROR )
-      ;
-   else if ( op_item->itemType() == XmlOutput::STACK )
-      op_item = op_item->parent();
-   else if ( op_item->itemType() == XmlOutput::FRAME )
-      op_item = op_item->parent()->parent();
-   else if ( op_item->itemType() == XmlOutput::AUX )
-      op_item = op_item->parent();
-   else if ( op_item->itemType() == XmlOutput::SRC )
-      op_item = op_item->parent()->parent()->parent();
-   vk_assert( op_item != 0 );
-   vk_assert( op_item->itemType() == XmlOutput::ERROR ||
-              op_item->itemType() == XmlOutput::LEAK_ERROR );
 
-   /* iterate over all the frames in this error,
-      stopping when we get to the error below */
-   QListViewItem* sib_error = op_item->nextSibling();
-   XmlOutputItem* next_item;
-   QListViewItemIterator it( op_item );
-   while ( it.current() ) {
-      next_item = (XmlOutputItem*)it.current();
-      if ( next_item->itemType() == XmlOutput::FRAME ) {
-         Frame* frame = (Frame*)next_item->xmlOutput;
-         if ( !frame->pathPrinted ) {
-            frame->printPath();
-            next_item->setText( frame->displayString() );
-         }
-      }
-      ++it;
-      if ( it.current() == sib_error ) {
+   VgOutputItem* curr_item = (VgOutputItem*)lv_item;
+
+   /* iterate over items up to nextSibling */
+   QListViewItem* sibling = curr_item->nextSibling();
+   VgOutputItem* item;
+   QListViewItemIterator it( curr_item );
+   for(; (item = (VgOutputItem*)it.current()); ++it ) {
+      if (item == sibling)
          break;
+      if ( item->elemType() == VgElement::FRAME ) {
+         /* show path in this frame */
+         FrameItem* frame = (FrameItem*)item;
+         frame->setText( ((VgFrame*)&frame->elem)->describe_IP(true) );
       }
    }
-#endif
 }
 
 
 void MemcheckView::itemSelected()
 {
-#if 0
    QListViewItem* lv_item = lView->currentItem();
-   if ( !lv_item ) 
+   if ( !lv_item ) {
       openOneButton->setEnabled( false );
-   else {
-      XmlOutputItem* op_item = (XmlOutputItem*)lv_item;
-      bool state = ( op_item->itemType() == XmlOutput::ERROR      || 
-                     op_item->itemType() == XmlOutput::LEAK_ERROR ||
-                     op_item->itemType() == XmlOutput::STACK      ||
-                     op_item->itemType() == XmlOutput::FRAME );
-      openOneButton->setEnabled( state );
-
-      state = ( state && op_item->isReadable || op_item->isWriteable );
-      srcPathButton->setEnabled( state );
-
-      state = !( op_item->itemType() == XmlOutput::PREAMBLE ||
-                 op_item->itemType() == XmlOutput::STATUS   ||
-                 op_item->itemType() == XmlOutput::INFO );
-      openAllButton->setEnabled( state );
+   } else {
+      /* if item openable and within an error: enable openOneButton */
+      bool isOpenable = (lv_item->firstChild() != 0);
+      bool withinError = false;
+      VgOutputItem* curr_item = (VgOutputItem*)lv_item;
+      for (; curr_item; curr_item = curr_item->parent() ) {
+         if ( curr_item->elemType() == VgElement::ERROR ) {
+            withinError = true;
+            break;
+         }
+      }
+      openOneButton->setEnabled( isOpenable && withinError );
    }
-#endif
 }

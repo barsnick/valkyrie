@@ -297,7 +297,7 @@ void TopStatusItem::updateLeakCounts(  VgError err )
    - args
    - details: as text lines
 */
-InfoItem::InfoItem( VgOutputItem* parent, VgElement root )
+InfoItem::InfoItem( VgOutputItem* parent, VgElement root /*element:ROOT*/ )
    : VgOutputItem( parent, root )
 {
    QString tool = elem.getFirstElem("tool").text();
@@ -513,7 +513,7 @@ void ErrorItem::setOpen( bool open )
       }
 
       /* J sez there may be more than two stacks in the future .. */
-      assert( aux_stack.nextSibling().isNull() );
+      vk_assert( aux_stack.nextSibling().isNull() );
    }
    VgOutputItem::setOpen( open );
 }

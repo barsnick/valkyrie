@@ -73,7 +73,7 @@ public:
 class VgFrame : public VgElement
 {
 public:
-   QString describe_IP();
+   QString describe_IP( bool withPath=false );
    bool operator==( const VgFrame& frame ) const;
    bool operator!=( const VgFrame& frame ) const;
 };

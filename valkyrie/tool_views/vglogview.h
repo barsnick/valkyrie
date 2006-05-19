@@ -45,6 +45,8 @@ public:
                    int col, int width, int align );
    void setOpen( bool open );
 
+   VgElement::ElemType elemType() { return elem.elemType(); }
+
 public:
    bool isReadable, isWriteable;
    VgElement elem;               /* associated element */
