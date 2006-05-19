@@ -16,6 +16,7 @@
 #include <qobject.h>
 #include <qcstring.h>
 #include <qstring.h>
+#include <qfont.h>
 
 #include "tool_object.h"
 #include "valkyrie_object.h"
@@ -94,6 +95,7 @@ public:
    QChar sepChar() { return m_sep; }
    QStyle* vkStyle();
    QPalette vkPalette();
+   QFont defaultAppFont();
 
    /* util functions */
    bool strToBool( QString str );
@@ -145,6 +147,8 @@ private:
    QCString m_vk_author;
    QCString m_vk_email;
    QCString m_vg_copyright;
+
+   QFont m_defaultAppFont;
 
    QString m_vkdocPath;        /* path to valkyrie docs dir */
    QString m_vgdocPath;        /* path to valgrind docs dir */

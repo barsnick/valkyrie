@@ -170,9 +170,16 @@ bool ValkyrieOptionsPage::applyOptions( int optId )
 
    case Valkyrie::FONT_USER:
    case Valkyrie::FONT_SYSTEM: {
-      QFont fnt; 
-      fnt.fromString( m_itemList[Valkyrie::FONT_USER]->currValue() );
-      qApp->setFont( fnt, true );
+      /* one or both of these could end up here on 'Apply'
+         - so making sure not to apply changes more than once */
+      bool useSysFont = ((CkWidget*)m_itemList[Valkyrie::FONT_SYSTEM])->isOn();
+      QFont fnt;
+      if (useSysFont)
+         fnt = vkConfig->defaultAppFont();
+      else
+         fnt.fromString( m_itemList[Valkyrie::FONT_USER]->currValue() );
+      if (qApp->font() != fnt)
+         qApp->setFont( fnt, true );
    } break;
 
    case Valkyrie::PALETTE: {

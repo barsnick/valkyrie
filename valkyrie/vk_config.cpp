@@ -95,6 +95,8 @@ VkConfig::VkConfig() : QObject( 0, "vkConfig" )
    m_logsPath  = m_rcPath + VK_LOGS_DIR;
    m_suppPath  = m_rcPath + VK_SUPPS_DIR;
    m_rcPath    += "/";
+
+   m_defaultAppFont = QApplication::font();
 }
 
 
@@ -190,6 +192,12 @@ QPalette VkConfig::vkPalette()
    pal.setColor( QPalette::Disabled,
                  QColorGroup::HighlightedText, base );
    return pal;
+}
+
+
+QFont VkConfig::defaultAppFont()
+{
+   return m_defaultAppFont;
 }
 
 
