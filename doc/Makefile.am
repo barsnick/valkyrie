@@ -17,7 +17,6 @@ dist_doc_DATA = \
 	mainwindow.status_msg.html \
 	mainwindow.tool_bar.html \
 	mainwindow.tool_view.html \
-	Makefile.am \
 	manual.html \
 	options_dialog.html \
 	options_valgrind.html \

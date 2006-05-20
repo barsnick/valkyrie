@@ -52,7 +52,7 @@ bool TextEdit::load()
       setText( ts.read() );
       break;
    case HelpAbout::ABOUT_QT:
-      setText( ts.read().arg(qVersion()) );
+      setText( ts.read().arg(QT_VERSION_STR).arg(qVersion()) );
       break;
    case HelpAbout::LICENSE:
       setText( ts.read() );
@@ -147,5 +147,5 @@ void HelpAbout::showTab( QWidget* tab )
    case SUPPORT:  support->load(); break;
    }
 
-   setCaption( title + tabParent->label( tabid) );
+   setCaption( title + " : " + tabParent->label( tabid) );
 }
