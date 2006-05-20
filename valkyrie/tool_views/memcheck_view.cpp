@@ -19,6 +19,7 @@
 #include "html_urls.h"
 #include "tool_object.h"       // VkRunState
 #include "vk_utils.h"
+#include "vk_process.h"
 
 #include <qcursor.h>
 #include <qfiledialog.h>
@@ -301,34 +302,59 @@ void MemcheckView::mkToolBar()
 
 /* checks if itemType() == SRC.  if true, and item isReadable or
    isWriteable, launches an editor with the source file loaded */
-//void MemcheckView::launchEditor( QListViewItem* lv_item, const QPoint&, int )
-void MemcheckView::launchEditor( QListViewItem*, const QPoint&, int )
+void MemcheckView::launchEditor( QListViewItem* lv_item, const QPoint&, int )
 {
-#if 0
-   if ( !lv_item ) return;
-   XmlOutputItem* op_item = (XmlOutputItem*)lv_item;
-   if ( op_item->itemType() != XmlOutput::SRC ) return;
+   if ( !lv_item || !lv_item->parent() ) return;
+//   VgOutputItem* op_item = (VgOutputItem*)lView->firstChild()->firstChild();
+   VgOutputItem* curr_item = (VgOutputItem*)lv_item;
+
+   if ( curr_item->elemType() != VgElement::LINE ||
+        curr_item->parent()->elemType() != VgElement::FRAME )
+      return;
 
    /* get the path to the source file */
-   if ( op_item->isReadable || op_item->isWriteable ) {
-      /* the Frame has the file path */
-      OutputItem* frame_item = (OutputItem*)op_item->parent();
-      Frame* frame = (Frame*)frame_item->xmlOutput;
-      vk_assert( frame != 0 );
-      QString fpath = frame->filepath;
-      vk_assert( !fpath.isEmpty() );
+   if ( curr_item->isReadable || curr_item->isWriteable ) {
 
-      /* this will never be empty. if the user hasn't specified a
+      FrameItem* frame = (FrameItem*)curr_item->parent();
+
+      QDomNodeList frame_details = frame->elem.childNodes();
+      vk_assert( frame_details.count() >= 1 );  /* only ip guaranteed */
+      QDomElement dir    = frame_details.item( 3 ).toElement();
+      QDomElement srcloc = frame_details.item( 4 ).toElement();
+      QDomElement line   = frame_details.item( 5 ).toElement();
+      
+      if (dir.isNull() || srcloc.isNull()) {
+         VK_DEBUG( "MemcheckView::launchEditor(): Not enough path information." );
+         vkError( this, "Editor Launch", "<p>Not enough path information.</p>" );
+         return;
+      }
+
+      QString path( dir.text() + '/' + srcloc.text() );
+      vk_assert( !path.isEmpty() );
+
+      QString lineno = !line.isNull() ? line.text() : "";
+      vk_assert( !lineno.isEmpty() );
+      
+      /* this should never be empty. if the user hasn't specified a
          preference, use the default. There Can Be Only One. */
       QString editor = vkConfig->rdEntry( "src-editor","valkyrie" );
-      QStringList args;
-      args << editor;                               /* emacs, nedit, ...*/
-      args << "+"+ QString::number(frame->lineno);  /* +43  */
-      args << fpath;                                /* /home/../file.c  */
+      vk_assert( !editor.isEmpty() );
 
-      AsyncProcess::spawn( args, AsyncProcess::SEARCH_PATH );
+      QStringList args;
+      args << editor;                  /* /path/to/emacs, nedit, ...*/
+      if (!lineno.isEmpty())
+         args << "+"+ lineno;          /* +43  */
+      args << path;                    /* /home/../file.c  */
+
+      VKProcess* ed_proc = new VKProcess( args, this );
+      if (!ed_proc->start()) {
+         VK_DEBUG("MemcheckView::launchEditor(): Failed to launch editor: %s",
+                  args.join(" ").latin1());
+         vkError( this, "Editor Launch",
+                  "<p>Failed to launch editor:<br>%s</p>",
+                  args.join("<br>").latin1() );
+      }
    }
-#endif
 }
 
 
@@ -391,6 +417,10 @@ void MemcheckView::showSrcPath()
    if ( !lv_item ) return;
 
    VgOutputItem* curr_item = (VgOutputItem*)lv_item;
+
+   if (curr_item->parent() &&
+       curr_item->parent()->elemType() == VgElement::FRAME)
+      curr_item = curr_item->parent();
 
    /* iterate over items up to nextSibling */
    QListViewItem* sibling = curr_item->nextSibling();
