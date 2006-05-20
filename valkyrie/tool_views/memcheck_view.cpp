@@ -290,7 +290,8 @@ void MemcheckView::mkToolBar()
             this,         SLOT( showSuppEditor() ) );
    QToolTip::add( suppedButton, "Open the Suppressions Editor" );
    ContextHelp::add( suppedButton, urlValkyrie::suppEdButton );
-   suppedButton->setEnabled( false );
+   //   suppedButton->setEnabled( false );
+   suppedButton->hide();
    // TODO: implement suppressionsEditor
 }
 

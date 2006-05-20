@@ -248,7 +248,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    case ERROR_LIMIT:
    case GEN_SUPP:
    case DEMANGLE:
-   case INPUT_FD:
+//   case INPUT_FD: // TODO
    case SHOW_BELOW:
    case MAX_SFRAME:
       opt->isValidArg( &errval, argval );
@@ -262,7 +262,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    case SUPPS_AVAIL:
    case SUPPS_SEL:
    case SMC_CHECK:
-      vkPrintErr("TODO: check Valgrind opts");
+      vkPrint("TODO: check Valgrind opts");
       break;
 
    case TRACE_CH: {
@@ -287,6 +287,8 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       opt->isValidArg( &errval, argval );
       break;
 
+
+#if 0 // TODO
    case DB_COMMAND: {   /* gdb -nw %f %p */
       int pos = argval.find( ' ' );
       QString tmp = argval.left( pos );
@@ -303,6 +305,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
                errval = PERROR_DB_CONFLICT;
          }
       } break;
+#endif
 
    case KERN_VAR:
       break;
@@ -320,6 +323,17 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       errval = PERROR_BADOPT;
       vkPrintErr("Option disabled '--%s'", opt->m_longFlag.latin1());
       vkPrintErr(" - Valkyrie sets its own logging options to gather data from Valgrind.");
+      break;
+
+
+   /* Not yet implemented */
+   case INPUT_FD:
+   case DB_COMMAND:
+   case DB_ATTACH:
+      /* Note: gui option disabled, so only reaches here from cmdline */
+      errval = PERROR_BADOPT;
+      vkPrintErr("Option disabled '--%s'", opt->m_longFlag.latin1());
+      vkPrintErr(" - Not yet implemented.");
       break;
 
    default:
@@ -428,8 +442,10 @@ void Valgrind::initToolObjects()
 { 
    int objId = VkObject::ID_TOOL0;
    m_toolObjList.append( new Memcheck  ( objId++ ) );
-   m_toolObjList.append( new Cachegrind( objId++ ) );
-   m_toolObjList.append( new Massif    ( objId++ ) );
+
+   // TODO: I need another lifetime!
+//   m_toolObjList.append( new Cachegrind( objId++ ) );
+//   m_toolObjList.append( new Massif    ( objId++ ) );
 }
 
 

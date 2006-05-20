@@ -1,10 +1,10 @@
-/* ---------------------------------------------------------------------- 
- * Definition of class ToolObject                         tool_object.cpp
+/* ---------------------------------------------------------------------
+ * Definition of class ToolObject                        tool_object.cpp
  *
  * Essential functionality is contained within a ToolObject.
  * Each ToolObject has an associated ToolView for displaying output.
  * 
- * See vk_object.h for information on how to add a new valgrind tool.
+ * See vk_objects.cpp for information on how to add a new valgrind tool.
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind
  * Copyright (c) 2000-2005, OpenWorks LLP <info@open-works.co.uk>

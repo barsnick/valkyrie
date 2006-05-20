@@ -10,7 +10,7 @@
  *   add 'm_toolObjList.append( new tool( objId++ ) )'
  *   this registers the tool with valkyrie.
  * - create a new options page for the Options dialog, and reimplement
- *   VgObjet::createOptionsPage() to create this when needed.
+ *   VgObject::createOptionsPage() to create this when needed.
  * - create the ToolView subclass in its own files, in the src/tool_view dir
  * That's all, folks.
  * ---------------------------------------------------------------------
