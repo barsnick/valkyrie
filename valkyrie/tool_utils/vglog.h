@@ -89,11 +89,32 @@ public:
    bool updateLeakErr( VgError sErr );
    QString unique();
 
-   enum ErrKind { UNREACHED=0, INDIRECT, INTERIOR, PROPER, NUM_EKS };
-   typedef QMap<QString, VgError::ErrKind> ErrKindMap;
-   static ErrKindMap errKindMap;
-   ErrKind errKind();
-   static QString leakDesc( ErrKind lk );
+   /*
+     Error type         <kind>               // Description
+     =========================================================
+     CoreMemErr:        CoreMemError         // unaddressable/uninitialised // ?
+     ValueErr:          UninitCondition      // cond jump dep on uninit value(s)
+                        UninitValue          // use of uninit value
+     ParamErr:          SyscallParam         // syscall param error
+     UserErr:           ClientCheck          // x byte(s) found during client check request
+     FreeErr:           InvalidFree          // invalid free/delete/delete[]
+     FreeMismatchErr:   MismatchedFree       // mismatched free/delete/delete[]
+     AddrErr:           InvalidRead          // invalid read
+                        InvalidWrite         // invalid write
+                        InvalidJump          // jump to invalid address
+     OverlapErr:        Overlap              // source and destination overlap
+     LeakErr:           Leak_DefinitelyLost  // loss unreached
+                        Leak_IndirectlyLost  // loss indirectLeak
+                        Leak_PossiblyLost    // loss interior
+                        Leak_StillReachable  // loss proper
+     IllegalMempoolErr: InvalidMemPool       // illegal memory pool address
+   */
+
+   enum LeakKind { UNREACHED=0, INDIRECT, INTERIOR, PROPER, NUM_LKS };
+   typedef QMap<QString, VgError::LeakKind> LeakKindMap;
+   static LeakKindMap leakKindMap;
+   LeakKind leakKind();
+   static QString leakDesc( LeakKind lk );
 };
 
 typedef QValueList<VgError> VgErrorList;

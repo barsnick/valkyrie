@@ -70,15 +70,15 @@ VgElement::ElemTypeMap setupElemTypeMap() {
 }
 VgElement::ElemTypeMap VgElement::elemtypeMap = setupElemTypeMap();
 
-VgError::ErrKindMap setupErrKindMap() {
-   VgError::ErrKindMap ekmap;
-   ekmap["Leak_DefinitelyLost"] = VgError::UNREACHED;
-   ekmap["Leak_IndirectlyLost"] = VgError::INDIRECT;
-   ekmap["Leak_PossiblyLost"]   = VgError::INTERIOR;
-   ekmap["Leak_StillReachable"] = VgError::PROPER;
-   return ekmap;
+VgError::LeakKindMap setupLeakKindMap() {
+   VgError::LeakKindMap lkmap;
+   lkmap["Leak_DefinitelyLost"] = VgError::UNREACHED;
+   lkmap["Leak_IndirectlyLost"] = VgError::INDIRECT;
+   lkmap["Leak_PossiblyLost"]   = VgError::INTERIOR;
+   lkmap["Leak_StillReachable"] = VgError::PROPER;
+   return lkmap;
 }
-VgError::ErrKindMap VgError::errKindMap = setupErrKindMap();
+VgError::LeakKindMap VgError::leakKindMap = setupLeakKindMap();
 
 
 
@@ -452,7 +452,7 @@ bool VgError::updateLeakErr( VgError sErr )
    QString mWhatStr = QString("%1 bytes in %2 blocks are %3")
       .arg( mBytes )
       .arg( mBlocks )
-      .arg( leakDesc( errKind() ) );
+      .arg( leakDesc( leakKind() ) );
   
    VgElement mWhat = getFirstElem( "what" );
    mWhat.setContent( mWhatStr );
@@ -484,19 +484,19 @@ VgElement VgErrCounts::getCount( VgError err )
 }
 
 
-VgError::ErrKind VgError::errKind()
+VgError::LeakKind VgError::leakKind()
 {
    QString kind = getFirstElem("kind").text();
-   ErrKindMap::Iterator it = errKindMap.find( kind );
-   if ( it == errKindMap.end() ) {
-      vklmPrintErr("VgError::errKind(): bad kind; %s", kind.latin1());
-      return VgError::NUM_EKS;
+   LeakKindMap::Iterator it = leakKindMap.find( kind );
+   if ( it == leakKindMap.end() ) {
+      vklmPrintErr("VgError::leakKind(): bad kind; %s", kind.latin1());
+      return VgError::NUM_LKS;
    }
    return it.data(); 
 }
 
 
-QString VgError::leakDesc( ErrKind lk )
+QString VgError::leakDesc( LeakKind lk )
 {
    switch( lk ) {
    case UNREACHED: return "definitely lost";
@@ -759,9 +759,9 @@ QString VgLog::plainTxtErrorSummary()
 /* CAB: suppressed leak errs not given in vg xml output */
 QString VgLog::plainTxtLeakSummary()
 {
-   unsigned long lk_bytes[VgError::NUM_EKS];
-   unsigned long lk_blocks[VgError::NUM_EKS];
-   for (unsigned int i=0; i<VgError::NUM_EKS; i++) {
+   unsigned long lk_bytes[VgError::NUM_LKS];
+   unsigned long lk_blocks[VgError::NUM_LKS];
+   for (unsigned int i=0; i<VgError::NUM_LKS; i++) {
       lk_bytes[i] = lk_blocks[i] = 0;
    }
 
@@ -775,19 +775,19 @@ QString VgLog::plainTxtLeakSummary()
       QString bytes  = err_details.item( 4 ).toElement().text();
       QString blocks = err_details.item( 5 ).toElement().text();
 
-      VgError::ErrKind kind = err.errKind();    
-      assert( kind < VgError::NUM_EKS );
+      VgError::LeakKind kind = err.leakKind();    
+      assert( kind < VgError::NUM_LKS );
       lk_bytes [ kind ] += bytes.toULong();
       lk_blocks[ kind ] += blocks.toULong();
    }
 
    QString output_str = "LEAK SUMMARY\n";
    int field_width = VgError::leakDesc(VgError::UNREACHED).length();
-   for (int i=0; i<VgError::NUM_EKS; i++) {
+   for (int i=0; i<VgError::NUM_LKS; i++) {
       if (i == VgError::INDIRECT && lk_blocks[i] == 0)
          continue;
       output_str += QString("   %1 %2 bytes in %3 blocks\n")
-         .arg( VgError::leakDesc( (VgError::ErrKind)i ), field_width )
+         .arg( VgError::leakDesc( (VgError::LeakKind)i ), field_width )
          .arg( lk_bytes[i] )
          .arg( lk_blocks[i] );
    }

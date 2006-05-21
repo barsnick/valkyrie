@@ -22,6 +22,7 @@
 */
 ErrorItem::AcronymMap setupErrAcronymMap() {
    ErrorItem::AcronymMap amap;
+   amap["CoreMemError"]        = "CRM";
    amap["InvalidFree"]         = "IVF";
    amap["MismatchedFree"]      = "MMF";
    amap["InvalidRead"]         = "IVR";
