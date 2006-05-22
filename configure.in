@@ -26,33 +26,76 @@ fi
 # Checks for options
 
 # Find valgrind
-AC_ARG_WITH([vg], [  --with-valgrind=PROGRAM   Valgrind executable ], VALGRIND=$withval)
-if test x"$VALGRIND" != x ; then
-   # given as arg: give msg
-   AC_MSG_CHECKING([for valgrind])
-   AC_MSG_RESULT([$VALGRIND])
-else
-   # not given as arg: try path
-   AC_CHECK_PROG([VALGRIND], [valgrind], [`which valgrind`])
-fi
+AC_ARG_WITH([valgrind],
+   [  --with-valgrind=PROGRAM   Valgrind executable ],
+   [ # given
+      # TODO: proper way of handling both --xyz=/path/to/foo, and --xyz=foo ?
+      if test -x $withval; then
+         AC_CHECK_FILE([$withval])  # ok if here: just print a message
+         VALGRIND=$withval
+      else
+         AC_PATH_PROG([VALGRIND], [$withval])
+      fi
+      if test x"$VALGRIND" = x; then
+         AC_MSG_ERROR([Valgrind executable '$withval' not found])
+      fi
+   ],
+   [ # not given
+      AC_PATH_PROG([VALGRIND], [valgrind])
+   ])
 
 if test x"$VALGRIND" = x ; then
    # Valgrind not found
    AC_MSG_WARN([Valgrind not found: may be configured at runtime.])
-
 else
   # Valgrind found: check is ok
-
   AC_MSG_CHECKING([valgrind version (need >= 3.0.0)])
   VG_VERSION_MAJOR_MIN=3
   VG_VERSION=`$VALGRIND --version | sed "s/^valgrind-//"`
-  AC_MSG_RESULT([$VG_VERSION])
-  VG_VERSION_MAJOR=`echo $VG_VERSION | sed "s/^\([[0-9\]]*\)\..*/\1/"`
-  if test $VG_VERSION_MAJOR -lt $VG_VERSION_MAJOR_MIN ; then
-     $VALGRIND=""
-     AC_MSG_WARN([Not configuring for valgrind: need minimum version of 3.0.0.  Please configure with a more recent version of valgrind (may be done at runtime).])
+  if test x"$VG_VERSION" = x; then
+     # failed to start valgrind
+     AC_MSG_WARN([Failed to start Valgrind. Please check your Valgrind installation. Valgrind path may be set at runtime.])
+     VALGRIND=""
+  else
+     AC_MSG_RESULT([$VG_VERSION])
+     VG_VERSION_MAJOR=`echo $VG_VERSION | sed "s/^\([[0-9\]]*\)\..*/\1/"`
+     if test $VG_VERSION_MAJOR -lt $VG_VERSION_MAJOR_MIN ; then
+        VALGRIND=""
+        AC_MSG_WARN([Not configuring for valgrind: need minimum version of 3.0.0.  Please configure with a more recent version of Valgrind (may be done at runtime).])
+     fi
   fi
 fi
+
+
+# Check for source editor
+AC_ARG_WITH([editor],
+   [  --with-editor=PROGRAM   Source-code editor [[emacs|nedit]] ],
+   [ # given
+      # TODO: proper way of handling both --xyz=/path/to/foo, and --xyz=foo ?
+      if test -x $withval; then
+         AC_CHECK_FILE([$withval])  # ok if here: just print a message
+         VK_EDITOR=$withval
+      else
+         AC_PATH_PROG([VK_EDITOR], [$withval])
+      fi
+      if test x"$VK_EDITOR" = x; then
+         AC_MSG_ERROR([Editor '$withval' not found])
+      fi
+
+      # if !emacs && !nedit, give warning
+      VK_ED_NAME=`echo $VK_EDITOR | sed "s/.*\///" | sed "s/-.*//"`
+      if test "$VK_ED_NAME" != "emacs" && test "$VK_ED_NAME" != "nedit"; then
+         AC_MSG_WARN([Valkyrie not tested with editor '$withval'.])
+      fi
+   ],
+   [ # not given
+      # flag not given: default to emacs/nedit
+      AC_PATH_PROGS([VK_EDITOR], [emacs nedit])
+      if test x"$VK_EDITOR" = x ; then
+         # Editor not found
+         AC_MSG_WARN([No suitable editor found: may be configured at runtime.])
+      fi
+   ])
 
 
 
@@ -130,6 +173,7 @@ AC_DEFINE_UNQUOTED(VK_SUPPS_DIR, "/suppressions/", [valkyrie config supps dir])
 # programs
 AC_DEFINE_UNQUOTED(BIN_VALGRIND, "$VALGRIND",                          [valgrind executable])
 AC_DEFINE_UNQUOTED(BIN_LOGMERGE, "$VK_INSTALL_PREFIX/bin/vk_logmerge", [log-merge executable])
+AC_DEFINE_UNQUOTED(BIN_EDITOR,   "$VK_EDITOR",                         [source code editor])
 
 # misc
 AC_DEFINE_UNQUOTED(VK_COPYRIGHT, "(c) 2003-2006", [copyright])

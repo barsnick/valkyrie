@@ -306,7 +306,7 @@ void MemcheckView::mkToolBar()
 void MemcheckView::launchEditor( QListViewItem* lv_item, const QPoint&, int )
 {
    if ( !lv_item || !lv_item->parent() ) return;
-//   VgOutputItem* op_item = (VgOutputItem*)lView->firstChild()->firstChild();
+
    VgOutputItem* curr_item = (VgOutputItem*)lv_item;
 
    if ( curr_item->elemType() != VgElement::LINE ||
@@ -315,6 +315,14 @@ void MemcheckView::launchEditor( QListViewItem* lv_item, const QPoint&, int )
 
    /* get the path to the source file */
    if ( curr_item->isReadable || curr_item->isWriteable ) {
+
+      /* check editor is set: may be empty if none found on installation... */
+      QString editor = vkConfig->rdEntry( "src-editor","valkyrie" );
+      if (editor.isEmpty()) {
+         vkError( this, "Editor Launch",
+                  "<p>Source editor not set - this can be updated via Options::Valkyrie.</p>" );
+         return;
+      }
 
       FrameItem* frame = (FrameItem*)curr_item->parent();
 
@@ -336,11 +344,6 @@ void MemcheckView::launchEditor( QListViewItem* lv_item, const QPoint&, int )
       QString lineno = !line.isNull() ? line.text() : "";
       vk_assert( !lineno.isEmpty() );
       
-      /* this should never be empty. if the user hasn't specified a
-         preference, use the default. There Can Be Only One. */
-      QString editor = vkConfig->rdEntry( "src-editor","valkyrie" );
-      vk_assert( !editor.isEmpty() );
-
       QStringList args;
       args << editor;                  /* /path/to/emacs, nedit, ...*/
       if (!lineno.isEmpty())

@@ -80,7 +80,7 @@ Valkyrie::Valkyrie()
            "Choose Font",   "",                urlValkyrie::userFont );
    addOpt( SRC_EDITOR,   VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
            "valkyrie",   '\0',                 "src-editor", 
-           "",           "",                   "/usr/bin/emacs", 
+           "",           "",                   BIN_EDITOR, 
            "Src Editor:",   "",                urlValkyrie::srcEditor );
    addOpt( SRC_LINES,    VkOPTION::NOT_POPT,   VkOPTION::WDG_SPINBOX, 
            "valkyrie",   '\0',                 "src-lines",
