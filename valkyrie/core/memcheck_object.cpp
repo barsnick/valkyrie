@@ -74,6 +74,12 @@ Memcheck::Memcheck( int objId )
            "Show reachable blocks in leak check",
            "show reachable blocks in leak check?",  
            urlMemcheck::Showreach );
+   addOpt( UNDEF_VAL,   VkOPTION::ARG_BOOL,   VkOPTION::WDG_CHECK, 
+           "memcheck",  '\0',                 "undef-value-errors",
+           "<yes|no>",  "yes|no",             "yes",
+           "Check for undefined value errors",
+           "check for undefined value errors?",
+           urlMemcheck::UndefVal );
    addOpt( PARTIAL,     VkOPTION::ARG_BOOL,   VkOPTION::WDG_CHECK, 
            "memcheck",  '\0',                 "partial-loads-ok",
            "<yes|no>",  "yes|no",             "no",
@@ -113,6 +119,7 @@ int Memcheck::checkOptArg( int optid, QString& argval )
    case FREELIST:
    case LEAK_RES:
    case SHOW_REACH:
+   case UNDEF_VAL:
    case GCC_296:
    case ALIGNMENT:
       opt->isValidArg( &errval, argval );

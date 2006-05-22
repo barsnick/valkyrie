@@ -46,6 +46,7 @@ public:
       LEAK_CHECK,
       LEAK_RES,
       SHOW_REACH,
+      UNDEF_VAL,
       PARTIAL,
       FREELIST,
       GCC_296,

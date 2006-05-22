@@ -109,6 +109,17 @@ Memcheck can detect the following problems:</p>
     you wanted to.</p>
 </li>
 <li>
+<p><a name="undefvalerrs"></a><code class="computeroutput">--undef-value-errors=yes</code>
+    [default]</p>
+<p><code class="computeroutput">--undef-value-errors=no</code></p>
+<p>When enabled (default), Memcheck tracks and detects (mis)use of
+    undefined values.  A program may copy around junk (undefined)
+    data as much as it likes: Memcheck keeps track of this data, 
+    but only complains when the program actually attempts to use it. 
+    When disabled, this class of errors is ignored (previous users 
+    of Addrcheck may like this option).</p>
+</li>
+<li>
 <p><a name="leakres"></a><code class="computeroutput">--leak-resolution=low</code>
     [default]</p>
 <p><code class="computeroutput">--leak-resolution=med</code></p>

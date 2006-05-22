@@ -100,6 +100,7 @@ namespace urlVgCore {
 namespace urlMemcheck { 
    const char* Leakcheck = "mc-manual.html#leakcheck";
    const char* Showreach = "mc-manual.html#showreach";
+   const char* UndefVal  = "mc-manual.html#undefvalerrs";
    const char* Leakres   = "mc-manual.html#leakres";
    const char* Freelist  = "mc-manual.html#freelist";
    const char* gcc296    = "mc-manual.html#gcc296";
