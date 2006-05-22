@@ -727,6 +727,10 @@ bool VkConfig::writeConfigDefaults( Valkyrie* vk )
 	QTextStream strm( &default_config, IO_ReadOnly );
 	EntryMap rcMap = parseConfigToMap( strm );
 	
+	/* Set valkyrie version: used for rc upgrading */
+      rcMap[ EntryKey( "valkyrie", "version" )  ].mValue
+         = PACKAGE_VERSION;
+
 	/* Set our 'configured' valgrind paths, if we have them */
    {
       rcMap[ EntryKey( "valkyrie", "merge-exec" )  ].mValue
