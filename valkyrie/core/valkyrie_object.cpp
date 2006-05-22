@@ -52,7 +52,7 @@ Valkyrie::Valkyrie()
            "",           "show this help message and exit", urlNone );
    addOpt( OPT_VERSION,  VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
            "valkyrie",   'v',                  "version", 
-           "",           "",                   PACKAGE_VERSION, 
+           "",           "",                   "", 
            "",           "display version information and exit", urlNone );
    addOpt( VGHELP,       VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
            "valkyrie",   'V',                  "valgrind-opts", 
