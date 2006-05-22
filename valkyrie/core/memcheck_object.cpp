@@ -480,7 +480,7 @@ bool Memcheck::runProcess( QStringList flags )
          delete m_vgproc;
          m_vgproc = 0;
       }
-      VK_DEBUG("process failed to start\n");
+      VK_DEBUG("process failed to start");
       QString path_errmsg = (runState() == VkRunState::VALGRIND)
          ? "Please verify the path to valgrind - this can be updated via Options::Valkyrie."
          : ""; /* TODO: same for vk_logmerge... and provide option widgets to update path... */
@@ -618,9 +618,16 @@ void Memcheck::readVgLog()
    if (m_vgproc != 0 && !m_vgproc->isRunning()) {
       //      vkPrint(" - cleaning up m_vgproc");
 
-      /* make sure nothing left on stdout/stderr */
-      readProcStdout();
-      readProcStderr();
+      /* check exit code: valgrind might have bombed */
+      bool exitStatus = m_vgproc->exitStatus();
+      if (exitStatus != 0) {
+         vkError( view(), "Run Error",
+                  "<p>Valgrind died!<br>Please 'Save Log' and examine for details.</p>");
+      } else {
+         /* make sure nothing left on stdout/stderr */
+         readProcStdout();
+         readProcStderr();
+      }
 
       delete m_vgproc;
       m_vgproc = 0;
@@ -629,7 +636,8 @@ void Memcheck::readVgLog()
          called us yet.  However, we can't wait and see else m_vgreader
          may not get deallocated. */
       if (m_vgreader != 0) {
-         readVgLog();
+         if (exitStatus != 0)  // only try again if proc exited ok
+            readVgLog();
 
          /* still not finished => error
             valgrind xml output has not been completed properly, or merge failed */
@@ -637,14 +645,16 @@ void Memcheck::readVgLog()
             delete m_vgreader;
             m_vgreader = 0;
 
-            if (runState() == VkRunState::VALGRIND) {
-               statusMsg( "Memcheck", "Error - incomplete output log" );
-               vkError( view(), "XML Parse Error",
-                        "<p>Valgrind XML output is incomplete</p>" );
-            } else {
-               statusMsg( "Merge Logs", "Error - incomplete output log" );
-               vkError( view(), "Parse Error",
-                        "<p>Failed to parse merge result</p>" );
+            if (exitStatus != 0) { // only a further err if proc exited ok
+               if (runState() == VkRunState::VALGRIND) {
+                  statusMsg( "Memcheck", "Error - incomplete output log" );
+                  vkError( view(), "XML Parse Error",
+                           "<p>Valgrind XML output is incomplete</p>" );
+               } else {
+                  statusMsg( "Merge Logs", "Error - incomplete output log" );
+                  vkError( view(), "Parse Error",
+                           "<p>Failed to parse merge result</p>" );
+               }
             }
          }
       }
