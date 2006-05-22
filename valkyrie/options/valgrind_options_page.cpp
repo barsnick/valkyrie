@@ -269,11 +269,18 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    m_itemList[Valgrind::TRACE_CH   ]->setEnabled( false );
 
    /* Disabled for now - not yet implemented */
+   m_itemList[Valgrind::INPUT_FD   ]->setEnabled( false );
+
+   /* Disabled for now - Valgrind presets these options for XML output
+      - See valgrind/docs/internals/xml_output.txt */
+   m_itemList[Valgrind::VERBOSITY  ]->setEnabled( false );
+   m_itemList[Valgrind::TRACK_FDS  ]->setEnabled( false );
+   m_itemList[Valgrind::EM_WARNS   ]->setEnabled( false );
+   m_itemList[Valgrind::GEN_SUPP   ]->setEnabled( false );
+   m_itemList[Valgrind::ERROR_LIMIT]->setEnabled( false );
    m_itemList[Valgrind::DB_ATTACH  ]->setEnabled( false );
    m_itemList[Valgrind::DB_COMMAND ]->setEnabled( false );
    dbLedit->button()->setEnabled( false );
-   m_itemList[Valgrind::INPUT_FD   ]->setEnabled( false );
-
 }
 
 

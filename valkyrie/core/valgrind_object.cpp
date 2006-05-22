@@ -241,12 +241,9 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    switch ( (Valgrind::vgOpts)optid ) {
 
    case TOOL:
-   case VERBOSITY:
    case SIM_HINTS:
    case RUN_LIBC:
    case NUM_CALLERS:
-   case ERROR_LIMIT:
-   case GEN_SUPP:
    case DEMANGLE:
 //   case INPUT_FD: // TODO
    case SHOW_BELOW:
@@ -254,9 +251,21 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       opt->isValidArg( &errval, argval );
       break;
 
+   case VERBOSITY:
    case TRACK_FDS:
    case TIME_STAMP:
    case EM_WARNS:
+   case GEN_SUPP:
+   case ERROR_LIMIT:
+   case DB_COMMAND:
+   case DB_ATTACH:
+      /* Note: gui option disabled, so only reaches here from cmdline */
+      errval = PERROR_BADOPT;
+      vkPrintErr("Option disabled '--%s'", opt->m_longFlag.latin1());
+      vkPrintErr(" - Valgrind presets these options for XML output.");
+      vkPrintErr(" - See valgrind/docs/internals/xml_output.txt.");
+      break;
+
    case XML_COMMENT:
    case SUPPS_DIRS:
    case SUPPS_AVAIL:
@@ -288,7 +297,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       break;
 
 
-#if 0 // TODO
+#if 0 // TODO: Fix Valgrind to allow gdb attaching with XML output
    case DB_COMMAND: {   /* gdb -nw %f %p */
       int pos = argval.find( ' ' );
       QString tmp = argval.left( pos );
@@ -328,8 +337,6 @@ int Valgrind::checkOptArg( int optid, QString& argval )
 
    /* Not yet implemented */
    case INPUT_FD:
-   case DB_COMMAND:
-   case DB_ATTACH:
       /* Note: gui option disabled, so only reaches here from cmdline */
       errval = PERROR_BADOPT;
       vkPrintErr("Option disabled '--%s'", opt->m_longFlag.latin1());
@@ -387,7 +394,6 @@ QStringList Valgrind::modifiedVgFlags( const ToolObject* tool_obj )
                modFlags << "--" + opt->cfgKey() + "=" + cfgVal;
          break;
 
-      /* memcheck presets/ignores these options for xml output */
       case VERBOSITY:
       case TRACK_FDS:
       case TIME_STAMP:
@@ -397,15 +403,11 @@ QStringList Valgrind::modifiedVgFlags( const ToolObject* tool_obj )
       case DB_ATTACH:
       case DB_COMMAND:
          if ( defVal != cfgVal ) {
-            /* gui options not disabled: other tools use these options */
+            // disabled for now: /* gui options not disabled: other tools use these options */
             if ( tool_obj->name() == "memcheck") {
-               /* TODO: inform user we skipped this option
-                  - but not every time! */
-               if (0) {
-                  vkPrintErr("Skipped option '%s'", flag.latin1());
-                  vkPrintErr(" - Memcheck presets/ignores this option when generating (required) xml output.");
-                  vkPrintErr(" - See valgrind/docs/internals/xml_output.txt.\n");
-               }
+               /* memcheck presets/ignores these options for xml output
+                  - ignore these opts
+                  - see valgrind/docs/internals/xml_output.txt */
             } else {
                modFlags << "--" + opt->cfgKey() + "=" + cfgVal;
             }
