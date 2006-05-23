@@ -81,10 +81,6 @@ private slots:
    void processDone();
    void readVgLog();
 
-   /* forward vgproc's stdout/err to our stdout/err */
-   void readProcStdout();
-   void readProcStderr();
-
 private:
    QString      m_saveFname;
    VgLogReader* m_vgreader;

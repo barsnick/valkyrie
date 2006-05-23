@@ -465,11 +465,9 @@ bool Memcheck::runProcess( QStringList flags )
    connect( m_vgproc, SIGNAL(processExited()),
             this, SLOT(processDone()) );
 
-   /* gather vgproc's stdout/stderr, and forward to our stdout/stderr */
-   connect( m_vgproc, SIGNAL(readyReadStdout()),
-            this, SLOT(readProcStdout()) );
-   connect( m_vgproc, SIGNAL(readyReadStderr()),
-            this, SLOT(readProcStderr()) );
+   /* don't need to talk/listen to forked process,
+      so don't let it hijack stdin/out/err for socket fd's */
+   m_vgproc->setCommunication( 0 );
 
    if ( !m_vgproc->start() ) {
       if (m_vgreader != 0) {
@@ -498,30 +496,6 @@ bool Memcheck::runProcess( QStringList flags )
 
    //  vkPrint(" - END MC::runProcess()" );
    return true;
-}
-
-
-/* forward vgproc's stdout to our stdout */
-void Memcheck::readProcStdout()
-{
-   /* read as much data as we can */
-   // TODO: might we spend too much time in here?
-   while ( m_vgproc->canReadLineStdout() ) {
-      QString str_stdout = m_vgproc->readLineStdout();
-      /* forward to our stdout */
-      fprintf(stdout, "%s\n", str_stdout.latin1());
-   }
-}
-
-/* forward vgproc's stderr to our stderr */
-void Memcheck::readProcStderr()
-{
-   /* read as much data as we can */
-   // TODO: might we spend too much time in here?
-   while ( m_vgproc->canReadLineStderr() ) {
-      QString str_stderr = m_vgproc->readLineStderr();
-      fprintf(stderr, "%s\n", str_stderr.latin1());
-   }
 }
 
 
@@ -621,12 +595,10 @@ void Memcheck::readVgLog()
       /* check exit code: valgrind might have bombed */
       bool exitStatus = m_vgproc->exitStatus();
       if (exitStatus != 0) {
-         vkError( view(), "Run Error",
-                  "<p>Valgrind died!<br>Please 'Save Log' and examine for details.</p>");
-      } else {
-         /* make sure nothing left on stdout/stderr */
-         readProcStdout();
-         readProcStderr();
+         if (runState() == VkRunState::VALGRIND) {
+            vkError( view(), "Run Error",
+                     "<p>Valgrind died!<br>Please 'Save Log' and examine for details.</p>");
+         }
       }
 
       delete m_vgproc;
