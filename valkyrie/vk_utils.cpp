@@ -173,6 +173,13 @@ QString escapeEntities( const QString& content )
 }
 
 
+/* swap '\n' for <br> */
+QString str2html( QString str )
+{
+   str.replace( '\n', "<br>" );
+   return str;
+}
+
 
 /* wrappers for various fns -------------------------------------------- */
 

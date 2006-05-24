@@ -92,6 +92,9 @@ int str2hex( QString ver_str );
  * current list: '<', '>', '&' ----------------------------------------- */
 QString escapeEntities( const QString& str );
 
+/* swap '\n' for <br> */
+QString str2html( QString str );
+
 /* malloc and free fns ------------------------------------------------- */
 void * vk_free( const void* p );
 
