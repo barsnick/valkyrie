@@ -25,9 +25,9 @@
 Memcheck::~Memcheck()
 {
    if (m_vgproc) {
+      m_vgproc->disconnect(); /* so no signal calling processDone() */
       if (m_vgproc->isRunning()) {
-         m_vgproc->tryTerminate();
-         m_vgproc->kill();
+         m_vgproc->stop(); 
       }
       delete m_vgproc;
       m_vgproc = 0;
@@ -52,7 +52,9 @@ Memcheck::Memcheck( int objId )
    m_fileSaved = true;
    m_vgproc    = 0;
    m_vgreader  = 0;
-   m_logpoller = 0;
+   m_logpoller = new VkLogPoller( this, "memcheck logpoller" );
+   connect( m_logpoller, SIGNAL(logUpdated()),
+            this,        SLOT(readVgLog()) );
 
 	/* these opts should be kept in exactly the same order as valgrind
       outputs them, as it makes keeping up-to-date a lot easier. */
@@ -209,7 +211,7 @@ bool Memcheck::queryDone()
    /* if current process is not yet finished, ask user if they really
       want to close */
    if ( isRunning() ) {
-      int ok = vkQuery( this->view(), "Process Running", "&Abort;&Cancel",
+      int ok = vkQuery( view(), "Process Running", "&Abort;&Cancel",
                         "<p>The current process is not yet finished.</p>"
                         "<p>Do you want to abort it ?</p>" );
       if ( ok == MsgBox::vkYes ) {
@@ -237,7 +239,7 @@ bool Memcheck::queryFileSave()
    /* currently loaded / parsed stuff is saved to tmp file - ask user
       if they want to save it to a 'real' file */
    if ( !m_fileSaved ) {
-      int ok = vkQuery( this->view(), "Unsaved File", 
+      int ok = vkQuery( view(), "Unsaved File", 
                         "&Save;&Discard;&Cancel",
                         "<p>The current output is not saved, "
                         " and will be deleted.<br/>"
@@ -284,13 +286,8 @@ bool Memcheck::stop()
 
    switch ( runState() ) {
    case VkRunState::VALGRIND: {
-      vk_assert( m_vgproc != 0 );
-      vk_assert( m_vgproc->isRunning() );
-      m_vgproc->stop();
-
-      vk_assert( m_logpoller != 0 );
-      vk_assert( m_logpoller->isActive() );
-      m_logpoller->stop();
+      if (m_vgproc && m_vgproc->isRunning() )
+         m_vgproc->stop(); /* signal -> processDone() */
       break;
    }
 
@@ -336,7 +333,7 @@ bool Memcheck::runValgrind( QStringList vgflags )
    m_fileSaved = false;
    statusMsg( "Memcheck", "Running ... " );
 
-   bool ok = runProcess( vgflags );
+   bool ok = startProcess( vgflags );
 
    if (!ok) {
       statusMsg( "Memcheck", "Failed" );
@@ -384,7 +381,7 @@ bool Memcheck::parseLogFile()
       VgLogHandler* hnd = vgLogFileReader.handler();
       statusMsg( "Parsing", "Error" );
       vkError( view(), "XML Parse Error",
-               "<p>%s</p>", escapeEntities(hnd->errorString()).latin1() );
+               "<p>%s</p>", escapeEntities(hnd->fatalMsg()).latin1() );
    }
 
    if (success) {
@@ -421,7 +418,7 @@ bool Memcheck::mergeLogFiles()
    m_fileSaved = false;
    statusMsg( "Merge Logs", "Running ... " );
 
-   bool ok = runProcess( flags );
+   bool ok = startProcess( flags );
 
    if (!ok) {
       statusMsg( "Merge Logs", "Failed" );
@@ -435,9 +432,9 @@ bool Memcheck::mergeLogFiles()
 /* Run a VKProcess, as given by 'flags'.
    Reads ouput from file, loading this to the listview.
 */
-bool Memcheck::runProcess( QStringList flags )
+bool Memcheck::startProcess( QStringList flags )
 {
-   //   vkPrint("Memcheck::runProcess()");
+   //   vkPrint("Memcheck::startProcess()");
    //   for ( unsigned int i=0; i<flags.count(); i++ )
    //      vkPrint("flag[%d] --> %s", i, flags[i].latin1() );
    vk_assert( view() != 0 );
@@ -448,15 +445,12 @@ bool Memcheck::runProcess( QStringList flags )
 
    /* start the log parse - nothing written yet tho */
    if (!m_vgreader->parse( m_saveFname, true )) {
-      QString errMsg = m_vgreader->handler()->errorString();
-      if (m_vgreader != 0) {
-         delete m_vgreader;
-         m_vgreader = 0;
-      }
+      QString errMsg = m_vgreader->handler()->fatalMsg();
       VK_DEBUG("m_vgreader failed to start parsing empty log\n");
-      vkError( view(), "XML Parse Error",
-               "<p>%s</p>", errMsg.ascii() );
-      return false;
+      vkError( view(), "Process Startup Error",
+               "<p>Failed to start XML parser:<br>%s</p>",
+               errMsg.ascii() );
+      goto failed_startup;
    }
 
    /* start a new process, listening on exit signal */
@@ -470,169 +464,163 @@ bool Memcheck::runProcess( QStringList flags )
    m_vgproc->setCommunication( 0 );
 
    if ( !m_vgproc->start() ) {
-      if (m_vgreader != 0) {
-         delete m_vgreader;
-         m_vgreader = 0;
-      }
-      if (m_vgproc != 0) {
-         delete m_vgproc;
-         m_vgproc = 0;
-      }
       VK_DEBUG("process failed to start");
       QString path_errmsg = (runState() == VkRunState::VALGRIND)
-         ? "Please verify the path to valgrind - this can be updated via Options::Valkyrie."
+         ? "Please verify the path to Valgrind in Options::Valkyrie."
          : ""; /* TODO: same for vk_logmerge... and provide option widgets to update path... */
-      vkError( this->view(), "Error", "<p>VG Process failed to start: <br>%s</br>%s</p>",
+      vkError( view(), "Process Startup Error",
+               "<p>Failed to start process:<br>%s<br><br>%s</p>",
                flags.join(" ").latin1(),
                path_errmsg.latin1() );
-      return false;
+      goto failed_startup;
    }
 
-   /* poll log for updates */
-   m_logpoller = new VkLogPoller( this, "memcheck logpoller" );
-   //   m_logpoller->setLog(  );
-   connect( m_logpoller, SIGNAL(logUpdated()), this, SLOT(readVgLog()) );
-   m_logpoller->start();
+   /* poll log for latest data */
+   if (!m_logpoller->start()) {
+      QString errMsg = m_vgreader->handler()->fatalMsg();
+      VK_DEBUG("m_logpoller failed to start\n");
+      vkError( view(), "Process Startup Error",
+               "<p>Failed to start log poller.</p>" );
+      goto failed_startup;
+   }
 
-   //  vkPrint(" - END MC::runProcess()" );
+   //  vkPrint(" - END MC::startProcess()" );
    return true;
+
+ failed_startup:
+   VK_DEBUG("failed_startup: '%s'", flags.join(" ").latin1());
+   if (m_logpoller != 0) {
+      m_logpoller->stop();
+   }
+   if (m_vgreader != 0) {
+      delete m_vgreader;
+      m_vgreader = 0;
+   }
+   if (m_vgproc != 0) {
+      delete m_vgproc;
+      m_vgproc = 0;
+   } 
+   return false;
 }
 
 
-/* Called on m_vgproc exit - stop logpoller, but send one more signal.
-   m_vgproc may:
-   - exit from self
-   - be terminated by the user via valkyrie
-   - be terminated from vgReadLog because of an xml parse error
+/* Process exited:
+    - self / external signal / user via 'stop()' / 
+    - terminated from readVgLog because of an xml parse error
+   Stops logfile polling, checks xml parsing for errors,
+   checks exitstatus, cleans up.
 */
 void Memcheck::processDone()
 {
    //   vkPrint("Memcheck::processDone()");
    vk_assert( m_vgproc != 0 );
+   vk_assert( m_vgreader != 0 );
    vk_assert( m_logpoller != 0 );
+   bool runError = false;
 
-   /* Stop signals to readVgLog()... */
-   m_logpoller->stop( /*...bar one last chance:*/true );
-}
+   /* stop polling logfile ------------------------------------------ */
+   m_logpoller->stop();
 
+   /* deal with log reader ------------------------------------------ */
+   /* if not finished && no error, try reading log data one last time */
+   if (!m_vgreader->handler()->finished() && 
+       m_vgreader->handler()->fatalMsg().isEmpty())
+      readVgLog();
 
-/* Read memcheck xml log output
-   Called by m_logpoller signals, and on m_vgproc exit signal
+   /* did log parsing go ok? */
+   QString fatalMsg = m_vgreader->handler()->fatalMsg();
+   if ( !fatalMsg.isEmpty() ) {
+      /* fatal log error... */
+      runError = true;
+      //      vkPrint(" - Memcheck::processDone(): fatal error");
 
-   Deals with cleanup of m_vgproc and m_vgreader, and only emits
-   running(false) when both of these are done and dusted.
-   - we assume that at some point m_vgproc will die, and use this as
-   a condition to do a final cleanup if necessary.
-*/
-void Memcheck::readVgLog()
-{
-   // vkPrint("Memcheck::readVgLog()");
-   vk_assert( view() != 0 );
-
-   if (m_vgreader != 0) {
-      //      vkPrint(" - parseContinue");
-      VgLogHandler* hnd = m_vgreader->handler();
-
-      /* Note: xml log may not be completed by valgrind,
-         meaning hnd never reaches 'finished' - this is taken care of by
-         the final cleanup on m_vgproc death
-      */
-      if (m_vgreader->parseContinue()) {
-         /* Parsing succeeded */
-         if (hnd->finished) {  /* We're done */
-            //            vkPrint(" - finished");
-
-            /* cleanup reader */
-            delete m_vgreader;
-            m_vgreader = 0;
-
-            if (runState() == VkRunState::VALGRIND)
-               statusMsg( "Memcheck", "Finished" );
-            else
-               statusMsg( "Merge Logs", "Finished" );
-
-            /* Only stop running if m_vgproc done and dusted */
-            if (m_vgproc == 0)
-               setRunState( VkRunState::STOPPED );
-         }
+      if (runState() == VkRunState::VALGRIND) {
+         statusMsg( "Memcheck", "Error parsing output log" );
+         vkError( view(), "XML Parse Error",
+                  "<p>Error parsing Valgrind XML output:<br>%s</p>",
+                  str2html( fatalMsg ).latin1() );
       } else {
-         //            vkPrint(" - parse failed on line %d", hnd->errorLine);
-         /* Parsing failed: kill m_vgproc, if alive
-            - will trigger another read, but m_vgreader == 0 */
-
-         /* gather first stderr line */
-         QString str_err = m_vgproc->readLineStderr();
-
-         /* cleanup reader */
-         QString errMsg = hnd->errorString();
-         delete m_vgreader;
-         m_vgreader = 0;
-
-         if (m_vgproc->isRunning())
-            stop();
-
-         if (runState() == VkRunState::VALGRIND) {
-            statusMsg( "Memcheck", "Error parsing output log" );
-            vkError( view(), "XML Parse Error",
-                     "<p>%s</p>", errMsg.ascii() );
-         } else {
-            statusMsg( "Merge Logs", "Error parsing output log" );
-            if (str_err.isEmpty()) str_err = "";
-            vkError( view(), "Parse Error",
-                     "<p>%s</p>", escapeEntities(str_err).latin1() );
-         }
-
-         /* Only stop running if m_vgproc done and dusted */
-         if (m_vgproc == 0)
-            setRunState( VkRunState::STOPPED );
+         statusMsg( "Merge Logs", "Error parsing output log" );
+         vkError( view(), "Parse Error",
+                  "<p>Error parsing output log</p>" );
+      }
+   } else if ( !m_vgreader->handler()->finished() ) {
+      /* no fatal error, but STILL not reached end of log, either:
+         - valgrind xml output not completed properly
+         - merge failed */
+      runError = true;
+      //      vkPrint(" - Memcheck::processDone(): parsing STILL not finished");
+            
+      if (runState() == VkRunState::VALGRIND) {
+         statusMsg( "Memcheck", "Error - incomplete output log" );
+         vkError( view(), "XML Parse Error",
+                  "<p>Valgrind XML output is incomplete</p>" );
+      } else {
+         statusMsg( "Merge Logs", "Error - incomplete output log" );
+         vkError( view(), "Parse Error",
+                  "<p>Failed to parse merge result</p>" );
       }
    }
 
-   /* If m_vgproc stopped but not cleaned up, cleanup. */
-   if (m_vgproc != 0 && !m_vgproc->isRunning()) {
-      //      vkPrint(" - cleaning up m_vgproc");
-
-      /* check exit code: valgrind might have bombed */
-      bool exitStatus = m_vgproc->exitStatus();
-      if (exitStatus != 0) {
-         if (runState() == VkRunState::VALGRIND) {
-            vkError( view(), "Run Error",
-                     "<p>Valgrind died!<br>Please 'Save Log' and examine for details.</p>");
-         }
+   /* check process exit status
+      - valgrind might have bombed ---------------------------------- */
+   bool exitStatus = m_vgproc->exitStatus();
+   if (exitStatus != 0) {
+      //      vkPrint(" - Memcheck::processDone(): process failed (%d)", exitStatus);
+      if (runState() == VkRunState::VALGRIND) {
+         vkError( view(), "Run Error",
+                  "<p>Process exited with return value %d.<br> \
+                      This is likely to simply be the client program \
+                      return value.  If, however, you suspect Valgrind \
+                      itself may have crashed, please 'Save Log' and \
+                      examine for details.</p>", exitStatus);
+      } else {
+         vkError( view(), "Parse Error",
+                  "<p>Merge process exited with return value %d.<br> \
+                      Please check the terminal for error messages.</p>",
+                  exitStatus);
       }
+   } else {
+      //      vkPrint(" - Memcheck::processDone(): process exited ok");      
+   }
 
-      delete m_vgproc;
-      m_vgproc = 0;
+   /* cleanup ------------------------------------------------------- */
+   delete m_vgreader;
+   m_vgreader = 0;
+   delete m_vgproc;
+   m_vgproc = 0;
 
-      /* m_vgproc is dead, but it's possible the last signals haven't
-         called us yet.  However, we can't wait and see else m_vgreader
-         may not get deallocated. */
-      if (m_vgreader != 0) {
-         if (exitStatus != 0)  // only try again if proc exited ok
-            readVgLog();
 
-         /* still not finished => error
-            valgrind xml output has not been completed properly, or merge failed */
-         if (m_vgreader != 0) {
-            delete m_vgreader;
-            m_vgreader = 0;
+   /* we're done. --------------------------------------------------- */
+   if (!runError) { /* (else we've already set an status error message) */
+      if (runState() == VkRunState::VALGRIND)
+         statusMsg( "Memcheck", "Finished" );
+      else
+         statusMsg( "Merge Logs", "Finished" );
+   }
 
-            if (exitStatus != 0) { // only a further err if proc exited ok
-               if (runState() == VkRunState::VALGRIND) {
-                  statusMsg( "Memcheck", "Error - incomplete output log" );
-                  vkError( view(), "XML Parse Error",
-                           "<p>Valgrind XML output is incomplete</p>" );
-               } else {
-                  statusMsg( "Merge Logs", "Error - incomplete output log" );
-                  vkError( view(), "Parse Error",
-                           "<p>Failed to parse merge result</p>" );
-               }
-            }
-         }
-      }
+   setRunState( VkRunState::STOPPED );
+   //   vkPrint("Memcheck::processDone(): DONE.\n");
+}
 
-      /* Ok, we're sure nothing is alive anymore */
-      setRunState( VkRunState::STOPPED );
+
+/* Read memcheck / logmerge xml output
+   Called by
+    - m_logpoller signals
+    - processDone() if one last data read needed.
+*/
+void Memcheck::readVgLog()
+{
+   //   vkPrint("Memcheck::readVgLog()");
+   vk_assert( view() != 0 );
+   vk_assert( m_vgreader != 0 );
+   vk_assert( m_vgproc != 0 );
+
+   /* Try reading some more data */
+   if ( !m_vgreader->parseContinue()) {
+      /* Parsing failed: stop m_vgproc, if running */
+      if (m_vgproc->isRunning())
+         m_vgproc->stop();  /* signal -> processDone() */
    }
 }
 
@@ -655,7 +643,7 @@ bool Memcheck::fileSaveDialog( QString fname/*=QString()*/ )
    if ( fname.isEmpty() ) {
       /* start dlg in dir of last saved logfile */
       QString start_path = QFileInfo( m_saveFname ).dirPath();
-      fname = dlg.getSaveFileName( start_path, flt, this->view(), "fsdlg", cptn );
+      fname = dlg.getSaveFileName( start_path, flt, view(), "fsdlg", cptn );
       if ( fname.isEmpty() )
          return false;
    }
@@ -663,7 +651,7 @@ bool Memcheck::fileSaveDialog( QString fname/*=QString()*/ )
    /* try to save file until succeed, or user Cancels */
    while ( !saveParsedOutput( fname ) ) {
       QString start_path = QFileInfo( fname ).dirPath();
-      fname = dlg.getSaveFileName( start_path, flt, this->view(), "fsdlg", cptn );
+      fname = dlg.getSaveFileName( start_path, flt, view(), "fsdlg", cptn );
       if ( fname.isEmpty() )   /* Cancelled */
          return false;
    }
@@ -692,7 +680,7 @@ bool Memcheck::saveParsedOutput( QString& fname )
 
    /* if this filename already exists, check if we should over-write it */
    if ( QFile::exists( fname ) ) {
-      int ok = vkQuery( this->view(), 2, "Overwrite File",
+      int ok = vkQuery( view(), 2, "Overwrite File",
                         "<p>Over-write existing file '%s' ?</p>", 
                         fname.latin1() );
       if ( ok == MsgBox::vkNo ) {
@@ -721,7 +709,7 @@ bool Memcheck::saveParsedOutput( QString& fname )
       statusMsg( "Saved", m_saveFname );
    } else {
       /* nogo: return and try again */
-      vkInfo( this->view(), "Save Failed", 
+      vkInfo( view(), "Save Failed", 
               "<p>Failed to save file to '%s'",  fname.latin1() );
       statusMsg( "Failed Save", m_saveFname );
    }

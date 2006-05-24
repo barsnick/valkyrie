@@ -27,9 +27,10 @@ public:
    VkLogPoller( QObject * parent = 0, const char * name = 0 );
    ~VkLogPoller();
 
-   void start();
-   void stop( bool lastSignal=false );
+   bool start( int interval=100 );
+   void stop();
    bool isActive();
+   int  interval();
 
 signals:
    void logUpdated();

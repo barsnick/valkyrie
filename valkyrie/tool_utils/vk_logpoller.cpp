@@ -26,24 +26,16 @@ VkLogPoller::VkLogPoller ( QObject* parent/*=0*/, const char* name/*=0*/ )
 }
 
 
-void VkLogPoller::start()
+bool VkLogPoller::start( int interval/*=100*/)
 {
-   m_timer->start( 100 );
+   return m_timer->start( interval );
 }
 
 
-void VkLogPoller::stop( bool lastSignal/*=false*/ )
+void VkLogPoller::stop()
 {
    if (m_timer->isActive())
       m_timer->stop();
-
-   if (lastSignal) {
-      /* emit final death throes... */
-      QTimer::singleShot( 5, this, SIGNAL(logUpdated()) );
-
-      /* ... and sometimes one just ain't enough... */
-      QTimer::singleShot( 5, this, SIGNAL(logUpdated()) );  // TODO: why?!
-   }
 }
 
 

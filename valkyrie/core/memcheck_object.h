@@ -75,7 +75,7 @@ private:
    bool runValgrind( QStringList vgflags );  // RM_Valgrind
    bool parseLogFile();                      // RM_Tool0
    bool mergeLogFiles();                     // RM_Tool1
-   bool runProcess( QStringList flags );
+   bool startProcess( QStringList flags );
 
 private slots:
    void processDone();

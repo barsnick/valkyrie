@@ -55,19 +55,22 @@ public:
    bool startDocument();
    bool endDocument();
 
-   // error handler
+   // reimplement error handlers
+   bool error( const QXmlParseException& exception );
    bool fatalError( const QXmlParseException& exception );
 
-   QString errorString();
-
-   bool finished;
+   /* only set if fatal error */
+   QString fatalMsg() { return m_fatalMsg; }
+   /* may have reached end of log even with fatal error */
+   bool finished() { return m_finished; }
 
 private:
    QDomDocument doc;
    VgLog* vglog;
    QDomNode node;
 
-   QString m_errorMsg;
+   QString m_fatalMsg;
+   bool m_finished;
 };
 
 

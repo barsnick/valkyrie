@@ -10,6 +10,8 @@
 #include "vglogreader.h"
 #include "vglog.h"
 
+#include <assert.h>
+
 /**********************************************************************/
 /* VgLogReader */
 VgLogReader::VgLogReader( VgLog* vglog )
@@ -62,7 +64,7 @@ VgLogHandler::VgLogHandler( VgLog* alog )
 {
    vglog = alog;
    node = doc;
-   finished = false;
+   m_finished = false;
 }
 
 VgLogHandler::~VgLogHandler()
@@ -119,7 +121,7 @@ bool VgLogHandler::endElement( const QString&, const QString&,
          with 2 V's attached to the same logfile, which doesn't get
          sorted out until the child does exec().
       */
-      finished = true;
+      m_finished = true;
    }
 
    return true;
@@ -150,11 +152,12 @@ bool VgLogHandler::characters( const QString&  ch )
 bool VgLogHandler::startDocument()
 {
    //   vkPrintErr("VgLogHandler::startDocument()\n");
+   assert(vglog != 0);
 
    doc = QDomDocument();
    node = doc;
-   m_errorMsg = QString();
-   finished = false;
+   m_fatalMsg = QString();
+   m_finished = false;
    return true;
 }
 
@@ -165,35 +168,41 @@ bool VgLogHandler::startDocument()
 bool VgLogHandler::endDocument()
 {
    //   vkPrintErr("VgLogHandler::endDocument()\n");
-   finished = true;
+   m_finished = true;
    if (node != doc)
       return false;
    return true;
 }
 
-bool VgLogHandler::fatalError( const QXmlParseException& exception )
+/* non-fatal error: just report it */
+bool VgLogHandler::error( const QXmlParseException& exception )
 {
-   //  vkPrintErr("fatalError\n");
-   m_errorMsg = exception.message() +
+//   vkPrintErr("VgLogHandler::error");
+   QString err = exception.message() +
       " (line: " + QString::number(exception.lineNumber()) +
       ", col: " + QString::number(exception.columnNumber()) + ")";
 
-   if (finished) {
-      /* If we finished before we got the error, this is probably the
-         result of Valgrind's fork-no-exec problem. */
-      m_errorMsg 
-         += "\nError after document closing tag.  This may be\n"
-            "caused by the Valgrinded application doing fork() but\n"
-            "not exec().  If so, ensure each fork() has a matching\n"
-            "exec() call.\n";
-   }
+   // printf("VgLogHandler::non-fatal error: %s", err.latin1());
 
-   return QXmlDefaultHandler::fatalError( exception );
+   return true; /* try to continue. */
 }
 
-QString VgLogHandler::errorString()
+bool VgLogHandler::fatalError( const QXmlParseException& exception )
 {
-   if (!m_errorMsg.isEmpty())
-      return m_errorMsg;
-   return QXmlDefaultHandler::errorString();
+   //  vkPrintErr("fatalError");
+   m_fatalMsg = exception.message() +
+      " (line: " + QString::number(exception.lineNumber()) +
+      ", col: " + QString::number(exception.columnNumber()) + ")";
+
+   if (m_finished) {
+      /* If we finished before we got the error, this is probably the
+         result of Valgrind's fork-no-exec problem. */
+      m_fatalMsg 
+         += "\nError after document closing tag.\nThis may be "
+            "caused by the Valgrinded application doing fork() but "
+            "not exec().  If so, ensure each fork() has a matching "
+            "exec() call.";
+   }
+
+   return false; /* don't continue parsing */
 }

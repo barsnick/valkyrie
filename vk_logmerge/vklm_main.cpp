@@ -95,7 +95,7 @@ bool parseLog( QString file_path, VgLog& vgLog )
    if (!ok) {
       VgLogHandler* hnd = reader.handler();
       vklmPrint( 0, "error parsing file '%s'", file_path.latin1() );
-      vklmPrint( 0, " - %s", hnd->errorString().latin1() );
+      vklmPrint( 0, " - %s", hnd->fatalMsg().latin1() );
       return false;
    }
 
