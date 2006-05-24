@@ -81,7 +81,13 @@ MemcheckView::MemcheckView( QWidget* parent, const char* name )
    lView->addColumn( "" );
    lView->header()->setStretchEnabled( true, 0 );
    lView->header()->hide();
-   QFont lview_fnt( "Adobe Courier", 9, QFont::Normal, false );
+   /* Works, but a bit small and difficult to read
+      Font lview_fnt( "Adobe Courier", 9, QFont::Normal, false );
+   */
+
+   /* Bigger, perhaps too big, but more visually pleasing. */
+   QFont lview_fnt( "Misc Fixed", 11, QFont::Normal, false );
+
    lview_fnt.setStyleHint( QFont::TypeWriter );
    lView->setFont( lview_fnt );
 

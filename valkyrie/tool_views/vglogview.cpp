@@ -698,7 +698,7 @@ SuppCountsItem::SuppCountsItem( VgOutputItem* parent,
    : VgOutputItem( parent, after, sc )
 {
    setExpandable( true );
-   setText( "Suppressions" );
+   setText( "Suppressed errors" );
 }
 
 void SuppCountsItem::setOpen( bool open )
