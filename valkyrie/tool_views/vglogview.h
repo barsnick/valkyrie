@@ -120,8 +120,7 @@ public:
               VgError err );
    void setOpen( bool open );
    void updateCount( QString count );
-   bool isLeak() { return error.isLeak(); }
-   VgError error;
+   bool isLeak() { return ((VgError*)&elem)->isLeak(); }
 
    /* mapping of error::kind to 3-letter acronyms */
    typedef QMap<QString, QString> AcronymMap;

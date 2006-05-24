@@ -802,7 +802,7 @@ void VgLogView::updateErrorItems( VgErrCounts ec )
    while ( item ) {
       if ( item->elem.elemType() == VgElement::ERROR ) {
          ErrorItem* err_item = (ErrorItem*)item;
-         VgError err = err_item->error;
+         VgError err = *((VgError*)&err_item->elem);
          if ( ! err.isLeak() ) {
             QString count = ec.getCount( err ).text();
             err_item->updateCount( count );
