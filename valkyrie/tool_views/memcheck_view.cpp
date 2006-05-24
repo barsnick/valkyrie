@@ -97,9 +97,8 @@ MemcheckView::MemcheckView( QWidget* parent, const char* name )
    connect( lView, SIGNAL(doubleClicked(QListViewItem*, const QPoint&, int)),
             this,  SLOT(launchEditor(QListViewItem*, const QPoint&, int)) );
 
-
-   QFont clientout_fnt( "Adobe Courier", 9, QFont::Normal, false );
-   clientout_fnt.setStyleHint( QFont::TypeWriter );
+//zz   QFont clientout_fnt( "Adobe Courier", 9, QFont::Normal, false );
+//zz   clientout_fnt.setStyleHint( QFont::TypeWriter );
 
    /* other tabs:
       - suppression editor?
@@ -115,7 +114,7 @@ void MemcheckView::setState( bool run )
    // TODO: suppedButton->setEnabled( !run );
    if ( run ) {       /* startup */
       savelogButton->setEnabled( false );
-      setCursor( QCursor(Qt::WaitCursor) );
+      setCursor( WaitCursor );
       lView->clear();
    } else {           /* finished */
       unsetCursor();
