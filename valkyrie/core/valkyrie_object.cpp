@@ -70,14 +70,18 @@ Valkyrie::Valkyrie()
            "valkyrie",   '\0',                 "show-butt-text", 
            "",           "true|false",         "true", 
            "Show toolbar text labels",  "",    urlValkyrie::toolLabels );
-   addOpt( FONT_SYSTEM,  VkOPTION::NOT_POPT,   VkOPTION::WDG_CHECK,
-           "valkyrie",   '\0',                 "use-system-font", 
+   addOpt( FNT_GEN_SYS,  VkOPTION::NOT_POPT,   VkOPTION::WDG_CHECK,
+           "valkyrie",   '\0',                 "font-gen-sys", 
            "",           "true|false",         "true", 
-           "Use default system font",  "",     urlValkyrie::userFont );
-   addOpt( FONT_USER,    VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
-           "valkyrie",   '\0',                 "user-font", 
+           "Use system default", "",           urlValkyrie::userFontGen );
+   addOpt( FNT_GEN_USR,  VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
+           "valkyrie",   '\0',                 "font-gen-user", 
            "",           "",                   "Luxi Sans,10,-1,5,50,0,0,0,0,0", 
-           "Choose Font",   "",                urlValkyrie::userFont );
+           "Choose Font",   "",                urlValkyrie::userFontGen );
+   addOpt( FNT_TOOL_USR, VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
+           "valkyrie",   '\0',                 "font-tool-user", 
+           "",           "",                   "Misc Fixed,11,-1,5,50,0,0,0,0,0", 
+           "Choose Font",   "",                urlValkyrie::userFontTool );
    addOpt( SRC_EDITOR,   VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
            "valkyrie",   '\0',                 "src-editor", 
            "",           "",                   BIN_EDITOR, 
@@ -135,8 +139,9 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
    case TOOLTIP:
    case PALETTE:
    case ICONTXT:
-   case FONT_SYSTEM:
-   case FONT_USER:
+   case FNT_GEN_SYS:
+   case FNT_GEN_USR:
+   case FNT_TOOL_USR:
    case SRC_LINES:
       return errval;
       break;

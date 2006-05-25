@@ -24,20 +24,19 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
    : OptionsPage( parent, obj, "valkyrie_options_page" )
 { 
    /* init the QIntDict list, resizing if necessary */
-   unsigned int numItems = 11;
+   unsigned int numItems = 12;
    m_itemList.resize( numItems );
 
    QVBoxLayout* vbox = new QVBoxLayout( this, m_margin, -1, "vbox" );
 
-   /* general prefs */
    QGroupBox* group1 = new QGroupBox( " Valkyrie Options ", this, "group1");
    ContextHelp::add( group1, urlValkyrie::optsPage );
    vbox->addWidget( group1, m_space );
 
-   /* vbox layout for group1; margin = 10; spacing = 25 */
+   /* vbox layout; margin = 10; spacing = 25 */
    QVBoxLayout* gvbox = new QVBoxLayout( group1, m_margin, 25, "gvbox" );
 
-   /* group1: preferences */
+   /* general prefs ------------------------------------------------- */
    m_itemList.insert( Valkyrie::TOOLTIP,                  /* checkbox */
                       optionWidget( Valkyrie::TOOLTIP, group1, false ) );
    m_itemList.insert( Valkyrie::ICONTXT,                  /* checkbox */
@@ -45,39 +44,27 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
    m_itemList.insert( Valkyrie::PALETTE,                  /* checkbox */
                       optionWidget( Valkyrie::PALETTE, group1, false ) );
 
-   m_itemList.insert( Valkyrie::FONT_SYSTEM,              /* checkbox */
-                      optionWidget( Valkyrie::FONT_SYSTEM, group1, false ));
-   connect( m_itemList[Valkyrie::FONT_SYSTEM], SIGNAL(changed(bool)),
-            this,   SLOT(fontClicked(bool)) );
-   m_itemList.insert( Valkyrie::FONT_USER,                /* line edit */
-                      optionWidget( Valkyrie::FONT_USER, group1, false ) );
-   LeWidget* fontLedit = ((LeWidget*)m_itemList[Valkyrie::FONT_USER]);
-   fontLedit->addButton( group1, this, SLOT(chooseFont()), "Choose:" );
-   fontLedit->setReadOnly( true );     /* don't allow direct editing */
+   /* fonts --------------------------------------------------------- */
+   m_itemList.insert( Valkyrie::FNT_GEN_SYS,              /* checkbox */
+                      optionWidget( Valkyrie::FNT_GEN_SYS, group1, false ));
+   m_itemList.insert( Valkyrie::FNT_GEN_USR,                /* line edit */
+                      optionWidget( Valkyrie::FNT_GEN_USR, group1, false ) );
+   LeWidget* fontGenLedit = ((LeWidget*)m_itemList[Valkyrie::FNT_GEN_USR]);
+   fontGenLedit->addButton( group1, this, SLOT(chooseGenFont()), "Choose:" );
+   fontGenLedit->setReadOnly( true );     /* don't allow direct editing */
    /* start up in correct state */
-   bool enable = vkConfig->rdBool("use-system-font", "valkyrie");
-   fontLedit->button()->setEnabled( !enable );
-   m_itemList[Valkyrie::FONT_USER]->widget()->setEnabled( !enable );
+   bool use_sys_font = vkConfig->rdBool("font-gen-sys", "valkyrie");
+   fontGenLedit->setDisabled( use_sys_font );
+   connect( m_itemList[Valkyrie::FNT_GEN_SYS], SIGNAL(changed(bool)),
+            m_itemList[Valkyrie::FNT_GEN_USR], SLOT(setDisabled(bool)) );
 
-   /* 1st grid layout for group1 */
-   int rows = 0;
-   int cols = 3;
-   QGridLayout* grid1 = new QGridLayout( gvbox, rows, cols, m_space );
-#if (QT_VERSION-0 >= 0x030200)
-   grid1->setRowSpacing( 0, m_topSpace );   /* blank top row */
-#else // QT_VERSION < 3.2
-   grid1->addRowSpacing( 0, m_topSpace );   /* blank top row */
-#endif
+   m_itemList.insert( Valkyrie::FNT_TOOL_USR,                /* line edit */
+                      optionWidget( Valkyrie::FNT_TOOL_USR, group1, false ) );
+   LeWidget* fontToolLedit = ((LeWidget*)m_itemList[Valkyrie::FNT_TOOL_USR]);
+   fontToolLedit->addButton( group1, this, SLOT(chooseToolFont()), "Choose:" );
+   fontToolLedit->setReadOnly( true );     /* don't allow direct editing */
 
-   grid1->addWidget( m_itemList[Valkyrie::TOOLTIP]->widget(), 1, 0 );
-   grid1->addWidget( m_itemList[Valkyrie::ICONTXT]->widget(), 1, 2 );
-   grid1->addWidget( m_itemList[Valkyrie::PALETTE]->widget(), 2, 2 );
-   grid1->addWidget( m_itemList[Valkyrie::FONT_SYSTEM ]->widget(), 2, 0 );
-   grid1->addMultiCellLayout( 
-                             m_itemList[Valkyrie::FONT_USER]->hlayout(), 3,3, 0,2 );
-
-   gvbox->addWidget( sep(group1,"sep1"), 10 );
-
+   /* core ---------------------------------------------------------- */
    m_itemList.insert( Valkyrie::SRC_LINES,       /* intspin */
                       optionWidget( Valkyrie::SRC_LINES, group1, true ) );
    m_itemList.insert( Valkyrie::SRC_EDITOR,      /* ledit + button */
@@ -96,38 +83,80 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
    LeWidget* binFlgsLedit = ((LeWidget*)m_itemList[Valkyrie::BIN_FLAGS]);
    connect(binFlgsLedit, SIGNAL(returnPressed()), this, SIGNAL(apply()));
 
-
    m_itemList.insert( Valkyrie::VG_EXEC,         /* ledit + button */
                       optionWidget(Valkyrie::VG_EXEC, group1, false ) );
    LeWidget* vgbinLedit = ((LeWidget*)m_itemList[Valkyrie::VG_EXEC]);
    vgbinLedit->addButton( group1, this, SLOT(getVgExec()) );
    vgbinLedit->setReadOnly( true );   /* don't allow direct editing */
 
-   /* 2nd grid layout for group1 */
-   rows = 0;
-   cols = 2;
-   QGridLayout* grid2 = new QGridLayout( gvbox, rows, cols, m_space );
-   grid2->addMultiCellLayout( m_itemList[Valkyrie::SRC_LINES]->hlayout(),  0,0, 0,1 );
-   grid2->addWidget( editLedit->button(),                       1, 0 );
-   grid2->addWidget( editLedit->widget(),                       1, 1 );
+
+   /* --------------------------------------------------------------- */
+   /* Note: not using opt_widget->hlayout()'s
+      because button width won't match qlabel width... */
+   int rows = 0;
+   int cols = 4;
+   QGridLayout* grid = new QGridLayout( gvbox, rows, cols, m_space );
+   grid->setColStretch(0, 0);
+   grid->setColStretch(1, 1);
+#if (QT_VERSION-0 >= 0x030200)
+   grid->setRowSpacing( 0, m_topSpace );   /* blank top row */
+#else // QT_VERSION < 3.2
+   grid->addRowSpacing( 0, m_topSpace );   /* blank top row */
+#endif
+
+   grid->addMultiCellWidget( m_itemList[Valkyrie::TOOLTIP]->widget(), 1,1, 0,1 );
+   grid->addWidget( m_itemList[Valkyrie::ICONTXT]->widget(), 1, 2 );
+   grid->addMultiCellWidget( m_itemList[Valkyrie::PALETTE]->widget(), 2,2, 0,1 );
+
+   grid->addMultiCellWidget( sep(group1,"sep0"), 3,3, 0,3 );
+#if (QT_VERSION-0 >= 0x030200)
+   grid->setRowSpacing( 3, 8 );
+#else // QT_VERSION < 3.2
+   grid->addRowSpacing( 3, 8 );
+#endif
+
+   /* --------------------------------------------------------------- */
+   QLabel* fntLblGen = new QLabel("General Font:", group1);
+   grid->addMultiCellWidget( fntLblGen, 4,4, 0,1 );
+   grid->addWidget( m_itemList[Valkyrie::FNT_GEN_SYS ]->widget(), 4, 2 );
+   grid->addWidget( fontGenLedit->button(),                       5, 0 );
+   grid->addMultiCellWidget( fontGenLedit->widget(),              5,5, 1,3 );
+
+   QLabel* fntLblTool = new QLabel("Tool Font:", group1);
+   grid->addMultiCellWidget( fntLblTool, 6,6, 0,1 );
+   grid->addWidget( fontToolLedit->button(),                      7, 0 );
+   grid->addMultiCellWidget( fontToolLedit->widget(),             7,7, 1,3 );
+
+   grid->addMultiCellWidget( sep(group1,"sep1"), 8,8, 0,3 );
+#if (QT_VERSION-0 >= 0x030200)
+   grid->setRowSpacing( 8, 8 );
+#else // QT_VERSION < 3.2
+   grid->addRowSpacing( 8, 8 );
+#endif
+
+   /* --------------------------------------------------------------- */
+   grid->addMultiCellLayout( m_itemList[Valkyrie::SRC_LINES]->hlayout(),  9,9, 0,3 );
+   grid->addWidget( editLedit->button(),                       10, 0 );
+   grid->addMultiCellWidget( editLedit->widget(),              10,10, 1,3 );
 
 #if (QT_VERSION-0 >= 0x030200)
-   grid2->setRowSpacing( 2, m_topSpace );
+   grid->setRowSpacing( 11, m_topSpace );
 #else // QT_VERSION < 3.2
-   grid2->addRowSpacing( 2, m_topSpace );
+   grid->addRowSpacing( 11, m_topSpace );
 #endif
-   grid2->addWidget( binLedit->button(),                        3, 0 );
-   grid2->addWidget( binLedit->widget(),                        3, 1 );
-   grid2->addWidget( binFlgsLedit->label(),                     4, 0 );
-   grid2->addWidget( binFlgsLedit->widget(),                    4, 1 );
+   grid->addWidget( binLedit->button(),                        12, 0 );
+   grid->addMultiCellWidget( binLedit->widget(),               12,12, 1,3 );
+   grid->addWidget( binFlgsLedit->label(),                     13, 0 );
+   grid->addMultiCellWidget( binFlgsLedit->widget(),           13,13, 1,3 );
 
 #if (QT_VERSION-0 >= 0x030200)
-   grid2->setRowSpacing( 5, m_topSpace );
+   grid->setRowSpacing( 14, m_topSpace );
 #else // QT_VERSION < 3.2
-   grid2->addRowSpacing( 5, m_topSpace );
+   grid->addRowSpacing( 14, m_topSpace );
 #endif
-   grid2->addWidget( vgbinLedit->button(),                      6, 0 );
-   grid2->addWidget( vgbinLedit->widget(),                      6, 1 );
+   grid->addWidget( vgbinLedit->button(),                      15, 0 );
+   grid->addMultiCellWidget( vgbinLedit->widget(),             15,15, 1,3 );
+
 
    vbox->addStretch( m_space );
    vk_assert( m_itemList.count() <= numItems );
@@ -137,7 +166,6 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
       connect(it.current(), SIGNAL(valueChanged( bool, OptionWidget * )),
               this,         SLOT(updateEditList( bool, OptionWidget * )));
    }
-
 }
 
 
@@ -168,18 +196,29 @@ bool ValkyrieOptionsPage::applyOptions( int optId )
       vkWin->toggleToolbarLabels();
    } break;
 
-   case Valkyrie::FONT_USER:
-   case Valkyrie::FONT_SYSTEM: {
+   case Valkyrie::FNT_GEN_USR:
+   case Valkyrie::FNT_GEN_SYS: {
       /* one or both of these could end up here on 'Apply'
          - so making sure not to apply changes more than once */
-      bool useSysFont = ((CkWidget*)m_itemList[Valkyrie::FONT_SYSTEM])->isOn();
+      bool useSysFont = ((CkWidget*)m_itemList[Valkyrie::FNT_GEN_SYS])->isOn();
       QFont fnt;
       if (useSysFont)
          fnt = vkConfig->defaultAppFont();
       else
-         fnt.fromString( m_itemList[Valkyrie::FONT_USER]->currValue() );
+         fnt.fromString( m_itemList[Valkyrie::FNT_GEN_USR]->currValue() );
       if (qApp->font() != fnt)
          qApp->setFont( fnt, true );
+   } break;
+
+   case Valkyrie::FNT_TOOL_USR: {
+      QFont fnt;
+      fnt.fromString( m_itemList[Valkyrie::FNT_TOOL_USR]->currValue() );
+
+      /* set font for all tool views */
+      ToolObjList tools = ((Valkyrie*)m_vkObj)->valgrind()->toolObjList();
+      for ( ToolObject* tool = tools.first(); tool; tool = tools.next() ) {
+         tool->view()->setToolFont( fnt );
+      }
    } break;
 
    case Valkyrie::PALETTE: {
@@ -200,28 +239,34 @@ bool ValkyrieOptionsPage::applyOptions( int optId )
 }
 
 
-/* dis/enable the button depending on state of checkbox */
-void ValkyrieOptionsPage::fontClicked( bool state )
-{ 
-   LeWidget* fontLedit = ((LeWidget*)m_itemList[Valkyrie::FONT_USER]);
-   fontLedit->widget()->setEnabled( !state );
-   fontLedit->button()->setEnabled( !state );
-}
-
-
 /* called by pbFont: conjures up a QFontDialog */
-void ValkyrieOptionsPage::chooseFont()
+void ValkyrieOptionsPage::chooseGenFont()
 {
-   LeWidget* fontLedit = ((LeWidget*)m_itemList[Valkyrie::FONT_USER]);
+   LeWidget* fontLedit = ((LeWidget*)m_itemList[Valkyrie::FNT_GEN_USR]);
 
    QFont afont;
    afont.fromString( fontLedit->initValue() );
    bool ok;
-   QFont user_font = QFontDialog::getFont( &ok, afont, this );
+   QFont font = QFontDialog::getFont( &ok, afont, this );
    if ( ok ) {
-      fontLedit->setCurrValue( user_font.toString() );
+      fontLedit->setCurrValue( font.toString() );
    } else {      /* user clicked cancel */
-      m_itemList[Valkyrie::FONT_SYSTEM]->reset();
+      m_itemList[Valkyrie::FNT_GEN_SYS]->reset();
+   }
+}
+
+
+/* called by pbFont: conjures up a QFontDialog */
+void ValkyrieOptionsPage::chooseToolFont()
+{
+   LeWidget* fontLedit = ((LeWidget*)m_itemList[Valkyrie::FNT_TOOL_USR]);
+
+   QFont afont;
+   afont.fromString( fontLedit->initValue() );
+   bool ok;
+   QFont font = QFontDialog::getFont( &ok, afont, this );
+   if ( ok ) {
+      fontLedit->setCurrValue( font.toString() );
    }
 }
 

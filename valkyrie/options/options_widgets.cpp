@@ -255,6 +255,13 @@ void LeWidget::addCurrValue( const QString& txt )
    }
 }
 
+void LeWidget::setDisabled( bool disable )
+{
+   m_ledit->setDisabled( disable );
+   if ( m_pb != 0 )
+      m_pb->setDisabled( disable );
+}
+
 void LeWidget::leChanged( const QString& txt )
 {
    m_currentValue = txt;

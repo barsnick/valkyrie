@@ -10,6 +10,7 @@
 
 #include "tool_view.h"
 #include "vk_utils.h"
+#include "vk_config.h"
 
 #include <qlayout.h>
 
@@ -26,8 +27,15 @@ ToolView::ToolView( QWidget* parent, const char* name )
 
    central = new QWidget( this );
    setCentralWidget( central );
+
+   setToolFont( vkConfig->rdFont( "font-tool-user", "valkyrie" ) );
 }
 
+void ToolView::setToolFont( QFont font )
+{
+   font.setStyleHint( QFont::TypeWriter );
+   central->setFont( font );
+}
 
 
 

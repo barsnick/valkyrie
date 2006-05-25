@@ -25,6 +25,8 @@ public:
    ToolView( QWidget* parent, const char* name );
    ~ToolView();
 
+   void setToolFont( QFont font ); /* sets font of central widget */
+
 public slots:
    virtual void toggleToolbarLabels(bool) = 0;
    /* called by the view's object */

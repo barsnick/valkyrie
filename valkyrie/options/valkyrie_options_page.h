@@ -22,8 +22,8 @@ public:
    bool applyOptions( int optId );
 
 private slots:
-   void chooseFont();
-   void fontClicked(bool);
+   void chooseGenFont();
+   void chooseToolFont();
    void checkEditor();
    void getBinary();
    void getVgExec();

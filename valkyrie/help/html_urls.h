@@ -33,7 +33,8 @@ namespace urlValkyrie {
    extern const char* optsPage;
    extern const char* toolTips;
    extern const char* toolLabels;
-   extern const char* userFont;
+   extern const char* userFontGen;
+   extern const char* userFontTool;
    extern const char* palette;
    extern const char* srcLines;
    extern const char* srcEditor;

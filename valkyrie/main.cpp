@@ -88,8 +88,8 @@ int main ( int argc, char* argv[] )
    app->setStyle( vkConfig->vkStyle() );
 
    /* font: allow user to specify an app-wide font setting ------------ */
-   if ( !vkConfig->rdBool( "use-system-font", "valkyrie" ) ) {
-      QFont vkfnt = vkConfig->rdFont( "user-font", "valkyrie" );
+   if ( !vkConfig->rdBool( "font-gen-sys", "valkyrie" ) ) {
+      QFont vkfnt = vkConfig->rdFont( "font-gen-user", "valkyrie" );
       app->setFont( vkfnt, true );
    }
 

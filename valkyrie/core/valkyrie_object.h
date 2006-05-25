@@ -47,7 +47,8 @@ public:
    enum vkOpts {
       HELP,        OPT_VERSION,   VGHELP,
       TOOLTIP,     PALETTE,   ICONTXT,
-      FONT_SYSTEM, FONT_USER, SRC_EDITOR, SRC_LINES,
+      FNT_GEN_SYS, FNT_GEN_USR, FNT_TOOL_USR,
+      SRC_EDITOR, SRC_LINES,
       VG_EXEC,      /* path to valgrind executable */
       /* FIRST_CMD_OPT */
       BINARY, BIN_FLAGS, VIEW_LOG, MERGE_EXEC, MERGE_LOGS,

@@ -138,6 +138,9 @@ public:
 signals:
    void returnPressed();
 
+public slots:
+   void setDisabled( bool disable );
+
 private slots:
    void leChanged(const QString& txt);
 

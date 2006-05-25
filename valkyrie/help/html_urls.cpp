@@ -34,7 +34,8 @@ namespace urlValkyrie {
    const char* optsPage     = "options_dialog.html#valkyrie";
    const char* toolTips     = "options_dialog.html#tool_tips";
    const char* toolLabels   = "options_dialog.html#tool_label";
-   const char* userFont     = "options_dialog.html#user_font";
+   const char* userFontGen  = "options_dialog.html#user_font_general";
+   const char* userFontTool = "options_dialog.html#user_font_tool";
    const char* palette      = "options_dialog.html#palette";
    const char* srcLines     = "options_dialog.html#src_lines";
    const char* srcEditor    = "options_dialog.html#src_editor";
