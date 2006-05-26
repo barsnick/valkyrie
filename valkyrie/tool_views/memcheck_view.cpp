@@ -226,7 +226,8 @@ void MemcheckView::mkToolBar()
    /* load-log(s) button ------------------------------------------------ */
    loadlogButton = new QToolButton( mcToolBar, "tb_load_log" );
    loadlogButton->setIconSet( QPixmap( open_log_xpm ) );
-   loadlogButton->setTextLabel( "Load Log" );
+   loadlogButton->setTextLabel( "&Load Log" );
+   loadlogButton->setAccel( ALT+Key_L );
 #if (QT_VERSION-0 >= 0x030200)
    loadlogButton->setTextPosition( QToolButton::BesideIcon );
 #else // QT_VERSION < 3.2
@@ -242,7 +243,8 @@ void MemcheckView::mkToolBar()
    /* merge-log(s) button ------------------------------------------------ */
    mrglogButton = new QToolButton( mcToolBar, "tb_merge_log" );
    mrglogButton->setIconSet( QPixmap( tool_run_xpm ) );
-   mrglogButton->setTextLabel( "Merge Logs" );
+   mrglogButton->setTextLabel( "&Merge Logs" );
+   mrglogButton->setAccel( ALT+Key_M );
 #if (QT_VERSION-0 >= 0x030200)
    mrglogButton->setTextPosition( QToolButton::BesideIcon );
 #else // QT_VERSION < 3.2
@@ -258,7 +260,8 @@ void MemcheckView::mkToolBar()
    /* save-log button --------------------------------------------------- */
    savelogButton = new QToolButton( mcToolBar, "tb_save_log" );
    savelogButton->setIconSet( QPixmap( save_log_xpm ) );
-   savelogButton->setTextLabel( "Save Log" );
+   savelogButton->setTextLabel( "&Save Log" );
+   savelogButton->setAccel( ALT+Key_S );
 #if (QT_VERSION-0 >= 0x030200)
    savelogButton->setTextPosition( QToolButton::BesideIcon );
 #else // QT_VERSION < 3.2
