@@ -91,6 +91,10 @@ Valkyrie::Valkyrie()
            "",           "1|10",               "2", 
            "Extra lines shown above/below the target line:", "",
            urlValkyrie::srcLines );
+   addOpt( BROWSER,      VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
+           "valkyrie",   '\0',                 "browser", 
+           "",           "",                   "", 
+           "Browser",    "",                   urlValkyrie::browser );
 
    /* path to valgrind executable (maybe found by configure) */
    addOpt( VG_EXEC,      VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
@@ -143,6 +147,7 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
    case FNT_GEN_USR:
    case FNT_TOOL_USR:
    case SRC_LINES:
+   case BROWSER:
       return errval;
       break;
 

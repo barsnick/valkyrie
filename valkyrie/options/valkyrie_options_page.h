@@ -26,6 +26,7 @@ private slots:
    void chooseToolFont();
    void checkEditor();
    void getBinary();
+   void getBrowser();
    void getVgExec();
 };
 

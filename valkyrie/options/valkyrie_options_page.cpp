@@ -43,6 +43,11 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
                       optionWidget( Valkyrie::ICONTXT, group1, false ) );
    m_itemList.insert( Valkyrie::PALETTE,                  /* checkbox */
                       optionWidget( Valkyrie::PALETTE, group1, false ) );
+   m_itemList.insert( Valkyrie::BROWSER,                  /* line edit */
+                      optionWidget( Valkyrie::BROWSER, group1, false ) );
+   LeWidget* brwsrLedit = ((LeWidget*)m_itemList[Valkyrie::BROWSER]);
+   brwsrLedit->addButton( group1, this, SLOT(getBrowser()) );
+   connect(brwsrLedit, SIGNAL(returnPressed()), this, SIGNAL(apply()));
 
    /* fonts --------------------------------------------------------- */
    m_itemList.insert( Valkyrie::FNT_GEN_SYS,              /* checkbox */
@@ -95,68 +100,81 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
       because button width won't match qlabel width... */
    int rows = 0;
    int cols = 4;
+   int i=0;
    QGridLayout* grid = new QGridLayout( gvbox, rows, cols, m_space );
    grid->setColStretch(0, 0);
    grid->setColStretch(1, 1);
 #if (QT_VERSION-0 >= 0x030200)
-   grid->setRowSpacing( 0, m_topSpace );   /* blank top row */
+   grid->setRowSpacing( i++, m_topSpace );   /* blank top row */
 #else // QT_VERSION < 3.2
-   grid->addRowSpacing( 0, m_topSpace );   /* blank top row */
+   grid->addRowSpacing( i++, m_topSpace );   /* blank top row */
 #endif
 
-   grid->addMultiCellWidget( m_itemList[Valkyrie::TOOLTIP]->widget(), 1,1, 0,1 );
-   grid->addWidget( m_itemList[Valkyrie::ICONTXT]->widget(), 1, 2 );
-   grid->addMultiCellWidget( m_itemList[Valkyrie::PALETTE]->widget(), 2,2, 0,1 );
+   grid->addMultiCellWidget( m_itemList[Valkyrie::TOOLTIP]->widget(), i,i, 0,1 );
+   grid->addWidget( m_itemList[Valkyrie::ICONTXT]->widget(), i++, 2 );
+   grid->addMultiCellWidget( m_itemList[Valkyrie::PALETTE]->widget(), i,i, 0,1 );
+   i++;
 
-   grid->addMultiCellWidget( sep(group1,"sep0"), 3,3, 0,3 );
+   grid->addWidget( brwsrLedit->button(),                             i, 0 );
+   grid->addMultiCellWidget( brwsrLedit->widget(),                    i,i, 1,3 );
+   i++;
+
+   grid->addMultiCellWidget( sep(group1,"sep0"), i,i, 0,3 );
 #if (QT_VERSION-0 >= 0x030200)
-   grid->setRowSpacing( 3, 8 );
+   grid->setRowSpacing( i++, 8 );
 #else // QT_VERSION < 3.2
-   grid->addRowSpacing( 3, 8 );
+   grid->addRowSpacing( i++, 8 );
 #endif
 
    /* --------------------------------------------------------------- */
    QLabel* fntLblGen = new QLabel("General Font:", group1);
-   grid->addMultiCellWidget( fntLblGen, 4,4, 0,1 );
-   grid->addWidget( m_itemList[Valkyrie::FNT_GEN_SYS ]->widget(), 4, 2 );
-   grid->addWidget( fontGenLedit->button(),                       5, 0 );
-   grid->addMultiCellWidget( fontGenLedit->widget(),              5,5, 1,3 );
+   grid->addMultiCellWidget( fntLblGen,                           i,i, 0,1 );
+   grid->addWidget( m_itemList[Valkyrie::FNT_GEN_SYS ]->widget(), i++, 2 );
+   grid->addWidget( fontGenLedit->button(),                       i, 0 );
+   grid->addMultiCellWidget( fontGenLedit->widget(),              i,i, 1,3 );
+   i++;
 
    QLabel* fntLblTool = new QLabel("Tool Font:", group1);
-   grid->addMultiCellWidget( fntLblTool, 6,6, 0,1 );
-   grid->addWidget( fontToolLedit->button(),                      7, 0 );
-   grid->addMultiCellWidget( fontToolLedit->widget(),             7,7, 1,3 );
+   grid->addMultiCellWidget( fntLblTool,                          i,i, 0,1 );
+   i++;
+   grid->addWidget( fontToolLedit->button(),                      i, 0 );
+   grid->addMultiCellWidget( fontToolLedit->widget(),             i,i, 1,3 );
+   i++;
 
-   grid->addMultiCellWidget( sep(group1,"sep1"), 8,8, 0,3 );
+   grid->addMultiCellWidget( sep(group1,"sep1"), i,i, 0,3 );
 #if (QT_VERSION-0 >= 0x030200)
-   grid->setRowSpacing( 8, 8 );
+   grid->setRowSpacing( i++, 8 );
 #else // QT_VERSION < 3.2
-   grid->addRowSpacing( 8, 8 );
+   grid->addRowSpacing( i++, 8 );
 #endif
 
    /* --------------------------------------------------------------- */
-   grid->addMultiCellLayout( m_itemList[Valkyrie::SRC_LINES]->hlayout(),  9,9, 0,3 );
-   grid->addWidget( editLedit->button(),                       10, 0 );
-   grid->addMultiCellWidget( editLedit->widget(),              10,10, 1,3 );
+   grid->addMultiCellLayout( m_itemList[Valkyrie::SRC_LINES]->hlayout(),  i,i, 0,3 );
+   i++;
+   grid->addWidget( editLedit->button(),                       i, 0 );
+   grid->addMultiCellWidget( editLedit->widget(),              i,i, 1,3 );
+   i++;
 
 #if (QT_VERSION-0 >= 0x030200)
-   grid->setRowSpacing( 11, m_topSpace );
+   grid->setRowSpacing( i++, m_topSpace );
 #else // QT_VERSION < 3.2
-   grid->addRowSpacing( 11, m_topSpace );
+   grid->addRowSpacing( i++, m_topSpace );
 #endif
-   grid->addWidget( binLedit->button(),                        12, 0 );
-   grid->addMultiCellWidget( binLedit->widget(),               12,12, 1,3 );
-   grid->addWidget( binFlgsLedit->label(),                     13, 0 );
-   grid->addMultiCellWidget( binFlgsLedit->widget(),           13,13, 1,3 );
+   grid->addWidget( binLedit->button(),                        i, 0 );
+   grid->addMultiCellWidget( binLedit->widget(),               i,i, 1,3 );
+   i++;
+   grid->addWidget( binFlgsLedit->label(),                     i, 0 );
+   grid->addMultiCellWidget( binFlgsLedit->widget(),           i,i, 1,3 );
+   i++;
 
 #if (QT_VERSION-0 >= 0x030200)
-   grid->setRowSpacing( 14, m_topSpace );
+   grid->setRowSpacing( i++, m_topSpace );
 #else // QT_VERSION < 3.2
-   grid->addRowSpacing( 14, m_topSpace );
+   grid->addRowSpacing( i++, m_topSpace );
 #endif
-   grid->addWidget( vgbinLedit->button(),                      15, 0 );
-   grid->addMultiCellWidget( vgbinLedit->widget(),             15,15, 1,3 );
-
+   grid->addWidget( vgbinLedit->button(),                      i, 0 );
+   grid->addMultiCellWidget( vgbinLedit->widget(),             i,i, 1,3 );
+   i++;
 
    vbox->addStretch( m_space );
    vk_assert( m_itemList.count() <= numItems );
@@ -306,6 +324,18 @@ void ValkyrieOptionsPage::getBinary()
    if ( !binfile.isEmpty() ) { /* user might have clicked Cancel */
       ((LeWidget*)m_itemList[Valkyrie::BINARY])->setCurrValue(binfile);
       applyOptions( Valkyrie::BINARY );
+   }
+}
+
+
+/* allows user to select default browser */
+void ValkyrieOptionsPage::getBrowser()
+{
+   QString brwsr = QFileDialog::getOpenFileName( QString::null,
+                                                 "All Files (*)", this, "fdlg", "Select Browser" );
+   if ( !brwsr.isEmpty() ) { /* user might have clicked Cancel */
+      ((LeWidget*)m_itemList[Valkyrie::BROWSER])->setCurrValue(brwsr);
+      applyOptions( Valkyrie::BROWSER );
    }
 }
 

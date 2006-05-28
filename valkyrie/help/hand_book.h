@@ -18,7 +18,25 @@
 #include <qtextbrowser.h>
 
 
-/* class HandBook ------------------------------------------------------ */
+/* class VkTextBrowser ---------------------------------------------- */
+/* Only used in order to catch 'linkClicked' signal and open a browser
+   for external links. */
+class VkTextBrowser :  public QTextBrowser
+{
+   Q_OBJECT
+ public:
+   VkTextBrowser ( QWidget * parent = 0, const char * name = 0 );
+
+ private slots:
+    void doLinkClicked ( const QString& link );
+
+ private:
+   bool launch_browser( const QString& url );
+   bool try_launch_browser(QString browser, const QString& link);
+};
+
+
+/* class HandBook --------------------------------------------------- */
 class HandBook : public QMainWindow
 {
    Q_OBJECT
@@ -39,7 +57,7 @@ private slots:
    void setBackwardAvailable( bool );
    void setForwardAvailable( bool );
    void textChanged();
-   void openUrl();
+   void openFile();
    void print();
    void pathSelected( const QString & );
    void historyChosen( int );
@@ -52,7 +70,7 @@ private:
 private:
    QString caption;
 
-   QTextBrowser* browser;
+   VkTextBrowser* browser;
    QComboBox* pathCombo;
 
    QString selectedURL;

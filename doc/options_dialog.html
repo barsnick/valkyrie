@@ -67,6 +67,14 @@ the <span><b class="command">current</b></span> option page, not all of them.</p
 <dd><p>Whether text labels should be shown next to buttons.  
     Applied application-wide.</p></dd>
 <dt>
+<a name="browser"></a><span><b class="command">Default Browser:</b></span>
+</dt>
+<dd><p>This determines the default browser to use on clicking an external link.<br>
+    If this option is empty (default), or fails to launch, a working
+    browser is looked for in the environment variable $BROWSER.
+    If that also fails, some well known browsers are tried.<br>
+    Example: mozilla -remote openUrl(%s,new-tab)</p></dd>
+<dt>
 <a name="user_font_general"></a><span><b class="command">General Font:</b></span>
 </dt>
 <dd><p>This is the general application font.  If the 'Using system default'

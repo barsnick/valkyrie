@@ -11,18 +11,132 @@
 #include "hand_book.h"
 #include "tb_handbook_icons.h"
 #include "vk_config.h"
+#include "vk_messages.h"
+#include "vk_utils.h"
 
+#include <qcursor.h>
 #include <qfiledialog.h>
 #include <qmenubar.h>
 #include <qpaintdevicemetrics.h>
 #include <qpainter.h>
 #include <qprinter.h>
+#include <qprocess.h>
 #include <qstatusbar.h>
 #include <qsimplerichtext.h>
 #include <qtoolbutton.h>
 
+#include <stdlib.h>           // getenv
 
 
+/* class VkTextBrowser ---------------------------------------------- */
+/* Only used in order to catch 'linkClicked' signal and open a browser
+   for external links. */
+VkTextBrowser::VkTextBrowser ( QWidget* parent, const char* name )
+   : QTextBrowser( parent, name )
+{
+   connect( this, SIGNAL(linkClicked(const QString&)),
+            this, SLOT(doLinkClicked(const QString&)) );
+}
+
+void VkTextBrowser::doLinkClicked ( const QString& link )
+{
+   if (link.startsWith("http://")) {
+      /* just reload same page */
+      reload();
+
+      /* try to launch a browser */
+      if ( !launch_browser( link ) ) {
+         vkPrintErr("Error: failed to startup a browser.");
+         vkError( this, "Browser Startup",
+                  "<p>Failed to startup a browser.<br> \
+                   Please set a browser in Options::Valkyrie::Browser</p>" );
+      }      
+   }
+}
+
+
+bool VkTextBrowser::try_launch_browser(QString browser, const QString& link)
+{
+   browser = browser.simplifyWhiteSpace();
+   QStringList args;
+   if (browser.find("%s") != -1) {
+      /* As per http://www.catb.org/~esr/BROWSER/ */
+      browser = browser.replace("%s", link);
+      browser = browser.replace("%%", "%");
+
+      /* TODO: this is necessary, but rather inadequate...
+         - what's the general solution? */
+      browser = browser.replace("\"", "");
+      args = QStringList::split(" ", browser );
+   } else {
+      args << browser << link;
+   }
+//   vkPrint(" args: '%s'\n", args.join(" |").latin1());
+   QProcess proc( args );
+   return proc.start();
+}
+
+
+bool VkTextBrowser::launch_browser(const QString& link)
+{
+   bool ok = false;
+   QApplication::setOverrideCursor(Qt::BusyCursor);
+   
+   /* try config::vk::browser */
+   QString rc_browser = vkConfig->rdEntry( "browser", "valkyrie" );
+   if (!rc_browser.isEmpty()) {
+      ok = try_launch_browser(rc_browser, link);
+      if (!ok) {
+         vkPrintErr("Error: Failed to launch browser '%s'",
+                    rc_browser.latin1());
+         vkPrintErr(" - trying other browsers.");
+         vkError( this, "Browser Startup",
+                  "<p>Failed to startup configured default browser '%s'.<br> \
+                   Please verify Options::Valkyrie::Browser.<br><br> \
+                   Going on to try other browsers... </p>",
+                  rc_browser.latin1() );
+      }
+   }
+
+   /* either no config val set, or it failed...
+      try env var $BROWSER */
+   if (!ok) {
+      QString env_browser = getenv("BROWSER");
+      if (!env_browser.isEmpty()) {
+         QStringList browsers = QStringList::split( ':', env_browser );
+         QStringList::iterator it;
+         for (it=browsers.begin(); it != browsers.end(); ++it ) {
+            if (ok = try_launch_browser(*it, link))
+               break;
+         }
+         if (!ok) {
+            vkPrintErr("Error: Failed to launch any browser in env var $BROWSER '%s'",
+                       env_browser.latin1());
+            vkPrintErr(" - trying other browsers.");
+         }
+      }
+   }
+
+   /* still nogo?
+      last resort: try preset list */
+   if (!ok) {
+      QStringList browsers;
+      browsers << "firefox" << "mozilla" << "konqueror" << "netscape";
+      QStringList::iterator it;
+      for (it=browsers.begin(); it != browsers.end(); ++it ) {
+         if (ok = try_launch_browser(*it, link))
+            break;
+      }
+   }
+
+   QApplication::restoreOverrideCursor();
+   return ok;
+} 
+
+
+
+
+/* class HandBook --------------------------------------------------- */
 HandBook::~HandBook() { }
 
 
@@ -37,7 +151,7 @@ HandBook::HandBook( QWidget* parent, const char* name )
    setDockEnabled( DockLeft, false );
    setDockEnabled( DockRight, false );
 
-   browser = new QTextBrowser( this );
+   browser = new VkTextBrowser( this );
    setCentralWidget( browser );
 
    mkMenuToolBars();
@@ -128,7 +242,7 @@ void HandBook::openUrl( const QString& url )
 { browser->setSource( url ); }
 
 
-void HandBook::openUrl()
+void HandBook::openFile()
 {
    QString fn = QFileDialog::getOpenFileName( vkConfig->vkdocDir(), 
                                               "Html Files (*.html *.htm);;All Files (*)", this );
@@ -271,7 +385,7 @@ void HandBook::mkMenuToolBars()
 
    /* file menu --------------------------------------------------------- */
    QPopupMenu* fileMenu = new QPopupMenu( this );
-   fileMenu->insertItem( "Open File",  this, SLOT( openUrl()  ) );
+   fileMenu->insertItem( "Open File",  this, SLOT( openFile()  ) );
    fileMenu->insertItem( "Print",      this, SLOT( print()     ) );
    fileMenu->insertSeparator();
    fileMenu->insertItem( "Close",      this, SLOT( close()     ) );
