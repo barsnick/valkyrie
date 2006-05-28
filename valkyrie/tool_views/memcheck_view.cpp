@@ -111,7 +111,7 @@ void MemcheckView::setState( bool run )
    // TODO: suppedButton->setEnabled( !run );
    if ( run ) {       /* startup */
       savelogButton->setEnabled( false );
-      setCursor( WaitCursor );
+      setCursor( QCursor( Qt::WaitCursor ) );
       lView->clear();
    } else {           /* finished */
       unsetCursor();
