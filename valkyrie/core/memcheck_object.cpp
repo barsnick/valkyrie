@@ -295,12 +295,12 @@ bool Memcheck::stop()
       /* TODO: make log parsing a VkProcess.  This will allow
          - valkyrie to stay responsive
          - the ability to interrupt the process if taking too long */
-      VK_DEBUG("TODO: Memcheck::stop(parse log)", name().latin1() );
+      VK_DEBUG("TODO: Memcheck::stop(parse log)" );
       break;
 
    case VkRunState::TOOL2:
       // TODO: stop merge 
-      VK_DEBUG("TODO: Memcheck::stop(merge logs)", name().latin1() );
+      VK_DEBUG("TODO: Memcheck::stop(merge logs)" );
       break;
 
    default:
