@@ -42,4 +42,8 @@ reference toc,title
   <xsl:attribute name="align">center</xsl:attribute>
 </xsl:attribute-set>
 
+<xsl:template match="br">
+   <xsl:element name="br"/>
+</xsl:template>
+
 </xsl:stylesheet>

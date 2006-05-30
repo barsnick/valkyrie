@@ -4,7 +4,6 @@
 # Makefile for building valkyrie's documentation
 #/trunk/doc/*.html
 #/trunk/doc/images/*.png
-#/trunk/doc/vg-html/*.html
 #/trunk/doc/xml/*.xml
 #/trunk/doc/xml/lib/*.xsl, .css
 # -------------------------------------------------------------------
