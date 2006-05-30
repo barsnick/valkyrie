@@ -19,7 +19,7 @@ class CachegrindOptionsPage : public OptionsPage
    Q_OBJECT
 public:
    CachegrindOptionsPage( QWidget* parent, VkObject* obj );
-   bool applyOptions( int optId );
+   void applyOption( int optId );
 
 private slots:
    void getPidFile();

@@ -73,10 +73,10 @@ Massif::Massif( int objId )
    called by parseCmdArgs() and gui option pages -------------------- */
 int Massif::checkOptArg( int optid, QString& argval )
 {
-   vk_assert( optid >= 0 && optid <= LAST_CMD_OPT );
+   vk_assert( optid >= 0 && optid < NUM_OPTS );
 
    int errval = PARSED_OK;
-   Option * opt = findOption( optid );
+   Option* opt = findOption( optid );
 
    switch ( optid ) {
 
@@ -92,6 +92,9 @@ int Massif::checkOptArg( int optid, QString& argval )
       /* how on earth can this be checked ? */
    case ALLOC_FN:
       break;
+
+   default:
+      vk_assert_never_reached();
    }
 
    return errval;

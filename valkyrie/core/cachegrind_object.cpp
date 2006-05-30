@@ -91,7 +91,7 @@ Cachegrind::Cachegrind( int objId )
    called by parseCmdArgs() and gui option pages -------------------- */
 int Cachegrind::checkOptArg( int optid, QString& argval )
 { 
-   vk_assert( optid >= 0 && optid <= LAST_CMD_OPT );
+   vk_assert( optid >= 0 && optid < NUM_OPTS );
 
    int errval = PARSED_OK;
    Option* opt = findOption( optid );
@@ -157,6 +157,8 @@ int Cachegrind::checkOptArg( int optid, QString& argval )
       } 
    } break;
 
+   default:
+      vk_assert_never_reached();
    }
 
    return errval;

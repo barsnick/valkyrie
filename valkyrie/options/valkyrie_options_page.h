@@ -19,12 +19,12 @@ class ValkyrieOptionsPage : public OptionsPage
    Q_OBJECT
 public:
    ValkyrieOptionsPage( QWidget* parent, VkObject* obj );
-   bool applyOptions( int optId );
+   void applyOption( int optId );
 
 private slots:
    void chooseGenFont();
    void chooseToolFont();
-   void checkEditor();
+   void getEditor();
    void getBinary();
    void getBrowser();
    void getVgExec();

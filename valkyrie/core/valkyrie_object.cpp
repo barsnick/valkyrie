@@ -132,6 +132,8 @@ Valkyrie::Valkyrie()
    called by parseCmdArgs() and gui option pages -------------------- */
 int Valkyrie::checkOptArg( int optid, QString& argval )
 { 
+   vk_assert( optid >= 0 && optid < NUM_OPTS );
+
    int errval = PARSED_OK;
    // Option* opt = findOption( optid );
 
@@ -151,7 +153,12 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
       return errval;
       break;
 
-   case SRC_EDITOR:
+   case SRC_EDITOR: {
+      QString ed_file = QStringList::split(" ", argval).first();
+      QString ed = binaryCheck( &errval, ed_file );
+      argval.replace( ed_file, ed );
+   } break;
+
    case MERGE_EXEC:
    case VG_EXEC:
       argval = binaryCheck( &errval, argval );
@@ -188,6 +195,9 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
    case VGHELP:
    case OPT_VERSION:
       break;
+
+   default:
+      vk_assert_never_reached();
    }
 
    return errval; 

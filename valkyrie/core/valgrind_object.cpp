@@ -233,7 +233,7 @@ Valgrind::Valgrind()
    called by parseCmdArgs() and gui option pages -------------------- */
 int Valgrind::checkOptArg( int optid, QString& argval )
 {
-   vk_assert( optid >= 0 && optid <= LAST_CMD_OPT );
+   vk_assert( optid >= 0 && optid < NUM_OPTS );
 
    int errval = PARSED_OK;
    Option* opt = findOption( optid );

@@ -70,8 +70,9 @@ public:
       DB_COMMAND,     // --db-command
       INPUT_FD,       // --input-fd
       MAX_SFRAME,     // --max-stackframe
-      LAST_CMD_OPT = MAX_SFRAME
+      NUM_OPTS
    };
+   unsigned int maxOptId() { return NUM_OPTS; }
 
    OptionsPage* createOptionsPage( OptionsWindow* parent ) {
       return (OptionsPage*)new ValgrindOptionsPage( parent, this );

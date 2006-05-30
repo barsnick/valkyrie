@@ -16,10 +16,6 @@
 #include <qfiledialog.h>
 
 #include "options_page.h"
-#include "valgrind_object.h"   /* Valgrind::enums */
-#include "valkyrie_object.h"   /* Valkyrie::enums */
-//#include "memcheck_object.h"
-//#include "massif_object.h"
 #include "vk_utils.h"
 #include "vk_config.h"
 #include "context_help.h"
@@ -133,8 +129,10 @@ bool OptionsPage::applyEdits()
 
    /* verify entries before committing them */
    for ( optw=m_editList.first(); optw; optw=m_editList.next() ) {
-      if ( !applyOptions( optw->id() ) )
+      if ( !checkOption( optw->id() ) )
          return false;
+      /* update any Valkyrie state dependent on this option */
+      applyOption( optw->id() );
    }
    
    /* if we got to here, then we passed all checks */
@@ -150,6 +148,33 @@ bool OptionsPage::applyEdits()
 
    vk_assert( m_mod == false );
    vk_assert( m_editList.isEmpty() == true );
+   return true;
+}
+
+
+/* check valid option via VkObject
+   argval may be altered by checks, so return it */
+bool OptionsPage::checkOption( unsigned int optId )
+{ 
+   vk_assert( optId < m_vkObj->maxOptId() );
+
+   QString argval = m_itemList[optId]->currValue();
+   /* argval may be altered by checkOptArg() */
+   int errval = m_vkObj->checkOptArg( optId, argval );
+   if ( errval != PARSED_OK ) {
+      vkError( this, "Invalid Entry", "%s:\n\"%s\"", 
+               parseErrString(errval),
+               m_itemList[optId]->currValue().latin1() );
+      m_itemList[optId]->cancelEdit();
+      return false;
+   }
+
+   /* argval may have been altered by checkOptArg(), e.g. a file path
+      - only applies to line-edit widgets. */
+   if ( argval != m_itemList[optId]->currValue() ) {
+      if ( m_itemList[optId]->isA("LeWidget") )
+         ((LeWidget*)m_itemList[optId])->setCurrValue( argval );
+   }
    return true;
 }
 

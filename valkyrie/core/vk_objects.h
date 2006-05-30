@@ -48,6 +48,9 @@ public:
    QString accelTitle()    const { return m_accelText;       }
    QKeySequence accelKey() const { return m_accel_Key;       }
 
+   /* return max number of opts */
+   virtual unsigned int maxOptId() = 0;
+
    /* check argval for this option, updating if necessary.
       called by parseCmdArgs() and gui option pages */
    virtual int checkOptArg(int optid, QString& argval ) = 0; 

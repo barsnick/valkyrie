@@ -47,8 +47,9 @@ public:
       AUTO,
       CONTEXT,
       INCLUDE,
-      LAST_CMD_OPT = INCLUDE 
+      NUM_OPTS
    };
+   unsigned int maxOptId() { return NUM_OPTS; }
 
    OptionsPage* createOptionsPage( OptionsWindow* parent ) {
       return (OptionsPage*)new CachegrindOptionsPage( parent, this );

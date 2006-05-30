@@ -113,6 +113,8 @@ Memcheck::Memcheck( int objId )
    called by parseCmdArgs() and gui option pages -------------------- */
 int Memcheck::checkOptArg( int optid, QString& argval )
 {
+   vk_assert( optid >= 0 && optid < NUM_OPTS );
+
    int errval = PARSED_OK;
    Option* opt = findOption( optid );
 
@@ -326,7 +328,6 @@ bool Memcheck::runValgrind( QStringList vgflags )
    QStringList::iterator it_str = vgflags.find("--log-file-exactly");
    if (it_str != vgflags.end())
       (*it_str) += ("=" + m_saveFname);
-
 #endif
   
    setRunState( VkRunState::VALGRIND );

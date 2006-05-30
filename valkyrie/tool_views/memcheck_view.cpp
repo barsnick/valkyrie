@@ -323,6 +323,7 @@ void MemcheckView::launchEditor( QListViewItem* lv_item, const QPoint&, int )
          return;
       }
 
+      /* get path,line for this frame */
       FrameItem* frame = (FrameItem*)curr_item->parent();
 
       QDomNodeList frame_details = frame->elem.childNodes();
@@ -341,16 +342,25 @@ void MemcheckView::launchEditor( QListViewItem* lv_item, const QPoint&, int )
       vk_assert( !path.isEmpty() );
 
       QString lineno = !line.isNull() ? line.text() : "";
-      vk_assert( !lineno.isEmpty() );
       
+      /* setup args to editor */
       QStringList args;
-      args << editor;                  /* /path/to/emacs, nedit, ...*/
-      if (!lineno.isEmpty())
-         args << "+"+ lineno;          /* +43  */
-      args << path;                    /* /home/../file.c  */
+      if (lineno.isEmpty()) {
+         /* remove any arg with "%n" in it */
+         args = QStringList::split(" ", editor);
+         QStringList lineargs = args.grep("%n");
+         QStringList::iterator it = lineargs.begin();
+         for (; it != lineargs.end(); ++it )
+            args.remove( *it );
+      } else {
+         editor.replace("%n", lineno);
+         args = QStringList::split(" ", editor);
+      }
+      args << path;
 
-      VKProcess* ed_proc = new VKProcess( args, this );
-      if (!ed_proc->start()) {
+      /* launch editor */
+      VKProcess ed_proc( args, this );
+      if (!ed_proc.start()) {
          VK_DEBUG("MemcheckView::launchEditor(): Failed to launch editor: %s",
                   args.join(" ").latin1());
          vkError( this, "Editor Launch",

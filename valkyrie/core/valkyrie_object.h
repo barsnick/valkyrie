@@ -52,8 +52,9 @@ public:
       VG_EXEC,      /* path to valgrind executable */
       /* FIRST_CMD_OPT */
       BINARY, BIN_FLAGS, VIEW_LOG, MERGE_EXEC, MERGE_LOGS,
-      LAST_CMD_OPT  = MERGE_LOGS
+      NUM_OPTS
    };
+   unsigned int maxOptId() { return NUM_OPTS; }
 
    OptionsPage* createOptionsPage( OptionsWindow* parent ) {
       return (OptionsPage*)new ValkyrieOptionsPage( parent, this );

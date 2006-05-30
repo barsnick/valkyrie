@@ -108,27 +108,17 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
 
 
 /* called when user clicks "Apply" / "Ok" / "Reset" buttons. */
-bool MemcheckOptionsPage::applyOptions( int optId )
+void MemcheckOptionsPage::applyOption( int optId )
 { 
-   vk_assert( optId <= Memcheck::LAST_CMD_OPT );
+   vk_assert( optId >= 0 && optId < Memcheck::NUM_OPTS );
 
-   /* check option */
-   QString argval = m_itemList[optId]->currValue();
-   int errval = m_vkObj->checkOptArg( optId, argval );
-   if ( errval != PARSED_OK ) {
-      vkInfo( this, "Invalid Entry", "%s:\n\"%s\"", 
-              parseErrString(errval), argval.latin1() );
-      m_itemList[optId]->cancelEdit();
-      return false;
-   }
+//   QString argval = m_itemList[optId]->currValue();
 
    /* apply option */
    switch ( optId ) {
    default:
       break;
    }
-
-   return true;
 }
 
 

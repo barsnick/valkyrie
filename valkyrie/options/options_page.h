@@ -25,7 +25,6 @@
 #include "options_widgets.h"
 
 
-
 /* class OptionsPage --------------------------------------------------- */
 class VkObject;
 class OptionsPage : public QWidget
@@ -41,7 +40,6 @@ public:
    bool isModified() { return m_mod; }
 
    void resetDefaults();
-   virtual bool applyOptions( int id ) = 0;
 
    /* init page on open */
    virtual void init() { /*do nothing*/ }
@@ -58,6 +56,10 @@ public slots:
 protected:
    QFrame* sep( QWidget* parent, const char* name );
    OptionWidget* optionWidget( int optid, QWidget* parent, bool mklabel );
+
+   bool checkOption( unsigned int optId );
+   /* apply option: update Valkyrie state dependent on this option */
+   virtual void applyOption( int id ) = 0;
 
 protected:
    bool m_mod; 

@@ -99,27 +99,17 @@ MassifOptionsPage::MassifOptionsPage( QWidget* parent, VkObject* obj )
 
 
 /* called when user clicks "Apply" / "Ok" / "Reset" buttons. */
-bool MassifOptionsPage::applyOptions( int optId )
+void MassifOptionsPage::applyOption( int optId )
 { 
-   vk_assert( optId <= Massif::LAST_CMD_OPT );
+   vk_assert( optId >= 0 && optId < Massif::NUM_OPTS );
 
-   /* check option */
-   QString argval = m_itemList[optId]->currValue();
-   int errval = m_vkObj->checkOptArg( optId, argval );
-   if ( errval != PARSED_OK ) {
-      vkError( this, "Invalid Entry", "%s:\n\"%s\"", 
-               parseErrString(errval), argval.latin1() );
-      m_itemList[optId]->cancelEdit();
-      return false;
-   }
+//   QString argval = m_itemList[optId]->currValue();
 
    /* apply option */
    switch ( optId ) {
    default:
       break;
    }
-
-   return true;
 }
 
 

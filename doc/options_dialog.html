@@ -108,7 +108,10 @@ the <span><b class="command">current</b></span> option page, not all of them.</p
 <dd><p>Memcheck-specific.  Specify the 
     <tt class="computeroutput">/path/to/your/favourite/editor</tt>.
     The editor is launched when a stack frame is double-clicked within 
-    Memcheck ToolView.</p></dd>
+    Memcheck ToolView.  A replacement string is defined: "%n", which
+    will be replaced with the target line number, when available, to
+    open up the editor on that line number.<br>
+    Example: "emacs +%n" => "emacs +21 /path/to/srcfile"</p></dd>
 <dt>
 <a name="binary"></a><span><b class="command">Binary:</b></span>
 </dt>

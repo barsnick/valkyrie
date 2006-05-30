@@ -19,7 +19,7 @@ class MassifOptionsPage : public OptionsPage
    Q_OBJECT
 public:
    MassifOptionsPage( QWidget* parent, VkObject* obj );
-   bool applyOptions( int optId );
+   void applyOption( int optId );
 };
 
 

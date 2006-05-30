@@ -69,7 +69,7 @@ fi
 
 # Check for source editor
 AC_ARG_WITH([editor],
-   [  --with-editor=PROGRAM   Source-code editor [[emacs|nedit]] ],
+   [  --with-editor=PROGRAM   Source-code editor [[PROGRAM=$EDITOR|emacs|nedit]] ],
    [ # given
       # TODO: proper way of handling both --xyz=/path/to/foo, and --xyz=foo ?
       if test -x $withval; then
@@ -85,18 +85,36 @@ AC_ARG_WITH([editor],
       # if !emacs && !nedit, give warning
       VK_ED_NAME=`echo $VK_EDITOR | sed "s/.*\///" | sed "s/-.*//"`
       if test "$VK_ED_NAME" != "emacs" && test "$VK_ED_NAME" != "nedit"; then
-         AC_MSG_WARN([Valkyrie not tested with editor '$withval'.])
+         AC_MSG_WARN([Unknown editor '$withval'.  If possible, setup an editor flag to go to the target line-number, where %n will be replaced with the line-number.])
       fi
    ],
    [ # not given
-      # flag not given: default to emacs/nedit
-      AC_PATH_PROGS([VK_EDITOR], [emacs nedit])
+      # flag not given: try $EDITOR
+      if test x"$EDITOR" != x ; then
+         if test -x $EDITOR; then
+	    # found absolute: just give msg
+	    AC_CHECK_FILE([$EDITOR])
+	    VK_EDITOR=$EDITOR
+	 else
+            # absolute not found: check $PATH
+            AC_PATH_PROG([VK_EDITOR], [$EDITOR])
+	 fi
+      fi
+      #if $EDITOR wasn't set, or failed check, try emacs|nedit
       if test x"$VK_EDITOR" = x ; then
-         # Editor not found
-         AC_MSG_WARN([No suitable editor found: may be configured at runtime.])
+        AC_PATH_PROGS([VK_EDITOR], [emacs nedit])
+        if test x"$VK_EDITOR" = x ; then
+           # Editor not found
+           AC_MSG_WARN([No suitable editor found: may be configured at runtime.])
+        fi
       fi
    ])
 
+#if emacs|nedit: add 'replacement' flags for line
+VK_ED_NAME=`echo $VK_EDITOR | sed "s/.*\///" | sed "s/-.*//"`
+if test "$VK_ED_NAME" = "emacs" || test "$VK_ED_NAME" == "nedit"; then
+   VK_EDITOR="$VK_EDITOR +%n"
+fi
 
 
 

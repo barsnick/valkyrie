@@ -43,8 +43,9 @@ public:
       ALLOC_FN,
       FORMAT,
       ALIGNMENT,
-      LAST_CMD_OPT  = ALIGNMENT
+      NUM_OPTS
    };
+   unsigned int maxOptId() { return NUM_OPTS; }
 
    OptionsPage* createOptionsPage( OptionsWindow* parent ) {
       return (OptionsPage*)new MassifOptionsPage( parent, this );

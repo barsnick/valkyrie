@@ -75,8 +75,8 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
    m_itemList.insert( Valkyrie::SRC_EDITOR,      /* ledit + button */
                       optionWidget(Valkyrie::SRC_EDITOR, group1, false ) );
    LeWidget* editLedit = ((LeWidget*)m_itemList[Valkyrie::SRC_EDITOR]);
-   editLedit->addButton( group1, this, SLOT(checkEditor()) );
-   editLedit->setReadOnly( true );  /* don't allow direct editing */
+   editLedit->addButton( group1, this, SLOT(getEditor()) );
+   connect(editLedit, SIGNAL(returnPressed()), this, SIGNAL(apply()));
 
    m_itemList.insert( Valkyrie::BINARY, 
                       optionWidget( Valkyrie::BINARY, group1, false ) );
@@ -188,19 +188,13 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
 
 
 /* called when user clicks "Apply" / "Ok" / "Reset" buttons.  */
-bool ValkyrieOptionsPage::applyOptions( int optId )
+void ValkyrieOptionsPage::applyOption( int optId )
 { 
-   vk_assert( optId <= Valkyrie::LAST_CMD_OPT );
+   vk_assert( optId >= 0 && optId < Valkyrie::NUM_OPTS );
 
-   /* check option */
-   QString argval = m_itemList[optId]->currValue();
-   int errval = m_vkObj->checkOptArg( optId, argval );
-   if ( errval != PARSED_OK ) {
-      vkError( this, "Invalid Entry", "%s:\n\"%s\"", 
-               parseErrString(errval), argval.latin1() );
-      m_itemList[optId]->cancelEdit();
-      return false;
-   }
+   OptionWidget* optWidg = m_itemList[optId];
+   vk_assert( optWidg != 0 );
+   QString argval = optWidg->currValue();
 
    /* apply option */
    switch ( optId ) {
@@ -249,11 +243,22 @@ bool ValkyrieOptionsPage::applyOptions( int optId )
       }
    } break;
 
+   case Valkyrie::SRC_EDITOR: {
+      /* if no "%n", give warning */
+      if (argval.find("%n") == -1) {
+         QFileInfo fi( QStringList::split(" ",argval ).first() );
+         if ( !fi.fileName().startsWith("emacs") && !fi.fileName().startsWith("nedit") ) {
+            vkInfo( this, "Unknown Source Editor",
+                    "If possible, set an editor flag to allow the \
+                     editor to be opened at a target line-number, \
+                     where %%n will be replaced with the line-number." );
+         }
+      }
+   } break;
+
    default:
       break;
    }
-
-   return true;
 }
 
 
@@ -289,10 +294,11 @@ void ValkyrieOptionsPage::chooseToolFont()
 }
 
 
-void ValkyrieOptionsPage::checkEditor()
+void ValkyrieOptionsPage::getEditor()
 {
    /* try and start up somewhere sensible */
-   QString ed_file = m_itemList[Valkyrie::SRC_EDITOR]->currValue();
+   QString ed = m_itemList[Valkyrie::SRC_EDITOR]->currValue();
+   QString ed_file = QStringList::split(" ", ed).first();
    QFileInfo fi( ed_file );
 
    QString ed_path = QFileDialog::getOpenFileName( fi.dirPath(),
@@ -301,18 +307,17 @@ void ValkyrieOptionsPage::checkEditor()
       return;
    }
 
-   /* let's see what we have here ... */
    fi.setFile( ed_path );
 
-   if ( fi.fileName() != "emacs" && fi.fileName() != "nedit" ) {
-      vkInfo( this, "Source Editor Warning",
-              "Valkyrie has not been tested with "
-              "editors other than Emacs and Nedit.<br>"
-              "Caveat emptor applies hereon in." );
+   ed = ed_path;
+   if ( fi.fileName().startsWith("emacs") ||
+        fi.fileName().startsWith("nedit") ) {
+      /* add go-to-line flag + replacement string (%n) */
+      ed += " +%n";
    }
 
-   ((LeWidget*)m_itemList[Valkyrie::SRC_EDITOR])->setCurrValue(ed_path);
-   applyOptions( Valkyrie::SRC_EDITOR );
+   ((LeWidget*)m_itemList[Valkyrie::SRC_EDITOR])->setCurrValue(ed);
+   checkOption( Valkyrie::SRC_EDITOR );
 }
 
 
@@ -323,7 +328,7 @@ void ValkyrieOptionsPage::getBinary()
                                                    "All Files (*)", this, "fdlg", "Select Executable" );
    if ( !binfile.isEmpty() ) { /* user might have clicked Cancel */
       ((LeWidget*)m_itemList[Valkyrie::BINARY])->setCurrValue(binfile);
-      applyOptions( Valkyrie::BINARY );
+      checkOption( Valkyrie::BINARY );
    }
 }
 
@@ -335,7 +340,7 @@ void ValkyrieOptionsPage::getBrowser()
                                                  "All Files (*)", this, "fdlg", "Select Browser" );
    if ( !brwsr.isEmpty() ) { /* user might have clicked Cancel */
       ((LeWidget*)m_itemList[Valkyrie::BROWSER])->setCurrValue(brwsr);
-      applyOptions( Valkyrie::BROWSER );
+      checkOption( Valkyrie::BROWSER );
    }
 }
 
@@ -360,7 +365,7 @@ void ValkyrieOptionsPage::getVgExec()
    /* quick and dirty check to see if we have an executable with rwx 
       permissions */
    vgbinLedit->setCurrValue( vg_exec_path );
-   if ( ! applyOptions( Valkyrie::VG_EXEC ) )
+   if ( ! checkOption( Valkyrie::VG_EXEC ) )
       return;
 
 
