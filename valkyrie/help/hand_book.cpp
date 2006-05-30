@@ -134,6 +134,12 @@ bool VkTextBrowser::launch_browser(const QString& link)
 } 
 
 
+/* overloaded to reload _with_ #mark */
+void VkTextBrowser::reload()
+{ setSource( source() ); }
+
+
+
 
 
 /* class HandBook --------------------------------------------------- */

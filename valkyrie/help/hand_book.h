@@ -27,6 +27,9 @@ class VkTextBrowser :  public QTextBrowser
  public:
    VkTextBrowser ( QWidget * parent = 0, const char * name = 0 );
 
+ public slots:
+    void reload();
+
  private slots:
     void doLinkClicked ( const QString& link );
 
