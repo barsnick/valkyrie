@@ -137,7 +137,11 @@ bool VkTextBrowser::launch_browser(const QString& link)
 
 
 /* class HandBook --------------------------------------------------- */
-HandBook::~HandBook() { }
+HandBook::~HandBook()
+{
+   /* save history + bookmarks */
+   save();
+}
 
 
 HandBook::HandBook( QWidget* parent, const char* name )
@@ -165,13 +169,14 @@ HandBook::HandBook( QWidget* parent, const char* name )
    paths << vkConfig->vkdocDir() << vkConfig->vgdocDir();
    browser->mimeSourceFactory()->setFilePath( paths );
 
-   /* default startup is with the index page loaded */
-   browser->setSource( "index.html" );
-
    connect( browser, SIGNAL( textChanged() ),
             this,    SLOT( textChanged() ) );
    connect( browser,     SIGNAL( highlighted( const QString&) ),
             statusBar(), SLOT( message( const QString&)) );
+
+   /* default startup is with the index page loaded */
+   QString home = vkConfig->vkdocDir() + "index.html";
+   browser->setSource( home );
 
    resize( 500, 600 );
    hide();
@@ -260,7 +265,7 @@ void HandBook::textChanged()
       setCaption( caption + " - " + browser->documentTitle() ) ;
    }
 
-   selectedURL = browser->context();
+   selectedURL = browser->context(); /* valkyrie or valgrind doc path */
 
    if ( !selectedURL.isEmpty() && pathCombo ) {
       bool exists = false;

@@ -352,8 +352,7 @@ void MainWindow::closeEvent( QCloseEvent *ce )
    }
 
    /* handbook is a top-level parent-less widget, so we have to
-      explicitly delete it - but save history + bookmarks first */
-   m_handBook->save();
+      explicitly delete it */
    delete m_handBook;
    m_handBook = 0;
 

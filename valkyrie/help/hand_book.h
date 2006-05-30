@@ -44,7 +44,6 @@ public:
    HandBook( QWidget* parent=0, const char* name="handbook" );
    ~HandBook();
 
-   void save();
    void openUrl( const QString& url );
 
 public slots:
@@ -65,6 +64,7 @@ private slots:
    void addBookmark();
 
 private:
+   void save();
    void mkMenuToolBars();
 
 private:
