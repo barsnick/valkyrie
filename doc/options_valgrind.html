@@ -88,15 +88,20 @@ click on the relevant widget.</p>
 <a name="supps_tab"></a>3.2.3. Suppressions Tab</h3></div></div>
 <div></div>
 </div>
-<p>On first-time install, the bottom listbox contains valgrind`s default 
-suppression files.  The top listbox only contains one file "default.supp".</p>
-<p>Right-clicking on either the top or bottom listbox will bring up a 
-popup menu allowing you to modify the list of files.</p>
-<p>Note: At the time of writing, Valgrind disallows the automatic 
-generation of suppressions, ie. the flag 
-<tt class="computeroutput">--gen-suppressions</tt> is ignored.  You can read 
-more about suppressions in the 
-<a href="vg-html/manual-core.suppress.html" target="_top">Valgrind Manual.</a></p>
+<p>Regardless of these settings, Valgrind's default suppressions (e.g. for glibc, xfree)
+ are always enabled.</p>
+<p>Because Valgrind does not yet support generating suppressions with XML output,
+you still have to generate suppressions by running your program through Valgrind directly,
+using the <tt class="computeroutput">--gen-suppressions</tt> flag.</p>
+<p>Once you have your suppressions, write them to a file 'myproject.supp', and put them either in your
+project directory.  Right-clicking on the top 'Suppression Dirs' listbox will allow you to add
+your project directory to those scanned for suppression files (files must end in .supp).</p>
+<p>Right-clicking on the 'Available' and 'Selected' listboxes allows you to choose what
+suppression files are currently active for the next Valgrind run</p>
+<p>The
+<a href="http://www.valgrind.org/docs/manual/manual.html">Valgrind User Manual</a> gives details on
+<a href="http://www.valgrind.org/docs/manual/manual-core.html#manual-core.suppress">Suppressing Errors</a>, and
+<a href="http://www.valgrind.org/docs/manual/mc-manual.html#mc-manual.suppfiles">Writing Suppression Files</a>.</p>
 </div>
 </div>
 <div>
