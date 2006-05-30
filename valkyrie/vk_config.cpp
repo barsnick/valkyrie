@@ -78,7 +78,6 @@ VkConfig::VkConfig() : QObject( 0, "vkConfig" )
 
    QString packagePath = VK_INSTALL_PREFIX;
    m_vkdocPath    = packagePath + VK_DOC_PATH;
-   m_vgdocPath    = packagePath + VG_DOC_PATH;
 
    m_vk_name      = PACKAGE;
    m_vk_Name      = PACKAGE_NAME;
@@ -129,8 +128,6 @@ const char* VkConfig::vgCopyright() { return m_vg_copyright.data(); }
 
 /* these fns return values held in private vars */
 QString VkConfig::vkdocDir()  { return m_vkdocPath; }
-QString VkConfig::vgdocDir()  { return m_vgdocPath; }
-/* rc paths (see config.h) */
 QString VkConfig::rcDir()     { return m_rcPath;    }
 QString VkConfig::dbaseDir()  { return m_dbasePath; }
 QString VkConfig::logsDir()   { return m_logsPath;  }

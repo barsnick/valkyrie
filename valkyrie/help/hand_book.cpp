@@ -172,11 +172,11 @@ HandBook::HandBook( QWidget* parent, const char* name )
 
    /* set the list of dirs to search when files are requested */
    QStringList paths;
-   paths << vkConfig->vkdocDir() << vkConfig->vgdocDir();
+   paths << vkConfig->vkdocDir();
    browser->mimeSourceFactory()->setFilePath( paths );
 
-   connect( browser, SIGNAL( textChanged() ),
-            this,    SLOT( textChanged() ) );
+   connect( browser, SIGNAL( sourceChanged(const QString&) ),
+            this,    SLOT( sourceChanged(const QString&) ) );
    connect( browser,     SIGNAL( highlighted( const QString&) ),
             statusBar(), SLOT( message( const QString&)) );
 
@@ -263,35 +263,28 @@ void HandBook::openFile()
 }
 
 
-void HandBook::textChanged()
+void HandBook::sourceChanged( const QString& url )
 {
-   if ( browser->documentTitle().isNull() ) {
-      setCaption( caption + " - " + browser->context() );
-   } else {
-      setCaption( caption + " - " + browser->documentTitle() ) ;
-   }
-
-   selectedURL = browser->context(); /* valkyrie or valgrind doc path */
-
-   if ( !selectedURL.isEmpty() && pathCombo ) {
-      bool exists = false;
+   if ( browser->documentTitle().isNull() )
+      setCaption( "Qt Example - Helpviewer - " + url );
+   else
+      setCaption( "Qt Example - Helpviewer - " + browser->documentTitle() ) ;
+   
+   if ( !url.isEmpty() && pathCombo ) {
+      bool exists = FALSE;
       int i;
-      for ( i=0; i<pathCombo->count(); ++i ) {
-         if ( pathCombo->text(i) == selectedURL ) {
-            exists = true;
+      for ( i = 0; i < pathCombo->count(); ++i ) {
+         if ( pathCombo->text( i ) == url ) {
+            exists = TRUE;
             break;
          }
       }
-
       if ( !exists ) {
-         pathCombo->insertItem( selectedURL, 0 );
+         pathCombo->insertItem( url, 0 );
          pathCombo->setCurrentItem( 0 );
-         mapHistory[ historyMenu->insertItem(selectedURL) ] = selectedURL;
-      } else {
-         pathCombo->setCurrentItem(i);
-      }
-
-      selectedURL = QString::null;
+         mapHistory[ historyMenu->insertItem( url ) ] = url;
+      } else
+         pathCombo->setCurrentItem( i );
    }
 }
 

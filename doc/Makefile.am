@@ -22,6 +22,10 @@ dist_doc_DATA = \
 	options_valgrind.html \
 	support.html \
 	tool-opts.html \
-	valkyrie.css
+	valkyrie.css \
+	vg-manual-core.html \
+	vg-manual-cg.html \
+	vg-manual-mc.html \
+	vg-manual-ms.html
 
-SUBDIRS = images vg-html 
+SUBDIRS = images

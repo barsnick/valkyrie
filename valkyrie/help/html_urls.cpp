@@ -64,72 +64,72 @@ namespace urlValkyrie {
 /* Valgrind core ------------------------------------------------------- */
 namespace urlVgCore { 
    /* valgrind's options page: tab Core */
-   const char* mainTool      = "manual-core.html#tool_name";
-   const char* verbosity     = "manual-core.html#verbosity";
-   const char* traceChild    = "manual-core.html#trace_children";
-   const char* trackFds      = "manual-core.html#track_fds";
-   const char* timeStamp     = "manual-core.html#time_stamp";
-   const char* xmlOutput     = "manual-core.html#xml_output";
-   const char* xmlComment    = "manual-core.html#xml_user_comment";
-   const char* freeGlibc     = "manual-core.html#free_glibc";
-   const char* showEmWarns   = "manual-core.html#show_emwarns";
-   const char* smcSupport    = "manual-core.html#smc_support";
-   const char* simHints      = "manual-core.html#simulation_hints";
-   const char* kernelVariant = "manual-core.html#kernel_variant";
+   const char* mainTool        = "vg-manual-core.html#tool_name";
+   const char* verbosity       = "vg-manual-core.html#verbosity";
+   const char* traceChild      = "vg-manual-core.html#trace_children";
+   const char* trackFds        = "vg-manual-core.html#track_fds";
+   const char* timeStamp       = "vg-manual-core.html#time_stamp";
+   const char* xmlOutput       = "vg-manual-core.html#xml_output";
+   const char* xmlComment      = "vg-manual-core.html#xml_user_comment";
+   const char* freeGlibc       = "vg-manual-core.html#free_glibc";
+   const char* showEmWarns     = "vg-manual-core.html#show_emwarns";
+   const char* smcSupport      = "vg-manual-core.html#smc_support";
+   const char* simHints        = "vg-manual-core.html#simulation_hints";
+   const char* kernelVariant   = "vg-manual-core.html#kernel_variant";
 
    /* valgrind's options page: tab Error Reporting */
-   const char* logToFd         = "manual-core.html#log2fd";
-   const char* logToFilePid    = "manual-core.html#log2file_pid";
-   const char* logToFile       = "manual-core.html#log2file";
-   const char* logFileQual     = "manual-core.html#log2file_qualifier";
-   const char* logToSocket     = "manual-core.html#log2socket";
-   const char* autoDemangle    = "manual-core.html#auto_demangle";
-   const char* numCallers      = "manual-core.html#num_callers";
-   const char* errorLimit      = "manual-core.html#error_limit";
-   const char* stackTraces     = "manual-core.html#stack_traces";
-   const char* genSuppressions = "manual-core.html#gen_supps";
-   const char* startDebugger   = "manual-core.html#attach_debugger";
-   const char* whichDebugger   = "manual-core.html#which_debugger";
-   const char* inputFd         = "manual-core.html#input_fd";
-   const char* maxSFrames      = "manual-core.html#max_frames";
+   const char* logToFd         = "vg-manual-core.html#log2fd";
+   const char* logToFilePid    = "vg-manual-core.html#log2file_pid";
+   const char* logToFile       = "vg-manual-core.html#log2file";
+   const char* logFileQual     = "vg-manual-core.html#log2file_qualifier";
+   const char* logToSocket     = "vg-manual-core.html#log2socket";
+   const char* autoDemangle    = "vg-manual-core.html#auto_demangle";
+   const char* numCallers      = "vg-manual-core.html#num_callers";
+   const char* errorLimit      = "vg-manual-core.html#error_limit";
+   const char* stackTraces     = "vg-manual-core.html#stack_traces";
+   const char* genSuppressions = "vg-manual-core.html#gen_supps";
+   const char* startDebugger   = "vg-manual-core.html#attach_debugger";
+   const char* whichDebugger   = "vg-manual-core.html#which_debugger";
+   const char* inputFd         = "vg-manual-core.html#input_fd";
+   const char* maxSFrames      = "vg-manual-core.html#max_frames";
 
    /* only used by Memcheck and Massif */
-   const char* Alignment       = "manual-core.html#alignment";
+   const char* Alignment       = "vg-manual-core.html#alignment";
 }
 
 
 /* Memcheck ------------------------------------------------------------ */
 namespace urlMemcheck { 
-   const char* Leakcheck = "mc-manual.html#leakcheck";
-   const char* Showreach = "mc-manual.html#showreach";
-   const char* UndefVal  = "mc-manual.html#undefvalerrs";
-   const char* Leakres   = "mc-manual.html#leakres";
-   const char* Freelist  = "mc-manual.html#freelist";
-   const char* gcc296    = "mc-manual.html#gcc296";
-   const char* Partial   = "mc-manual.html#partial";
+   const char* Leakcheck = "vg-manual-mc.html#leakcheck";
+   const char* Showreach = "vg-manual-mc.html#showreach";
+   const char* UndefVal  = "vg-manual-mc.html#undefvalerrs";
+   const char* Leakres   = "vg-manual-mc.html#leakres";
+   const char* Freelist  = "vg-manual-mc.html#freelist";
+   const char* gcc296    = "vg-manual-mc.html#gcc296";
+   const char* Partial   = "vg-manual-mc.html#partial";
 }
 
 
 /* Cachegrind ---------------------------------------------------------- */
 namespace urlCachegrind { 
-   const char* Cacheopts = "cg-manual.html#cg-manual.cgopts";
-   const char* Pid       = "cg-manual.html#pid";
-   const char* Sort      = "cg-manual.html#sort";
-   const char* Show      = "cg-manual.html#show";
-   const char* Threshold = "cg-manual.html#threshold";
-   const char* Auto      = "cg-manual.html#auto";
-   const char* Context   = "cg-manual.html#context";
-   const char* Include   = "cg-manual.html#include";
+   const char* Cacheopts = "vg-manual-cg.html#cg-manual.cgopts";
+   const char* Pid       = "vg-manual-cg.html#pid";
+   const char* Sort      = "vg-manual-cg.html#sort";
+   const char* Show      = "vg-manual-cg.html#show";
+   const char* Threshold = "vg-manual-cg.html#threshold";
+   const char* Auto      = "vg-manual-cg.html#auto";
+   const char* Context   = "vg-manual-cg.html#context";
+   const char* Include   = "vg-manual-cg.html#include";
 }
 
 
 /* Massif -------------------------------------------------------------- */
 namespace urlMassif { 
-   const char* Heap      = "ms-manual.html#heap";
-   const char* HeapAdmin = "ms-manual.html#heap-admin";
-   const char* Stacks    = "ms-manual.html#stacks";
-   const char* Depth     = "ms-manual.html#depth";
-   const char* AllocFn   = "ms-manual.html#alloc-fn";
-   const char* Format    = "ms-manual.html#format";
+   const char* Heap      = "vg-manual-ms.html#heap";
+   const char* HeapAdmin = "vg-manual-ms.html#heap-admin";
+   const char* Stacks    = "vg-manual-ms.html#stacks";
+   const char* Depth     = "vg-manual-ms.html#depth";
+   const char* AllocFn   = "vg-manual-ms.html#alloc-fn";
+   const char* Format    = "vg-manual-ms.html#format";
 }
 

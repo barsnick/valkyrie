@@ -86,7 +86,6 @@ public:
    const char* vgCopyright();
 
    /* these fns return values held in private vars ---------------------- */
-   QString vgdocDir();
    QString vkdocDir();
    QString rcDir();
    QString logsDir();
@@ -151,8 +150,6 @@ private:
    QFont m_defaultAppFont;
 
    QString m_vkdocPath;        /* path to valkyrie docs dir */
-   QString m_vgdocPath;        /* path to valgrind docs dir */
-
    QString m_rcPath;           /* path to ~/valkyrie=X.X.X dir */
    QString m_rcFileName;       /* where valkyrierc lives */
    QString m_logsPath;         /* path to log dir */

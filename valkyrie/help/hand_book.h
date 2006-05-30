@@ -58,7 +58,7 @@ protected:
 private slots:
    void setBackwardAvailable( bool );
    void setForwardAvailable( bool );
-   void textChanged();
+   void sourceChanged(const QString& url);
    void openFile();
    void print();
    void pathSelected( const QString & );
@@ -76,7 +76,6 @@ private:
    VkTextBrowser* browser;
    QComboBox* pathCombo;
 
-   QString selectedURL;
    QMap<int, QString> mapHistory;
    QMap<int, QString> mapBookmarks;
 

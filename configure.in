@@ -180,7 +180,6 @@ fi
 # valkyrie installation paths
 AC_DEFINE_UNQUOTED(VK_INSTALL_PREFIX, "$VK_INSTALL_PREFIX", [valkyrie install prefix])
 AC_DEFINE_UNQUOTED(VK_DOC_PATH,       "/doc/",              [valkyrie install doc path])
-AC_DEFINE_UNQUOTED(VG_DOC_PATH,       "/doc/vg-html/",      [valgrind install doc path])
 
 # valkyrie config paths
 AC_DEFINE_UNQUOTED(VK_CFG_DIR,   ".$PACKAGE",      [valkyrie config dir])
@@ -208,8 +207,6 @@ AC_OUTPUT(
    vk_logmerge/Makefile
    doc/Makefile
    doc/images/Makefile
-   doc/vg-html/Makefile
-   doc/vg-html/images/Makefile
 )
 
 #   tests/Makefile
