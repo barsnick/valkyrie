@@ -42,8 +42,7 @@ namespace urlValkyrie {
    const char* srcEditor    = "options_dialog.html#src_editor";
    const char* binary       = "options_dialog.html#binary";
    const char* binFlags     = "options_dialog.html#bin_flags";
-   const char* vgDir        = "options_dialog.html#valgrind_dir";
-   const char* suppDir      = "options_dialog.html#supps_dir";
+   const char* vgDir        = "options_dialog.html#valgrind";
 
    /* valgrind`s options page: tab Suppressions */
    const char* coreTab  = "options_valgrind.html#core_tab";

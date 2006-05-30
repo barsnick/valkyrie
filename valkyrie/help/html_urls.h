@@ -42,7 +42,6 @@ namespace urlValkyrie {
    extern const char* binary;
    extern const char* binFlags;
    extern const char* vgDir;
-   extern const char* suppDir;
    /* valgrind's options page */
    extern const char* coreTab;
    extern const char* errorTab;
