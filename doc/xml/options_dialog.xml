@@ -32,27 +32,50 @@ the <command>current</command> option page, not all of them.</para>
   <glossentry id="tool_tips">
     <glossterm><command>Show tooltips:</command></glossterm>
     <glossdef><para>Whether tooltips should be shown when the mouse 
-    pointer hovers over a widget.  Applied application-wide.</para>
+    pointer hovers over a widget.<br/>
+    Applied application-wide.</para>
     </glossdef>
   </glossentry>
 
   <glossentry id="tool_label">
     <glossterm><command>Show toolbar text labels:</command></glossterm>
-    <glossdef><para>Whether text labels should be shown next to buttons.  
-    Applied application-wide.</para></glossdef>
-  </glossentry>
-
-  <glossentry id="user_font">
-    <glossterm><command>Use default system font:</command></glossterm>
-    <glossdef><para>Whether Valkyrie should use your default window font 
-    or not.  Clicking "Choose" will bring up a font dialog to allow you to 
-    select an alternative font.  Applied application-wide.</para></glossdef>
+    <glossdef><para>Whether text labels should be shown next to buttons.
+    <br/>Applied application-wide.</para></glossdef>
   </glossentry>
 
   <glossentry id="palette">
     <glossterm><command>Use valkyrie`s palette:</command></glossterm>
     <glossdef><para>Whether Valkyrie should use your default window palette 
-    (aka "theme") or use her own.  Applied application-wide.</para></glossdef>
+    (aka "theme") or use her own.<br/>
+    Applied application-wide.</para></glossdef>
+  </glossentry>
+
+  <glossentry id="browser">
+    <glossterm><command>Default Browser:</command></glossterm>
+    <glossdef><para>This determines the default browser to use on
+    clicking an external link.  If this option is empty (default),
+    or fails to launch, a working browser is looked for in the
+    environment variable $BROWSER.  If that also fails, some well
+    known browsers are tried.<br/>
+    Example: mozilla -remote openUrl(%s,new-tab).</para></glossdef>
+  </glossentry>
+
+  <glossentry id="user_font_general">
+    <glossterm><command>General Font:</command></glossterm>
+    <glossdef><para>This is the general application font.
+    If the 'Using system default' checkbox is enabled, Valkyrie will use
+    your default system font.  If it is disabled, you can click "Choose"
+    to bring up a font dialog to allow you to select an alternative font.<br/>
+    Applied application-wide, except for the main display of the
+    tools.</para></glossdef>
+  </glossentry>
+
+  <glossentry id="user_font_tool">
+    <glossterm><command>Tool Font:</command></glossterm>
+    <glossdef><para>This font is used for the main display of the tools,
+    for example the treeview of memcheck.  Clicking "Choose" will bring
+    up a font dialog to allow you to select an alternative font.<br/>
+    Applied to all tools.</para></glossdef>
   </glossentry>
 
   <glossentry id="src_lines">
@@ -60,8 +83,9 @@ the <command>current</command> option page, not all of them.</para>
                line:</command></glossterm>
     <glossdef><para>Memcheck-specific.  This value specifies the number of 
     source code lines to be shown above and below the target source line when 
-    displaying errors in Memcheck ToolView.  Note that changing this value 
-    will not take effect until the next run.</para></glossdef>
+    displaying errors in Memcheck ToolView.<br/>
+    Note that changing this value will not take effect until the next
+    run.</para></glossdef>
   </glossentry>
 
   <glossentry id="src_editor">
@@ -69,7 +93,10 @@ the <command>current</command> option page, not all of them.</para>
     <glossdef><para>Memcheck-specific.  Specify the 
     <computeroutput>/path/to/your/favourite/editor</computeroutput>.
     The editor is launched when a stack frame is double-clicked within 
-    Memcheck ToolView.</para></glossdef>
+    Memcheck ToolView.  A replacement string "%n" is defined, which
+    will be replaced with the target line number, when available, to
+    open up the editor on that line number.<br/>
+    Example: "emacs +%n" => "emacs +21 /path/to/srcfile"</para></glossdef>
   </glossentry>
 
   <glossentry id="binary">
@@ -88,21 +115,11 @@ the <command>current</command> option page, not all of them.</para>
     <emphasis>--your-flags</emphasis> is stored here.</para></glossdef>
   </glossentry>
 
-  <glossentry id="valgrind_dir">
+  <glossentry id="valgrind">
     <glossterm><command>Valgrind:</command></glossterm>
-    <glossdef><para>This is the <emphasis>/path/to/valgrind</emphasis> which 
-    you specified when you configured and built Valkyrie.  It is shown here 
-    purely for information purposes.</para></glossdef>
-  </glossentry>
-
-  <glossentry id="supps_dir">
-    <glossterm><command>Supps Dir:</command></glossterm>
-    <glossdef><para>This is the 
-    <emphasis>/path/to/valgrind/suppressions/dir</emphasis> 
-    which you specified when you configured and built Valkyrie.  It is 
-    shown here purely for information purposes.</para>
-    <para>If you want to add/remove/change suppression files, see the 
-    <xref linkend="options_valgrind"/>.</para></glossdef>
+    <glossdef><para>This is the <emphasis>/path/to/valgrind</emphasis>.
+    You may change this to point to a different Valgrind
+    installation.</para></glossdef>
   </glossentry>
 
 </glosslist>
@@ -194,17 +211,28 @@ click on the relevant widget.</para>
 <sect2 id="supps_tab" xreflabel="Suppressions Tab">
 <title>Suppressions Tab</title>
 
-<para>On first-time install, the bottom listbox contains valgrind`s default 
-suppression files.  The top listbox only contains one file "default.supp".</para>
+<para>Regardless of these settings, Valgrind's default suppressions
+(e.g. for glibc, xfree) are always enabled.</para>
 
-<para>Right-clicking on either the top or bottom listbox will bring up a 
-popup menu allowing you to modify the list of files.</para>
+<para>Because Valgrind does not yet support generating suppressions with
+XML output, you still have to generate suppressions by running your
+program through Valgrind directly, using the
+<computeroutput>--gen-suppressions</computeroutput> flag.</para>
 
-<para>Note: At the time of writing, Valgrind disallows the automatic 
-generation of suppressions, ie. the flag 
-<computeroutput>--gen-suppressions</computeroutput> is ignored.  You can read 
-more about suppressions in the 
-<ulink url="vg-html/manual-core.suppress.html">Valgrind Manual.</ulink></para>
+<para>Once you have your suppressions, write them to a file
+'myproject.supp', and put them either in your project directory.
+Right-clicking on the top 'Suppression Dirs' listbox will allow you to
+add your project directory to those scanned for suppression files
+(files must end in .supp).</para>
+
+<para>Right-clicking on the 'Available' and 'Selected' listboxes allows
+you to choose what suppression files are currently active for the next
+Valgrind run</para>
+
+<para>The
+<ulink url="http://www.valgrind.org/docs/manual/manual.html">Valgrind User Manual</ulink> gives details on
+<ulink url="http://www.valgrind.org/docs/manual/manual-core.html#manual-core.suppress">Suppressing Errors</ulink> and
+<ulink url="http://www.valgrind.org/docs/manual/mc-manual.html#mc-manual.suppfiles">Writing Suppression Files</ulink>.</para>
 
 </sect2>
 
@@ -212,12 +240,11 @@ more about suppressions in the
  
 
 
-<sect1 id="tool-opts" xreflabel="Valgrind Tool Options Pages">
-<title>Valgrind Tool Options Pages</title>
+<sect1 id="tool-opts" xreflabel="Tool Options Pages">
+<title>Tool Options Pages</title>
 
 <para>There is an option page for each tool which is supported by 
-Valkyrie.  Currently, this is only Memcheck; although the pages for 
-Cachegrind and Massif have been implemented, they are not functional.</para>
+Valkyrie.</para>
 
 <para>To access valgrind`s manual for help on any of these options, click 
 on the <xref linkend="context_help"/> toolbutton and then click on 

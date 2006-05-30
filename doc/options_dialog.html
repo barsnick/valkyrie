@@ -33,7 +33,7 @@
 <dt><span class="sect2"><a href="options_valgrind.html#error_tab">3.2.2. Error Reporting Tab</a></span></dt>
 <dt><span class="sect2"><a href="options_valgrind.html#supps_tab">3.2.3. Suppressions Tab</a></span></dt>
 </dl></dd>
-<dt><span class="sect1"><a href="tool-opts.html">3.3. Valgrind Tool Options Pages</a></span></dt>
+<dt><span class="sect1"><a href="tool-opts.html">3.3. Tool Options Pages</a></span></dt>
 </dl>
 </div>
 <p>The Options dialog has a separate "pane" for Valkyrie and Valgrind,
@@ -60,58 +60,63 @@ the <span><b class="command">current</b></span> option page, not all of them.</p
 <a name="tool_tips"></a><span><b class="command">Show tooltips:</b></span>
 </dt>
 <dd><p>Whether tooltips should be shown when the mouse 
-    pointer hovers over a widget.  Applied application-wide.</p></dd>
+    pointer hovers over a widget.<br>
+    Applied application-wide.</p></dd>
 <dt>
 <a name="tool_label"></a><span><b class="command">Show toolbar text labels:</b></span>
 </dt>
-<dd><p>Whether text labels should be shown next to buttons.  
-    Applied application-wide.</p></dd>
-<dt>
-<a name="browser"></a><span><b class="command">Default Browser:</b></span>
-</dt>
-<dd><p>This determines the default browser to use on clicking an external link.<br>
-    If this option is empty (default), or fails to launch, a working
-    browser is looked for in the environment variable $BROWSER.
-    If that also fails, some well known browsers are tried.<br>
-    Example: mozilla -remote openUrl(%s,new-tab)</p></dd>
-<dt>
-<a name="user_font_general"></a><span><b class="command">General Font:</b></span>
-</dt>
-<dd><p>This is the general application font.  If the 'Using system default'
-    checkbox is enabled, Valkyrie will use your default system font.
-    If it is disabled, you can click "Choose" to bring up a font dialog to
-    allow you to select an alternative font.
-    Applied application-wide, except for the main display of the tools.</p></dd>
-<dt>
-<a name="user_font_tool"></a><span><b class="command">Tool Font:</b></span>
-</dt>
-<dd><p>This font is used for the main display of the tools,
-    for example the treeview of memcheck.
-    Clicking "Choose" will bring up a font dialog to allow you to 
-    select an alternative font.  Applied to all tools.</p></dd>
+<dd><p>Whether text labels should be shown next to buttons.
+    <br>Applied application-wide.</p></dd>
 <dt>
 <a name="palette"></a><span><b class="command">Use valkyrie`s palette:</b></span>
 </dt>
 <dd><p>Whether Valkyrie should use your default window palette 
-    (aka "theme") or use her own.  Applied application-wide.</p></dd>
+    (aka "theme") or use her own.<br>
+    Applied application-wide.</p></dd>
+<dt>
+<a name="browser"></a><span><b class="command">Default Browser:</b></span>
+</dt>
+<dd><p>This determines the default browser to use on
+    clicking an external link.  If this option is empty (default),
+    or fails to launch, a working browser is looked for in the
+    environment variable $BROWSER.  If that also fails, some well
+    known browsers are tried.<br>
+    Example: mozilla -remote openUrl(%s,new-tab).</p></dd>
+<dt>
+<a name="user_font_general"></a><span><b class="command">General Font:</b></span>
+</dt>
+<dd><p>This is the general application font.
+    If the 'Using system default' checkbox is enabled, Valkyrie will use
+    your default system font.  If it is disabled, you can click "Choose"
+    to bring up a font dialog to allow you to select an alternative font.<br>
+    Applied application-wide, except for the main display of the
+    tools.</p></dd>
+<dt>
+<a name="user_font_tool"></a><span><b class="command">Tool Font:</b></span>
+</dt>
+<dd><p>This font is used for the main display of the tools,
+    for example the treeview of memcheck.  Clicking "Choose" will bring
+    up a font dialog to allow you to select an alternative font.<br>
+    Applied to all tools.</p></dd>
 <dt>
 <a name="src_lines"></a><span><b class="command">Extra lines shown above/below the target 
                line:</b></span>
 </dt>
 <dd><p>Memcheck-specific.  This value specifies the number of 
     source code lines to be shown above and below the target source line when 
-    displaying errors in Memcheck ToolView.  Note that changing this value 
-    will not take effect until the next run.</p></dd>
+    displaying errors in Memcheck ToolView.<br>
+    Note that changing this value will not take effect until the next
+    run.</p></dd>
 <dt>
 <a name="src_editor"></a><span><b class="command">Source editor:</b></span>
 </dt>
 <dd><p>Memcheck-specific.  Specify the 
     <tt class="computeroutput">/path/to/your/favourite/editor</tt>.
     The editor is launched when a stack frame is double-clicked within 
-    Memcheck ToolView.  A replacement string is defined: "%n", which
+    Memcheck ToolView.  A replacement string "%n" is defined, which
     will be replaced with the target line number, when available, to
     open up the editor on that line number.<br>
-    Example: "emacs +%n" => "emacs +21 /path/to/srcfile"</p></dd>
+    Example: "emacs +%n" =&gt; "emacs +21 /path/to/srcfile"</p></dd>
 <dt>
 <a name="binary"></a><span><b class="command">Binary:</b></span>
 </dt>
@@ -127,22 +132,11 @@ the <span><b class="command">current</b></span> option page, not all of them.</p
     /path/to/your/exe --your-flags</tt> then 
     <span class="emphasis"><em>--your-flags</em></span> is stored here.</p></dd>
 <dt>
-<a name="valgrind_dir"></a><span><b class="command">Valgrind:</b></span>
+<a name="valgrind"></a><span><b class="command">Valgrind:</b></span>
 </dt>
-<dd><p>This is the <span class="emphasis"><em>/path/to/valgrind</em></span> which 
-    you specified when you configured and built Valkyrie.  It is shown here 
-    purely for information purposes.</p></dd>
-<dt>
-<a name="supps_dir"></a><span><b class="command">Supps Dir:</b></span>
-</dt>
-<dd>
-<p>This is the 
-    <span class="emphasis"><em>/path/to/valgrind/suppressions/dir</em></span> 
-    which you specified when you configured and built Valkyrie.  It is 
-    shown here purely for information purposes.</p>
-<p>If you want to add/remove/change suppression files, see the 
-    <a href="options_valgrind.html">Valgrind Options Page</a>.</p>
-</dd>
+<dd><p>This is the <span class="emphasis"><em>/path/to/valgrind</em></span>.
+    You may change this to point to a different Valgrind
+    installation.</p></dd>
 </dl></div>
 </div>
 </div>

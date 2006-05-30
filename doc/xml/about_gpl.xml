@@ -7,7 +7,7 @@
   <artheader><title>The GNU General Public License</title></artheader>
 
     <literallayout>
-      <xi:include href="../../LICENSE.GPL"
+      <xi:include href="../../COPYING"
           parse="text"
           xmlns:xi="http://www.w3.org/2001/XInclude" />
     </literallayout>

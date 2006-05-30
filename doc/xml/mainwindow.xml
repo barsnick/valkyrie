@@ -28,12 +28,14 @@ which are below.</para>
 
   <listitem id="stop_button">
     <para><command>File->Stop:</command></para>
-    <para>This option will be disabled unless a process is in the middle of 
-    being run.</para>
+    <para>This option will be disabled unless a process is currently
+    running.</para>
     <para>Selecting this option will cause a dialog to pop up asking if you 
     are sure you want to abort the run; selecting "Abort" will terminate the
     current process.</para>
-    <para>The "Stop" toolbutton is a shortcut to this menu options.</para>
+    <para>The "Stop" toolbutton is a shortcut to this menu option.</para>
+    <para>Note: Not all processes can be stopped: for example
+    loading/saving a file.</para>
   </listitem>
 
   <listitem>
@@ -124,10 +126,9 @@ which are below.</para>
     on any widget anywhere within Valkyrie will bring up the "Handbook" 
     at the relevant page, providing instant help without having to trawl 
     through the manual.</para>
-    <para>A useful feature is the context help which is available for the 
-    <xref linkend="options_dialog"/> box.  Clicking on any widget in the 
-    Options dialog will show you the relevant section of either Valgrind's 
-    or Valkyrie's manual.</para>
+    <para>This is particularly useful for the
+    <xref linkend="options_dialog"/> box: Clicking on a option widget
+    will take you directly to the relevant section of the manual.</para>
   </listitem>
 </itemizedlist>
 
