@@ -3,10 +3,10 @@
 <!ENTITY vk-url      "www.open-works.co.uk/projects/valkyrie.html">
 <!ENTITY vk-author   "OpenWorks LLP">
 <!ENTITY vk-email    "info@open-works.co.uk">
-<!ENTITY vk-lifespan "2000-2005">
+<!ENTITY vk-lifespan "2000-2006">
 
 <!-- valkyrie release + version stuff -->
-<!ENTITY rel-type    "Development release">
-<!ENTITY rel-version "1.1.0">
-<!ENTITY rel-date    "November 27 2005">
+<!ENTITY rel-type    "Release version">
+<!ENTITY rel-version "1.2.0">
+<!ENTITY rel-date    "(not yet released)">
 
