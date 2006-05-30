@@ -40,15 +40,19 @@
 as well as for each Valgrind tool.  Any flag or option which can be 
 set on the command line is available for modification via this dialog.</p>
 <p>On first-time startup, all options are set to their defaults.  
-If you subsequently change any of these, for example by giving the 
-following on the command line:</p>
+These can be changed via both the GUI and the command-line, but
+these changes are only stored for the next session by selecting
+"Options::Save as Default".<br>
+For example, by giving the following command:</p>
 <pre class="programlisting">
   valkyrie --show-reachable=yes /bin/ls -lF
 </pre>
-<p>then the value of the argument will be saved, and the option will 
-then be set to this value until you specifically change it again.</p>
-<p>Note: choosing "Reset Defaults" only resets the default values for
-the <span><b class="command">current</b></span> option page, not all of them.</p>
+<p>then the values of the various arguments will be set in the
+appropriate option widgets.  These particular values will only be saved
+for the next Valkyrie startup if Options::Save as Default" is selected.
+</p>
+<p>Note: choosing "Defaults" resets the <span><b class="command">current</b></span>
+option page to the installation defaults, not all option pages.</p>
 <div class="sect1" lang="en">
 <div class="titlepage">
 <div><div><h2 class="title" style="clear: both">
@@ -81,7 +85,7 @@ the <span><b class="command">current</b></span> option page, not all of them.</p
     or fails to launch, a working browser is looked for in the
     environment variable $BROWSER.  If that also fails, some well
     known browsers are tried.<br>
-    Example: mozilla -remote openUrl(%s,new-tab).</p></dd>
+    Example: "mozilla -remote openUrl(%s,new-tab)".</p></dd>
 <dt>
 <a name="user_font_general"></a><span><b class="command">General Font:</b></span>
 </dt>
@@ -116,7 +120,7 @@ the <span><b class="command">current</b></span> option page, not all of them.</p
     Memcheck ToolView.  A replacement string "%n" is defined, which
     will be replaced with the target line number, when available, to
     open up the editor on that line number.<br>
-    Example: "emacs +%n" =&gt; "emacs +21 /path/to/srcfile"</p></dd>
+    Example: "emacs +%n" =&gt; "emacs +21 /path/to/srcfile".</p></dd>
 <dt>
 <a name="binary"></a><span><b class="command">Binary:</b></span>
 </dt>
