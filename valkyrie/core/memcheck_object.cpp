@@ -668,13 +668,6 @@ bool Memcheck::saveParsedOutput( QString& fname )
    vk_assert( view() != 0 );
    vk_assert( !fname.isEmpty() );
 
-   /* checks on destination fname */
-   if ( fname.find('/') == -1 ) {
-      /* no abs or rel path given, so save in default dir */
-      /* TODO: Not sure about this...
-         - normally, even if no './' is given, it is still implied... */
-      fname = vkConfig->logsDir() + fname;
-   }
    /* make sure path is absolute */
    fname = QFileInfo( fname ).absFilePath();
 
