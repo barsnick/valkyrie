@@ -16,6 +16,7 @@ dist_doc_DATA = \
 	mainwindow.html \
 	mainwindow.status_msg.html \
 	mainwindow.tool_bar.html \
+	mainwindow.vg_ctl_tool_bar.html \
 	mainwindow.tool_view.html \
 	manual.html \
 	options_dialog.html \

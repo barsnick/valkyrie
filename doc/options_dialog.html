@@ -6,7 +6,7 @@
 <meta name="generator" content="DocBook XSL Stylesheets V1.65.1">
 <link rel="home" href="index.html" title="Valkyrie Documentation">
 <link rel="up" href="manual.html" title="Valkyrie User Manual">
-<link rel="previous" href="mainwindow.status_msg.html" title="2.5. Status Messages">
+<link rel="previous" href="mainwindow.status_msg.html" title="2.6. Status Messages">
 <link rel="next" href="options_valgrind.html" title="3.2. Valgrind Options Page">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -36,23 +36,26 @@
 <dt><span class="sect1"><a href="tool-opts.html">3.3. Tool Options Pages</a></span></dt>
 </dl>
 </div>
-<p>The Options dialog has a separate "pane" for Valkyrie and Valgrind,
-as well as for each Valgrind tool.  Any flag or option which can be 
-set on the command line is available for modification via this dialog.</p>
-<p>On first-time startup, all options are set to their defaults.  
-These can be changed via both the GUI and the command-line, but
-these changes are only stored for the next session by selecting
-"Options::Save as Default".<br>
-For example, by giving the following command:</p>
+<p>The Options dialog has a separate "pane" for Valkyrie and
+Valgrind, as well as for each (supported) Valgrind tool.
+Any flag or option which can be set on the command line is available
+for modification via this dialog.  In addition, Valkyrie has a
+number of preference options that can only be set via this dialog.
+</p>
+<p>On first-time startup, all options are set to their installation
+defaults.  These can be changed via both the GUI and the command-line,
+but these changes are only stored to disk for the next session by
+selecting "Options::Save as Default".  For example, by giving the
+following command:</p>
 <pre class="programlisting">
   valkyrie --show-reachable=yes /bin/ls -lF
 </pre>
 <p>then the values of the various arguments will be set in the
 appropriate option widgets.  These particular values will only be saved
-for the next Valkyrie startup if Options::Save as Default" is selected.
-</p>
-<p>Note: choosing "Defaults" resets the <span><b class="command">current</b></span>
-option page to the installation defaults, not all option pages.</p>
+for the next Valkyrie startup if Options::Save as Default" is
+subsequently selected.</p>
+<p>Note: choosing "Defaults" resets the current option page to the
+installation defaults.  Other option pages are not affected.</p>
 <div class="sect1" lang="en">
 <div class="titlepage">
 <div><div><h2 class="title" style="clear: both">
@@ -78,13 +81,14 @@ option page to the installation defaults, not all option pages.</p>
     (aka "theme") or use her own.<br>
     Applied application-wide.</p></dd>
 <dt>
-<a name="browser"></a><span><b class="command">Default Browser:</b></span>
+<a name="browser"></a><span><b class="command">Browser:</b></span>
 </dt>
 <dd><p>This determines the default browser to use on
     clicking an external link.  If this option is empty (default),
     or fails to launch, a working browser is looked for in the
     environment variable $BROWSER.  If that also fails, some well
-    known browsers are tried.<br>
+    known browsers are tried.  If a '-remote' command is given,
+    the "%s" string is replaced with the targed url.<br>
     Example: "mozilla -remote openUrl(%s,new-tab)".</p></dd>
 <dt>
 <a name="user_font_general"></a><span><b class="command">General Font:</b></span>
@@ -114,12 +118,12 @@ option page to the installation defaults, not all option pages.</p>
 <dt>
 <a name="src_editor"></a><span><b class="command">Source editor:</b></span>
 </dt>
-<dd><p>Memcheck-specific.  Specify the 
+<dd><p>Specify the 
     <tt class="computeroutput">/path/to/your/favourite/editor</tt>.
-    The editor is launched when a stack frame is double-clicked within 
-    Memcheck ToolView.  A replacement string "%n" is defined, which
-    will be replaced with the target line number, when available, to
-    open up the editor on that line number.<br>
+    In Memcheck, the editor is launched when a stack frame is
+    double-clicked within Memcheck ToolView.  A replacement string
+    "%n" is defined, which will be replaced with the target line number,
+    when available, to open up the editor on that line number.<br>
     Example: "emacs +%n" =&gt; "emacs +21 /path/to/srcfile".</p></dd>
 <dt>
 <a name="binary"></a><span><b class="command">Binary:</b></span>
@@ -139,8 +143,7 @@ option page to the installation defaults, not all option pages.</p>
 <a name="valgrind"></a><span><b class="command">Valgrind:</b></span>
 </dt>
 <dd><p>This is the <span class="emphasis"><em>/path/to/valgrind</em></span>.
-    You may change this to point to a different Valgrind
-    installation.</p></dd>
+    You may change this to point to a different Valgrind executable.</p></dd>
 </dl></div>
 </div>
 </div>
@@ -148,7 +151,7 @@ option page to the installation defaults, not all option pages.</p>
 <br><table class="nav" width="100%" cellspacing="3" cellpadding="2" border="0" summary="Navigation footer">
 <tr>
 <td rowspan="2" width="40%" align="left">
-<a accesskey="p" href="mainwindow.status_msg.html">&lt;&lt; 2.5. Status Messages</a> </td>
+<a accesskey="p" href="mainwindow.status_msg.html">&lt;&lt; 2.6. Status Messages</a> </td>
 <td width="20%" align="center"><a accesskey="u" href="manual.html">Up</a></td>
 <td rowspan="2" width="40%" align="right"> <a accesskey="n" href="options_valgrind.html">3.2. Valgrind Options Page &gt;&gt;</a>
 </td>

@@ -1,4 +1,0 @@
-need to doc that if no path given for log file,
-defaults to valkyrie log dir (set in config)
-_not_ (the expected) current dir
-

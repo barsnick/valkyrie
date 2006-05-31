@@ -25,7 +25,7 @@
 </div>
 <p>Valgrind`s options page has been divided into three areas which 
 reflect the split between Core options, Error Reporting options, and 
-suppressions.</p>
+Suppressions.</p>
 <p>To access valgrind`s manual for help on any of these options, 
 click on the <a href="mainwindow.html#context_help">Context Help</a> toolbutton and then 
 click on the relevant widget.</p>
@@ -37,23 +37,34 @@ click on the relevant widget.</p>
 </div>
 <div class="glosslist"><dl>
 <dt>
-<a name="verbosity"></a><span><b class="command">Verbosity level:</b></span>
+<a name="tool_name"></a><span><b class="command">Main Tool: (disabled)</b></span>
 </dt>
-<dd><p><span><b class="command">Verbosity level</b></span>: when generating 
-      XML output, the verbosity level is set to 1.  Also see the next 
-      entry.</p></dd>
+<dd><p>Valkyrie currently only supports Memcheck.</p></dd>
 <dt>
-<a name="xml_format"></a><span><b class="command">Output in xml format:</b></span>
+<a name="verbosity"></a><span><b class="command">Verbosity level: (disabled)</b></span>
+</dt>
+<dd><p>Valgrind presets this to 1 for generating XML
+    output.  See next entry.</p></dd>
+<dt>
+<a name="xml_format"></a><span><b class="command">Output in XML format: (disabled)</b></span>
 </dt>
 <dd><p>Since Memcheck is currently the only tool supported by 
     valkyrie, and therefore the flag <tt class="computeroutput">--xml=yes</tt> 
     is always sent to valgrind, changing this flag is disabled.</p></dd>
 <dt>
-<a name="track_fds"></a><span><b class="command">Track open file descriptors:</b></span>
+<a name="trace_children"></a><span><b class="command">Trace child processes: (disabled)</b></span>
 </dt>
-<dd><p>As before, valgrind disables file descriptor leak
-    checking when generating xml output; therefore this flag is 
-    disabled.</p></dd>
+<dd><p>Valkyrie can not yet deal with the multiple log files that
+    are generated using this option.</p></dd>
+<dt>
+<a name="track_fds"></a><span><b class="command">Track open file descriptors: (disabled)</b></span>
+</dt>
+<dd><p>Valgrind disables file descriptor leak checking when generating
+    XML output.</p></dd>
+<dt>
+<a name="show_emwarns"></a><span><b class="command">Show warnings about emulation limits: (disabled)</b></span>
+</dt>
+<dd><p>Valgrind disables this option when generating XML output.</p></dd>
 </dl></div>
 </div>
 <div class="sect2" lang="en">
@@ -64,22 +75,27 @@ click on the relevant widget.</p>
 </div>
 <div class="glosslist"><dl>
 <dt>
-<a name="error_supps"></a><span><b class="command">Print suppressions for errors:</b></span>
+<a name="error_supps"></a><span><b class="command">Print suppressions for errors: (disabled)</b></span>
 </dt>
 <dd><p>Currently, valgrind disables suppression generation when 
-    generating XML output, as that would require user input; therefore 
-    changing this flag is disabled.</p></dd>
+    generating XML output, therefore changing this flag is disabled.</p></dd>
 <dt>
-<a name="error_limit"></a><span><b class="command">Limit the number of errors shown:</b></span>
+<a name="error_limit"></a><span><b class="command">Limit the number of errors shown: (disabled)</b></span>
 </dt>
-<dd><p>valgrind disables error limits when generating XML output; 
+<dd><p>Valgrind disables error limits when generating XML output; 
     therefore changing this flag is disabled.</p></dd>
 <dt>
 <a name="error_db"></a><span><b class="command">Start debugger on error detection</b></span> and
-             <span><b class="command">Debugger:</b></span>
+             <span><b class="command">Debugger: (disabled)</b></span>
 </dt>
 <dd><p>valgrind disables attaching a debugger when generating 
     XML output; therefore changing these flags is disabled.</p></dd>
+<dt>
+<a name="logging"></a><span><b class="command">Logging Options: (disabled)</b></span>
+</dt>
+<dd><p>Valkyrie needs to control all logging options to
+    gather the XML output from Valgrind; therefore changing these options
+    is disabled.</p></dd>
 </dl></div>
 </div>
 <div class="sect2" lang="en">

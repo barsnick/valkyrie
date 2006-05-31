@@ -9,5 +9,4 @@ dist_doc_DATA = \
 	next.png \
 	prev.png \
 	screenshot_1.png \
-	screenshot_2.png \
 	up.png

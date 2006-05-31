@@ -7,7 +7,7 @@
 <link rel="home" href="index.html" title="Valkyrie Documentation">
 <link rel="up" href="manual.html" title="Valkyrie User Manual">
 <link rel="previous" href="intro.why_valkyrie.html" title="1.2. Why Valkyrie is thusly named">
-<link rel="next" href="mainwindow.tool_bar.html" title="2.2. The ToolBar">
+<link rel="next" href="mainwindow.vg_ctl_tool_bar.html" title="2.2. Valgrind Control ToolBar">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div><table class="nav" width="100%" cellspacing="3" cellpadding="3" border="0" summary="Navigation header"><tr>
@@ -15,7 +15,7 @@
 <td width="25px" align="center" valign="middle"><a accesskey="u" href="manual.html"><img src="images/up.png" width="21" height="18" border="0" alt="Up"></a></td>
 <td width="31px" align="center" valign="middle"><a accesskey="h" href="index.html"><img src="images/home.png" width="27" height="20" border="0" alt="Up"></a></td>
 <th align="center" valign="middle">Valkyrie User Manual</th>
-<td width="22px" align="center" valign="middle"><a accesskey="n" href="mainwindow.tool_bar.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
+<td width="22px" align="center" valign="middle"><a accesskey="n" href="mainwindow.vg_ctl_tool_bar.html"><img src="images/next.png" width="18" height="21" border="0" alt="Next"></a></td>
 </tr></table></div>
 <div class="chapter" lang="en">
 <div class="titlepage">
@@ -34,10 +34,11 @@
 <dt><span class="sect2"><a href="mainwindow.html#help_menu">2.1.4. The Help Menu</a></span></dt>
 <dt><span class="sect2"><a href="mainwindow.html#context_help">2.1.5. Context Help</a></span></dt>
 </dl></dd>
-<dt><span class="sect1"><a href="mainwindow.tool_bar.html">2.2. The ToolBar</a></span></dt>
-<dt><span class="sect1"><a href="mainwindow.tool_view.html">2.3. Tool Views</a></span></dt>
-<dt><span class="sect1"><a href="mainwindow.flags_widget.html">2.4. Flags Widget</a></span></dt>
-<dt><span class="sect1"><a href="mainwindow.status_msg.html">2.5. Status Messages</a></span></dt>
+<dt><span class="sect1"><a href="mainwindow.vg_ctl_tool_bar.html">2.2. Valgrind Control ToolBar</a></span></dt>
+<dt><span class="sect1"><a href="mainwindow.tool_bar.html">2.3. ToolView ToolBar</a></span></dt>
+<dt><span class="sect1"><a href="mainwindow.tool_view.html">2.4. ToolViews</a></span></dt>
+<dt><span class="sect1"><a href="mainwindow.flags_widget.html">2.5. Flags Widget</a></span></dt>
+<dt><span class="sect1"><a href="mainwindow.status_msg.html">2.6. Status Messages</a></span></dt>
 </dl>
 </div>
 <p>The main window is composed of several elements, explanations for
@@ -56,27 +57,26 @@ which are below.</p>
 </div>
 <div class="itemizedlist"><ul type="disc">
 <li>
-<p><a name="run_button"></a><span><b class="command">File-&gt;Run:</b></span></p>
-<p>This option is disabled unless a ToolView is open.</p>
-<p>Selecting this option will run Valgrind on whatever executable 
-    you last specified.  If no executable has been set, a dialog will pop 
-    up asking you to enter the path/to/executable.</p>
-<p>The "Run" toolbutton is a shortcut to this menu option.</p>
+<p><a name="run_button"></a><span><b class="command">File-&gt;Run Valgrind:</b></span></p>
+<p>This option will be disabled if a process is currently
+    running.</p>s
+    <p>Selecting this option will run Valgrind on whatever executable 
+    is currently specified in the Options::Valkyrie::Binary option.
+    If no executable has been set, a dialog will pop up asking you to 
+    enter the path/to/executable.</p>
+<p>The "Run Valgrind" toolbutton is a shortcut to this menu option.</p>
 </li>
 <li>
 <p><a name="stop_button"></a><span><b class="command">File-&gt;Stop:</b></span></p>
 <p>This option will be disabled unless a process is currently
     running.</p>
-<p>Selecting this option will cause a dialog to pop up asking if you 
-    are sure you want to abort the run; selecting "Abort" will terminate the
-    current process.</p>
+<p>Selecting this option will abort the current run.</p>
+<p>Note: Not all processes can currently be stopped: for example
+    loading/saving a logfile.</p>
 <p>The "Stop" toolbutton is a shortcut to this menu option.</p>
-<p>Note: Not all processes can be stopped: for example
-    loading/saving a file.</p>
 </li>
 <li>
 <p><span><b class="command">File-&gt;Close:</b></span></p>
-<p>This option will be disabled unless a "ToolView" is open.</p>
 <p>Selecting this will close the current ToolView.  If the ToolView
     contains an unsaved file, or if a process is in the middle of being run,
     a dialog will pop up asking for confirmation.</p>
@@ -99,9 +99,9 @@ which are below.</p>
 <a name="tview_buttons"></a><ul type="disc"><li>
 <p>This menu shows which Valgrind tools are available.  The currently 
     selected tool is greyed out.</p>
-<p>The "ToolView Buttons" just below the status message area provide a 
-    quick way of switching between views. The currently selected toolbutton 
-    is depressed.</p>
+<p>The "ToolView Buttons" at the bottom, just below the status
+    message area, provide a quick way of switching between views. The
+    currently selected ToolView button is depressed.</p>
 </li></ul>
 </div>
 </div>
@@ -115,9 +115,9 @@ which are below.</p>
 <p>This menu contains links to a dialog where preferences, options and 
     flags may be set for Valkyrie, Valgrind, and (supported) Valgrind tools.
     Any flag which may be given on the command-line for Valkyrie or Valgrind
-    is available to be set in this dialog.  The settings are saved, so if you
-    want to repeat runs, there is no need to re-specify the options.  Also see 
-    <a href="mainwindow.html#context_help">Context Help</a> below.</p>
+    is available to be set in this dialog.  Settings applied to the current
+    run are only saved to disk if you select Options-&gt;Save As Default.
+    Also see <a href="mainwindow.html#context_help">Context Help</a> below.</p>
 <p>For detailed information on this dialog, see the 
     <a href="options_dialog.html">Options Dialog</a> page.</p>
 </li></ul></div>
@@ -165,7 +165,7 @@ which are below.</p>
 <td rowspan="2" width="40%" align="left">
 <a accesskey="p" href="intro.why_valkyrie.html">&lt;&lt; 1.2. Why Valkyrie is thusly named</a> </td>
 <td width="20%" align="center"><a accesskey="u" href="manual.html">Up</a></td>
-<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="mainwindow.tool_bar.html">2.2. The ToolBar &gt;&gt;</a>
+<td rowspan="2" width="40%" align="right"> <a accesskey="n" href="mainwindow.vg_ctl_tool_bar.html">2.2. Valgrind Control ToolBar &gt;&gt;</a>
 </td>
 </tr>
 <tr><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td></tr>

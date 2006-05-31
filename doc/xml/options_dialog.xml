@@ -6,25 +6,28 @@
 <title>Options Dialog</title>
 
 
-<para>The Options dialog has a separate "pane" for Valkyrie and Valgrind,
-as well as for each Valgrind tool.  Any flag or option which can be 
-set on the command line is available for modification via this dialog.</para>
+<para>The Options dialog has a separate "pane" for Valkyrie and
+Valgrind, as well as for each (supported) Valgrind tool.
+Any flag or option which can be set on the command line is available
+for modification via this dialog.  In addition, Valkyrie has a
+number of preference options that can only be set via this dialog.
+</para>
 
-<para>On first-time startup, all options are set to their defaults.  
-These can be changed via both the GUI and the command-line, but
-these changes are only stored for the next session by selecting
-"Options::Save as Default".<br/>
-For example, by giving the following command:</para>
+<para>On first-time startup, all options are set to their installation
+defaults.  These can be changed via both the GUI and the command-line,
+but these changes are only stored to disk for the next session by
+selecting "Options::Save as Default".  For example, by giving the
+following command:</para>
 <programlisting>
   valkyrie --show-reachable=yes /bin/ls -lF
 </programlisting>
 <para>then the values of the various arguments will be set in the
 appropriate option widgets.  These particular values will only be saved
-for the next Valkyrie startup if Options::Save as Default" is selected.
-</para>
+for the next Valkyrie startup if Options::Save as Default" is
+subsequently selected.</para>
 
-<para>Note: choosing "Defaults" resets the <command>current</command>
-option page to the installation defaults, not all option pages.</para>
+<para>Note: choosing "Defaults" resets the current option page to the
+installation defaults.  Other option pages are not affected.</para>
 
 
 
@@ -55,12 +58,13 @@ option page to the installation defaults, not all option pages.</para>
   </glossentry>
 
   <glossentry id="browser">
-    <glossterm><command>Default Browser:</command></glossterm>
+    <glossterm><command>Browser:</command></glossterm>
     <glossdef><para>This determines the default browser to use on
     clicking an external link.  If this option is empty (default),
     or fails to launch, a working browser is looked for in the
     environment variable $BROWSER.  If that also fails, some well
-    known browsers are tried.<br/>
+    known browsers are tried.  If a '-remote' command is given,
+    the "%s" string is replaced with the targed url.<br/>
     Example: "mozilla -remote openUrl(%s,new-tab)".</para></glossdef>
   </glossentry>
 
@@ -94,12 +98,12 @@ option page to the installation defaults, not all option pages.</para>
 
   <glossentry id="src_editor">
     <glossterm><command>Source editor:</command></glossterm>
-    <glossdef><para>Memcheck-specific.  Specify the 
+    <glossdef><para>Specify the 
     <computeroutput>/path/to/your/favourite/editor</computeroutput>.
-    The editor is launched when a stack frame is double-clicked within 
-    Memcheck ToolView.  A replacement string "%n" is defined, which
-    will be replaced with the target line number, when available, to
-    open up the editor on that line number.<br/>
+    In Memcheck, the editor is launched when a stack frame is
+    double-clicked within Memcheck ToolView.  A replacement string
+    "%n" is defined, which will be replaced with the target line number,
+    when available, to open up the editor on that line number.<br/>
     Example: "emacs +%n" => "emacs +21 /path/to/srcfile".</para></glossdef>
   </glossentry>
 
@@ -122,8 +126,8 @@ option page to the installation defaults, not all option pages.</para>
   <glossentry id="valgrind">
     <glossterm><command>Valgrind:</command></glossterm>
     <glossdef><para>This is the <emphasis>/path/to/valgrind</emphasis>.
-    You may change this to point to a different Valgrind
-    installation.</para></glossdef>
+    You may change this to point to a different Valgrind executable.</para>
+    </glossdef>
   </glossentry>
 
 </glosslist>
@@ -138,7 +142,7 @@ option page to the installation defaults, not all option pages.</para>
 
 <para>Valgrind`s options page has been divided into three areas which 
 reflect the split between Core options, Error Reporting options, and 
-suppressions.</para>
+Suppressions.</para>
 
 <para>To access valgrind`s manual for help on any of these options, 
 click on the <xref linkend="context_help"/> toolbutton and then 
@@ -150,27 +154,44 @@ click on the relevant widget.</para>
 
 <glosslist>
 
+  <glossentry id="tool_name">
+    <glossterm><command>Main Tool: (disabled)</command></glossterm>
+    <glossdef><para>Valkyrie currently only supports Memcheck.</para>
+    </glossdef>
+  </glossentry>
+
   <glossentry id="verbosity">
-    <glossterm><command>Verbosity level:</command></glossterm>
-    <glossdef><para><command>Verbosity level</command>: when generating 
-      XML output, the verbosity level is set to 1.  Also see the next 
-      entry.</para>
+    <glossterm><command>Verbosity level: (disabled)</command></glossterm>
+    <glossdef><para>Valgrind presets this to 1 for generating XML
+    output.  See next entry.</para>
     </glossdef>
   </glossentry>
 
   <glossentry id="xml_format">
-  <glossterm><command>Output in xml format:</command></glossterm>
+  <glossterm><command>Output in XML format: (disabled)</command></glossterm>
   <glossdef><para>Since Memcheck is currently the only tool supported by 
     valkyrie, and therefore the flag <computeroutput>--xml=yes</computeroutput> 
     is always sent to valgrind, changing this flag is disabled.</para>
   </glossdef>
   </glossentry>
 
+  <glossentry id="trace_children">
+  <glossterm><command>Trace child processes: (disabled)</command></glossterm>
+  <glossdef><para>Valkyrie can not yet deal with the multiple log files that
+    are generated using this option.</para>
+  </glossdef>
+  </glossentry>
+
   <glossentry id="track_fds">
-  <glossterm><command>Track open file descriptors:</command></glossterm>
-  <glossdef><para>As before, valgrind disables file descriptor leak
-    checking when generating xml output; therefore this flag is 
-    disabled.</para>
+  <glossterm><command>Track open file descriptors: (disabled)</command></glossterm>
+  <glossdef><para>Valgrind disables file descriptor leak checking when generating
+    XML output.</para>
+  </glossdef>
+  </glossentry>
+
+  <glossentry id="show_emwarns">
+  <glossterm><command>Show warnings about emulation limits: (disabled)</command></glossterm>
+  <glossdef><para>Valgrind disables this option when generating XML output.</para>
   </glossdef>
   </glossentry>
 
@@ -185,25 +206,32 @@ click on the relevant widget.</para>
 <glosslist>
 
   <glossentry id="error_supps">
-  <glossterm><command>Print suppressions for errors:</command></glossterm>
+  <glossterm><command>Print suppressions for errors: (disabled)</command></glossterm>
   <glossdef><para>Currently, valgrind disables suppression generation when 
-    generating XML output, as that would require user input; therefore 
-    changing this flag is disabled.</para>
+    generating XML output, therefore changing this flag is disabled.</para>
   </glossdef>
   </glossentry>
 
   <glossentry id="error_limit">
-  <glossterm><command>Limit the number of errors shown:</command></glossterm>
-  <glossdef><para>valgrind disables error limits when generating XML output; 
+  <glossterm><command>Limit the number of errors shown: (disabled)</command></glossterm>
+  <glossdef><para>Valgrind disables error limits when generating XML output; 
     therefore changing this flag is disabled.</para>
   </glossdef>
   </glossentry>
 
   <glossentry id="error_db">
   <glossterm><command>Start debugger on error detection</command> and
-             <command>Debugger:</command></glossterm>
+             <command>Debugger: (disabled)</command></glossterm>
   <glossdef><para>valgrind disables attaching a debugger when generating 
     XML output; therefore changing these flags is disabled.</para>
+  </glossdef>
+  </glossentry>
+
+  <glossentry id="logging">
+  <glossterm><command>Logging Options: (disabled)</command></glossterm>
+  <glossdef><para>Valkyrie needs to control all logging options to
+    gather the XML output from Valgrind; therefore changing these options
+    is disabled.</para>
   </glossdef>
   </glossentry>
 
