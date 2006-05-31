@@ -129,9 +129,10 @@ bool Massif::queryDone()
       int ok = vkQuery( this->view(), "Process Running", "&Abort;&Cancel",
                         "<p>The current process is not yet finished.</p>"
                         "<p>Do you want to abort it ?</p>" );
+      /* Note: process may have finished while waiting for user */
       if ( ok == MsgBox::vkYes ) {
-         bool stopped = stop();         /* abort */
-         vk_assert( stopped );          // TODO: what todo if couldn't stop?
+         stop();                              /* abort */
+         vk_assert( !isRunning() );
       } else if ( ok == MsgBox::vkNo ) {
          return false;                        /* continue */
       }
@@ -169,9 +170,10 @@ bool Massif::start( VkRunState::State rs, QStringList /*vgflags*/ )
 }
 
 
-bool Massif::stop()
+void Massif::stop()
 {
-   vk_assert( isRunning() );
+   if ( !isRunning() )
+      return;
 
    switch ( runState() ) {
 
@@ -181,5 +183,5 @@ bool Massif::stop()
 
    // TODO: statusMsg() ?
 
-   return true;
+   return;
 }

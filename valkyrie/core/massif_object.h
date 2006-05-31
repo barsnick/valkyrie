@@ -29,7 +29,7 @@ public:
    bool queryDone();
 
    bool start( VkRunState::State rm, QStringList vgflags );
-   bool stop();
+   void stop();
 
    /* check argval for this option, updating if necessary.
       called by parseCmdArgs() and gui option pages */

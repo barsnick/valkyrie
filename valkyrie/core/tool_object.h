@@ -53,8 +53,10 @@ public:
    virtual void deleteView();
    ToolView* view();
 
+   /* start a process: may fail */
    virtual bool start( VkRunState::State rs, QStringList vgflags ) = 0;
-   virtual bool stop() = 0;
+   /* stop a process: doesn't exit until success */
+   virtual void stop() = 0;
 
    bool isRunning();
 

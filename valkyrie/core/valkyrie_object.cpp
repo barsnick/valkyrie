@@ -309,8 +309,8 @@ void Valkyrie::stopTool( int tId )
    ToolObject* tool = valgrind()->toolObj( tId );
    vk_assert( tool != 0 );
 
-   bool success = tool->stop();
-   vk_assert( success );  // TODO: what to do if couldn't stop?
+   tool->stop();
+   vk_assert( !tool->isRunning() );
 }
 
 

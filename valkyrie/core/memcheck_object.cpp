@@ -216,9 +216,10 @@ bool Memcheck::queryDone()
       int ok = vkQuery( view(), "Process Running", "&Abort;&Cancel",
                         "<p>The current process is not yet finished.</p>"
                         "<p>Do you want to abort it ?</p>" );
+      /* Note: process may have finished while waiting for user */
       if ( ok == MsgBox::vkYes ) {
-         bool stopped = stop();         /* abort */
-         vk_assert( stopped );          // TODO: what todo if couldn't stop?
+         stop();                               /* abort */
+         vk_assert( !isRunning() );
       } else if ( ok == MsgBox::vkNo ) {
          return false;                         /* continue */
       }
@@ -282,9 +283,14 @@ bool Memcheck::start( VkRunState::State rs, QStringList vgflags )
 }
 
 
-bool Memcheck::stop()
+/* stop a process
+   - doesn't exit until process stopped.
+   - may take some time for process to respond: too much time and it
+     just gets terminated. */
+void Memcheck::stop()
 {
-   vk_assert( isRunning() );
+   if ( !isRunning() )
+      return;
 
    switch ( runState() ) {
    case VkRunState::VALGRIND: {
@@ -308,7 +314,11 @@ bool Memcheck::stop()
       vk_assert_never_reached();
    }
 
-   return true;
+   /* spin until done */
+   while ( isRunning() )
+      qApp->processEvents();
+
+   return;
 }
 
 
