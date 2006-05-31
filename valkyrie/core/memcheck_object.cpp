@@ -19,7 +19,6 @@
 
 #include <qapplication.h>
 #include <qtimer.h>
-#include <qurloperator.h>
 
 
 /* class Memcheck ------------------------------------------------------ */
