@@ -324,8 +324,9 @@ void MainWindow::showFlagsWidget( bool show )
 */
 void MainWindow::updateVgFlags()
 {
-   /* update valkyrie's flags */
-   valkyrie()->updateVgFlags( m_viewStack->visibleId() );
+   /* update valkyrie's flags: if there's a visible ToolView */
+   if ( m_viewStack->visible() != 0 )
+      valkyrie()->updateVgFlags( m_viewStack->visibleId() );
 
    /* update flags display */
    if ( m_flagsLabel->isVisible() ) {
