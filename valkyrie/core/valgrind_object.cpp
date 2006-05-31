@@ -130,7 +130,7 @@ Valgrind::Valgrind()
            "valgrind",  '\0',                 "smc-check",
            "<none|stack|all>",  "none|stack|all",  "stack",
            "Where to check for self-modifying code",
-           "checks for self-modifying code: none, only for code found in stacks, or all",
+           "checks for self-modifying code: none, only for code on the stack, or all",
            urlVgCore::smcSupport );
 
    /*--------------------------------------------------------------- */
@@ -248,6 +248,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
 //   case INPUT_FD: // TODO
    case SHOW_BELOW:
    case MAX_SFRAME:
+   case SMC_CHECK:
       opt->isValidArg( &errval, argval );
       break;
 
@@ -267,10 +268,18 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       break;
 
    case XML_COMMENT:
+      /* don't wan't xml in comment: escape '<','&',etc */
+      argval = escapeEntities( argval );
+      break;
+
    case SUPPS_DIRS:
    case SUPPS_AVAIL:
+      /* Not popts: only reaches here from gui */
+      vkPrint("TODO: check Valgrind opts");
+      break;
+
    case SUPPS_SEL:
-   case SMC_CHECK:
+      /* check valid suppression files */
       vkPrint("TODO: check Valgrind opts");
       break;
 
@@ -293,7 +302,10 @@ int Valgrind::checkOptArg( int optid, QString& argval )
 
 
    case XML_OUTPUT:
-      opt->isValidArg( &errval, argval );
+      /* Note: gui option disabled, so only reaches here from cmdline */
+      errval = PERROR_BADOPT;
+      vkPrintErr("Option disabled '--%s'", opt->m_longFlag.latin1());
+      vkPrintErr(" - Valkyrie always requires xml output from Valgrind.");
       break;
 
 
