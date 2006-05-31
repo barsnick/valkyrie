@@ -290,7 +290,26 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
 /* Called from OptionsWindow::categoryClicked() */
 void ValgrindOptionsPage::init()
 {
-   /* init available supps list */
+   /* if usr gave suppfile on cmdline (updating lbSel)
+      - update suppDirs, suppsAvail from each path in lbSel */
+   QChar       sep       = vkConfig->sepChar();
+   LbWidget*   lbSel     = (LbWidget*)m_itemList[Valgrind::SUPPS_SEL  ];
+   QStringList currSupps = QStringList::split( sep, lbSel->currValue() );
+   LbWidget*   lbDirs    = (LbWidget*)m_itemList[Valgrind::SUPPS_DIRS];
+   QStringList suppDirs  = QStringList::split( sep, lbDirs->currValue() );
+
+   for ( unsigned int i=0; i<currSupps.count(); i++ ) {
+      QFileInfo fi( currSupps[i] );
+      QString path = fi.dirPath();
+      if ( suppDirs.find( path ) == suppDirs.end() )
+         suppDirs << path;
+   }
+   lbDirs->setCurrValue( suppDirs.join( sep ) );
+
+   /* apply changes to lbDirs */
+   applyEdits();
+
+   /* init suppsAvail */
    suppDirsChanged();
 }
 

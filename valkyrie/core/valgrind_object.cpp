@@ -237,6 +237,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
 
    int errval = PARSED_OK;
    Option* opt = findOption( optid );
+   QString sep = vkConfig->sepChar();
 
    switch ( (Valgrind::vgOpts)optid ) {
 
@@ -272,16 +273,35 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       argval = escapeEntities( argval );
       break;
 
-   case SUPPS_DIRS:
-   case SUPPS_AVAIL:
-      /* Not popts: only reaches here from gui */
-      vkPrint("TODO: check Valgrind opts");
-      break;
+   case SUPPS_DIRS: {  /* not popt: only reaches here from gui */
+      /* check all entries are valid dirs */
+      QStringList dirs = QStringList::split(sep, argval);
+      QStringList::iterator it = dirs.begin();
+      for (; it != dirs.end(); ++it) {
+         /* check dirs ok */
+         *it = dirCheck( &errval, *it, true, false );
+         if ( errval != PARSED_OK )
+            break;
+      }
+      argval = dirs.join(sep);
+   } break;
 
-   case SUPPS_SEL:
-      /* check valid suppression files */
-      vkPrint("TODO: check Valgrind opts");
-      break;
+   case SUPPS_AVAIL:  /* not popt: only reaches here from gui */
+   case SUPPS_SEL: {  /* is popt: --suppressions */
+      QStringList files = QStringList::split(sep, argval);
+      QStringList::iterator it = files.begin();
+      for (; it != files.end(); ++it) {
+         /* check files ok & readable */
+         *it = fileCheck( &errval, *it, true, false );
+         if ( errval != PARSED_OK )
+            break;
+         /* TODO: do we care if it doesn't end in .supp?
+            - breaks the suppression widgets a little, as only lists those ending in .supp ... */
+
+         /* TODO: ? check valid suppression files */
+      }
+      argval = files.join(sep);
+   } break;
 
    case TRACE_CH: {
 #if 0
