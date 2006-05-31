@@ -242,6 +242,12 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    switch ( (Valgrind::vgOpts)optid ) {
 
    case TOOL:
+      /* Note: gui option disabled, so only reaches here from cmdline */
+      errval = PERROR_BADOPT;
+      vkPrintErr("Option disabled '--%s'", opt->m_longFlag.latin1());
+      vkPrintErr(" - Valkyrie currently only supports Memcheck.");
+      break;
+
    case SIM_HINTS:
    case RUN_LIBC:
    case NUM_CALLERS:

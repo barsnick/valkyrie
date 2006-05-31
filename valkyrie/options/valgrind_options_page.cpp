@@ -267,6 +267,9 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    /* Disabled because Valkyrie always requires xml output from Valgrind */
    m_itemList[Valgrind::XML_OUTPUT ]->setEnabled( false );
 
+   /* Disabled for now: Only supporting memcheck so far. */
+   m_itemList[Valgrind::TOOL       ]->setEnabled( false );
+
    /* Disabled for now - can't deal with the multiple xml files this generates */
    /* Note: Also disabled in Valgrind::checkOptArg() */
    m_itemList[Valgrind::TRACE_CH   ]->setEnabled( false );
