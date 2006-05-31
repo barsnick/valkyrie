@@ -11,17 +11,18 @@
     <title>Valkyrie Support</title>
   </artheader>
 
-<para>Valkyrie is developed and maintained by the Valgrind Developers, 
-and is therefore always in sync with Valgrind.</para>
+<para>Valkyrie is developed and maintained by Valgrind developers, 
+and is kept up to date with the latest Valgrind release.</para>
 
-<para>If you have a feature request, or would like support for a
-Valgrind tool extended, contact &vk-author; at 
-<ulink url="mailto:&vk-email;">&vk-email;</ulink></para>
+<para>If you have a feature request, or would like the support for
+a Valgrind tool extended, contact &vk-author; at 
+<ulink url="mailto:&vk-email;">&vk-email;</ulink>.</para>
 
 
 <informaltable class="nav" width="100%">
 <tbody><tr>
-  <td align="center">Copyright (c) &vk-lifespan; &vk-author; &lt;&ow-url;&gt;</td>
+  <td align="center">Copyright (c) &vk-lifespan; &vk-author;<br/>
+                     <ulink url="&ow-url;">&ow-url;</ulink></td>
 </tr></tbody>
 </informaltable>
 

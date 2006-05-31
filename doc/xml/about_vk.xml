@@ -8,23 +8,23 @@
 <article>
 
   <artheader>
-    <title>Valkyrie &rel-version;</title>
-    <pubdate>&rel-type; &rel-date;</pubdate>
+    <title>Valkyrie</title>
   </artheader>
 
 
-<para>Valkyrie is a graphical user interface for Valgrind 
-&lt;www.valgrind.org&gt;.</para>
+<para>Valkyrie is a graphical user interface for Valgrind: 
+<ulink url="www.valgrind.org">www.valgrind.org</ulink>.</para>
 
 <para>You can download the latest version of Valkyrie from the
-OpenWorks website: &vk-url;.</para>
+OpenWorks website: <ulink url="&vk-url;"></ulink>.</para>
 
 <para>For more information on Valkyrie and/or Valgrind, contact 
-<ulink url="mailto:info@open-works.co.uk">info@open-works.co.uk</ulink></para>
+<ulink url="mailto:info@open-works.co.uk">info@open-works.co.uk</ulink>.</para>
 
 <informaltable class="nav" width="100%">
 <tbody><tr>
-  <td align="center">Copyright (c) &vk-lifespan; &vk-author; &lt;&ow-url;&gt;</td>
+  <td align="center">Copyright (c) &vk-lifespan; &vk-author;<br/>
+                     <ulink url="&ow-url;">&ow-url;</ulink></td>
 </tr></tbody>
 </informaltable>
 
