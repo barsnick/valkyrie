@@ -3345,3 +3345,35 @@ void PreviewStack::previewUrl( const QUrl& url )
 	raiseWidget( m_textView );
 }
 
+
+
+
+
+/* ------------------------------------------------------------------ */
+bool FileCopy(const QString& in, const QString& out)
+{
+   const int bufSize = 16384; // 16Kb buffer
+   char *buf = new char[bufSize];
+   
+   QFile fin(in);
+   if( !fin.open(IO_ReadOnly) )
+      return false;
+   QFile fout(out);
+   if( !fout.open(IO_WriteOnly) )
+      return false;
+
+   int len = fin.readBlock(buf, bufSize);
+   while (len > 0) {
+      if (fout.writeBlock(buf, len) == -1)
+         return false;
+      len = fin.readBlock(buf, len);
+   }
+   if (len == -1)
+      return false;
+
+   fin.close();
+   fout.close();
+   delete[] buf;
+
+   return true;
+}

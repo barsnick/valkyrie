@@ -14,6 +14,7 @@
 #include "html_urls.h"
 #include "vk_messages.h"
 #include "vk_option.h"         // PERROR* and friends 
+#include "vk_file_utils.h"     // FileCopy()
 #include "vk_utils.h"          // vk_assert, VK_DEBUG, etc.
 
 #include <qapplication.h>
@@ -691,10 +692,7 @@ bool Memcheck::saveParsedOutput( QString& fname )
    } else {
       /* we've saved once already: must now copy m_saveFname => fname */
       //vkPrint("copying: '%s' -> '%s'", m_saveFname.latin1(), fname.latin1() );
-      QUrlOperator *op = new QUrlOperator();
-      op->copy( m_saveFname, fname, false, false ); 
-      /* TODO: check copied ok */
-      ok = true;
+      ok = FileCopy( m_saveFname, fname );
    }
    if (ok) {
       m_saveFname = fname;

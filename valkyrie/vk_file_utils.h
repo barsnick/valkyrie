@@ -351,5 +351,9 @@ private:
    QPushButton*  m_cancelB;
 };
 
+
+bool FileCopy(const QString& in, const QString& out);
+
+
 #endif // #ifndef __VK_FILE_UTILS_H
 
