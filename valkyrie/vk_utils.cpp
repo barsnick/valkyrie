@@ -164,7 +164,15 @@ QString escapeEntities( const QString& content )
       switch ( content[i].latin1() ) {
       case '<': ret_str += "&lt;";     break;
       case '>': ret_str += "&gt;";     break;
-      case '&': ret_str += "&amp;";    break;
+      case '&': {
+         /* already escaped? */
+         if ((content.mid(i+1,4) == "amp;") ||
+             (content.mid(i+1,3) == "lt;" ) ||
+             (content.mid(i+1,3) == "gt;" ))
+            ret_str += content[i];
+         else
+            ret_str += "&amp;";    
+      } break;
       default:  ret_str += content[i]; break;
       }
    }
