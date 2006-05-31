@@ -169,6 +169,11 @@ bool ContextHelp::eventFilter( QObject * obj, QEvent * ev )
          QMouseEvent* me = (QMouseEvent*) ev;
          QPoint p = me->pos();
          while ( w && !item ) {
+            if (w->isA("QMenuBar")) {
+               /* If we're a qmenubar, allow event to pass on so menus work... */
+               // TODO: find what menuitem we're sitting on, if any, and get that widget...
+               return false;
+            }
             item = wdict->find( w );
             if ( !item ) {
                p += w->pos();

@@ -480,7 +480,6 @@ void MainWindow::mkMenuBar()
                            SLOT(showAboutInfo(int)), 0, HelpAbout::LICENSE );
    m_helpMenu->insertItem( "Support", this, 
                            SLOT(showAboutInfo(int)), 0, HelpAbout::SUPPORT );
-   QToolTip::add( m_helpMenu, "Show help manual / information" );
    mainMenu->insertItem( "&Help", m_helpMenu, -1, index );
    QToolTip::add( m_helpMenu, "Show help manual / information" );
    ContextHelp::add( m_helpMenu, urlValkyrie::helpMenu );
@@ -577,7 +576,7 @@ void MainWindow::mkStatusBar()
    msgFrame->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
    mid_row->addWidget( msgFrame );
    QBoxLayout* msgLayout = new QHBoxLayout( msgFrame, 2 );
-   m_statusMsg = new QLabel( "", msgFrame );
+   m_statusMsg = new QLabel( "", msgFrame, "status_msg" );
    m_statusMsg->setAlignment( AlignLeft );
    m_statusMsg->setTextFormat( Qt::PlainText );
    int status_height = fontMetrics().height();
@@ -608,7 +607,7 @@ void MainWindow::mkStatusBar()
    int butt_height = fontMetrics().height() + 12;
    QToolButton* tvButton;
    for ( ToolObject* tool = tools.first(); tool; tool = tools.next() ) {
-      tvButton = new QToolButton( statusFrame );
+      tvButton = new QToolButton( statusFrame, tool->name() + "_button" );
       tvButton->setToggleButton( true );
       tvButton->setEnabled( true );
       tvButton->setText( tool->accelTitle() );
