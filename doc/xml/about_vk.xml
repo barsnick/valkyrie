@@ -13,10 +13,10 @@
 
 
 <para>Valkyrie is a graphical user interface for Valgrind: 
-<ulink url="www.valgrind.org">www.valgrind.org</ulink>.</para>
+<ulink url="http://www.valgrind.org">www.valgrind.org</ulink>.</para>
 
 <para>You can download the latest version of Valkyrie from the
-OpenWorks website: <ulink url="&vk-url;"></ulink>.</para>
+OpenWorks website: <ulink url="http://&vk-url;"></ulink>.</para>
 
 <para>For more information on Valkyrie and/or Valgrind, contact 
 <ulink url="mailto:info@open-works.co.uk">info@open-works.co.uk</ulink>.</para>
@@ -24,7 +24,7 @@ OpenWorks website: <ulink url="&vk-url;"></ulink>.</para>
 <informaltable class="nav" width="100%">
 <tbody><tr>
   <td align="center">Copyright (c) &vk-lifespan; &vk-author;<br/>
-                     <ulink url="&ow-url;">&ow-url;</ulink></td>
+                     <ulink url="http://&ow-url;">&ow-url;</ulink></td>
 </tr></tbody>
 </informaltable>
 

@@ -40,6 +40,7 @@ VkTextBrowser::VkTextBrowser ( QWidget* parent, const char* name )
 
 void VkTextBrowser::doLinkClicked ( const QString& link )
 {
+   //vkPrint("link: '%s'", link.latin1());
    if (link.startsWith("http://")) {
       /* just reload same page */
       reload();
@@ -51,6 +52,11 @@ void VkTextBrowser::doLinkClicked ( const QString& link )
                   "<p>Failed to startup a browser.<br> \
                    Please set a browser in Options::Valkyrie::Browser</p>" );
       }      
+   } else if (link.startsWith("mailto:")) {
+      reload();   /* just reload same page */
+
+      /* try to launch a mail client */
+      // TODO
    }
 }
 

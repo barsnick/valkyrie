@@ -13,17 +13,16 @@
 
 #include <qdialog.h>
 #include <qtabwidget.h>
-#include <qtextedit.h>
+
+#include "hand_book.h"   /* VkTextBrowser */
 
 
 /* class HelpAbout ----------------------------------------------------- */
-class TextEdit;
-
 class HelpAbout : public QDialog
 {
    Q_OBJECT
 public:
-   enum TabId { ABOUT_VK=0, ABOUT_QT, LICENSE, SUPPORT };
+   enum TabId { ABOUT_VK=0, ABOUT_QT, LICENSE, SUPPORT, NUM_TABS };
 
    HelpAbout( QWidget* parent, TabId tabid );
    ~HelpAbout();
@@ -35,26 +34,10 @@ private:
    QString title;
 
    QTabWidget* tabParent;
-   TextEdit* aboutVk;
-   TextEdit* aboutQt;
-   TextEdit* license;
-   TextEdit* support;
+   VkTextBrowser* aboutVk;
+   VkTextBrowser* aboutQt;
+   VkTextBrowser* license;
+   VkTextBrowser* support;
 };
-
-
-/* class TextEdit ------------------------------------------------------ */
-class TextEdit : public QTextEdit
-{ 
-public:
-   TextEdit( QWidget* parent, HelpAbout::TabId tabid, const char* name );
-   ~TextEdit();
-   bool load();
-
-private:
-   bool loaded;
-   QString html_file;
-   HelpAbout::TabId tabId;
-};
-
 
 #endif

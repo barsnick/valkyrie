@@ -11,59 +11,10 @@
 #include "valkyrie_xpm.h"
 #include "help_about.h"
 #include "vk_config.h"
+#include "vk_utils.h"
 
 #include <qlabel.h>
-#include <qlayout.h>
 #include <qpushbutton.h>
-
-
-/* class TextEdit ------------------------------------------------------ */
-TextEdit::~TextEdit() { }
-
-TextEdit::TextEdit( QWidget* parent, HelpAbout::TabId tabid, 
-                    const char* name ) 
-   : QTextEdit( parent, name )
-{
-   tabId = tabid;
-   loaded = false;
-   html_file.sprintf("%s%s.html", vkConfig->vkdocDir().latin1(), name );
-   setReadOnly( true );
-   setTextFormat( Qt::RichText );
-}
-
-bool TextEdit::load()
-{
-   if ( loaded )
-      return true;
-
-   if ( !QFile::exists( html_file ) )
-      return false;
-
-   QFile file( html_file );
-   if ( !file.open( IO_ReadOnly ) )
-      return false;
-
-   setUpdatesEnabled( false );
-
-   QTextStream ts( &file );
-   switch( tabId ) {
-   case HelpAbout::ABOUT_VK:
-   case HelpAbout::SUPPORT:
-      setText( ts.read() );
-      break;
-   case HelpAbout::ABOUT_QT:
-      setText( ts.read().arg(QT_VERSION_STR).arg(qVersion()) );
-      break;
-   case HelpAbout::LICENSE:
-      setText( ts.read() );
-      break;
-   }
-
-   setUpdatesEnabled( true );
-   loaded = true;
-
-   return true;
-}
 
 
 /* class HelpAbout ----------------------------------------------------- */
@@ -107,20 +58,20 @@ HelpAbout::HelpAbout(  QWidget* parent, TabId tabid )
    vbox->addWidget( tabParent, 0 );
     
    /* about_vk tab */
-   aboutVk = new TextEdit( tabParent, ABOUT_VK, "about_vk" );
+   aboutVk = new VkTextBrowser( tabParent, "about_vk" );
    str.sprintf( "About %s", vkConfig->vkName() );
    tabParent->insertTab( aboutVk, str, ABOUT_VK );
 
    /* about qt tab */
-   aboutQt = new TextEdit( tabParent, ABOUT_QT, "about_qt" );
+   aboutQt = new VkTextBrowser( tabParent, "about_qt" );
    tabParent->insertTab( aboutQt, "About Qt", ABOUT_QT );
 
    /* license tab */
-   license = new TextEdit( tabParent, LICENSE, "about_gpl" );
+   license = new VkTextBrowser( tabParent, "about_gpl" );
    tabParent->insertTab( license, "License Agreement", LICENSE );
   
    /* support tab */
-   support = new TextEdit( tabParent, SUPPORT, "support" );
+   support = new VkTextBrowser( tabParent, "support" );
    tabParent->insertTab( support, "Support", SUPPORT );
 
    QPushButton* okButt = new QPushButton( "Close", this);
@@ -129,6 +80,22 @@ HelpAbout::HelpAbout(  QWidget* parent, TabId tabid )
    connect( okButt, SIGNAL(clicked() ), this, SLOT(accept()));
    okButt->setFocus();
    vbox->addWidget( okButt, 0, Qt::AlignRight );
+
+   /* setup text-browsers */
+   for (int i=0; i<NUM_TABS; ++i) {
+      VkTextBrowser* page = (VkTextBrowser*)tabParent->page(i);
+      page->setLinkUnderline( true );
+      page->mimeSourceFactory()->setFilePath( QStringList() << vkConfig->vkdocDir() );
+   }
+   aboutVk->setSource( vkConfig->vkdocDir() + "about_vk.html" );
+   license->setSource( vkConfig->vkdocDir() + "about_gpl.html" );
+   support->setSource( vkConfig->vkdocDir() + "support.html" );
+   /* about_qt source needs version args updating: */
+   QFile file( vkConfig->vkdocDir() + "about_qt.html" );
+   if ( file.open( IO_ReadOnly ) ) {
+      QTextStream ts( &file );
+      aboutQt->setText( ts.read().arg(QT_VERSION_STR).arg(qVersion()) );
+   }
 
    /* start up with the correct page loaded */
    tabParent->setCurrentPage( tabid );
@@ -139,13 +106,5 @@ HelpAbout::HelpAbout(  QWidget* parent, TabId tabid )
 void HelpAbout::showTab( QWidget* tab )
 {
    TabId tabid = (TabId)tabParent->indexOf( tab );
-
-   switch ( tabid ) {
-   case ABOUT_VK: aboutVk->load(); break;
-   case ABOUT_QT: aboutQt->load(); break;
-   case LICENSE:  license->load(); break;
-   case SUPPORT:  support->load(); break;
-   }
-
-   setCaption( title + " : " + tabParent->label( tabid) );
+   setCaption( title + " : " + tabParent->label( tabid ) );
 }
