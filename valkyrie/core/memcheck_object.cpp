@@ -290,20 +290,19 @@ bool Memcheck::stop()
    case VkRunState::VALGRIND: {
       if (m_vgproc && m_vgproc->isRunning() )
          m_vgproc->stop(); /* signal -> processDone() */
-      break;
-   }
+   } break;
 
-   case VkRunState::TOOL1:
+   case VkRunState::TOOL1: { /* parse log */
       /* TODO: make log parsing a VkProcess.  This will allow
          - valkyrie to stay responsive
          - the ability to interrupt the process if taking too long */
       VK_DEBUG("TODO: Memcheck::stop(parse log)" );
-      break;
+   } break;
 
-   case VkRunState::TOOL2:
-      // TODO: stop merge 
-      VK_DEBUG("TODO: Memcheck::stop(merge logs)" );
-      break;
+   case VkRunState::TOOL2: { /* merge logs */
+      if (m_vgproc && m_vgproc->isRunning() )
+         m_vgproc->stop(); /* signal -> processDone() */
+   } break;
 
    default:
       vk_assert_never_reached();
