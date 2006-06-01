@@ -53,10 +53,10 @@ namespace VkOPTION {
 
 
 /* helper functions ---------------------------------------------------- */
-QString fileCheck( int* err_val, const char* fpath, 
+QString fileCheck( int* err_val, const QString fpath, 
                    bool rd_perms, bool wr_perms );
-QString binaryCheck( int* err_val, const char* exe_name );
-QString dirCheck( int* err_val, const char* fpath,
+QString binaryCheck( int* err_val, const QString exe_name );
+QString dirCheck( int* err_val, const QString fpath,
                   bool rd_perms, bool wr_perms );
 
 const char* parseErrString( const int error );

@@ -181,7 +181,9 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
       break;
 
    case BINARY:
-      argval = binaryCheck( &errval, argval );
+      if ( !argval.isEmpty() )
+         argval = binaryCheck( &errval, argval );
+
       if ( errval == PARSED_OK )
          m_startRunState = VkRunState::VALGRIND;
       break;

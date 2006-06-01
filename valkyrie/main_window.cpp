@@ -169,7 +169,7 @@ void MainWindow::run( VkRunState::State runState )
    if( runState == VkRunState::VALGRIND ) {
       int errval  = PARSED_OK;
       QString bin = vkConfig->rdEntry( "binary", "valkyrie" );
-      binaryCheck( &errval, bin.latin1() );
+      binaryCheck( &errval, bin );
       if ( errval != PARSED_OK ) {
          vkError( this, "Run Tool", "Invalid Binary: Please set a valid binary in Options::Valkyrie." );
          return;

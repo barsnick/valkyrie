@@ -146,7 +146,7 @@ int Cachegrind::checkOptArg( int optid, QString& argval )
       QStringList aList = QStringList::split( ",", argval );
       for ( unsigned int i=0; i<aList.count(); i++ ) {
          QString tmp    = aList[i].simplifyWhiteSpace();
-         QString srcdir = dirCheck( &errval, tmp.latin1(), true, false );
+         QString srcdir = dirCheck( &errval, tmp, true, false );
          if ( errval == PARSED_OK ) {
             aList[i] = srcdir;
          } else {

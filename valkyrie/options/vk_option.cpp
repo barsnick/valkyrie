@@ -72,11 +72,15 @@ const char* parseErrString( const int error )
 
 /* helper functions ---------------------------------------------------- */
 
-QString checkFile( int* err_val, const char* fname )
+QString checkFile( int* err_val, const QString file_name )
 {
    *err_val = PARSED_OK;
-   QString file_name = fname;
    QString absPath = QString::null;
+
+   if (file_name.isEmpty()) {
+      *err_val = PERROR_BADFILE;
+      return file_name;
+   }
 
    if ( QFile::exists(file_name) ) {
       absPath = QFileInfo( file_name ).absFilePath();
@@ -104,7 +108,7 @@ QString checkFile( int* err_val, const char* fname )
 
 /* transforms relative paths to absolute ones; checks the file exists,
    and that the user has the specified permissions */
-QString fileCheck( int* err_val, const char* fpath, 
+QString fileCheck( int* err_val, const QString fpath, 
                    bool rd_perms, bool wr_perms )
 {
    QString absPath = checkFile( err_val, fpath );
@@ -141,7 +145,7 @@ QString fileCheck( int* err_val, const char* fpath,
 
 /* check the file exists; try to get the absolute path; if found,
    check that the user has executable permissions */
-QString binaryCheck( int* err_val, const char* exe_name )
+QString binaryCheck( int* err_val, const QString exe_name )
 {
    QString absPath = checkFile( err_val, exe_name );
 
@@ -157,7 +161,7 @@ QString binaryCheck( int* err_val, const char* exe_name )
 
 
 
-QString dirCheck( int* err_val, const char* dir,
+QString dirCheck( int* err_val, const QString dir,
                   bool rd_perms, bool wr_perms )
 {
    QString absPath = checkFile( err_val, dir );
