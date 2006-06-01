@@ -626,6 +626,8 @@ void Memcheck::readVgLog()
    vk_assert( m_vgreader != 0 );
    vk_assert( m_vgproc != 0 );
 
+   qApp->processEvents();
+
    /* Try reading some more data */
    if ( !m_vgreader->parseContinue()) {
       /* Parsing failed: stop m_vgproc, if running */
