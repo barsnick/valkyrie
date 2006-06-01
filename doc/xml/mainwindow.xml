@@ -20,7 +20,7 @@ which are below.</para>
   <listitem id="run_button">
     <para><command>File->Run Valgrind:</command></para>
     <para>This option will be disabled if a process is currently
-    running.</para>s
+    running.</para>
     <para>Selecting this option will run Valgrind on whatever executable 
     is currently specified in the Options::Valkyrie::Binary option.
     If no executable has been set, a dialog will pop up asking you to 
