@@ -64,6 +64,8 @@ const char* parseErrString( const int error )
          "when sending output to stderr.";
    case PERROR_POWER_OF_TWO:
       return "number is not a power of two";
+   case PERROR_BADVERSION:
+      return "Bad program version";
    default:
       return "unknown error";
    }

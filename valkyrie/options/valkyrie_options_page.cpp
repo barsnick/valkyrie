@@ -92,7 +92,7 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
                       optionWidget(Valkyrie::VG_EXEC, group1, false ) );
    LeWidget* vgbinLedit = ((LeWidget*)m_itemList[Valkyrie::VG_EXEC]);
    vgbinLedit->addButton( group1, this, SLOT(getVgExec()) );
-   vgbinLedit->setReadOnly( true );   /* don't allow direct editing */
+   connect(vgbinLedit, SIGNAL(returnPressed()), this, SIGNAL(apply()));
 
 
    /* --------------------------------------------------------------- */
@@ -301,8 +301,9 @@ void ValkyrieOptionsPage::getEditor()
    QString ed_file = QStringList::split(" ", ed).first();
    QFileInfo fi( ed_file );
 
-   QString ed_path = QFileDialog::getOpenFileName( fi.dirPath(),
-                                                   "All Files (*)", this, "fdlg", "Select Source Editor" );
+   QString ed_path =
+      QFileDialog::getOpenFileName( fi.dirPath(), "All Files (*)",
+                                    this, "fdlg", "Select Source Editor" );
    if ( ed_path.isEmpty() ) { /* user might have clicked Cancel */
       return;
    }
@@ -324,8 +325,9 @@ void ValkyrieOptionsPage::getEditor()
 /* allows user to select executable-to-debug */
 void ValkyrieOptionsPage::getBinary()
 {
-   QString binfile = QFileDialog::getOpenFileName( QString::null,
-                                                   "All Files (*)", this, "fdlg", "Select Executable" );
+   QString binfile =
+      QFileDialog::getOpenFileName( QString::null, "All Files (*)",
+                                    this, "fdlg", "Select Executable" );
    if ( !binfile.isEmpty() ) { /* user might have clicked Cancel */
       ((LeWidget*)m_itemList[Valkyrie::BINARY])->setCurrValue(binfile);
       checkOption( Valkyrie::BINARY );
@@ -336,8 +338,9 @@ void ValkyrieOptionsPage::getBinary()
 /* allows user to select default browser */
 void ValkyrieOptionsPage::getBrowser()
 {
-   QString brwsr = QFileDialog::getOpenFileName( QString::null,
-                                                 "All Files (*)", this, "fdlg", "Select Browser" );
+   QString brwsr =
+      QFileDialog::getOpenFileName( QString::null, "All Files (*)",
+                                    this, "fdlg", "Select Browser" );
    if ( !brwsr.isEmpty() ) { /* user might have clicked Cancel */
       ((LeWidget*)m_itemList[Valkyrie::BROWSER])->setCurrValue(brwsr);
       checkOption( Valkyrie::BROWSER );
@@ -349,45 +352,11 @@ void ValkyrieOptionsPage::getBrowser()
    of this fn are essentially the same as the one in config.tests/valgrind.test */
 void ValkyrieOptionsPage::getVgExec()
 {
-   LeWidget* vgbinLedit = ((LeWidget*)m_itemList[Valkyrie::VG_EXEC]);
-
-   QString startdir = vgbinLedit->currValue();
-   if (startdir.isEmpty())
-      startdir = QDir::currentDirPath();
-
-   QString vg_exec_path = QFileDialog::getOpenFileName( startdir, 
-                                                        "All Files (*)",
-                                                        this, "fdlg",
-                                                        "Select Valgrind" );
-   if ( vg_exec_path.isEmpty() ) /* user clicked Cancel ? */
-      return;
-
-   /* quick and dirty check to see if we have an executable with rwx 
-      permissions */
-   vgbinLedit->setCurrValue( vg_exec_path );
-   if ( ! checkOption( Valkyrie::VG_EXEC ) )
-      return;
-
-
-   /* now check the version */
-   QString cmd, vg_version, tmp_fname;
-   tmp_fname = vk_mkstemp( vkConfig->rcDir() + "vg-version" );
-   cmd.sprintf( "%s --version | sed \"s/valgrind-//g\" > %s", 
-                vg_exec_path.latin1(), tmp_fname.latin1() );
-   system( cmd.latin1() );
-   QFile file( tmp_fname );
-   if ( file.open( IO_ReadOnly ) ) {
-      file.readLine( vg_version, 100 );
+   QString vg_exec_path =
+      QFileDialog::getOpenFileName( QString::null, "All Files (*)",
+                                    this, "fdlg", "Select Valgrind" );
+   if ( !vg_exec_path.isEmpty() ) { /* user might have clicked Cancel */
+      ((LeWidget*)m_itemList[Valkyrie::VG_EXEC])->setCurrValue( vg_exec_path );
+      checkOption( Valkyrie::VG_EXEC );
    }
-   file.remove();   /* close and delete the temporary file */
-
-   /* do some fancy stuff */
-   vg_version = vg_version.simplifyWhiteSpace();
-   int found = str2hex( vg_version );
-   int reqd  = str2hex( "3.0.0" );
-   if ( found < reqd ) {
-      m_itemList[Valkyrie::VG_EXEC]->cancelEdit();
-      vkInfo( this, "Invalid Valgrind Version",
-              "<p>Valgrind version >= 3.0.0 is required.</p>" );
-   } 
 }

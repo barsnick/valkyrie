@@ -160,9 +160,35 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
    } break;
 
    case MERGE_EXEC:
-   case VG_EXEC:
       argval = binaryCheck( &errval, argval );
       break;
+
+   case VG_EXEC: {
+      /* see if we have an executable with rx permissions */
+      argval = binaryCheck( &errval, argval );
+      if ( errval != PARSED_OK )
+         return errval;
+
+      /* check the version */
+      QString cmd = argval + " --version 2>&1";
+      FILE* fp;
+      char line[50];
+      fp = popen( (const char*)cmd, "r" );
+      if ( !fp ) {
+         pclose(fp);
+         return PERROR_BADFILE;
+      }
+      fgets( line, sizeof(line), fp );
+      pclose(fp);
+
+      QString vg_version = QString(line).simplifyWhiteSpace();
+      if ( !vg_version.startsWith("valgrind") )
+         return PERROR_BADFILE;
+      /* compare with minimum req'd version: */
+      if ( str2hex(vg_version) <  str2hex("3.0.0") )
+         return PERROR_BADVERSION;
+      /* looking good... */
+   } break;
 
    case VIEW_LOG:
       argval = fileCheck( &errval, argval, true, false );

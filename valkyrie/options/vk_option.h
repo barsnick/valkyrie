@@ -49,6 +49,7 @@ namespace VkOPTION {
 #define PERROR_DB_OUTPUT    -30  /* using db-attach, but not sending
                                     output to stderr */
 #define PERROR_POWER_OF_TWO -31  /* number not a power of two */
+#define PERROR_BADVERSION   -32  /* bad program version */
 
 
 

@@ -130,26 +130,18 @@ QString vk_mkstemp( QString filepath, QString ext/*=QString::null*/ )
 
 
 /* Version check ------------------------------------------------------- 
-   Version strings have a numeric value in the form:
-   0x mm ii bb (m = major, i = minor, b = bugfix). 
-   For example, Valgrind 3.0.5 is 0x 030005 */
+   Given version string of "major.minor.patch" (e.g. 3.0.0),
+   hex version = (major << 16) + (minor << 8) + patch
+*/
 int str2hex( QString ver_str )
 {
-   int dot1 = ver_str.find( '.', 0 );
-   int dot2 = ver_str.find( '.', dot1+1 );
-   int dot3 = ver_str.find( '.', dot2+1 );
-
-   int major = ver_str.left( dot1 ).toInt();
-   int minor = ver_str.mid( dot1+1, dot2 - (dot1+1) ).toInt();
-   int plevel;
-   if ( dot3 == -1 )
-      plevel = ver_str.right( ver_str.length() - (dot2+1) ).toInt();
-   else
-      plevel = ver_str.mid( dot2+1, dot3 - (dot2+1) ).toInt();
-
-   int hex = (major << 16) + (minor << 8) + plevel;
-
-   return hex;
+   QRegExp rxver(".*(\\d{1,2})\\.(\\d{1,2})\\.(\\d{1,2}).*");
+   if ( rxver.search( ver_str ) == -1)
+      return -1;
+   int major = rxver.cap(1).toInt();
+   int minor = rxver.cap(2).toInt();
+   int patch = rxver.cap(3).toInt();
+   return (major << 16) + (minor << 8) + patch;
 }
 
 
