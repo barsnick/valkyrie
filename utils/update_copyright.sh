@@ -49,15 +49,10 @@ fi
 ########################################################################
 # Update all copyright dates to current year
 echo "Updating copyright year to current year..."
-# current year
 CURR_YEAR=`date +%Y`
-
-CR_LINE="^ \* Copyright (c) \([0-9]*\)-[0-9]*, OpenWorks LLP <info@open-works.co.uk>$"
-CR_LINE_NEW=" \* Copyright (c) \1-$CURR_YEAR, OpenWorks LLP <info@open-works.co.uk>"
-
 for file in $FILES; do
     echo " - $file"
-    sed -e "s/$CR_LINE/$CR_LINE_NEW/" <$file >$file.tmp && mv $file.tmp $file;
+    sed -e "s/^ \* Copyright (c) \([0-9]*\)-[0-9]*/ \* Copyright (c) \1-$CURR_YEAR/" <$file >$file.tmp \
+       && mv $file.tmp $file;
 done
-
 echo "done"
