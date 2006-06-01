@@ -6,7 +6,7 @@ functionality, but serious work has gone into redesigning and
 stabilising the current functionality.
 
 Major changes are:
-- Much improved gathering/processing/displaying of Valgrind's XML output.
+- Much improved gathering/processing/display of Valgrind's XML output.
   This is much more resilient to the various things that can go awry,
   and gives useful feedback if things didn't go smoothly.
 - Auto-conf/make now used for the configure/build system.
@@ -14,6 +14,9 @@ Major changes are:
   was started, so input/output via stdin/out/err are transparently
   forwarded to/from the client.
   Valkyrie output (e.g. errors) is prefixed with '===valkyrie:pid==='.
+- Option values are no longer auto-saved to disk.  Any options set
+  either via the GUI Option pages, or via the command line, are only
+  saved to disk if 'Options->Save As Default' is selected.
 
 Minor new functionality:
 - External links in the Help/Handbook will now open in a (configureable)
@@ -21,6 +24,7 @@ Minor new functionality:
 - Other source editors than emacs/nedit supported, but up to user to
   set the right flag to open editor at correct line.
 - Extra font option for the Tool's: e.g. Memcheck's tree-view.
+- Support for new Valgrind (Memcheck) flag: --undef-value-errors
 
 A zillion other small changes have abstracted Valkyrie's code to make it
 easier to maintain and extend.
