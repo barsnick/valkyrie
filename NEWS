@@ -1,0 +1,26 @@
+
+Release 1.2.0 (?? June 2006)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1.2.0 fixes a bunch of bugs from 1.1.0.  There is no major new
+functionality, but serious work has gone into redesigning and
+stabilising the current functionality.
+
+Major changes are:
+- Much improved gathering/processing/displaying of Valgrind's XML output.
+  This is much more resilient to the various things that can go awry,
+  and gives useful feedback if things didn't go smoothly.
+- Auto-conf/make now used for the configure/build system.
+- The client program remains connected to the terminal in which Valkyrie
+  was started, so input/output via stdin/out/err are transparently
+  forwarded to/from the client.
+  Valkyrie output (e.g. errors) is prefixed with '===valkyrie:pid==='.
+
+Minor new functionality:
+- External links in the Help/Handbook will now open in a (configureable)
+  browser.
+- Other source editors than emacs/nedit supported, but up to user to
+  set the right flag to open editor at correct line.
+- Extra font option for the Tool's: e.g. Memcheck's tree-view.
+
+A zillion other small changes have abstracted Valkyrie's code to make it
+easier to maintain and extend.
