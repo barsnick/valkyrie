@@ -523,8 +523,14 @@ VgLog::~VgLog()
 
 bool VgLog::init( QDomProcessingInstruction xml_insn, QString doc_tag )
 {
-   if ( xml_insn.isNull() || doc_tag.isEmpty() )
+   if ( xml_insn.isNull() ) {
+      vklmPrintErr("VgLog::init(): xml_insn isNull");
       return false;
+   }
+   if ( doc_tag.isEmpty() ) {
+      vklmPrintErr("VgLog::init(): doc_tag isEmpty");
+      return false;
+   }
 
    QString init_str;
    QTextStream strm( init_str, IO_WriteOnly );
@@ -541,8 +547,12 @@ bool VgLog::init( QDomProcessingInstruction xml_insn, QString doc_tag )
 */
 bool VgLog::appendNode( QDomNode node )
 {
-   if (log.isNull() || docroot().isNull()) {
+   if (log.isNull()) {
       vklmPrintErr("VgLog::appendNode(): log not initialised");
+      return false;
+   }
+   if (docroot().isNull()) {
+      vklmPrintErr("VgLog::appendNode(): docroot isNull");
       return false;
    }
 

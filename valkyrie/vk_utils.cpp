@@ -60,13 +60,26 @@ void vkPrintErr( const char* msg, ... )
 
 
 /* Kludge to keep vglog happy
-   - Want vk_logmerge to print messages from class VgLog, but keep that
-     class within valkyrie...
+   - Want vk_logmerge to print progress messages from class VgLog,
+     but keep that class within valkyrie...
    - Hmm... perhaps shove that class into vk_logmerge after all...
    TODO: Figure out what we want and implement it!
  */
 void vklmPrint( int, const char*, ... ) { /* nada */ }
-void vklmPrintErr( const char*, ... )   { /* nada */ }
+void vklmPrintErr( const char* msg, ... )
+{
+   /* same as vkPrintErr()
+      TODO: how to forward call with mult args? */
+   const char* vkname = vkConfig ? vkConfig->vkname() : "";
+   va_list ap;
+   va_start( ap, msg );
+   va_end( ap );
+   fprintf( stderr, "===%s:%d=== ", vkname, (int)getpid() ); 
+   vfprintf( stderr, msg, ap );
+   va_end( ap );
+   fprintf( stderr, "\n" );
+   fflush(stderr);
+}
 
 
 

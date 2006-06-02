@@ -91,8 +91,10 @@ bool VgLogHandler::startElement( const QString&, const QString&,
    if (node == doc.documentElement()) {
       QDomProcessingInstruction xml_insn =
          doc.firstChild().toProcessingInstruction();
-      if ( ! vglog->init( xml_insn, tag ) )
+      if ( ! vglog->init( xml_insn, tag ) ) {
+         //VK_DEBUG("Error: Failed log initialisation");
          return false;
+      }
    }
 
    return true;
@@ -103,15 +105,19 @@ bool VgLogHandler::endElement( const QString&, const QString&,
 {
    //  vkPrintErr("VgLogHandler::endElement: %s", tag.latin1());
    // Should never have end element at doc level
-   if ( node == doc )
+   if ( node == doc ) {
+      //VK_DEBUG("VgLogHandler::endElement(): Error: node == doc");
       return false;
+   }
 
    QDomNode prnt = node.parentNode();
 
    /* if closing a top-level tag, append to vglog */
    if (prnt == doc.documentElement()) {
-      if ( ! vglog->appendNode( node ) )
+      if ( ! vglog->appendNode( node ) ) {
+         //VK_DEBUG("Failed to append node");
          return false;
+      }
    }
    node = prnt;
 
