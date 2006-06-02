@@ -103,7 +103,7 @@ OptionsWindow::OptionsWindow( QWidget* parent )
    /* okay button: apply and quit in one go */
    pb = new QPushButton( "&Ok", statusFrame );
    pb->setFixedWidth( w );
-   pb->setDefault( true );
+   pb->setDefault( true );                /* default button for dialog */
    buttLayout->addWidget( pb );
    connect( pb, SIGNAL(clicked() ), this, SLOT(accept()) );
 
@@ -301,57 +301,56 @@ void OptionsWindow::adjustPosition()
 }
 
 
-/* accept any edits and quit */
-void OptionsWindow::accept()
-{
-   OptionsPage* page;
-   for ( page = m_optPages.first(); page; page = m_optPages.next() ) {
-      if ( !page->applyEdits() ) {
-         VK_DEBUG("Failed to save edits");
-         return;  /* don't close window */
-      }
-   }
-   /* let the toolviews know that the flags (may) have changed */
-   emit flagsChanged();
-   close();
-}
-
-
+/* reject edits
+   - only current page can be in an edited state.
+   - don't emit flagsChanged - only 'changed' once they're 'applied'.
+*/
 void OptionsWindow::reject()
 {
-   OptionsPage* page;
-   for ( page = m_optPages.first(); page; page = m_optPages.next() ) {
-      if ( !page->rejectEdits() ) {
-         VK_DEBUG("Failed to reject edits");
-      }
+   OptionsPage* page = (OptionsPage*)m_wStack->visibleWidget();
+   vk_assert( page );
+   if ( !page->rejectEdits() ) {
+      VK_DEBUG("Failed to reject edits");
    }
-   /* let the toolviews know that the flags (may) have changed */
-   emit flagsChanged();
 }
 
 
-void OptionsWindow::apply()
+/* apply edits
+   - only current page can be in an edited state.
+   - emit flagsChanged to tell Valkyrie option values have been changed.
+*/
+bool OptionsWindow::apply()
 {
-   OptionsPage* page;
-   for ( page = m_optPages.first(); page; page = m_optPages.next() ) {
-      if ( !page->applyEdits() ) {
-         VK_DEBUG("Failed to apply edits");
-      }
+   OptionsPage* page = (OptionsPage*)m_wStack->visibleWidget();
+   vk_assert( page );
+   bool applied = page->applyEdits();
+   if (!applied) {
+      VK_DEBUG("Failed to apply edits");
+      return false;
    }
+
    /* let the toolviews know that the flags (may) have changed */
    emit flagsChanged();
+   return true;
 }
 
 
+/* apply edits and quit if no problems */
+void OptionsWindow::accept()
+{
+   if ( apply() )
+      close();
+}
+
+
+/* reset to installation defaults
+   - only reset current page
+*/
 void OptionsWindow::resetDefaults()
 {
-   /* get the current page */
-   int catid = m_categories->currentItem();
-   if ( catid != -1 ) {
-      CategItem* cit = (CategItem*)m_categories->item(catid);
-      OptionsPage* optpage = cit->page();
-      optpage->resetDefaults();
-   }
+   OptionsPage* page = (OptionsPage*)m_wStack->visibleWidget();
+   vk_assert( page );
+   page->resetDefaults();
 }
 
 
@@ -366,16 +365,15 @@ void OptionsWindow::closeEvent( QCloseEvent * )
 { hide(); }
 
 
+/* slot called by page->modified() signal
+   - only current page can have been modified.
+*/
 void OptionsWindow::modified()
 {
    bool edited = false;
-   OptionsPage* page;
-   for ( page = m_optPages.first(); page; page = m_optPages.next() ) {
-      if ( page->isModified() ) {
-         edited = true;
-         break;
-      }
-   }
+   OptionsPage* page = (OptionsPage*)m_wStack->visibleWidget();
+   vk_assert( page );
+   edited = page->isModified();
 
    m_applyButton->setEnabled( edited );
    m_resetButton->setEnabled( edited );

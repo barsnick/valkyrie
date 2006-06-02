@@ -74,7 +74,7 @@ protected:
 private slots:
    void accept();
    void reject();
-   void apply();
+   bool apply();
    void modified();
    void resetDefaults();
    void categoryClicked( QListBoxItem * );
