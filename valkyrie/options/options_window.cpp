@@ -359,8 +359,7 @@ bool OptionsWindow::apply()
 {
    OptionsPage* page = (OptionsPage*)m_wStack->visibleWidget();
    vk_assert( page );
-   bool applied = page->applyEdits();
-   if (!applied) {
+   if ( !page->applyEdits() ) {
       VK_DEBUG("Failed to apply edits");
       return false;
    }
