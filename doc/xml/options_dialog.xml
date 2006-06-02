@@ -21,7 +21,7 @@ defaults.  These can be changed via both the GUI and the command-line.
 
   <glossentry id="opt_defaults">
     <glossterm><command>Defaults:</command></glossterm>
-    <glossdef><para>sets all the options on the current page to the
+    <glossdef><para>Sets all the options on the current page to the
     installation defaults.</para>
     </glossdef>
   </glossentry>
@@ -34,9 +34,8 @@ defaults.  These can be changed via both the GUI and the command-line.
 
   <glossentry id="opt_apply">
     <glossterm><command>Apply:</command></glossterm>
-    <glossdef><para>Checks the current page's changes are valid, stores
-    them in the session configuration, and applies the changes to
-    Valkyrie.</para>
+    <glossdef><para>Checks the current page's changes are valid, and
+    uses them for the current session only.</para>
     </glossdef>
   </glossentry>
 
@@ -48,10 +47,9 @@ defaults.  These can be changed via both the GUI and the command-line.
 
   <glossentry id="opt_save">
     <glossterm><command>Save:</command></glossterm>
-    <glossdef><para>Calls <command>Apply</command> and then saves
-    <emphasis>all</emphasis> options from <emphasis>all</emphasis> pages
-    to disk.  The saved option settings will be set the next time
-    Valkyrie is started.</para>
+    <glossdef><para>Checks current page's changes are valid, uses them
+    for the current session, and then saves the changes in
+    <emphasis>ALL</emphasis> pages for future sessions too.</para>
     </glossdef>
   </glossentry>
 

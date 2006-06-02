@@ -49,7 +49,7 @@ defaults.  These can be changed via both the GUI and the command-line.
 <dt>
 <a name="opt_defaults"></a><span><b class="command">Defaults:</b></span>
 </dt>
-<dd><p>sets all the options on the current page to the
+<dd><p>Sets all the options on the current page to the
     installation defaults.</p></dd>
 <dt>
 <a name="opt_reset"></a><span><b class="command">Reset:</b></span>
@@ -58,9 +58,8 @@ defaults.  These can be changed via both the GUI and the command-line.
 <dt>
 <a name="opt_apply"></a><span><b class="command">Apply:</b></span>
 </dt>
-<dd><p>Checks the current page's changes are valid, stores
-    them in the session configuration, and applies the changes to
-    Valkyrie.</p></dd>
+<dd><p>Checks the current page's changes are valid, and
+    uses them for the current session only.</p></dd>
 <dt>
 <a name="opt_ok"></a><span><b class="command">Ok:</b></span>
 </dt>
@@ -68,10 +67,9 @@ defaults.  These can be changed via both the GUI and the command-line.
 <dt>
 <a name="opt_save"></a><span><b class="command">Save:</b></span>
 </dt>
-<dd><p>Calls <span><b class="command">Apply</b></span> and then saves
-    <span class="emphasis"><em>all</em></span> options from <span class="emphasis"><em>all</em></span> pages
-    to disk.  The saved option settings will be set the next time
-    Valkyrie is started.</p></dd>
+<dd><p>Checks current page's changes are valid, uses them
+    for the current session, and then saves the changes in
+    <span class="emphasis"><em>ALL</em></span> pages for future sessions too.</p></dd>
 </dl></div>
 <p>Note: Starting valkyrie with command-line options does not save
 these option values to disk.  You must explicitly select
