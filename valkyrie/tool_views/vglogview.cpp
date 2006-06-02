@@ -267,13 +267,15 @@ void TopStatusItem::updateLeakCounts(  VgError err )
       - if '1' then reset counters
    */
    QString what = err.getFirstElem("what").text();
-   QString str = what.mid( what.find( "in loss record " ) );
-   QString record = QStringList::split( " ", str )[3];
-   //  VK_DEBUG("what: '%s'\n", what.latin1());
-   //  VK_DEBUG("str: '%s'\n", str.latin1());
-   //  VK_DEBUG("rec: '%s'\n", record.latin1());
-   if (record == "1") {
-      num_bytes = num_blocks = 0;
+   QString lr_str = what.mid( what.find( "in loss record " ) );
+   /* merged logs may not have a 'loss record' string... */
+   if ( !lr_str.isEmpty() ) {
+      /* valgrind can output multiple leak summaries
+         - reset counts when we get a new summary */
+      QString record = QStringList::split( " ", lr_str )[3];
+      if (record == "1") {
+         num_bytes = num_blocks = 0;
+      }
    }
    num_bytes  += err.getFirstElem("leakedbytes").text().toUInt();
    num_blocks += err.getFirstElem("leakedblocks").text().toUInt();
