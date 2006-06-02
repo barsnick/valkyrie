@@ -19,6 +19,7 @@ Major changes are:
   saved to disk if 'Options->Save As Default' is selected.
 
 Minor new functionality:
+- Merging Memcheck XML logs now supported via GUI.
 - External links in the Help/Handbook will now open in a (configureable)
   browser.
 - Other source editors than emacs/nedit supported, but up to user to
