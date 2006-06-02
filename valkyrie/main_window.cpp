@@ -63,7 +63,7 @@ MainWindow::~MainWindow()
       cfg.wrInt( this->x(),      "x-pos",  "MainWin" );
       cfg.wrInt( this->y(),      "y-pos",  "MainWin" );
 
-      // save opts to disk... don't care if it fails
+      // save opts to disk... too bad if it fails
       cfg.sync( m_valkyrie );
    }
 }
@@ -219,20 +219,6 @@ void MainWindow::showOptionsWindow( int view_id )
 }
 
 
-/* save options to disk --------------------------------------------- */
-void MainWindow::saveOptions()
-{ 
-   // should only get here if any current opts difft to stored config
-   vk_assert( vkConfig->isDirty() == true );
-
-   // save opts to disk...
-   if (vkConfig->sync( m_valkyrie )) {
-      // disable menu item
-      m_optsMenu->setItemEnabled( OPTS_SAVE, false );
-   }
-}
-
-
 /* slot, connected to a tool object's signal running(bool) */
 void MainWindow::updateButtons( bool running )
 {
@@ -332,10 +318,6 @@ void MainWindow::updateVgFlags()
    if ( m_flagsLabel->isVisible() ) {
       showFlagsWidget( true );
    }
-
-   /* if flags changed, enable 'save as default' item */
-   if (vkConfig->isDirty())
-      m_optsMenu->setItemEnabled( OPTS_SAVE, true );
 }
 
 
@@ -458,11 +440,6 @@ void MainWindow::mkMenuBar()
                               SLOT(showOptionsWindow(int)),
                               0, obj->objId() );
    }
-   m_optsMenu->insertSeparator();
-   m_optsMenu->insertItem( QPixmap(filesave_xpm),
-                           "Save as &Default", this, SLOT(saveOptions()), 
-                           CTRL+Key_D, OPTS_SAVE );
-   m_optsMenu->setItemEnabled( OPTS_SAVE, false );  /* starts up disabled */
    mainMenu->insertItem( "O&ptions", m_optsMenu, -1, index );
    ContextHelp::add( m_optsMenu, urlValkyrie::optionsMenu );
 

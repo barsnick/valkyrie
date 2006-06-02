@@ -104,6 +104,13 @@ OptionsWindow::OptionsWindow( QWidget* parent )
    buttLayout->addStretch( 10 );
 
    int w = fontMetrics().width( "X&CancelX" );
+   /* save button: apply and save to disk */
+   m_saveButton = new QPushButton( "&Save", statusFrame );
+   m_saveButton->setFixedWidth( w );
+   buttLayout->addWidget( m_saveButton );
+   connect( m_saveButton, SIGNAL(clicked() ), this, SLOT(save()) );
+   m_saveButton->setEnabled(  vkConfig->isDirty() );
+
    /* reset button: undo everything since last apply */
    m_resetButton = new QPushButton( "&Reset", statusFrame );
    m_resetButton->setFixedWidth( w );
@@ -306,6 +313,30 @@ void OptionsWindow::adjustPosition()
 }
 
 
+/* save edits to disk
+   - applies current page edits
+   - saves all changes to disk.
+
+   Need a 'save' because we're not auto-saving 'applied' edits.
+   'Apply' just means check edits and update Valkyrie.
+   'Save' means save changes to disk for next startup.
+   This is because Vk accepts cmdline values... if started with option
+   values xyz, don't necessarily want those saved to disk for next run.
+   This needs some clear thinking...
+*/
+void OptionsWindow::save()
+{
+   if (!apply())
+      return;
+   
+   /* save opts to disk... */
+   if ( vkConfig->isDirty() )
+      vkConfig->sync( ((MainWindow*)parent())->valkyrie() );
+
+   m_saveButton->setEnabled(  vkConfig->isDirty() );
+}
+
+
 /* reject edits
    - only current page can be in an edited state.
    - don't emit flagsChanged - only 'changed' once they're 'applied'.
@@ -382,4 +413,5 @@ void OptionsWindow::modified()
 
    m_applyButton->setEnabled( edited );
    m_resetButton->setEnabled( edited );
+   m_saveButton->setEnabled(  edited || vkConfig->isDirty() );
 }

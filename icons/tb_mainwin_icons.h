@@ -586,6 +586,7 @@ static const char* help_xpm[] = {
 #endif
 
 /* XPM */
+/*
 static const char* filesave_xpm[] = {
 "22 22 273 2",
 "  	c None",
@@ -883,3 +884,4 @@ static const char* filesave_xpm[] = {
 "      I+J+K+L+M+N+O+P+Q+R+S+T+U+V+W+X+      ",
 "                                            ",
 "                                            "};
+*/

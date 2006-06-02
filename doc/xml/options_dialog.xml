@@ -14,20 +14,53 @@ number of preference options that can only be set via this dialog.
 </para>
 
 <para>On first-time startup, all options are set to their installation
-defaults.  These can be changed via both the GUI and the command-line,
-but these changes are only stored to disk for the next session by
-selecting "Options::Save as Default".  For example, by giving the
-following command:</para>
-<programlisting>
-  valkyrie --show-reachable=yes /bin/ls -lF
-</programlisting>
-<para>then the values of the various arguments will be set in the
-appropriate option widgets.  These particular values will only be saved
-for the next Valkyrie startup if Options::Save as Default" is
-subsequently selected.</para>
+defaults.  These can be changed via both the GUI and the command-line.
+</para>
 
-<para>Note: choosing "Defaults" resets the current option page to the
-installation defaults.  Other option pages are not affected.</para>
+<glosslist>
+
+  <glossentry id="opt_defaults">
+    <glossterm><command>Defaults:</command></glossterm>
+    <glossdef><para>sets all the options on the current page to the
+    installation defaults.</para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="opt_reset">
+    <glossterm><command>Reset:</command></glossterm>
+    <glossdef><para>Discards any changes to the current page.</para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="opt_apply">
+    <glossterm><command>Apply:</command></glossterm>
+    <glossdef><para>Checks the current page's changes are valid, stores
+    them in the session configuration, and applies the changes to
+    Valkyrie.</para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="opt_ok">
+    <glossterm><command>Ok:</command></glossterm>
+    <glossdef><para>Calls <command>Apply</command> and closes the options window.</para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="opt_save">
+    <glossterm><command>Save:</command></glossterm>
+    <glossdef><para>Calls <command>Apply</command> and then saves
+    <emphasis>all</emphasis> options from <emphasis>all</emphasis> pages
+    to disk.  The saved option settings will be set the next time
+    Valkyrie is started.</para>
+    </glossdef>
+  </glossentry>
+
+</glosslist>
+
+<para>Note: Starting valkyrie with command-line options does not save
+these option values to disk.  You must explicitly select
+<command>Save</command> to do this.</para>
+
 
 
 

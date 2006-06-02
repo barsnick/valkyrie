@@ -81,8 +81,7 @@ which are below.</para>
     <para>This menu contains links to a dialog where preferences, options and 
     flags may be set for Valkyrie, Valgrind, and (supported) Valgrind tools.
     Any flag which may be given on the command-line for Valkyrie or Valgrind
-    is available to be set in this dialog.  Settings applied to the current
-    run are only saved to disk if you select Options->Save As Default.
+    is available to be set in this dialog.
     Also see <xref linkend="context_help"/> below.</para>
     <para>For detailed information on this dialog, see the 
     <xref linkend="options_dialog"/> page.</para>

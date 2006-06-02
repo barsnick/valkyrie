@@ -66,7 +66,6 @@ private slots:
 
    void showFlagsWidget( bool show );
    void showOptionsWindow(int);
-   void saveOptions();
    void showAboutInfo( int id );
    void closeToolView();
 
@@ -92,7 +91,7 @@ private:
    bool m_showToolTips;
    bool m_showToolbarLabels;
 
-   enum menuIds{ FILE_RUN, FILE_STOP, FILE_CLOSE, OPTS_SAVE=99/*>vkobj_id*/ };
+   enum menuIds{ FILE_RUN, FILE_STOP, FILE_CLOSE };
    QPopupMenu*   m_fileMenu;
    QPopupMenu*   m_toolsMenu;
    QPopupMenu*   m_optsMenu;

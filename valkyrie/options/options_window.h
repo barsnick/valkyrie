@@ -77,6 +77,7 @@ private slots:
    bool apply();
    void modified();
    void resetDefaults();
+   void save();
    void categoryClicked( QListBoxItem * );
 
 private:
@@ -92,6 +93,7 @@ private:
    QString      m_capt;
    QPushButton* m_applyButton;
    QPushButton* m_resetButton;
+   QPushButton* m_saveButton;
 
    /* so we can iterate over the vkOptions widgets */
    QPtrList<OptionsPage> m_optPages;

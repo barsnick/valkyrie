@@ -43,19 +43,39 @@ for modification via this dialog.  In addition, Valkyrie has a
 number of preference options that can only be set via this dialog.
 </p>
 <p>On first-time startup, all options are set to their installation
-defaults.  These can be changed via both the GUI and the command-line,
-but these changes are only stored to disk for the next session by
-selecting "Options::Save as Default".  For example, by giving the
-following command:</p>
-<pre class="programlisting">
-  valkyrie --show-reachable=yes /bin/ls -lF
-</pre>
-<p>then the values of the various arguments will be set in the
-appropriate option widgets.  These particular values will only be saved
-for the next Valkyrie startup if Options::Save as Default" is
-subsequently selected.</p>
-<p>Note: choosing "Defaults" resets the current option page to the
-installation defaults.  Other option pages are not affected.</p>
+defaults.  These can be changed via both the GUI and the command-line.
+</p>
+<div class="glosslist"><dl>
+<dt>
+<a name="opt_defaults"></a><span><b class="command">Defaults:</b></span>
+</dt>
+<dd><p>sets all the options on the current page to the
+    installation defaults.</p></dd>
+<dt>
+<a name="opt_reset"></a><span><b class="command">Reset:</b></span>
+</dt>
+<dd><p>Discards any changes to the current page.</p></dd>
+<dt>
+<a name="opt_apply"></a><span><b class="command">Apply:</b></span>
+</dt>
+<dd><p>Checks the current page's changes are valid, stores
+    them in the session configuration, and applies the changes to
+    Valkyrie.</p></dd>
+<dt>
+<a name="opt_ok"></a><span><b class="command">Ok:</b></span>
+</dt>
+<dd><p>Calls <span><b class="command">Apply</b></span> and closes the options window.</p></dd>
+<dt>
+<a name="opt_save"></a><span><b class="command">Save:</b></span>
+</dt>
+<dd><p>Calls <span><b class="command">Apply</b></span> and then saves
+    <span class="emphasis"><em>all</em></span> options from <span class="emphasis"><em>all</em></span> pages
+    to disk.  The saved option settings will be set the next time
+    Valkyrie is started.</p></dd>
+</dl></div>
+<p>Note: Starting valkyrie with command-line options does not save
+these option values to disk.  You must explicitly select
+<span><b class="command">Save</b></span> to do this.</p>
 <div class="sect1" lang="en">
 <div class="titlepage">
 <div><div><h2 class="title" style="clear: both">
