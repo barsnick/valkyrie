@@ -74,7 +74,8 @@ VgLogHandler::~VgLogHandler()
 bool VgLogHandler::processingInstruction( const QString& target, const QString& data )
 {
    //  vkPrintErr("VgLogHandler::processingInstruction: %s, %s", target.latin1(), data.latin1());
-   node.appendChild( doc.createProcessingInstruction( target, data ) );
+   doc.appendChild( doc.createProcessingInstruction( target, data ) );
+   node = doc;
    return true;
 }
 
