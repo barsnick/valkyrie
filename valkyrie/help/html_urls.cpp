@@ -30,6 +30,9 @@ namespace urlValkyrie {
    const char* statusMsg    = "mainwindow.status_msg.html";
    const char* flagsWidget  = "mainwindow.flags_widget.html";
 
+   /* options dialog */
+   const char* optsDlg      = "options_dialog.html";
+
    /* valkyrie's options page */
    const char* optsPage     = "options_dialog.html#valkyrie";
    const char* toolTips     = "options_dialog.html#tool_tips";
@@ -99,6 +102,7 @@ namespace urlVgCore {
 
 /* Memcheck ------------------------------------------------------------ */
 namespace urlMemcheck { 
+   const char* optsMC    = "vg-manual-mc.html";
    const char* Leakcheck = "vg-manual-mc.html#leakcheck";
    const char* Showreach = "vg-manual-mc.html#showreach";
    const char* UndefVal  = "vg-manual-mc.html#undefvalerrs";
@@ -111,6 +115,7 @@ namespace urlMemcheck {
 
 /* Cachegrind ---------------------------------------------------------- */
 namespace urlCachegrind { 
+   const char* optsCG    = "vg-manual-cg.html";
    const char* Cacheopts = "vg-manual-cg.html#cg-manual.cgopts";
    const char* Pid       = "vg-manual-cg.html#pid";
    const char* Sort      = "vg-manual-cg.html#sort";
@@ -123,7 +128,8 @@ namespace urlCachegrind {
 
 
 /* Massif -------------------------------------------------------------- */
-namespace urlMassif { 
+namespace urlMassif {
+   const char* optsMS    = "vg-manual-ms.html";
    const char* Heap      = "vg-manual-ms.html#heap";
    const char* HeapAdmin = "vg-manual-ms.html#heap-admin";
    const char* Stacks    = "vg-manual-ms.html#stacks";

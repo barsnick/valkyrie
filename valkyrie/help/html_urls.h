@@ -29,6 +29,8 @@ namespace urlValkyrie {
    extern const char* helpMenu;
    extern const char* statusMsg;
    extern const char* flagsWidget;
+   /* options dialog */
+   extern const char* optsDlg;
    /* valkyrie's options page */
    extern const char* optsPage;
    extern const char* toolTips;
@@ -94,6 +96,7 @@ namespace urlVgCore {
 
 /* Memcheck ------------------------------------------------------------ */
 namespace urlMemcheck { 
+   extern const char* optsMC;
    extern const char* Partial;
    extern const char* Freelist;
    extern const char* Leakcheck;
@@ -106,6 +109,7 @@ namespace urlMemcheck {
 
 /* Cachegrind ---------------------------------------------------------- */
 namespace urlCachegrind { 
+   extern const char* optsCG;
    extern const char* Cacheopts;
    extern const char* Pid;
    extern const char* Sort;
@@ -119,6 +123,8 @@ namespace urlCachegrind {
 
 /* Massif -------------------------------------------------------------- */
 namespace urlMassif { 
+   extern const char* optsMS;
+   extern const char* optsMassif;
    extern const char* Heap;
    extern const char* HeapAdmin;
    extern const char* Stacks;

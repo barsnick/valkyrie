@@ -16,6 +16,8 @@
 #include <qsplitter.h>
 #include <qstatusbar.h>
 
+#include "html_urls.h"
+#include "context_help.h"
 #include "options_window.h"
 #include "vk_utils.h"
 #include "vk_objects.h"
@@ -85,6 +87,8 @@ OptionsWindow::OptionsWindow( QWidget* parent )
    setCaption( m_capt );
    statusBar()->setSizeGripEnabled( false );
 
+   ContextHelp::add( this, urlValkyrie::optsDlg );
+
    m_optPages.setAutoDelete( true );
    m_xpos = m_ypos = -1;
 
@@ -100,13 +104,6 @@ OptionsWindow::OptionsWindow( QWidget* parent )
    buttLayout->addStretch( 10 );
 
    int w = fontMetrics().width( "X&CancelX" );
-   /* okay button: apply and quit in one go */
-   pb = new QPushButton( "&Ok", statusFrame );
-   pb->setFixedWidth( w );
-   pb->setDefault( true );                /* default button for dialog */
-   buttLayout->addWidget( pb );
-   connect( pb, SIGNAL(clicked() ), this, SLOT(accept()) );
-
    /* reset button: undo everything since last apply */
    m_resetButton = new QPushButton( "&Reset", statusFrame );
    m_resetButton->setFixedWidth( w );
@@ -120,6 +117,14 @@ OptionsWindow::OptionsWindow( QWidget* parent )
    buttLayout->addWidget( m_applyButton );
    connect( m_applyButton, SIGNAL(clicked() ), this, SLOT(apply()));
    m_applyButton->setEnabled( false );  /* nothing to apply yet */
+
+   /* okay button: apply and quit in one go */
+   pb = new QPushButton( "&Ok", statusFrame );
+   pb->setFixedWidth( w );
+   pb->setDefault( true );                /* default button for dialog */
+   buttLayout->addWidget( pb );
+   connect( pb, SIGNAL(clicked() ), this, SLOT(accept()) );
+
 
    QSplitter* splitter = new QSplitter( this );
    setCentralWidget( splitter );

@@ -9,9 +9,13 @@
  */
 
 #include "cachegrind_options_page.h"
+
 #include "cachegrind_object.h"
+#include "context_help.h"
+#include "html_urls.h"
 #include "vk_utils.h"
 #include "vk_messages.h"
+
 
 
 CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
@@ -26,6 +30,7 @@ CachegrindOptionsPage::CachegrindOptionsPage( QWidget* parent, VkObject* obj )
 
    /* group1: cache configuration options */
    QGroupBox* group1 = new QGroupBox(" Cache Configuration ", this, "group1");
+   ContextHelp::add( group1, urlCachegrind::optsCG );
    vbox->addWidget( group1, m_space );
 
    /* we make the three spin-widgets 'by hand' here */

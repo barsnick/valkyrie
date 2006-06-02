@@ -9,6 +9,9 @@
  */
 
 #include "memcheck_options_page.h"
+
+#include "context_help.h"
+#include "html_urls.h"
 #include "memcheck_object.h"
 #include "vk_messages.h"
 #include "vk_utils.h"
@@ -27,6 +30,7 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
 
    /* group1: memcheck options */
    QGroupBox* group1 = new QGroupBox( " Memcheck Options ", this, "group1");
+   ContextHelp::add( group1, urlMemcheck::optsMC );
    vbox->addWidget( group1, m_space );
 
    m_itemList.insert( Memcheck::LEAK_CHECK,                 /* combobox */

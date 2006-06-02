@@ -125,7 +125,7 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    /* tab 2: error-reporting ---------------------------------------- */
    QWidget* tabErep = new QWidget( tabWidget, "tab_erep");
    tabWidget->addTab( tabErep, " Error Reporting " );
-   ContextHelp::add( tabCore, urlValkyrie::errorTab );
+   ContextHelp::add( tabErep, urlValkyrie::errorTab );
    /* tabErep - vbox */
    QVBoxLayout* erep_vbox = new QVBoxLayout( tabErep, 10, 25, "vbox" );
 
@@ -205,7 +205,7 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    /* tab 3: suppressions ------------------------------------------- */
    QWidget* tabSupps = new QWidget( tabWidget, "tab_supps");
    tabWidget->addTab( tabSupps, " Suppressions " );
-   ContextHelp::add( tabCore, urlValkyrie::suppsTab );
+   ContextHelp::add( tabSupps, urlValkyrie::suppsTab );
    /* tabSupps - vbox */
    QVBoxLayout* supp_vbox = new QVBoxLayout( tabSupps, 10, 25, "supp_vbox" );
 

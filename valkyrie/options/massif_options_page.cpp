@@ -9,9 +9,13 @@
  */
 
 #include "massif_options_page.h"
+
+#include "context_help.h"
+#include "html_urls.h"
 #include "massif_object.h"
 #include "vk_messages.h"
 #include "vk_utils.h"
+
 
 
 MassifOptionsPage::MassifOptionsPage( QWidget* parent, VkObject* obj )
@@ -26,6 +30,7 @@ MassifOptionsPage::MassifOptionsPage( QWidget* parent, VkObject* obj )
 
    /* group1: massif options */
    QGroupBox* group1 = new QGroupBox( " Massif Options ", this, "group1");
+   ContextHelp::add( group1, urlMassif::optsMS );
    vbox->addWidget( group1, m_space );
 
    m_itemList.insert( Massif::HEAP,                        /* checkbox */
