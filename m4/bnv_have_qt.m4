@@ -80,6 +80,11 @@ dnl @author Bastiaan Veelo <Bastiaan@Veelo.net>
 dnl @version 2006-03-12
 dnl @license AllPermissive
 
+dnl Copyright (C) 2006 Bastiaan Veelo <Bastiaan@Veelo.net> 
+dnl Copying and distribution of this file, with or without modification,
+dnl are permitted in any medium without royalty provided the copyright 
+dnl notice and this notice are preserved.
+
 dnl Copyright (C) 2001, 2002, 2003, 2005, 2006 Bastiaan Veelo
 
 dnl THANKS! This code includes bug fixes and contributions made by:
