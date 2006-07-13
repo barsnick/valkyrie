@@ -86,7 +86,7 @@ bool VkTextBrowser::try_launch_browser(QString browser, const QString& link)
 bool VkTextBrowser::launch_browser(const QString& link)
 {
    bool ok = false;
-   QApplication::setOverrideCursor(Qt::BusyCursor);
+   QApplication::setOverrideCursor(Qt::WaitCursor);
    
    /* try config::vk::browser */
    QString rc_browser = vkConfig->rdEntry( "browser", "valkyrie" );
