@@ -91,8 +91,13 @@ MemcheckView::MemcheckView( QWidget* parent, const char* name )
    connect( lView, SIGNAL(selectionChanged()),
             this,  SLOT(itemSelected()) );
    /* launch editor with src file loaded */
+#if (QT_VERSION-0 >= 0x030200)
    connect( lView, SIGNAL(doubleClicked(QListViewItem*, const QPoint&, int)),
-            this,  SLOT(launchEditor(QListViewItem*, const QPoint&, int)) );
+            this,  SLOT(launchEditor(QListViewItem*)) );
+#else // QT_VERSION < 3.2
+   connect( lView, SIGNAL(doubleClicked(QListViewItem*)),
+            this,  SLOT(launchEditor(QListViewItem*)) );
+#endif
 
 //zz   QFont clientout_fnt( "Adobe Courier", 9, QFont::Normal, false );
 //zz   clientout_fnt.setStyleHint( QFont::TypeWriter );
@@ -302,7 +307,7 @@ void MemcheckView::mkToolBar()
 
 /* checks if itemType() == SRC.  if true, and item isReadable or
    isWriteable, launches an editor with the source file loaded */
-void MemcheckView::launchEditor( QListViewItem* lv_item, const QPoint&, int )
+void MemcheckView::launchEditor( QListViewItem* lv_item )
 {
    if ( !lv_item || !lv_item->parent() ) return;
 

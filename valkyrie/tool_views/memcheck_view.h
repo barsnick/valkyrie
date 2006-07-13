@@ -53,7 +53,7 @@ private:
    void openAllItems(bool);
    void openOneItem();
    void showSrcPath();
-   void launchEditor(  QListViewItem*, const QPoint&, int );
+   void launchEditor(  QListViewItem* );
 
 private:
    QListView* lView;

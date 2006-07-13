@@ -780,6 +780,8 @@ bool VgLogView::appendNode( QDomNode node )
       break;
    }
    case VgElement::ERRORCOUNTS: {
+      if (elem.childNodes().count() == 0)  // ignore empty errorcounts
+         break;
       VgErrCounts ec = (VgErrCounts&)elem;
       /* update topStatus */
       topStatus->updateErrorCounts( ec );
