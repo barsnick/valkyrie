@@ -13,15 +13,19 @@ To check out Valkyrie via anonymous, read-only svn access:
   svn co svn://svn.valgrind.org/valkyrie/trunk valkyrie
 
 
+Requirements
+~~~~~~~~~~~~
+Qt (v3.2.0 to v3.3.6) <http://www.trolltech.com>
+Valgrind (>=v3.0.0) <http://www.valgrind.org>
+
+
 Executive Summary
 ~~~~~~~~~~~~~~~~~
-Valkyrie is a GPL'd graphical front-end to the Valgrind suite of tools
-for debugging and profiling x86-Linux programs.  
+Valkyrie is a GPL'd graphical front-end to the Valgrind suite
+of tools for debugging and profiling programs.
 
-Valkyrie uses the Qt widget library <http://www.trolltech.com>, and
-(should) run on any platform that 
-  (a) Qt (>= v3.2.0) runs on, and
-  (b) Valgrind (>= v3.0.0) runs on.
+Valkyrie uses the Qt widget library, and (should) run on any platform
+that both Qt and Valgrind run on.
 
 To get the most out of Valkyrie, you must read the Valgrind
 documentation: <http://www.valgrind.org/docs/>
