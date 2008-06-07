@@ -19,6 +19,8 @@
 #include "vk_option.h"         // PERROR* and friends 
 
 #include <stdio.h>
+#include <stdlib.h>            /* exit */
+
 #include <qapplication.h>
 
 

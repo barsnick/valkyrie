@@ -28,6 +28,7 @@
 #include <qsocketnotifier.h>
 
 #include <signal.h>
+#include <stdlib.h>            // exit
 
 
 class VKMembuf

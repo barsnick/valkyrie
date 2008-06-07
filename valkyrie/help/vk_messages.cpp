@@ -14,6 +14,7 @@
 #include "msgbox_icons.h"
 
 #include <stdarg.h>           /* va_start, va_end */
+#include <stdlib.h>           /* exit */
 
 #include <qapplication.h>
 #include <qobjectlist.h>

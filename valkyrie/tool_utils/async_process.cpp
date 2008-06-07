@@ -19,12 +19,13 @@
  * See the file LICENSE.GPL for the full license details.
  */
 
-#include <unistd.h>                /* dup2(), _exit(),  */
-#include <sys/types.h>             /* waitpid()         */
-#include <sys/wait.h>              /* waitpid()         */
+#include <errno.h>                 /* Fedora Core needs this */
 #include <fcntl.h>                 /* open(), O_RDONLY, O_WRONLY */
 #include <signal.h>
-#include <errno.h>                 /* Fedora Core needs this */
+#include <stdlib.h>                /* exit */
+#include <sys/types.h>             /* waitpid()         */
+#include <sys/wait.h>              /* waitpid()         */
+#include <unistd.h>                /* dup2(), _exit(),  */
 
 #include "async_process.h"
 #include "vk_utils.h"

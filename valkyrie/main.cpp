@@ -10,6 +10,7 @@
 #include <qapplication.h>
 #include <qdir.h>
 #include <signal.h>    /* signal name macros, and the signal() prototype */
+#include <stdlib.h>    /* exit */
 
 #include "vk_utils.h"              // vk_assert(), vkPrint() etc
 #include "parse_cmd_args.h"        // parseCmdArgs()
