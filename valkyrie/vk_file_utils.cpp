@@ -3021,7 +3021,7 @@ void FileDialog::urlFinished( QNetworkOperation *op )
       if ( d->paths->hasFocus() )
          d->ignoreNextKeyPress = true;
 
-		vkWarn( this, "Error", op->protocolDetail().latin1() );
+		vkWarn( this, "Error", "%s", op->protocolDetail().latin1() );
       switch ( op->errorCode() ) {
       case QNetworkProtocol::ErrParse:
       case QNetworkProtocol::ErrValid:

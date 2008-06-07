@@ -863,7 +863,7 @@ bool VgLog::mergeErrors( VgErrorList sErrors,
 {
    VgErrCounts mErrCounts = errorcounts();
 
-   vklmPrint( 2, "--- update matches (n=%d) --- ", sErrors.count());
+   vklmPrint( 2, "--- update matches (n=%zu) --- ", sErrors.count());
 
    /* --- find matches: update master err, delete slave err ---  */
 
@@ -927,7 +927,7 @@ bool VgLog::mergeErrors( VgErrorList sErrors,
       vklmPrint( 2, " ");
    }
 
-   vklmPrint( 2, "--- append non-matches (n=%d) --- ", sErrors.count() );
+   vklmPrint( 2, "--- append non-matches (n=%zu) --- ", sErrors.count() );
 
    /* if no errcounts, and sErrors > 0, create empty errcounts */
    if ( mErrCounts.isNull() && sErrors.count() > 0 ) {
@@ -965,7 +965,7 @@ bool VgLog::mergeErrors( VgErrorList sErrors,
 
 bool VgLog::mergeLeakErrors( VgErrorList sLeakErrors )
 {
-   vklmPrint( 2, "--- update matches (n=%d) ---", sLeakErrors.count() );
+   vklmPrint( 2, "--- update matches (n=%zu) ---", sLeakErrors.count() );
 
    /* --- for each leak in master ---  */
    VgErrorList errs = leaks();
@@ -1001,7 +1001,7 @@ bool VgLog::mergeLeakErrors( VgErrorList sLeakErrors )
       vklmPrint( 2, " ");
    }
 
-   vklmPrint( 2, "--- append non-matches (n=%d) ---", sLeakErrors.count() );
+   vklmPrint( 2, "--- append non-matches (n=%zu) ---", sLeakErrors.count() );
 
    /* --- append remaining slave leaks to master --- */
    VgErrorList::Iterator sIt;
