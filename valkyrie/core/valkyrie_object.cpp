@@ -350,12 +350,7 @@ bool Valkyrie::runTool( int tId, VkRunState::State runState )
    ToolObject* activeTool = valgrind()->toolObj( tId );
    vk_assert( activeTool != 0 );
 
-   /* Adding user-invisible flags to capture valgrind output
-      --log-file-exactly must be given a filename by the tool */
-   QStringList vgFlags = m_flags;
-   vgFlags.insert( ++(vgFlags.begin()), "--log-file-exactly" );
-
-   return activeTool->start( runState, vgFlags );
+   return activeTool->start( runState, m_flags );
 }
 
 

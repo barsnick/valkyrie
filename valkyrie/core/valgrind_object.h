@@ -85,6 +85,9 @@ public:
    ToolObject* toolObj( int tid );
    ToolObject* toolObj( const QString& name );
 
+   /* Get valgrind version */
+   static bool getVersionBinary( QString& vg_bin, int& v1, int& v2, int& v3 );
+
 private:
    /* creates the various VkObjects and initialises their options,
       ready for cmd-line parsing (if any). */

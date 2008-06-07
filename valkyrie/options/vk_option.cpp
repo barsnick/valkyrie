@@ -13,7 +13,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <malloc.h>
-#include <stdlib.h>         /* exit */
+#include <stdlib.h>         // getenv
 
 #include <qdir.h>
 

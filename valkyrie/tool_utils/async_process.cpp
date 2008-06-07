@@ -22,7 +22,7 @@
 #include <errno.h>                 /* Fedora Core needs this */
 #include <fcntl.h>                 /* open(), O_RDONLY, O_WRONLY */
 #include <signal.h>
-#include <stdlib.h>                /* exit */
+#include <stdlib.h>                /* getenv            */
 #include <sys/types.h>             /* waitpid()         */
 #include <sys/wait.h>              /* waitpid()         */
 #include <unistd.h>                /* dup2(), _exit(),  */

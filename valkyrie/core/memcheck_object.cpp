@@ -329,21 +329,40 @@ bool Memcheck::runValgrind( QStringList vgflags )
 {
    m_saveFname = vk_mkstemp( vkConfig->logsDir() + "mc_log", "xml" );
    vk_assert( !m_saveFname.isEmpty() );
-
-   /* fill in filename in flags list */
-#if (QT_VERSION-0 >= 0x030200)
-   vgflags.gres( "--log-file-exactly", "--log-file-exactly=" + m_saveFname );
-#else // QT_VERSION < 3.2
-   QStringList::iterator it_str = vgflags.find("--log-file-exactly");
-   if (it_str != vgflags.end())
-      (*it_str) += ("=" + m_saveFname);
-#endif
-  
-   setRunState( VkRunState::VALGRIND );
-   m_fileSaved = false;
-   statusMsg( "Memcheck", "Running ... " );
-
-   bool ok = startProcess( vgflags );
+   
+   /* check valgrind version:
+       - supported version
+       - version dependent code
+   */
+   int v1=0, v2=0, v3=0;
+   bool ok = Valgrind::getVersionBinary( vgflags.first(), v1, v2, v3 );
+   if ( !ok ) {
+      vkError( view(), "Valgrind start error",
+         "Failure running valgrind version test" );
+   } else {
+      // valgrind version dependent code
+      QString log_param;
+      
+      if ( v1 == 3 && v2 < 3 ) { // < 3.3.0
+         log_param = "--log-file-exactly=";
+      } else {                    // >= 3.3.0
+         log_param = "--log-file=";
+      }
+      v3=v3; // stop compiler complaining
+      log_param += m_saveFname;
+      
+      printf("param: '%s'\n", log_param.latin1() );
+      
+      vgflags.insert( ++(vgflags.begin()), log_param );
+   }
+   
+   if ( ok ) {
+      setRunState( VkRunState::VALGRIND );
+      m_fileSaved = false;
+      statusMsg( "Memcheck", "Running ... " );
+      
+      ok = startProcess( vgflags );
+   }
 
    if (!ok) {
       statusMsg( "Memcheck", "Failed" );

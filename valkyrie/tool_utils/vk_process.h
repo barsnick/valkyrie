@@ -28,7 +28,7 @@
 #include <qsocketnotifier.h>
 
 #include <signal.h>
-#include <stdlib.h>            // exit
+#include <stdlib.h>            // ssize_t
 
 
 class VKMembuf

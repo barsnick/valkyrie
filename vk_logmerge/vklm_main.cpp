@@ -9,7 +9,7 @@
 
 #include <sys/types.h>   // getpid
 #include <unistd.h>      // getpid
-#include <stdlib.h>      // exit
+#include <stdlib.h>      // abort
 
 #include <qfileinfo.h>
 #include <qdom.h>

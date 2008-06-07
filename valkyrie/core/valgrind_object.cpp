@@ -358,8 +358,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       break;
 
    /* logging options */
-   /* for all tools we use --log-file-exactly=xyz.
-      this is set in Valkyrie::runTool(), and updated by the tool.
+   /* all tools use an internal logging option,
       all logging options are therefore ignored */
    case LOG_FILE:
    case LOG_FD:
@@ -452,8 +451,7 @@ QStringList Valgrind::modifiedVgFlags( const ToolObject* tool_obj )
          }
          break;
 
-      /* for all tools we use --log-file-exactly=xyz.
-         this is set in Valkyrie::runTool(), and updated by the tool.
+      /* all tools use an internal logging option,
          all logging options should therefore not be used */
       case LOG_FILE:
       case LOG_FD:
@@ -474,6 +472,62 @@ QStringList Valgrind::modifiedVgFlags( const ToolObject* tool_obj )
    return modFlags;
 }
 
+
+
+/* Get valgrind version */
+bool Valgrind::getVersionBinary( QString& vg_bin, int& v1, int& v2, int& v3 )
+{
+   bool ok = true;
+   QString vg_version;
+
+   QString exec = vg_bin + " --version | sed 's/^valgrind-//'";
+   FILE* fd = popen( exec.latin1(), "r");
+   if (!fd) {   // start error?
+      perror("popen");
+      ok = false;
+      vkPrintErr( "Valgrind start error: Failure starting valgrind version test" );
+   } else {
+      char buf[1024];
+      fgets(buf, sizeof(buf), fd);
+      vg_version = buf;
+      vg_version = vg_version.left( vg_version.length() - 1 );
+
+      int result = pclose(fd);
+      if ( !WIFEXITED( result ) ) {   // exit error?
+         ok = false;
+         vkPrintErr( "Valgrind start error: Failure running valgrind version test" );
+      }
+   }
+
+   if ( ok ) {
+      // parse valgrind version
+      QStringList slst_vg_ver = QStringList::split( '.', vg_version );
+      if ( slst_vg_ver.count() != 3 ) {
+         ok = false;
+      }
+      if ( ok ) {
+         v1 = slst_vg_ver[0].toUInt( &ok );
+      }
+      if ( ok ) {
+         v2 = slst_vg_ver[1].toUInt( &ok );
+      }
+      if ( ok ) {
+         v3 = slst_vg_ver[2].toUInt( &ok );
+      }
+      if ( !ok ) {
+         vkPrintErr( "Valgrind start error: Failure reading valgrind version: '%s'",
+            vg_version.latin1() );
+      } else {
+         // check version supported
+         if ( v1 < 3 ) {  // < 3.0.0: unsupported
+            ok = false;
+            vkPrintErr( "Valgrind start error: Unsupported version: %s < 3.0.0",
+               vg_version.latin1() );
+         }
+      }
+   }
+   return ok;
+}
 
 
 
