@@ -629,9 +629,9 @@ void Memcheck::readVgLog()
    qApp->processEvents();
 
    /* Try reading some more data */
-   if ( !m_vgreader->parseContinue()) {
+   if ( m_vgreader && !m_vgreader->parseContinue()) {
       /* Parsing failed: stop m_vgproc, if running */
-      if (m_vgproc->isRunning())
+      if ( m_vgproc && m_vgproc->isRunning())
          m_vgproc->stop();  /* signal -> processDone() */
    }
 }
