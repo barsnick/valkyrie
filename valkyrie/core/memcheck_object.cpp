@@ -348,10 +348,7 @@ bool Memcheck::runValgrind( QStringList vgflags )
       } else {                    // >= 3.3.0
          log_param = "--log-file=";
       }
-      v3=v3; // stop compiler complaining
       log_param += m_saveFname;
-      
-      printf("param: '%s'\n", log_param.latin1() );
       
       vgflags.insert( ++(vgflags.begin()), log_param );
    }
