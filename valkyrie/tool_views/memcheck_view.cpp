@@ -79,7 +79,6 @@ MemcheckView::MemcheckView( QWidget* parent, const char* name )
    lView->setSorting( -1 );
    lView->setMargin( 5 );
    lView->addColumn( "" );
-   lView->header()->setStretchEnabled( true, 0 );
    lView->header()->hide();
 
    savelogButton->setEnabled( false );
