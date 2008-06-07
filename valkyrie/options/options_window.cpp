@@ -218,8 +218,8 @@ void OptionsWindow::categoryClicked( QListBoxItem *item )
 
       /* make sure the item seletion is sync'd */
       m_categories->setSelected( cit->catId(), true );
-      cit->page()->init();
       m_wStack->raiseWidget( cit->page() );
+      cit->page()->init();
    }
 
 }
