@@ -140,12 +140,6 @@ void MemcheckView::toggleToolbarLabels( bool state )
    to start up in whatever the user's current dir happens to be. */
 void MemcheckView::openLogFile()
 { 
-#if 0
-   /* testing new file dialog stuff */
-   QString fname = "";  
-   FileDialog* fd = new FileDialog( this, "log_file_fd" );
-   fd->exec();
-#else
    QString log_file;
 
    QFileDialog dlg;
@@ -160,7 +154,6 @@ void MemcheckView::openLogFile()
 
    vkConfig->wrEntry( log_file, "view-log", "valkyrie" );
    emit run( VkRunState::TOOL1 );
-#endif
 }
 
 

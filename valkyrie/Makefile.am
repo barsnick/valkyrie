@@ -21,7 +21,6 @@ bin_PROGRAMS = valkyrie
 # All header filed to be MOC'd
 valkyrie_MOC = \
 	main_window.moc.cpp \
-	vk_file_utils.moc.cpp \
 	core/memcheck_object.moc.cpp \
 	core/tool_object.moc.cpp \
 	core/valkyrie_object.moc.cpp \
