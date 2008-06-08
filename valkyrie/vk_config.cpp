@@ -676,7 +676,7 @@ QString VkConfig::mkConfigDefaults( Valkyrie* vk )
 
 	QString header = mkConfigHeader();
 
-   char * window_colors = "[Colors]\n\
+   const char * window_colors = "[Colors]\n\
 background=214,205,187\n\
 base=255,255,255\n\
 dkgray=128,128,128\n\
@@ -685,13 +685,13 @@ highlight=147,40,40\n\
 nullColor=239,227,211\n\
 text=0,0,0\n\n";
 
-   char * mainwin_size_pos = "[MainWin]\n\
+   const char * mainwin_size_pos = "[MainWin]\n\
 height=600\n\
 width=550\n\
 x-pos=400\n\
 y-pos=0\n\n";
 
-   char * dbase = "[Database]\n\
+   const char * dbase = "[Database]\n\
 user=auser\n\
 host=localhost\n\
 pword=123\n\
