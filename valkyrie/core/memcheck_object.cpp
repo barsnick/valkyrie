@@ -8,6 +8,7 @@
  * See the file LICENSE.GPL for the full license details.
  */
 
+#include "config.h"
 #include "memcheck_object.h"
 #include "valkyrie_object.h"
 #include "vk_config.h"
@@ -322,12 +323,15 @@ void Memcheck::stop()
 }
 
 
-/* if --vg-opt=<arg> was specified on the cmd-line, called by
+/* If --vg-opt=<arg> was specified on the cmd-line, called by
    valkyrie->runTool(); if set via the run-button in the gui, 
-   then MainWindow::run() calls valkyrie->runTool().  */
+   then MainWindow::run() calls valkyrie->runTool().
+
+   Auto-generated logs always saved in hard-coded (configured) log dir
+*/
 bool Memcheck::runValgrind( QStringList vgflags )
 {
-   m_saveFname = vk_mkstemp( vkConfig->logsDir() + "mc_log", "xml" );
+   m_saveFname = vk_mkstemp( QString( VK_LOGS_DIR ) + "mc_log", "xml" );
    vk_assert( !m_saveFname.isEmpty() );
    
    /* check valgrind version:
@@ -430,7 +434,8 @@ bool Memcheck::mergeLogFiles()
    QString fname_logList = vkConfig->rdEntry( "merge", "valkyrie" );
    statusMsg( "Merging logs in file-list", fname_logList );
  
-   m_saveFname = vk_mkstemp( vkConfig->logsDir() + "mc_merged", "xml" );
+   QString logDir = vkConfig->rdEntry( "default-logdir", "valkyrie" );
+   m_saveFname = vk_mkstemp( logDir + "mc_merged", "xml" );
    vk_assert( !m_saveFname.isEmpty() );
 
    QStringList flags;
@@ -653,10 +658,12 @@ void Memcheck::readVgLog()
 }
 
 
-/* brings up a fileSaveDialog until successfully saved,
+/* Brings up a fileSaveDialog until successfully saved,
    or user pressed Cancel.
-   if fname.isEmpty, ask user for a name first.
+   If fname.isEmpty, ask user for a name first.
    returns false on user pressing Cancel, else true.
+
+   Save-dialog started in user-configured default log dir
 */
 bool Memcheck::fileSaveDialog( QString fname/*=QString()*/ )
 {
@@ -669,8 +676,8 @@ bool Memcheck::fileSaveDialog( QString fname/*=QString()*/ )
 
    /* Ask fname if don't have one already */
    if ( fname.isEmpty() ) {
-      /* start dlg in dir of last saved logfile */
-      QString start_path = QFileInfo( m_saveFname ).dirPath();
+      /* Start save-dialog in User-configured default log dir*/
+      QString start_path = vkConfig->rdEntry( "default-logdir", "valkyrie" );
       fname = dlg.getSaveFileName( start_path, flt, view(), "fsdlg", cptn );
       if ( fname.isEmpty() )
          return false;

@@ -88,7 +88,6 @@ public:
    /* these fns return values held in private vars ---------------------- */
    QString vkdocDir();
    QString rcDir();
-   QString logsDir();
    QString dbaseDir();
    QString suppDir();
    QChar sepChar() { return m_sep; }
@@ -152,7 +151,6 @@ private:
    QString m_vkdocPath;        /* path to valkyrie docs dir */
    QString m_rcPath;           /* path to ~/valkyrie=X.X.X dir */
    QString m_rcFileName;       /* where valkyrierc lives */
-   QString m_logsPath;         /* path to log dir */
    QString m_dbasePath;        /* path to dbase dir */
    /* path to user's suppression files dir.
       default is ~/.valkyrie/suppressions */

@@ -129,6 +129,7 @@ QString fileCheck( int* err_val, const QString fpath,
       if ( rd_perms ) {
          if ( !fi.isReadable() ) {
             *err_val = PERROR_BADFILERD;
+            goto bye;
          }
       }
 
@@ -136,6 +137,7 @@ QString fileCheck( int* err_val, const QString fpath,
       if ( wr_perms ) {
          if ( !fi.isWritable() ) {
             *err_val = PERROR_BADFILEWR;
+            goto bye;
          }
       }
 
@@ -182,6 +184,7 @@ QString dirCheck( int* err_val, const QString dir,
       if ( rd_perms ) {
          if ( !fi.isReadable() ) {
             *err_val = PERROR_BADFILERD;
+            goto bye;
          }
       }
 
@@ -189,6 +192,7 @@ QString dirCheck( int* err_val, const QString dir,
       if ( wr_perms ) {
          if ( !fi.isWritable() ) {
             *err_val = PERROR_BADFILEWR;
+            goto bye;
          }
       }
 

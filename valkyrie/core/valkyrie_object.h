@@ -49,6 +49,7 @@ public:
       TOOLTIP,     PALETTE,     ICONTXT,
       FNT_GEN_SYS, FNT_GEN_USR, FNT_TOOL_USR,
       SRC_EDITOR,  SRC_LINES,   BROWSER,
+      DFLT_LOGDIR,
       VG_EXEC,      /* path to valgrind executable */
       /* FIRST_CMD_OPT */
       BINARY, BIN_FLAGS, VIEW_LOG, MERGE_EXEC, MERGE_LOGS,

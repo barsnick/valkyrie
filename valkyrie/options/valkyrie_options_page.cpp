@@ -24,7 +24,7 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
    : OptionsPage( parent, obj, "valkyrie_options_page" )
 { 
    /* init the QIntDict list, resizing if necessary */
-   unsigned int numItems = 12;
+   unsigned int numItems = 13;
    m_itemList.resize( numItems );
 
    QVBoxLayout* vbox = new QVBoxLayout( this, m_margin, -1, "vbox" );
@@ -48,6 +48,12 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
    LeWidget* brwsrLedit = ((LeWidget*)m_itemList[Valkyrie::BROWSER]);
    brwsrLedit->addButton( group1, this, SLOT(getBrowser()) );
    connect(brwsrLedit, SIGNAL(returnPressed()), this, SIGNAL(apply()));
+
+   m_itemList.insert( Valkyrie::DFLT_LOGDIR,    /* ledit + button */
+                      optionWidget(Valkyrie::DFLT_LOGDIR, group1, false ) );
+   LeWidget* dirLogSave = ((LeWidget*)m_itemList[Valkyrie::DFLT_LOGDIR]);
+   dirLogSave->addButton( group1, this, SLOT(getDfltLogDir()) );
+   connect(dirLogSave, SIGNAL(returnPressed()), this, SIGNAL(apply()));
 
    /* fonts --------------------------------------------------------- */
    m_itemList.insert( Valkyrie::FNT_GEN_SYS,              /* checkbox */
@@ -117,6 +123,10 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
 
    grid->addWidget( brwsrLedit->button(),                             i, 0 );
    grid->addMultiCellWidget( brwsrLedit->widget(),                    i,i, 1,3 );
+   i++;
+
+   grid->addWidget( dirLogSave->button(),                             i, 0 );
+   grid->addMultiCellWidget( dirLogSave->widget(),                    i,i, 1,3 );
    i++;
 
    grid->addMultiCellWidget( sep(group1,"sep0"), i,i, 0,3 );
@@ -358,5 +368,21 @@ void ValkyrieOptionsPage::getVgExec()
    if ( !vg_exec_path.isEmpty() ) { /* user might have clicked Cancel */
       ((LeWidget*)m_itemList[Valkyrie::VG_EXEC])->setCurrValue( vg_exec_path );
       checkOption( Valkyrie::VG_EXEC );
+   }
+}
+
+
+/* RM: allows user to specify which valgrind version to use.  the guts
+   of this fn are essentially the same as the one in config.tests/valgrind.test */
+void ValkyrieOptionsPage::getDfltLogDir()
+{
+   QString currdir = m_itemList[Valkyrie::DFLT_LOGDIR]->currValue();
+   QString dir_logsave =
+      QFileDialog::getExistingDirectory( currdir, this,
+                                         "get default log-save dir",
+                                          "Choose a directory", TRUE );
+   if ( !dir_logsave.isEmpty() ) { /* user might have clicked Cancel */
+      ((LeWidget*)m_itemList[Valkyrie::DFLT_LOGDIR])->setCurrValue( dir_logsave );
+      checkOption( Valkyrie::DFLT_LOGDIR );
    }
 }

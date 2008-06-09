@@ -58,7 +58,7 @@ bool VkConfig::sync( Valkyrie* vk )
       rcMap.insert( aIt.key(), dirtyEntry );
    }
 
-	/* write out updated config */
+   /* write out updated config */
    if ( !writeConfig( rcMap ) ) {
       VK_DEBUG( "failed to write updated config file" );
       return false;
@@ -88,12 +88,10 @@ VkConfig::VkConfig() : QObject( 0, "vkConfig" )
    m_vg_copyright = VG_COPYRIGHT;
 
    /* set full rc paths (see config.h) */
-   m_rcPath.sprintf( "%s/.%s", QDir::homeDirPath().latin1(), vkname() );
-   m_rcFileName.sprintf( "%s/%src", m_rcPath.latin1(), vkname() );
-   m_dbasePath = m_rcPath + VK_DBASE_DIR;
-   m_logsPath  = m_rcPath + VK_LOGS_DIR;
-   m_suppPath  = m_rcPath + VK_SUPPS_DIR;
-   m_rcPath    += "/";
+   m_rcPath     = QDir::homeDirPath() + "/." + vkname() + "/";
+   m_rcFileName = m_rcPath + vkname() + "rc";
+   m_dbasePath  = m_rcPath + VK_DBASE_DIR;
+   m_suppPath   = m_rcPath + VK_SUPPS_DIR;
 
    m_defaultAppFont = QApplication::font();
 }
@@ -130,7 +128,6 @@ const char* VkConfig::vgCopyright() { return m_vg_copyright.data(); }
 QString VkConfig::vkdocDir()  { return m_vkdocPath; }
 QString VkConfig::rcDir()     { return m_rcPath;    }
 QString VkConfig::dbaseDir()  { return m_dbasePath; }
-QString VkConfig::logsDir()   { return m_logsPath;  }
 QString VkConfig::suppDir()   { return m_suppPath;  }
 
 /* valkyrie's default palette */
@@ -720,15 +717,15 @@ logfile=\n\n";
    relevant data to ~/.PACKAGE/PACKAGErc */
 bool VkConfig::writeConfigDefaults( Valkyrie* vk )
 {
-	QString default_config = mkConfigDefaults( vk );
-	QTextStream strm( &default_config, IO_ReadOnly );
-	EntryMap rcMap = parseConfigToMap( strm );
-	
-	/* Set valkyrie version: used for rc upgrading */
-      rcMap[ EntryKey( "valkyrie", "version" )  ].mValue
-         = PACKAGE_VERSION;
+   QString default_config = mkConfigDefaults( vk );
+   QTextStream strm( &default_config, IO_ReadOnly );
+   EntryMap rcMap = parseConfigToMap( strm );
+   
+   /* Set valkyrie version: used for rc upgrading */
+   rcMap[ EntryKey( "valkyrie", "version" )  ].mValue
+      = PACKAGE_VERSION;
 
-	/* Set our 'configured' valgrind paths, if we have them */
+   /* Set our 'configured' valgrind paths, if we have them */
    {
       rcMap[ EntryKey( "valkyrie", "merge-exec" )  ].mValue
          = BIN_LOGMERGE;
@@ -743,11 +740,11 @@ bool VkConfig::writeConfigDefaults( Valkyrie* vk )
          = suppDir();
    }
 
-	/* write out new config */
-	if ( !writeConfig( rcMap, true ) ) {
+   /* write out new config */
+   if ( !writeConfig( rcMap, true ) ) {
       VK_DEBUG( "failed to write default config file" );
-		return false;
-	}
+      return false;
+   }
    return true;
 }
 
@@ -809,7 +806,7 @@ bool VkConfig::checkRCTree( Valkyrie* vk )
 {
    QStringList entries;
    entries << m_rcPath << m_rcFileName
-           << m_dbasePath << m_logsPath << m_suppPath;
+           << m_dbasePath << m_suppPath;
 
    /* Note: don't just run through and test/fix: want to tell the user
       if there was a problem with a previous config dir tree.
@@ -830,7 +827,7 @@ bool VkConfig::checkRCTree( Valkyrie* vk )
    if (!ok) { /* rc tree !exists or !well */
       /* this an existing tree?
          if so, tell the user there was a problem */
-      if (QFile::exists(m_rcPath)) {
+      if ( QFile::exists(m_rcPath) ) {
          vkInfo( 0, "Checking Config Setup",
                  "<p>Detected missing configuration files/dirs.<br/>"
                  "Attempting to recreate from defaults...</p>" );
@@ -842,6 +839,13 @@ bool VkConfig::checkRCTree( Valkyrie* vk )
       creating them if necessary */
    for ( it = entries.begin(); it != entries.end(); ++it) {
       if (!checkRCEntry(*it, vk)) {
+         return false;
+      }
+   }
+
+   /* Further, check for temporary log dir (VK_LOGS_DIR), make if !exists */
+   if ( !QFile::exists( VK_LOGS_DIR ) ) {
+      if ( !checkRCEntry( VK_LOGS_DIR, vk) ) {
          return false;
       }
    }

@@ -96,7 +96,11 @@ Valkyrie::Valkyrie()
    addOpt( BROWSER,      VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
            "valkyrie",   '\0',                 "browser", 
            "",           "",                   "", 
-           "Browser",    "",                   urlValkyrie::browser );
+           "Browser:",   "",                   urlValkyrie::browser );
+   addOpt( DFLT_LOGDIR,  VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
+           "valkyrie",   '\0',                 "default-logdir", 
+           "",           "",                   VK_LOGS_DIR, 
+           "Log Dir:",   "",                   "" );
 
    /* path to valgrind executable (maybe found by configure) */
    addOpt( VG_EXEC,      VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
@@ -154,6 +158,11 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
    case BROWSER:
       return errval;
       break;
+
+   case DFLT_LOGDIR: {
+      /* see if we have an dir with rx permissions */
+      (void) dirCheck( &errval, argval, true, true );
+   } break;
 
    case SRC_EDITOR: {
       QString ed_file = QStringList::split(" ", argval).first();
