@@ -603,8 +603,8 @@ void Memcheck::processDone()
                   "<p>Process exited with return value %d.<br> \
                       This is likely to simply be the client program \
                       return value.  If, however, you suspect Valgrind \
-                      itself may have crashed, please 'Save Log' and \
-                      examine for details.</p>", exitStatus);
+                      itself may have crashed, please click 'OK', then \
+                      'Save Log' and examine for details.</p>", exitStatus);
       } else {
          vkError( view(), "Parse Error",
                   "<p>Merge process exited with return value %d.<br> \
