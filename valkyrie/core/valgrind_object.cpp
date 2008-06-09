@@ -116,7 +116,7 @@ Valgrind::Valgrind()
            urlVgCore::simHints );
    addOpt( KERN_VAR,    VkOPTION::ARG_STRING, VkOPTION::WDG_COMBO,      
            "valgrind",  '\0',                 "kernel-variant", 
-           "<variant1,variant2,...>", "none|bproc", "none",
+           "<variant1,...>", "none|bproc",    "none",
            "Kernel Variants:",
            "Handle non-standard kernel variants. Recognised variants are: bproc. Use with caution!", 
            urlVgCore::kernelVariant );

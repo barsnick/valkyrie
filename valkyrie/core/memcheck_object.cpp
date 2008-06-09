@@ -496,6 +496,10 @@ bool Memcheck::startProcess( QStringList flags )
       so don't let it hijack stdin/out/err for socket fd's */
    m_vgproc->setCommunication( 0 );
 
+   /* set working directory */
+   m_vgproc->setWorkingDirectory(
+      QDir( vkConfig->rdEntry( "working-dir", "valkyrie" ) ) );
+
    if ( !m_vgproc->start() ) {
       VK_DEBUG("process failed to start");
       QString path_errmsg = (runState() == VkRunState::VALGRIND)

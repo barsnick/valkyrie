@@ -24,7 +24,7 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
    : OptionsPage( parent, obj, "valkyrie_options_page" )
 { 
    /* init the QIntDict list, resizing if necessary */
-   unsigned int numItems = 13;
+   unsigned int numItems = 14;
    m_itemList.resize( numItems );
 
    QVBoxLayout* vbox = new QVBoxLayout( this, m_margin, -1, "vbox" );
@@ -54,6 +54,12 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
    LeWidget* dirLogSave = ((LeWidget*)m_itemList[Valkyrie::DFLT_LOGDIR]);
    dirLogSave->addButton( group1, this, SLOT(getDfltLogDir()) );
    connect(dirLogSave, SIGNAL(returnPressed()), this, SIGNAL(apply()));
+
+   m_itemList.insert( Valkyrie::WORKING_DIR,    /* ledit + button */
+                      optionWidget(Valkyrie::WORKING_DIR, group1, false ) );
+   LeWidget* dirWorking = ((LeWidget*)m_itemList[Valkyrie::WORKING_DIR]);
+   dirWorking->addButton( group1, this, SLOT(getWorkingDir()) );
+   connect(dirWorking, SIGNAL(returnPressed()), this, SIGNAL(apply()));
 
    /* fonts --------------------------------------------------------- */
    m_itemList.insert( Valkyrie::FNT_GEN_SYS,              /* checkbox */
@@ -127,6 +133,10 @@ ValkyrieOptionsPage::ValkyrieOptionsPage( QWidget* parent, VkObject* obj )
 
    grid->addWidget( dirLogSave->button(),                             i, 0 );
    grid->addMultiCellWidget( dirLogSave->widget(),                    i,i, 1,3 );
+   i++;
+
+   grid->addWidget( dirWorking->button(),                             i, 0 );
+   grid->addMultiCellWidget( dirWorking->widget(),                    i,i, 1,3 );
    i++;
 
    grid->addMultiCellWidget( sep(group1,"sep0"), i,i, 0,3 );
@@ -372,8 +382,7 @@ void ValkyrieOptionsPage::getVgExec()
 }
 
 
-/* RM: allows user to specify which valgrind version to use.  the guts
-   of this fn are essentially the same as the one in config.tests/valgrind.test */
+/* RM: allows user to specify which default log dir to use */
 void ValkyrieOptionsPage::getDfltLogDir()
 {
    QString currdir = m_itemList[Valkyrie::DFLT_LOGDIR]->currValue();
@@ -384,5 +393,19 @@ void ValkyrieOptionsPage::getDfltLogDir()
    if ( !dir_logsave.isEmpty() ) { /* user might have clicked Cancel */
       ((LeWidget*)m_itemList[Valkyrie::DFLT_LOGDIR])->setCurrValue( dir_logsave );
       checkOption( Valkyrie::DFLT_LOGDIR );
+   }
+}
+
+/* RM: allows user to specify which default log dir to use */
+void ValkyrieOptionsPage::getWorkingDir()
+{
+   QString currdir = m_itemList[Valkyrie::WORKING_DIR]->currValue();
+   QString dir_working =
+      QFileDialog::getExistingDirectory( currdir, this,
+                                         "get default working dir",
+                                          "Choose a directory", TRUE );
+   if ( !dir_working.isEmpty() ) { /* user might have clicked Cancel */
+      ((LeWidget*)m_itemList[Valkyrie::WORKING_DIR])->setCurrValue( dir_working );
+      checkOption( Valkyrie::WORKING_DIR );
    }
 }

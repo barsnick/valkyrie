@@ -59,7 +59,7 @@ Valkyrie::Valkyrie()
    addOpt( VGHELP,       VkOPTION::ARG_NONE,   VkOPTION::WDG_NONE,
            "valkyrie",   'V',                  "valgrind-opts", 
            "",           "",                   "", 
-           "",           "Show valgrind options too, and exit", urlNone );
+           "",           "show valgrind options too, and exit", urlNone );
    addOpt( TOOLTIP,      VkOPTION::NOT_POPT,   VkOPTION::WDG_CHECK, 
            "valkyrie",  '\0',                  "show-tooltips", 
            "",           "true|false",         "true", 
@@ -101,6 +101,10 @@ Valkyrie::Valkyrie()
            "valkyrie",   '\0',                 "default-logdir", 
            "",           "",                   VK_LOGS_DIR, 
            "Log Dir:",   "",                   "" );
+   addOpt( WORKING_DIR,  VkOPTION::ARG_STRING, VkOPTION::WDG_LEDIT, 
+           "valkyrie",   '\0',                 "working-dir", 
+           "<dir>",      "",                   "./", 
+           "Working Dir:", "dir under which to run valgrind", "" );
 
    /* path to valgrind executable (maybe found by configure) */
    addOpt( VG_EXEC,      VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
@@ -159,7 +163,8 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
       return errval;
       break;
 
-   case DFLT_LOGDIR: {
+   case DFLT_LOGDIR:
+   case WORKING_DIR: {
       /* see if we have an dir with rx permissions */
       (void) dirCheck( &errval, argval, true, true );
    } break;

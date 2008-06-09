@@ -28,6 +28,7 @@ private slots:
    void getBinary();
    void getBrowser();
    void getDfltLogDir();
+   void getWorkingDir();
    void getVgExec();
 };
 
