@@ -428,14 +428,16 @@ bool Memcheck::parseLogFile()
 /* if --merge=<file_list> was specified on the cmd-line, called by
    valkyrie->runTool(); if set via the open-file-dialog in the gui,
    called by MemcheckView::openMergeFile().  either way, the value in
-   [valkyrie:merge] is what we need to know */
+   [valkyrie:merge] is what we need to know
+
+   Auto-generated logs always saved in hard-coded (configured) log dir
+*/
 bool Memcheck::mergeLogFiles()
 {
    QString fname_logList = vkConfig->rdEntry( "merge", "valkyrie" );
    statusMsg( "Merging logs in file-list", fname_logList );
  
-   QString logDir = vkConfig->rdEntry( "default-logdir", "valkyrie" );
-   m_saveFname = vk_mkstemp( logDir + "mc_merged", "xml" );
+   m_saveFname = vk_mkstemp( QString( VK_LOGS_DIR ) + "mc_merged", "xml" );
    vk_assert( !m_saveFname.isEmpty() );
 
    QStringList flags;
