@@ -91,7 +91,6 @@ valkyrie_SOURCES = \
 	vk_config.h \
 	vk_file_utils.h \
 	vk_utils.h \
-	../icons/filedlg_icons.h \
 	../icons/memcheck_icons.h \
 	../icons/msgbox_icons.h \
 	../icons/tb_handbook_icons.h \
