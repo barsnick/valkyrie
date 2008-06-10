@@ -179,10 +179,18 @@ int parseCmdArgs( int argc, char** argv, Valkyrie* vk )
          goto done;
       }
 
-      /* else ok: write option to config (but not to disk yet) */
+      /* else ok: write option to config
+         Note: not written to disk. The user can do this via option config */
       vk_opt = obj->findOption( opt->optKey );
       vk_assert(vk_opt != NULL);
-      vkConfig->wrEntry( qs_argval, vk_opt->cfgKey(), vk_opt->cfgGroup() );
+
+      if ( opt->objectId == VkObject::ID_VALGRIND &&
+           opt->optKey == Valgrind::SUPPS_SEL ) {
+         /* exception: multiple suppressions are allowed */
+         vkConfig->addEntry( qs_argval, vk_opt->cfgKey(), vk_opt->cfgGroup() );
+      } else {
+         vkConfig->wrEntry( qs_argval, vk_opt->cfgKey(), vk_opt->cfgGroup() );
+      }
 
    }   /* end while ... */
 
