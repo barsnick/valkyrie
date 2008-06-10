@@ -565,12 +565,15 @@ FrameItem::FrameItem( VgOutputItem* parent, QListViewItem* after,
    : VgOutputItem( parent, after, frm )
 {
    /* check what perms the user has w.r.t. this file */
-   QDomNodeList frame_details = frm.childNodes();
-   QDomElement srcdir  = frame_details.item( 3 ).toElement();
-   QDomElement srcfile = frame_details.item( 4 ).toElement();
+   QDomElement srcdir  = frm.getFirstElem( "dir" );
+   QDomElement srcfile = frm.getFirstElem( "file" );
 
-   if (!srcdir.isNull() && !srcfile.isNull()) {
-      QString path = srcdir.text() + "/" + srcfile.text();
+   if ( !srcfile.isNull() ) {
+      QString path;
+      if ( !srcdir.isNull() )
+         path = srcdir.text() + "/";
+      path += srcfile.text();
+
       QFileInfo fi( path );
       if ( fi.exists() && fi.isFile() && !fi.isSymLink() ) {
          isReadable  = fi.isReadable();
@@ -585,16 +588,21 @@ FrameItem::FrameItem( VgOutputItem* parent, QListViewItem* after,
 void FrameItem::setOpen( bool open )
 {
    if ( open && childCount() == 0 && isReadable ) {
+      QDomElement srcdir  = elem.getFirstElem( "dir"  );
+      QDomElement srcfile = elem.getFirstElem( "file" );
+      QDomElement line    = elem.getFirstElem( "line" );
 
-      QDomNodeList frame_details = elem.childNodes();
-      QDomElement srcdir  = frame_details.item( 3 ).toElement();
-      QDomElement srcfile = frame_details.item( 4 ).toElement();
-      QDomElement line    = frame_details.item( 5 ).toElement();
-
-      if (srcdir.isNull() || srcfile.isNull())
+      if ( srcfile.isNull() )
          return;
 
-      QString path = srcdir.text() + "/" + srcfile.text();
+      QString path;
+      if ( !srcdir.isNull() )
+         path = srcdir.text() + "/";
+      path += srcfile.text();
+
+      if ( !QFile::exists( path ) )
+         return;
+
       VgElement srcline = (VgElement&)line;
 
       /* create the item for the src lines */

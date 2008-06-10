@@ -226,21 +226,21 @@ bool VgFrame::operator==( const VgFrame& frame2 ) const
 {
    QDomNodeList frame_details1 = childNodes();
    assert( frame_details1.count() >= 1 );  /* only ip guaranteed */
-   QDomElement iptr1 = frame_details1.item( 0 ).toElement();
-   QDomElement objt1 = frame_details1.item( 1 ).toElement();
-   QDomElement func1 = frame_details1.item( 2 ).toElement();
-   QDomElement diry1 = frame_details1.item( 3 ).toElement();
-   QDomElement file1 = frame_details1.item( 4 ).toElement();
-   QDomElement line1 = frame_details1.item( 5 ).toElement();
+   QDomElement iptr1 = getFirstElem( "ip"   );
+   QDomElement objt1 = getFirstElem( "obj"  );
+   QDomElement func1 = getFirstElem( "fn"   );
+   QDomElement diry1 = getFirstElem( "dir"  );
+   QDomElement file1 = getFirstElem( "file" );
+   QDomElement line1 = getFirstElem( "line" );
 
    QDomNodeList frame_details2 = frame2.childNodes();
    assert( frame_details2.count() >= 1 );  /* only ip guaranteed */
-   QDomElement iptr2 = frame_details2.item( 0 ).toElement();
-   QDomElement objt2 = frame_details2.item( 1 ).toElement();
-   QDomElement func2 = frame_details2.item( 2 ).toElement();
-   QDomElement diry2 = frame_details2.item( 3 ).toElement();
-   QDomElement file2 = frame_details2.item( 4 ).toElement();
-   QDomElement line2 = frame_details2.item( 5 ).toElement();
+   QDomElement iptr2 = frame2.getFirstElem( "ip"   );
+   QDomElement objt2 = frame2.getFirstElem( "obj"  );
+   QDomElement func2 = frame2.getFirstElem( "fn"   );
+   QDomElement diry2 = frame2.getFirstElem( "dir"  );
+   QDomElement file2 = frame2.getFirstElem( "file" );
+   QDomElement line2 = frame2.getFirstElem( "line" );
 
    /* a frame may be the 'same' as another even if it is
       missing some data - do the best comparison we can */
@@ -299,12 +299,12 @@ QString VgFrame::describe_IP( bool withPath/*=false*/ )
 {
    QDomNodeList frame_details = childNodes();
    assert( frame_details.count() >= 1 );  /* only ip guaranteed */
-   QDomElement ip     = frame_details.item( 0 ).toElement();
-   QDomElement obj    = frame_details.item( 1 ).toElement();
-   QDomElement fn     = frame_details.item( 2 ).toElement();
-   QDomElement dir    = frame_details.item( 3 ).toElement();
-   QDomElement srcloc = frame_details.item( 4 ).toElement();
-   QDomElement line   = frame_details.item( 5 ).toElement();
+   QDomElement ip     = getFirstElem( "ip"   );
+   QDomElement obj    = getFirstElem( "obj"  );
+   QDomElement fn     = getFirstElem( "fn"   );
+   QDomElement dir    = getFirstElem( "dir"  );
+   QDomElement srcloc = getFirstElem( "file" );
+   QDomElement line   = getFirstElem( "line" );
 
    bool  know_fnname  = !fn.isNull();
    bool  know_objname = !obj.isNull();
