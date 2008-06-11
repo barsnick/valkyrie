@@ -50,7 +50,7 @@ private:
    void showSuppEditor();
 
    void itemSelected();
-   void openAllItems(bool);
+   void openAllItems();
    void openOneItem();
    void showSrcPath();
    void launchEditor(  QListViewItem* );

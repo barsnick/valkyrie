@@ -189,9 +189,8 @@ void MemcheckView::mkToolBar()
    openAllButton = new QToolButton( mcToolBar, "tb_open_all" );
    openAllButton->setIconSet( QPixmap( open_all_items_xpm ) );
    openAllButton->setAutoRaise( true );
-   openAllButton->setToggleButton( true );
-   connect( openAllButton, SIGNAL( toggled(bool) ), 
-            this,          SLOT( openAllItems(bool) ) );
+   connect( openAllButton, SIGNAL( clicked() ), 
+            this,          SLOT( openAllItems() ) );
    QToolTip::add( openAllButton, 
                   "Open / Close all errors" );
    ContextHelp::add( openAllButton, urlValkyrie::openAllButton );
@@ -370,7 +369,7 @@ void MemcheckView::launchEditor( QListViewItem* lv_item )
 
 /* opens all error items plus their children. 
    ignores the status, preamble, et al. items. */
-void MemcheckView::openAllItems( bool open )
+void MemcheckView::openAllItems()
 {
    if (!lView->firstChild()) /* listview populated at all? */
       return;
@@ -383,11 +382,31 @@ void MemcheckView::openAllItems( bool open )
       op_item = op_item->nextSibling();
    }
 
+   /* is any top-level item open? */
+   bool anItemIsOpen = false;
+   VgOutputItem* op_item2 = op_item;
+   while ( op_item2 ) {
+      /* skip suppressions */
+      if ( ((VgOutputItem*)op_item2)->elemType() == VgElement::SUPPCOUNTS ) {
+         op_item2 = op_item2->nextSibling();
+         continue;
+      }
+      if ( op_item2->isOpen() ) {
+         anItemIsOpen = true;
+         break;
+      }
+      op_item2 = op_item2->nextSibling();
+   }
+
+   /* iterate over all items, opening as we go */
    QListViewItemIterator it( op_item );
    while ( it.current() ) {
-      if ( ((VgOutputItem*)it.current())->elemType() == VgElement::SUPPCOUNTS )
-         break;                        /* stop when we hit suppressions */
-      it.current()->setOpen( open );
+      /* skip suppressions */
+      if ( ((VgOutputItem*)it.current())->elemType() == VgElement::SUPPCOUNTS ) {
+         ++it;
+         continue;
+      }
+      it.current()->setOpen( !anItemIsOpen );
       ++it;
    }
 }
@@ -455,15 +474,7 @@ void MemcheckView::itemSelected()
       openOneButton->setEnabled( false );
    } else {
       /* if item openable and within an error: enable openOneButton */
-      bool isOpenable = (lv_item->firstChild() != 0);
-      bool withinError = false;
-      VgOutputItem* curr_item = (VgOutputItem*)lv_item;
-      for (; curr_item; curr_item = curr_item->parent() ) {
-         if ( curr_item->elemType() == VgElement::ERROR ) {
-            withinError = true;
-            break;
-         }
-      }
-      openOneButton->setEnabled( isOpenable && withinError );
+      bool isOpenable = lv_item->isExpandable();
+      openOneButton->setEnabled( isOpenable );
    }
 }

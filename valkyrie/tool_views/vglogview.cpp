@@ -366,6 +366,7 @@ void LogQualItem::setOpen( bool open )
       }
    }
    VgOutputItem::setOpen( open );
+   setExpandable( true );
 }
 
 
@@ -383,9 +384,10 @@ void CommentItem::setOpen( bool open )
 {
    if ( open && childCount() == 0 ) {
       VgOutputItem* item = new VgOutputItem( this, elem );
-      item->setText( elem.text() );    
+      item->setText( elem.text() );
    }
    VgOutputItem::setOpen( open );
+   setExpandable( true );
 }
 
 
@@ -397,6 +399,7 @@ ArgsItem::ArgsItem( VgOutputItem* parent, QListViewItem* after,
    : VgOutputItem( parent, after, args )
 {
    setText( "args" );
+   setExpandable( true );
 }
 
 void ArgsItem::setOpen( bool open )
