@@ -100,11 +100,11 @@ Valkyrie::Valkyrie()
    addOpt( DFLT_LOGDIR,  VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
            "valkyrie",   '\0',                 "default-logdir", 
            "",           "",                   VK_LOGS_DIR, 
-           "Log Dir:",   "",                   "" );
+           "Log Dir:",   "",                   urlValkyrie::logDir );
    addOpt( WORKING_DIR,  VkOPTION::ARG_STRING, VkOPTION::WDG_LEDIT, 
            "valkyrie",   '\0',                 "working-dir", 
            "<dir>",      "",                   "./", 
-           "Working Dir:", "dir under which to run valgrind", "" );
+           "Working Dir:", "dir under which to run valgrind", urlValkyrie::workingDir );
 
    /* path to valgrind executable (maybe found by configure) */
    addOpt( VG_EXEC,      VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 

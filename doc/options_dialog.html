@@ -109,6 +109,24 @@ these option values to disk.  You must explicitly select
     the "%s" string is replaced with the targed url.<br>
     Example: "mozilla -remote openUrl(%s,new-tab)".</p></dd>
 <dt>
+<a name="log_dir"></a><span><b class="command">Log Dir:</b></span>
+</dt>
+<dd><p>This determines the default directory for the user to save
+    their log files.<br>
+    Note: When running, Valkyrie generates temporary log files. These
+    are stored under /tmp/valkyrie_logs (this can be changed when building Valkyrie).<br>
+    Example: "./".<br>
+    Example: "/home/myself/valkyrie_logs".</p></dd>
+<dt>
+<a name="working_dir"></a><span><b class="command">Working Dir:</b></span>
+</dt>
+<dd><p>This determines the working directory under which valgrind runs
+    (and therefore also the program being run by Valgrind). This does
+    not change the current working directory of Valkyrie itself, but the
+    that of the program being run.<br>
+    Example: "./".<br>
+    Example: "/home/myself/valkyrie_working_dir".</p></dd>
+<dt>
 <a name="user_font_general"></a><span><b class="command">General Font:</b></span>
 </dt>
 <dd><p>This is the general application font.

@@ -38,6 +38,8 @@ namespace urlValkyrie {
    const char* toolTips     = "options_dialog.html#tool_tips";
    const char* toolLabels   = "options_dialog.html#tool_label";
    const char* browser      = "options_dialog.html#browser";
+   const char* logDir       = "options_dialog.html#log_dir";
+   const char* workingDir   = "options_dialog.html#working_dir";
    const char* userFontGen  = "options_dialog.html#user_font_general";
    const char* userFontTool = "options_dialog.html#user_font_tool";
    const char* palette      = "options_dialog.html#palette";
