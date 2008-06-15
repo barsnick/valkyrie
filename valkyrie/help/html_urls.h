@@ -69,6 +69,7 @@ namespace urlVgCore {
    extern const char* xmlOutput;
    extern const char* xmlComment;
    extern const char* traceChild;
+   extern const char* silentChild;
    extern const char* trackFds;
    extern const char* timeStamp;
    extern const char* freeGlibc;
@@ -87,10 +88,8 @@ namespace urlVgCore {
    extern const char* whichDebugger;
    extern const char* inputFd;
    extern const char* logToFd;
-   extern const char* logToFilePid;
    extern const char* logToFile;
    extern const char* logToSocket;
-   extern const char* logFileQual;
    /* only used by Memcheck and Massif */
    extern const char* Alignment;
 }

@@ -56,8 +56,14 @@ Valgrind::Valgrind()
            "valgrind",  '\0',                 "trace-children",
            "<yes|no>",  "yes|no",             "no",
            "Trace child processes: ",
-           "Valgrind-ise child processes?",
+           "Valgrind-ise child processes (follow execve)?",
            urlVgCore::traceChild );
+   addOpt( SILENT_CH,   VkOPTION::ARG_BOOL,   VkOPTION::WDG_CHECK,
+           "valgrind",  '\0',                 "child-silent-after-fork",
+           "<yes|no>",  "yes|no",             "yes",   /* currently necessary for clean XML output */
+           "Omit child output between fork and exec: ",
+           "omit child output between fork & exec?",
+           urlVgCore::silentChild );
    addOpt( TRACK_FDS,   VkOPTION::ARG_BOOL,   VkOPTION::WDG_CHECK,      
            "valgrind",  '\0',                 "track-fds", 
            "<yes|no>",  "yes|no",             "no",
@@ -76,23 +82,12 @@ Valgrind::Valgrind()
            "Log to file descriptor:",
            "log messages to file descriptor (1=stdout, 2=stderr)",  
            urlVgCore::logToFd );
-   addOpt( LOG_PID,     VkOPTION::ARG_STRING, VkOPTION::WDG_LEDIT, 
-           "valgrind",  '\0',                 "log-file", 
-           "<file>",    "",                   "",
-           "Log to <file>.pid<pid>:",
-           "Log messages to <file>.pid<pid>", 
-           urlVgCore::logToFilePid );
-   addOpt( LOG_FILE,    VkOPTION::ARG_STRING, VkOPTION::WDG_LEDIT, 
-           "valgrind",  '\0',                 "log-file-exactly", 
+   addOpt( LOG_FILE,    VkOPTION::ARG_STRING, VkOPTION::WDG_LEDIT,
+           "valgrind",  '\0',                 "log-file",
            "<file>",    "",                   "",
            "Log to file:",
            "log messages to <file>", 
            urlVgCore::logToFile );
-   addOpt( LOG_QUAL,    VkOPTION::ARG_STRING, VkOPTION::WDG_NONE,
-           "valgrind",  '\0',                 "log-file-qualifier",
-           "VAR",       "",                   "",
-           "<VAR>",     "incorporate $VAR in logfile name",
-           urlVgCore::logFileQual );
    addOpt( LOG_SOCKET,  VkOPTION::ARG_STRING, VkOPTION::WDG_LEDIT, 
            "valgrind",  '\0',                 "log-socket", 
            "<ipaddr:port>", "",               "",
@@ -326,6 +321,13 @@ int Valgrind::checkOptArg( int optid, QString& argval )
 #endif
    } break;
 
+   case SILENT_CH: {
+      /* Disabled for now - output between fork and exec is confusing for the XML output */
+      /* Note: Also disabled in ValgrindOptionsPage() */
+      errval = PERROR_BADOPT;
+      vkPrintErr("Option disabled '--%s'", opt->m_longFlag.latin1());
+      vkPrintErr(" - Necessary, to get clean XML output from Valgrind.");
+   } break;
 
    case XML_OUTPUT:
       /* Note: gui option disabled, so only reaches here from cmdline */
@@ -362,8 +364,6 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       all logging options are therefore ignored */
    case LOG_FILE:
    case LOG_FD:
-   case LOG_PID:
-   case LOG_QUAL:
    case LOG_SOCKET:
       /* Note: gui options disabled, so only reaches here from cmdline */
       errval = PERROR_BADOPT;
@@ -431,6 +431,15 @@ QStringList Valgrind::modifiedVgFlags( const ToolObject* tool_obj )
                modFlags << "--" + opt->cfgKey() + "=" + cfgVal;
          break;
 
+      /* for memcheck we needs this enabled to keep the xml clean */
+      case SILENT_CH:
+         if ( tool_obj->name() == "memcheck")
+            modFlags << "--" + opt->cfgKey() + "=yes";
+         else
+            if ( defVal != cfgVal )
+               modFlags << "--" + opt->cfgKey() + "=" + cfgVal;
+         break;
+
       case VERBOSITY:
       case TRACK_FDS:
       case TIME_STAMP:
@@ -455,8 +464,6 @@ QStringList Valgrind::modifiedVgFlags( const ToolObject* tool_obj )
          all logging options should therefore not be used */
       case LOG_FILE:
       case LOG_FD:
-      case LOG_PID:
-      case LOG_QUAL:
       case LOG_SOCKET:
          /* ignore these opts */
          break;
@@ -470,63 +477,6 @@ QStringList Valgrind::modifiedVgFlags( const ToolObject* tool_obj )
    }
 
    return modFlags;
-}
-
-
-
-/* Get valgrind version */
-bool Valgrind::getVersionBinary( QString& vg_bin, int& v1, int& v2, int& v3 )
-{
-   bool ok = true;
-   QString vg_version;
-
-   QString exec = vg_bin + " --version | sed 's/^valgrind-//'";
-   FILE* fd = popen( exec.latin1(), "r");
-   if (!fd) {   // start error?
-      perror("popen");
-      ok = false;
-      vkPrintErr( "Valgrind start error: Failure starting valgrind version test" );
-   } else {
-      char buf[1024];
-      fgets(buf, sizeof(buf), fd);
-      vg_version = buf;
-      vg_version = vg_version.left( vg_version.length() - 1 );
-
-      int result = pclose(fd);
-      if ( !WIFEXITED( result ) ) {   // exit error?
-         ok = false;
-         vkPrintErr( "Valgrind start error: Failure running valgrind version test" );
-      }
-   }
-
-   if ( ok ) {
-      // parse valgrind version
-      QStringList slst_vg_ver = QStringList::split( '.', vg_version );
-      if ( slst_vg_ver.count() != 3 ) {
-         ok = false;
-      }
-      if ( ok ) {
-         v1 = slst_vg_ver[0].toUInt( &ok );
-      }
-      if ( ok ) {
-         v2 = slst_vg_ver[1].toUInt( &ok );
-      }
-      if ( ok ) {
-         v3 = slst_vg_ver[2].toUInt( &ok );
-      }
-      if ( !ok ) {
-         vkPrintErr( "Valgrind start error: Failure reading valgrind version: '%s'",
-            vg_version.latin1() );
-      } else {
-         // check version supported
-         if ( v1 < 3 ) {  // < 3.0.0: unsupported
-            ok = false;
-            vkPrintErr( "Valgrind start error: Unsupported version: %s < 3.0.0",
-               vg_version.latin1() );
-         }
-      }
-   }
-   return ok;
 }
 
 

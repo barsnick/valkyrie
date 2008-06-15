@@ -55,7 +55,7 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    QGroupBox* cgroup1 = new QGroupBox(" Common Options ", tabCore, "cgroup1");
    core_vbox->addWidget( cgroup1, m_space );
    /* tabCore - group box 1 - grid layout */
-   int rows = 7;
+   int rows = 8;
    int cols = 2;
    QGridLayout* cgrid1 = new QGridLayout( cgroup1, rows, cols, m_margin, m_space );
 #if (QT_VERSION-0 >= 0x030200)
@@ -73,6 +73,8 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
                       optionWidget( Valgrind::XML_OUTPUT, cgroup1, false ) );
    m_itemList.insert( Valgrind::TRACE_CH,                    /* checkbox */
                       optionWidget( Valgrind::TRACE_CH,   cgroup1, false ) );
+   m_itemList.insert( Valgrind::SILENT_CH,                   /* checkbox */
+                      optionWidget( Valgrind::SILENT_CH,  cgroup1, false ) );
    m_itemList.insert( Valgrind::TRACK_FDS,                   /* checkbox */
                       optionWidget( Valgrind::TRACK_FDS,  cgroup1, false ) );
    m_itemList.insert( Valgrind::TIME_STAMP,                  /* checkbox */
@@ -82,8 +84,9 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    cgrid1->addLayout( m_itemList[Valgrind::VERBOSITY ]->hlayout(), 2, 0 );
    cgrid1->addWidget( m_itemList[Valgrind::XML_OUTPUT]->widget(),  3, 0 );
    cgrid1->addWidget( m_itemList[Valgrind::TRACE_CH  ]->widget(),  4, 0 );
-   cgrid1->addWidget( m_itemList[Valgrind::TRACK_FDS ]->widget(),  5, 0 );
-   cgrid1->addWidget( m_itemList[Valgrind::TIME_STAMP]->widget(),  6, 0 );
+   cgrid1->addWidget( m_itemList[Valgrind::SILENT_CH ]->widget(),  5, 0 );
+   cgrid1->addWidget( m_itemList[Valgrind::TRACK_FDS ]->widget(),  6, 0 );
+   cgrid1->addWidget( m_itemList[Valgrind::TIME_STAMP]->widget(),  7, 0 );
 
 
    /* tabCore - group box 2 */
@@ -133,7 +136,7 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    QGroupBox* egroup1 = new QGroupBox( " Options ", tabErep, "egroup1" );
    erep_vbox->addWidget( egroup1, m_space );
    /* tabErep - group box 1 - grid layout */
-   rows = 14;  cols = 2;
+   rows = 13;  cols = 2;
    QGridLayout* egrid1 = new QGridLayout( egroup1, rows, cols, m_margin, m_space );
 #if (QT_VERSION-0 >= 0x030200)
    egrid1->setRowSpacing( 0, m_topSpace );   /* blank top row */
@@ -165,8 +168,6 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
                       optionWidget( Valgrind::INPUT_FD,    egroup1, true ) );
    m_itemList.insert( Valgrind::LOG_FD,                    /* spinbox  */
                       optionWidget( Valgrind::LOG_FD,      egroup1, true ) );
-   m_itemList.insert( Valgrind::LOG_PID,                   /* ledit    */
-                      optionWidget(Valgrind::LOG_PID,      egroup1, true ) );
    m_itemList.insert( Valgrind::LOG_FILE,                  /* ledit    */
                       optionWidget(Valgrind::LOG_FILE,     egroup1, true ) );
    m_itemList.insert( Valgrind::LOG_SOCKET,                /* ledit    */
@@ -195,9 +196,8 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    hBox->addLayout( m_itemList[Valgrind::LOG_FD]->hlayout() );
    egrid1->addLayout( hBox,                                       10, 0 );
    //------------
-   egrid1->addLayout( m_itemList[Valgrind::LOG_PID    ]->hlayout(), 11, 0 );
-   egrid1->addLayout( m_itemList[Valgrind::LOG_FILE   ]->hlayout(), 12, 0 );
-   egrid1->addLayout( m_itemList[Valgrind::LOG_SOCKET ]->hlayout(), 13, 0 );
+   egrid1->addLayout( m_itemList[Valgrind::LOG_FILE   ]->hlayout(), 11, 0 );
+   egrid1->addLayout( m_itemList[Valgrind::LOG_SOCKET ]->hlayout(), 12, 0 );
 
    erep_vbox->addStretch( m_space );
 
@@ -259,10 +259,8 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
       with this. */
 	// error reporting tab
    m_itemList[Valgrind::LOG_FD     ]->setEnabled( false );
-   m_itemList[Valgrind::LOG_PID    ]->setEnabled( false );
    m_itemList[Valgrind::LOG_FILE   ]->setEnabled( false );
    m_itemList[Valgrind::LOG_SOCKET ]->setEnabled( false );
-//   m_itemList[Valgrind::LOG_QUAL   ]->setEnabled( false );
 
    /* Disabled because Valkyrie always requires xml output from Valgrind */
    m_itemList[Valgrind::XML_OUTPUT ]->setEnabled( false );
@@ -273,6 +271,10 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    /* Disabled for now - can't deal with the multiple xml files this generates */
    /* Note: Also disabled in Valgrind::checkOptArg() */
    m_itemList[Valgrind::TRACE_CH   ]->setEnabled( false );
+
+   /* Disabled - must be left on to generate clean XML */
+   /* Note: Also disabled in Valgrind::checkOptArg() */
+   m_itemList[Valgrind::SILENT_CH  ]->setEnabled( false );
 
    /* Disabled for now - not yet implemented */
    m_itemList[Valgrind::INPUT_FD   ]->setEnabled( false );
@@ -408,4 +410,3 @@ void ValgrindOptionsPage::updateSuppsSel(const QString& suppr)
                VG_CLO_MAX_SFILES );      
    }
 }
-

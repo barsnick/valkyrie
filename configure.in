@@ -49,8 +49,9 @@ if test x"$VALGRIND" = x ; then
    AC_MSG_WARN([Valgrind not found: may be configured at runtime.])
 else
   # Valgrind found: check is ok
-  AC_MSG_CHECKING([valgrind version (need >= 3.0.0)])
-  VG_VERSION_MAJOR_MIN=3
+  AC_MSG_CHECKING([valgrind version (need >= 3.3.0)])
+  VG_VERSION_MIN1=3
+  VG_VERSION_MIN2=3
   VG_VERSION=`$VALGRIND --version | sed "s/^valgrind-//"`
   if test x"$VG_VERSION" = x; then
      # failed to start valgrind
@@ -58,10 +59,12 @@ else
      VALGRIND=""
   else
      AC_MSG_RESULT([$VG_VERSION])
-     VG_VERSION_MAJOR=`echo $VG_VERSION | sed "s/^\([[0-9\]]*\)\..*/\1/"`
-     if test $VG_VERSION_MAJOR -lt $VG_VERSION_MAJOR_MIN ; then
+     VG_VERSION_1=`echo $VG_VERSION | sed "s/^\([[0-9]]\+\)\..*/\1/"`
+     VG_VERSION_2=`echo $VG_VERSION | sed "s/^[[0-9]]\+\.\([[0-9]]\+\)\..*/\1/"`
+     if { test $VG_VERSION_1 -lt $VG_VERSION_MIN1  || \
+          test $VG_VERSION_2 -lt $VG_VERSION_MIN2; }; then
         VALGRIND=""
-        AC_MSG_WARN([Not configuring for valgrind: need minimum version of 3.0.0.  Please configure with a more recent version of Valgrind (may be done at runtime).])
+        AC_MSG_WARN([Not configuring for valgrind: need minimum version of 3.3.0.  Please configure with a more recent version of Valgrind (may be done at runtime).])
      fi
   fi
 fi

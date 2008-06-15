@@ -143,10 +143,10 @@ QString vk_mkstemp( QString filepath, QString ext/*=QString::null*/ )
 
 
 /* Version check ------------------------------------------------------- 
-   Given version string of "major.minor.patch" (e.g. 3.0.0),
+   Given version string of "major.minor.patch" (e.g. 3.3.0),
    hex version = (major << 16) + (minor << 8) + patch
 */
-int str2hex( QString ver_str )
+int strVersion2hex( QString ver_str )
 {
    QRegExp rxver(".*(\\d{1,2})\\.(\\d{1,2})\\.(\\d{1,2}).*");
    if ( rxver.search( ver_str ) == -1)

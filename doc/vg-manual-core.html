@@ -588,6 +588,14 @@ categories.</p>
     disabled by default.</p>
 </li>
 <li>
+<p><a name="silent_child"></a><code class="computeroutput">--child-silent-after-fork=yes</code>
+    [default]</p>
+<p><code class="computeroutput">--child-silent-after-fork=yes</code></p>
+<p>When enabled, Valgrind will omit child output between fork
+    and exec. This is normally disabled in Valgrind, but it
+    must be enabled for clean XML, which Valkyrie requires.</p>
+</li>
+<li>
 <p><a name="track_fds"></a><code class="computeroutput">--track-fds=no</code> [default]</p>
 <p><code class="computeroutput">--track-fds=yes</code></p>
 <p>When enabled, Valgrind will print out a list of open
@@ -613,31 +621,11 @@ categories.</p>
     interfere with the client's own use of stderr.</p>
 </li>
 <li>
-<p><a name="log2file_pid"></a><code class="computeroutput">--log-file=&lt;filename&gt;</code></p>
-<p>Specifies that Valgrind should send all of its messages
-    to the specified file.  In fact, the file name used is
-    created by concatenating the text
-    <code class="computeroutput">filename</code>, "." and the
-    process ID, so as to create a file per process.  The
-    specified file name may not be the empty string.</p>
-</li>
-<li>
-<p><a name="log2file"></a><code class="computeroutput">--log-file-exactly=&lt;filename&gt;</code></p>
-<p>Just like <code class="computeroutput">--log-file</code>, but
-    the "." suffix is not added.  If you trace multiple processes
-    with Valgrind when using this option the log file may get all messed
-    up.
-    </p>
-</li>
-<li>
-<p><a name="log2file_qualifier"></a><code class="computeroutput">--log-file-qualifer=&lt;VAR&gt;</code></p>
-<p>When used in conjunction with
-    <code class="computeroutput">--log-file=</code>, causes the log file
-    name to be qualified using the contents of environment variable
-    <code class="computeroutput">VAR</code>.  This is useful when running
-    MPI programs.
-    For further details, see <a href="manual-core.html#manual-core.comment">The commentary</a>.
-    </p>
+<p><a name="log2file"></a><code class="computeroutput">--log-file=&lt;filename&gt;</code></p>
+<p>Specifies that Valgrind should send all of its messages to
+    the specified file. The specified file name may not be an
+    empty string. If you trace multiple processes with Valgrind
+    when using this option the log file may get all messed up.
 </li>
 <li>
 <p><a name="log2socket"></a><code class="computeroutput">--log-socket=&lt;ip-address:port-number&gt;</code></p>

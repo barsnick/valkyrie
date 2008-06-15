@@ -36,12 +36,11 @@ public:
       /* common options relevant to all tools */
       VERBOSITY,      // --verbosity
       TRACE_CH,       // --trace-children
+      SILENT_CH,      // --child-silent-after-fork
       TRACK_FDS,      // --track-fds
       TIME_STAMP,     // --time-stamp
       LOG_FD,         // --log-fd
-      LOG_PID,        // --log-file
-      LOG_FILE,       // --log-file-exactly
-      LOG_QUAL,       // --log-file-qualifier
+      LOG_FILE,       // --log-file
       LOG_SOCKET,     // --log-socket
 
       /* uncommon options relevant to all tools */
@@ -84,9 +83,6 @@ public:
    int         toolObjId( const QString& name );
    ToolObject* toolObj( int tid );
    ToolObject* toolObj( const QString& name );
-
-   /* Get valgrind version */
-   static bool getVersionBinary( QString& vg_bin, int& v1, int& v2, int& v3 );
 
 private:
    /* creates the various VkObjects and initialises their options,

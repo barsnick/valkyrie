@@ -24,6 +24,9 @@
 #include <qapplication.h>
 
 
+ // Minimum version of Valgrind required
+const char* pchVersionVgMin = "3.3.0";
+
 
 /* class Valkyrie --------------------------------------------------- */
 Valkyrie:: ~Valkyrie()
@@ -195,14 +198,25 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
          return PERROR_BADFILE;
       }
       fgets( line, sizeof(line), fp );
-      pclose(fp);
+
+      int result = pclose(fp);
+      if ( !WIFEXITED( result ) ) {   // cmd exit error?
+         return PERROR_BADFILE;
+      }
 
       QString vg_version = QString(line).simplifyWhiteSpace();
-      if ( !vg_version.startsWith("valgrind") )
+      if ( !vg_version.startsWith("valgrind") ) {
          return PERROR_BADFILE;
+      }
       /* compare with minimum req'd version: */
-      if ( str2hex(vg_version) <  str2hex("3.0.0") )
+      int versionVg     = strVersion2hex( vg_version );
+      int versionVgReqd = strVersion2hex( pchVersionVgMin );
+      if ( versionVg == -1 || versionVgReqd == -1) {
+         return PERROR_BADFILE;
+      }
+      if ( versionVg <  versionVgReqd ) {
          return PERROR_BADVERSION;
+      }
       /* looking good... */
    } break;
 

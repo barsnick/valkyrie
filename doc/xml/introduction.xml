@@ -9,16 +9,16 @@
 <title>An Overview of Valkyrie</title>
 
 <para>Valkyrie is a graphical front-end to the Valgrind suite of tools for 
-debugging and profiling Linux executables.  Valgrind versions from 3.0.0
-(the first release to output XML) are supported.  Currently, the 
-only supported Valgrind tool is Memcheck.</para>
+debugging and profiling Linux executables.  The current version supports
+Valgrind from version 3.3.0.  Currently, the only supported Valgrind tool
+is Memcheck.</para>
 
 <para>Valkyrie uses the Qt widget library, and should run on most reasonably 
 recent Linux setups.  The only sine qua non is that you must have:</para>
 <itemizedlist mark='bullet'>
   <listitem><para>Qt v.3.2.0 or higher (but not Qt v.4 as yet), 
   and</para></listitem>
-  <listitem><para>Valgrind v.3.0.0 or higher.</para></listitem>
+  <listitem><para>Valgrind v.3.3.0 or higher.</para></listitem>
 </itemizedlist>
 
 

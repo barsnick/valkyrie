@@ -85,8 +85,8 @@ extern void vklmPrintErr( const char*, ... )
 /* create a unique filename -------------------------------------------- */
 QString vk_mkstemp( QString filepath, QString ext=QString::null );
 
-/* 3.0.5 --> 0x030005 -------------------------------------------------- */
-int str2hex( QString ver_str );
+/* "valgrind 3.0.5" --> 0x030005 --------------------------------------- */
+int strVersion2hex( QString ver_str );
 
 /* escape html entities
  * current list: '<', '>', '&' ----------------------------------------- */

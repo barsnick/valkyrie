@@ -71,6 +71,7 @@ namespace urlVgCore {
    const char* mainTool        = "vg-manual-core.html#tool_name";
    const char* verbosity       = "vg-manual-core.html#verbosity";
    const char* traceChild      = "vg-manual-core.html#trace_children";
+   const char* silentChild     = "vg-manual-core.html#silent_child";
    const char* trackFds        = "vg-manual-core.html#track_fds";
    const char* timeStamp       = "vg-manual-core.html#time_stamp";
    const char* xmlOutput       = "vg-manual-core.html#xml_output";
@@ -83,9 +84,7 @@ namespace urlVgCore {
 
    /* valgrind's options page: tab Error Reporting */
    const char* logToFd         = "vg-manual-core.html#log2fd";
-   const char* logToFilePid    = "vg-manual-core.html#log2file_pid";
    const char* logToFile       = "vg-manual-core.html#log2file";
-   const char* logFileQual     = "vg-manual-core.html#log2file_qualifier";
    const char* logToSocket     = "vg-manual-core.html#log2socket";
    const char* autoDemangle    = "vg-manual-core.html#auto_demangle";
    const char* numCallers      = "vg-manual-core.html#num_callers";
