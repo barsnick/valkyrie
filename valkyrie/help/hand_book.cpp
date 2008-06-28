@@ -112,7 +112,7 @@ bool VkTextBrowser::launch_browser(const QString& link)
          QStringList browsers = QStringList::split( ':', env_browser );
          QStringList::iterator it;
          for (it=browsers.begin(); it != browsers.end(); ++it ) {
-            if (ok = try_launch_browser(*it, link))
+            if ( (ok = try_launch_browser(*it, link)) )
                break;
          }
          if (!ok) {
@@ -130,7 +130,7 @@ bool VkTextBrowser::launch_browser(const QString& link)
       browsers << "firefox" << "mozilla" << "konqueror" << "netscape";
       QStringList::iterator it;
       for (it=browsers.begin(); it != browsers.end(); ++it ) {
-         if (ok = try_launch_browser(*it, link))
+         if ( (ok = try_launch_browser(*it, link)) )
             break;
       }
    }

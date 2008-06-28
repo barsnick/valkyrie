@@ -275,8 +275,8 @@ Option::Option( int opt_key, VkOPTION::ArgType arg_type, VkOPTION::WidgetType w_
    if (m_argType == VkOPTION::ARG_UINT) {
       /* except don't test cachegrind's horrible cache options */
       bool dontTest = ( m_configGroup == "cachegrind" &&
-                        ( m_longFlag == "I1" |
-                          m_longFlag == "D1" |
+                        ( m_longFlag == "I1" ||
+                          m_longFlag == "D1" ||
                           m_longFlag == "L2" ) );
       if (!dontTest) {
          /* min|max */
