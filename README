@@ -1,10 +1,18 @@
 
 Release Notes for Valkyrie
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-Valkyrie supports Valgrind 3.0.0 or higher, as that is the first release
-to support XML output, which Valkyrie requires.
+Valkyrie version 1.3.0 supports Valgrind 3.3.x.
 
 For instructions on how to build/install, see the INSTALL file.
+
+
+Support for other versions of Valgrind
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Valgrind 3.2.x is not supported - you will need Valkyrie 1.2.x.
+
+The upcoming Valgrind 3.4.x series will have xml changes for 
+which you will need Valkyrie version 1.4.x - Valkyrie 1.3.x does not,
+and will not, support Valgrind 3.4.x.
 
 
 How to get Valkyrie
