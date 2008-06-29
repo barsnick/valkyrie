@@ -4,9 +4,9 @@
  * Essential functionality is contained within a VkObject.
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind
- * Copyright (c) 2000-2006, OpenWorks LLP <info@open-works.co.uk>
+ * Copyright (C) 2000-2008, OpenWorks LLP <info@open-works.co.uk>
  * This program is released under the terms of the GNU GPL v.2
- * See the file LICENSE.GPL for the full license details.
+ * See the file COPYING for the full license details.
  */
 
 /* TODO: don't have enum values for the objOpts; instead, init an int
@@ -36,7 +36,7 @@ class VkObject : public QObject
 {
    Q_OBJECT
 public:
-   /* VkObject id's: tool id's begin from ID_TOOL0 */
+   /* VkObject ids: tool ids begin from ID_TOOL0 */
    enum { ID_VALKYRIE=0, ID_VALGRIND, ID_TOOL0/*first tool*/  };
 
    VkObject( const QString& capt, const QString& txt,

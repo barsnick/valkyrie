@@ -5,9 +5,9 @@
  * Each ToolObject has an associated ToolView for displaying output.
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind
- * Copyright (c) 2000-2006, OpenWorks LLP <info@open-works.co.uk>
+ * Copyright (C) 2000-2008, OpenWorks LLP <info@open-works.co.uk>
  * This program is released under the terms of the GNU GPL v.2
- * See the file LICENSE.GPL for the full license details.
+ * See the file COPYING for the full license details.
  */
 
 /* TODO: don't have enum values for the objOpts; instead, init an int

@@ -25,9 +25,9 @@ echo "Checking files for copyright notice..."
 
 # Expected copyright notice:
 RE_COPYRIGHT=" \* This file is part of Valkyrie, a front-end for Valgrind
- \* Copyright \(c\) [1|2][9|0][0-9][0-9]-[0-9]*, OpenWorks LLP <info\@open-works.co.uk>
+ \* Copyright \(C\) [1|2][9|0][0-9][0-9]-[0-9]*, OpenWorks LLP <info\@open-works.co.uk>
  \* This program is released under the terms of the GNU GPL v.2
- \* See the file LICENSE.GPL for the full license details."
+ \* See the file COPYING for the full license details."
 
 # All files that don't contain $RE_COPYRIGHT
 # gotta be a nicer way of doing this...

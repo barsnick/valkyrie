@@ -3,9 +3,10 @@
  * This is a seriously hacked version of the popt libraries.
  * No credit to me, all thanks and many apologies to the Red Hat team
  * ---------------------------------------------------------------------
- * popt is Copyright (c) 1998 Red Hat Software and distributed under
+ * popt is Copyright (C) 1998 Red Hat Software and distributed under
  * an X11-style license, which is in turn compatible the GNU GPL v.2.
- */
+ * See the file COPYING for the full license details.
+*/
 
 #ifndef __VK_POPT_H
 #define __VK_POPT_H

@@ -2,9 +2,9 @@
  * Implementation of class VKProcess                         vk_process.h
  * ---------------------------------------------------------------------
  * This file is part of Valkyrie, a front-end for Valgrind
- * Copyright (c) 2005-2006, OpenWorks LLP <info@open-works.co.uk>
+ * Copyright (C) 2005-2008, OpenWorks LLP <info@open-works.co.uk>
  * This program is released under the terms of the GNU GPL v.2
- * See the file LICENSE.GPL for the full license details.
+ * See the file COPYING for the full license details.
  * ---------------------------------------------------------------------
  * This file is a re-implementation of QProcess:
  * ** ($Id: qt/qprocess_unix.cpp   3.3.4   edited Dec 23 11:57 $)
@@ -14,7 +14,7 @@
  * **
  * ** This file may be distributed and/or modified under the terms of the
  * ** GNU General Public License version 2 as published by the Free Software
- * ** Foundation and appearing in the file LICENSE.GPL included in the
+ * ** Foundation and appearing in the file COPYING included in the
  * ** packaging of this file.
  */
 

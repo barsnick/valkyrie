@@ -5,7 +5,8 @@
  * ---------------------------------------------------------------------
  * popt is Copyright (c) 1998 Red Hat Software and distributed under
  * an X11-style license, which is in turn compatible the GNU GPL v.2.
- */
+ * See the file COPYING for the full license details.
+*/
 
 #include "vk_popt.h"
 #include "vk_option.h"           /* namespace VkOPTION */
