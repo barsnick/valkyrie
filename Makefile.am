@@ -12,9 +12,9 @@ SUBDIRS = valkyrie vk_logmerge doc
 
 
 ## Preprend @PERL@ because tests/vk_regtest isn't executable
-#regtest: check
-#        @PERL@ tests/vk_regtest $(TOOLS)
+regtest: check
+	@PERL@ tests/vk_regtest vk_logmerge
 
 
 EXTRA_DIST = \
-        README_DEVELOPERS
+	README_DEVELOPERS
