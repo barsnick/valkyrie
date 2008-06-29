@@ -34,38 +34,38 @@ bool VkConfig::isDirty()
    called by user from menu 'Options::Save as Default' ---------------------- */
 bool VkConfig::sync( Valkyrie* vk )
 {
-   if ( !m_dirty )
-      return true;
+  if ( !m_dirty )
+    return true;
 
-   /* read config file from disk, and fill the temporary structure 
-      with entries from the file */
-	EntryMap rcMap;
-   if ( !parseFile( vk, rcMap )) {
-      VK_DEBUG( "failed to parse config file" );
-      return false;
-   }
+  /* read config file from disk, and fill the temporary structure 
+     with entries from the file */
+  EntryMap rcMap;
+  if ( !parseFile( vk, rcMap )) {
+    VK_DEBUG( "failed to parse config file" );
+    return false;
+  }
 
-   /* augment this structure with the dirty entries from the
-      config object */
-   EntryMapIterator aIt;
-   for ( aIt = m_EntryMap.begin(); aIt != m_EntryMap.end(); ++aIt) {
-      const EntryData &dirtyEntry = aIt.data();
-      if ( !dirtyEntry.mDirty ) 
-         continue;
-      /* put dirty entries from the config object into the temporary map.
-         if the entry exists, replaces the data
-         if is a new entry (i.e old rc file), insert new key:data */
-      rcMap.insert( aIt.key(), dirtyEntry );
-   }
+  /* augment this structure with the dirty entries from the
+     config object */
+  EntryMapIterator aIt;
+  for ( aIt = m_EntryMap.begin(); aIt != m_EntryMap.end(); ++aIt) {
+    const EntryData &dirtyEntry = aIt.data();
+    if ( !dirtyEntry.mDirty ) 
+      continue;
+    /* put dirty entries from the config object into the temporary map.
+       if the entry exists, replaces the data
+       if is a new entry (i.e old rc file), insert new key:data */
+    rcMap.insert( aIt.key(), dirtyEntry );
+  }
 
-   /* write out updated config */
-   if ( !writeConfig( rcMap ) ) {
-      VK_DEBUG( "failed to write updated config file" );
-      return false;
-   }
+  /* write out updated config */
+  if ( !writeConfig( rcMap ) ) {
+    VK_DEBUG( "failed to write updated config file" );
+    return false;
+  }
 
-   m_dirty = false;
-   return true;
+  m_dirty = false;
+  return true;
 }
 
 
@@ -453,12 +453,12 @@ void VkConfig::backupConfigFile()
       VK_DEBUG( "failed to backup rc file" );
       return;
    }
-	if ( !QFile::exists(m_rcFileName) ) {
+  if ( !QFile::exists(m_rcFileName) ) {
       /* not much we can do about that... */
       VK_DEBUG( "no rc file to backup!" );
-		return;
-	}
-	if ( !QDir().rename( m_rcFileName, bakfile ) ) {
+    return;
+  }
+  if ( !QDir().rename( m_rcFileName, bakfile ) ) {
       /* oh well... */
       VK_DEBUG( "rename failed: couldn't backup rc file" );
       return;
@@ -472,29 +472,29 @@ bool VkConfig::parseFile( Valkyrie* vk, /*OUT*/EntryMap& dstMap )
 {
    QFile rFile( m_rcFileName );
    if ( !rFile.open( IO_ReadOnly ) ) {
-		/* Error: Failed to open file. */
-		vkError( 0, "Parsing Config File",
+    /* Error: Failed to open file. */
+    vkError( 0, "Parsing Config File",
                "<p>Failed to open config file '%s' for reading.<br>"
                "%s cannot run without this file.</p>", 
                m_rcFileName.latin1(), vkName() );
       return false;
    }
 
-	/* beam me up, scotty */
-	QTextStream stream( &rFile );
-	EntryMap fileMap = parseConfigToMap( stream );
-	rFile.close();
+  /* beam me up, scotty */
+  QTextStream stream( &rFile );
+  EntryMap fileMap = parseConfigToMap( stream );
+  rFile.close();
 
    QString defaultConfig = mkConfigDefaults( vk );
    QTextStream strm( &defaultConfig, IO_ReadOnly );
    EntryMap defaultMap = parseConfigToMap( strm );
 
-	/* Check for correct rc version number
-	   - if mismatch, print warning, update entries */
-	QString vk_ver_rc = fileMap[ EntryKey( "valkyrie", "version" ) ].mValue;
-	QString vk_ver    = vkVersion();
+  /* Check for correct rc version number
+     - if mismatch, print warning, update entries */
+  QString vk_ver_rc = fileMap[ EntryKey( "valkyrie", "version" ) ].mValue;
+  QString vk_ver    = vkVersion();
 
-	if (vk_ver_rc != vk_ver) {  /* Version mismatch - fix rc file */
+  if (vk_ver_rc != vk_ver) {  /* Version mismatch - fix rc file */
       vkInfo( 0, "Parsing Config File",
               "<p>Valkyrie version mismatch<br/>"
               "Config file: %s<br/>"
@@ -534,7 +534,7 @@ bool VkConfig::parseFile( Valkyrie* vk, /*OUT*/EntryMap& dstMap )
       }
    }
 
-	/* fileMap is fine: use that */
+  /* fileMap is fine: use that */
    dstMap = fileMap;
    return true;
 }
@@ -603,37 +603,37 @@ EntryMap VkConfig::parseConfigToMap( QTextStream &stream )
          EntryKey entryKey( aGroup, key );
          EntryData entryData( value, false );
 
-			/* insert into the temporary scratchpad map */
-			rcMap.insert( entryKey, entryData );
+      /* insert into the temporary scratchpad map */
+      rcMap.insert( entryKey, entryData );
       }
    }
-	return rcMap;
+  return rcMap;
 }
 
 
 bool VkConfig::writeConfig( EntryMap rcMap, bool backup/*=false*/ )
 {
-	if (backup) {
-		/* move old config file, if it exists */
-		backupConfigFile();
-	}
+  if (backup) {
+    /* move old config file, if it exists */
+    backupConfigFile();
+  }
 
    /* The temporary map should now be full of ALL entries.
       Write it out to disk. */
    QFile outF( m_rcFileName );
    if ( !outF.open( IO_WriteOnly ) ) {
-		vkError( 0, "Writing Config File",
+    vkError( 0, "Writing Config File",
                "<p>Failed to open config file '%s' for writing.</p>", 
                m_rcFileName.latin1() );
-		return false;
-	}
-	QTextStream aStream( &outF );
-	
-	/* Write comment header */
-	QString hdr = mkConfigHeader();
-	aStream << hdr.latin1();
+    return false;
+  }
+  QTextStream aStream( &outF );
+  
+  /* Write comment header */
+  QString hdr = mkConfigHeader();
+  aStream << hdr.latin1();
 
-	/* Write out map entries under relevant group sections */
+  /* Write out map entries under relevant group sections */
    QString currGroup;
    EntryMapIterator aIt;
    for ( aIt = rcMap.begin(); aIt != rcMap.end(); ++aIt) {
@@ -648,11 +648,11 @@ bool VkConfig::writeConfig( EntryMap rcMap, bool backup/*=false*/ )
       }
 
       /* group data */
-		aStream << currKey.mKey << "=" << currEntry.mValue << "\n";
+    aStream << currKey.mKey << "=" << currEntry.mValue << "\n";
    }
 
-	outF.close();
-	return true;
+  outF.close();
+  return true;
 }
 
 
@@ -660,21 +660,21 @@ bool VkConfig::writeConfig( EntryMap rcMap, bool backup/*=false*/ )
  */
 QString VkConfig::mkConfigHeader( void )
 {
-   QDateTime dt = QDateTime::currentDateTime();
-   QString hdr = QString("# %1 configuration file\n").arg(vkName());
-   hdr += "# " + dt.toString( "MMMM d hh:mm yyyy" ) + "\n";
-   hdr += "# Warning: This file is auto-generated, edits may be lost!\n";
-	return hdr;
+  QDateTime dt = QDateTime::currentDateTime();
+  QString hdr = QString("# %1 configuration file\n").arg(vkName());
+  hdr += "# " + dt.toString( "MMMM d hh:mm yyyy" ) + "\n";
+  hdr += "# Warning: This file is auto-generated, edits may be lost!\n";
+  return hdr;
 }
 
 QString VkConfig::mkConfigDefaults( Valkyrie* vk )
 {
-	QString str;
-	QTextStream ts( &str, IO_WriteOnly );
+  QString str;
+  QTextStream ts( &str, IO_WriteOnly );
 
-	QString header = mkConfigHeader();
+  QString header = mkConfigHeader();
 
-   const char * window_colors = "[Colors]\n\
+  const char * window_colors = "[Colors]\n\
 background=214,205,187\n\
 base=255,255,255\n\
 dkgray=128,128,128\n\
@@ -683,13 +683,13 @@ highlight=147,40,40\n\
 nullColor=239,227,211\n\
 text=0,0,0\n\n";
 
-   const char * mainwin_size_pos = "[MainWin]\n\
+  const char * mainwin_size_pos = "[MainWin]\n\
 height=600\n\
 width=550\n\
 x-pos=400\n\
 y-pos=0\n\n";
 
-   const char * dbase = "[Database]\n\
+  const char * dbase = "[Database]\n\
 user=auser\n\
 host=localhost\n\
 pword=123\n\
@@ -697,18 +697,18 @@ dbase=valkyrie\n\
 logging=true\n\
 logfile=\n\n";
 
-	ts << header << "\n" << window_colors << mainwin_size_pos << dbase;
+  ts << header << "\n" << window_colors << mainwin_size_pos << dbase;
 
-	/* a new tool might have been added, or other changes made, in
-      which case this fn wouldn't contain the correct options=values
-      if it were hard-wired in. Better safe than sorry: just get all
-      tools that are present to spew their options/flags out to disk. */
-   VkObject* vkobj;
-   VkObjectList vkObjecList = vk->vkObjList();
-   for ( vkobj = vkObjecList.first(); vkobj; vkobj = vkObjecList.next() ) {
-		ts << vkobj->configEntries();
-	}
-	return str;
+  /* a new tool might have been added, or other changes made, in
+     which case this fn wouldn't contain the correct options=values
+     if it were hard-wired in. Better safe than sorry: just get all
+     tools that are present to spew their options/flags out to disk. */
+  VkObject* vkobj;
+  VkObjectList vkObjecList = vk->vkObjList();
+  for ( vkobj = vkObjecList.first(); vkobj; vkobj = vkObjecList.next() ) {
+    ts << vkobj->configEntries();
+  }
+  return str;
 }
 
 

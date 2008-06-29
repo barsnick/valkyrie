@@ -257,7 +257,7 @@ ValgrindOptionsPage::ValgrindOptionsPage( QWidget* parent, VkObject* obj )
    /* These widgets are disabled because Valkyrie uses
       --log-file-exactly internally: logging options would interfere
       with this. */
-	// error reporting tab
+  // error reporting tab
    m_itemList[Valgrind::LOG_FD     ]->setEnabled( false );
    m_itemList[Valgrind::LOG_FILE   ]->setEnabled( false );
    m_itemList[Valgrind::LOG_SOCKET ]->setEnabled( false );

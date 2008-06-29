@@ -125,10 +125,10 @@ int main ( int argc, char* argv[] )
        QString toolname = vkConfig->rdEntry("tool", "valgrind");
        ToolObjList tools = valkyrie.valgrind()->toolObjList();
        for ( ToolObject* tool=tools.first(); tool; tool=tools.next() ) {
-	   if ( tool->name() == toolname ) {
-	       vkWin->showToolView( tool->objId() );
-	       break;
-	   }
+         if ( tool->name() == toolname ) {
+           vkWin->showToolView( tool->objId() );
+           break;
+         }
        }
 
    }

@@ -72,11 +72,11 @@ void OptionWidget::cancelEdit()
 
 void OptionWidget::setEnabled( bool enable )
 {
-	if ( m_wLabel != 0 )
-		m_wLabel->setEnabled( enable );
-	if ( m_widg != 0 ) {
-		m_widg->setEnabled( enable );
-	}
+  if ( m_wLabel != 0 )
+    m_wLabel->setEnabled( enable );
+  if ( m_widg != 0 ) {
+    m_widg->setEnabled( enable );
+  }
 }
 
 

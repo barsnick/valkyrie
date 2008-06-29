@@ -57,7 +57,7 @@ Memcheck::Memcheck( int objId )
    connect( m_logpoller, SIGNAL(logUpdated()),
             this,        SLOT(readVgLog()) );
 
-	/* these opts should be kept in exactly the same order as valgrind
+  /* these opts should be kept in exactly the same order as valgrind
       outputs them, as it makes keeping up-to-date a lot easier. */
    addOpt( LEAK_CHECK,  VkOPTION::ARG_STRING, VkOPTION::WDG_COMBO, 
            "memcheck",  '\0',                 "leak-check",

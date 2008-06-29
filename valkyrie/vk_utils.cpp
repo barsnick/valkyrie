@@ -118,27 +118,27 @@ __attribute__ ((noreturn))
 /* Create a unique filename, with an optional extension ---------------- */
 QString vk_mkstemp( QString filepath, QString ext/*=QString::null*/ )
 {
-   /* create tempfiles with datetime, so can sort easily if they stay around */
+  /* create tempfiles with datetime, so can sort easily if they stay around */
 
-   QString datetime = QDateTime::currentDateTime().toString( "-yyyy.MM.dd-hh.mm.ss");
-	QString unique = filepath + datetime;
-   if (!ext.isNull()) unique +=  "." + ext;
+  QString datetime = QDateTime::currentDateTime().toString( "-yyyy.MM.dd-hh.mm.ss");
+  QString unique = filepath + datetime;
+  if (!ext.isNull()) unique +=  "." + ext;
 
-   if ( QFile::exists(unique) ) {
-      /* fall back on mkstemp */
-      char* tmpname = vk_str_malloc( unique.length() + 10 );
-      sprintf( tmpname, "%s.XXXXXX", unique.latin1() );
-      int fd = mkstemp( tmpname );
-      if ( fd == -1 ) {
-         /* something went wrong */
-         VK_DEBUG("failed to create unique filename from '%s'.",
-                  filepath.latin1() );
-         return QString::null;
-      }
-      unique = QString( tmpname );
-      tmpname = vk_str_free( tmpname );
-   }
-   return unique;
+  if ( QFile::exists(unique) ) {
+    /* fall back on mkstemp */
+    char* tmpname = vk_str_malloc( unique.length() + 10 );
+    sprintf( tmpname, "%s.XXXXXX", unique.latin1() );
+    int fd = mkstemp( tmpname );
+    if ( fd == -1 ) {
+      /* something went wrong */
+      VK_DEBUG("failed to create unique filename from '%s'.",
+               filepath.latin1() );
+      return QString::null;
+    }
+    unique = QString( tmpname );
+    tmpname = vk_str_free( tmpname );
+  }
+  return unique;
 }
 
 
