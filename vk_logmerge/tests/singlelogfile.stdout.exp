@@ -1,6 +1,9 @@
 <?xml version = '1.0'?>
+
 <valgrindoutput>
+
   <protocolversion>2</protocolversion>
+
   <preamble>
     <line>Memcheck, a memory error detector.</line>
     <line>Copyright (C) 2002-2008, and GNU GPL'd, by Julian Seward et al.</line>
@@ -9,9 +12,13 @@
     <line>Using valgrind-3.3.0, a dynamic binary instrumentation framework.</line>
     <line>Copyright (C) 2000-2008, and GNU GPL'd, by Julian Seward et al.</line>
   </preamble>
+
   <pid>6961</pid>
+
   <ppid>5324</ppid>
+
   <tool>memcheck</tool>
+
   <args>
     <vargv>
       <exe>/home/cerion/Work/Valgrind/trunk/Inst/bin/valgrind</exe>
@@ -22,18 +29,22 @@
       <exe>/bin/ls</exe>
     </argv>
   </args>
+
   <status>
     <state>RUNNING</state>
     <time>00:00:00:00.102</time>
   </status>
+
   <status>
     <state>FINISHED</state>
     <time>00:00:00:01.368</time>
   </status>
+
   <suppcounts>
     <pair>
       <count>23</count>
       <name>Ugly strchr error in /lib/ld-2.3.3.so</name>
     </pair>
   </suppcounts>
+
 </valgrindoutput>
