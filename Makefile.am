@@ -7,8 +7,7 @@ AUTOMAKE_OPTIONS = foreign 1.7 dist-bzip2
 AC_AUX_DIR = m4
 AC_MACRO_DIR = m4
 
-SUBDIRS = valkyrie vk_logmerge doc
-# . tests
+SUBDIRS = valkyrie vk_logmerge doc tests
 
 
 ## Preprend @PERL@ because tests/vk_regtest isn't executable

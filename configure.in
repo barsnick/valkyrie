@@ -222,6 +222,7 @@ AC_OUTPUT(
    vk_logmerge/Makefile
    doc/Makefile
    doc/images/Makefile
+   tests/Makefile
 )
 
 #   tests/Makefile
