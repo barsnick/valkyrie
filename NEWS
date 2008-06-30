@@ -1,13 +1,13 @@
 
 Release 1.3.0 (30 June 2008)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1.3.0 adds support for Valgrind versions 3.3.0 and 3.3.1, and fixes a
+number of bugs reported in 1.2.0.
 
-1.3.0 has focused on stability with a view to the forthcoming support
-for Helgrind, Valgrind's new thread-checking tool.  Valkyrie now supports
-Valgrind 3.3.0.  And, of course, the usually collection of bug fixes.
+NEW FUNCTIONALITY:
 
-OTHER NEW STUFF:
 - Added option to set working directory (via cmdline and vk config)
+
 - Allow for multiple suppressions on the command line
 
 BUGS and PROBLEMS FIXED: 
@@ -36,14 +36,14 @@ BUGS and PROBLEMS FIXED:
 
 - Compile errors for Slackware 10.1
 
-- Various compiler warnings
+- Various compiler warnings.  It now compiles cleanly with g++-4.3.1.
 
 - Fixed open/close items buttons
  - open current item: only worked once item had been opened once already
  - open all items: didn't open leak errors (stopped at suppressions)
  - open all items: remained 'pushed' even if all items were closed
 
-
+(valkyrie-1.3.0: 30 June 2008, svn r449).
 
 
 Release 1.2.0 (02 June 2006)
