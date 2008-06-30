@@ -220,6 +220,7 @@ AC_OUTPUT(
    Makefile
    valkyrie/Makefile
    vk_logmerge/Makefile
+   vk_logmerge/tests/Makefile
    doc/Makefile
    doc/images/Makefile
    tests/Makefile

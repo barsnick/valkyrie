@@ -2,7 +2,7 @@
 
 noinst_SCRIPTS = \
 	vk_regtest \
-	filter_addresses
+	filter_addresses \
 	filter_libc \
 	filter_sink \
 	filter_test_paths \

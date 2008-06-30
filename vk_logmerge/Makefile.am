@@ -8,6 +8,8 @@ QT_MOC = @QT_MOC@
 QT_UIC = @QT_UIC@
 QT_DIR = @QT_DIR@
 
+SUBDIRS = tests
+
 ########################################################################
 # Build vk_logmerge
 #
