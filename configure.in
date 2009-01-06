@@ -49,9 +49,9 @@ if test x"$VALGRIND" = x ; then
    AC_MSG_WARN([Valgrind not found: may be configured at runtime.])
 else
   # Valgrind found: check is ok
-  AC_MSG_CHECKING([valgrind version (need >= 3.3.0)])
+  AC_MSG_CHECKING([valgrind version (need >= 3.4.0)])
   VG_VERSION_MIN1=3
-  VG_VERSION_MIN2=3
+  VG_VERSION_MIN2=4
   VG_VERSION=`$VALGRIND --version | sed "s/^valgrind-//"`
   if test x"$VG_VERSION" = x; then
      # failed to start valgrind
@@ -64,7 +64,7 @@ else
      if { test $VG_VERSION_1 -lt $VG_VERSION_MIN1  || \
           test $VG_VERSION_2 -lt $VG_VERSION_MIN2; }; then
         VALGRIND=""
-        AC_MSG_WARN([Not configuring for valgrind: need minimum version of 3.3.0.  Please configure with a more recent version of Valgrind (may be done at runtime).])
+        AC_MSG_ERROR([Not configuring for valgrind: need minimum version of 3.4.0.  Please configure with a more recent version of Valgrind (may be done at runtime).])
      fi
   fi
 fi
@@ -87,18 +87,18 @@ AC_ARG_WITH([editor],
 
       # if unknown editor, give warning
       VK_ED_NAME=`echo $VK_EDITOR | sed "s/.*\///" | sed "s/-.*//"`
-      if test "$VK_ED_NAME" != "emacs" && \
-         test "$VK_ED_NAME" != "nedit" && \
-         test "$VK_ED_NAME" != "gvim" && \
-         test "$VK_ED_NAME" != "gview" && \
-         test "$VK_ED_NAME" != "kate"; then
+      if test x"$VK_ED_NAME" != x"emacs" && \
+         test x"$VK_ED_NAME" != x"nedit" && \
+         test x"$VK_ED_NAME" != x"gvim" && \
+         test x"$VK_ED_NAME" != x"gview" && \
+         test x"$VK_ED_NAME" != x"kate"; then
          AC_MSG_WARN([Unknown editor '$withval'.  If possible, set editor options in valkyrie to go to the target line-number, e.g. 'gvim +%n', where %n will be replaced with the line-number.])
       fi
    ],
    [ # not given
       # flag not given: try $EDITOR
       if test x"$EDITOR" != x ; then
-         if test -x $EDITOR; then
+         if test -x "$EDITOR"; then
 	    # found absolute: just give msg
 	    AC_CHECK_FILE([$EDITOR])
 	    VK_EDITOR=$EDITOR
