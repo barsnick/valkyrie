@@ -112,6 +112,11 @@ VgElement VgElement::getLastElem( QString tagname ) const
    return VgElement();
 }
 
+VgElement VgElement::getNextSibling() const
+{
+   QDomElement e = nextSibling().toElement();
+   return (VgElement&)e;
+}
 
 VgElement::ElemType VgElement::elemType()
 {
@@ -574,7 +579,8 @@ bool VgLog::appendNode( QDomNode node )
 
    switch ( type ) {
    case VgElement::PROTOCOL:
-      if ( elem.text() != "1" && elem.text() != "2" ) {
+      if ( elem.text() != "1" 
+           && elem.text() != "2" && elem.text() != "3" ) {
          vklmPrintErr("VgLog::appendNode(): bad xml protocol version");
          return false;
       }
@@ -626,8 +632,18 @@ VgElement VgLog::ppid()
 VgElement VgLog::tool()
 { return docroot().getFirstElem("tool"); }
 
-VgElement VgLog::logqual()
-{ return docroot().getFirstElem("logfilequalifier"); }
+VgLogQualList VgLog::logquals()
+{
+   VgLogQualList list;
+   QDomElement e = docroot().firstChild().toElement();
+   for ( ; !e.isNull(); e=e.nextSibling().toElement() ) {
+      if (e.tagName() == "logfilequalifier") {
+         VgLogQual lq = (VgLogQual&)e;
+         list.append( lq );
+      }
+   }
+   return list;
+}
 
 VgElement VgLog::comment()
 { return docroot().getFirstElem("usercomment"); }

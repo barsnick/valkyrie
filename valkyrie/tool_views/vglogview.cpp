@@ -179,7 +179,7 @@ void TopStatusItem::updateStatus( VgStatus status )
          VK_DEBUG("can't read start-time string\n");
       }
    }
-   else if (protocol == "2") {
+   else if (protocol == "2" || protocol == "3") {
       // Valgrind >= v3.1 outputs a count only
       /* start count */
       ret = sscanf( stime.ascii(), "%d:%d:%d:%d.%4d", 
@@ -322,11 +322,13 @@ void InfoItem::setOpen( bool open )
 {
    if ( open && childCount() == 0 ) {
       VgOutputItem* after = 0;
+
+      /* handle any number of log-file-qualifiers */
       VgElement logqual = elem.getFirstElem("logfilequalifier");
-      /* may / may not have log-file-qualifier */
-      if ( ! logqual.isNull() ) {
+      while (!logqual.isNull() && logqual.tagName() == "logfilequalifier") {
          after = new LogQualItem( this, logqual );
          after->setOpen( true );
+         logqual = logqual.getNextSibling();
       }
 
       VgElement comment = elem.getFirstElem("usercomment");
@@ -516,6 +518,24 @@ void ErrorItem::setOpen( bool open )
       if ( ! aux_stack.isNull() ) {
          VgElement auxstack = (VgElement&)aux_stack;
          new StackItem( this, after, auxstack );
+      }
+
+      /* origin */
+      VgElement origin = elem.getFirstElem( "origin" );
+      if ( ! origin.isNull() ) {
+         VgElement ori_what  = origin.getFirstElem( "what" );
+         VgElement ori_stack = ori_what.getNextSibling();
+
+         VgOutputItem* zzz_aux_item = new VgOutputItem( this, after, ori_what );
+         zzz_aux_item->setText( ori_what.text() );
+         after = zzz_aux_item;
+
+         //      }
+         //      /* aux stack */
+         //      QDomElement aux_stack = aux_what.nextSibling().toElement();
+         //      if ( ! aux_stack.isNull() ) {
+         StackItem* si = new StackItem( this, after, ori_stack );
+         si->setOpen(true);
       }
 
       /* J sez there may be more than two stacks in the future .. */

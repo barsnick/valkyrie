@@ -49,7 +49,7 @@ namespace urlValkyrie {
    const char* binFlags     = "options_dialog.html#bin_flags";
    const char* vgDir        = "options_dialog.html#valgrind";
 
-   /* valgrind`s options page: tab Suppressions */
+   /* valgrind's options page: tab Suppressions */
    const char* coreTab  = "options_valgrind.html#core_tab";
    const char* errorTab = "options_valgrind.html#error_tab";
    const char* suppsTab = "options_valgrind.html#supps_tab";
@@ -106,7 +106,8 @@ namespace urlMemcheck {
    const char* optsMC    = "vg-manual-mc.html";
    const char* Leakcheck = "vg-manual-mc.html#leakcheck";
    const char* Showreach = "vg-manual-mc.html#showreach";
-   const char* UndefVal  = "vg-manual-mc.html#undefvalerrs";
+   //const char* UndefVal  = "vg-manual-mc.html#undefvalerrs";
+   const char* TrackOri  = "vg-manual-mc.html#undefvalerrs";
    const char* Leakres   = "vg-manual-mc.html#leakres";
    const char* Freelist  = "vg-manual-mc.html#freelist";
    const char* gcc296    = "vg-manual-mc.html#gcc296";

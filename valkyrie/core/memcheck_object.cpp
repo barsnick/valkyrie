@@ -77,12 +77,18 @@ Memcheck::Memcheck( int objId )
            "Show reachable blocks in leak check",
            "show reachable blocks in leak check?",  
            urlMemcheck::Showreach );
-   addOpt( UNDEF_VAL,   VkOPTION::ARG_BOOL,   VkOPTION::WDG_CHECK, 
-           "memcheck",  '\0',                 "undef-value-errors",
-           "<yes|no>",  "yes|no",             "yes",
-           "Check for undefined value errors",
-           "check for undefined value errors?",
-           urlMemcheck::UndefVal );
+   //addOpt( UNDEF_VAL,   VkOPTION::ARG_BOOL,   VkOPTION::WDG_CHECK, 
+   //        "memcheck",  '\0',                 "undef-value-errors",
+   //        "<yes|no>",  "yes|no",             "yes",
+   //        "Check for undefined value errors",
+   //        "check for undefined value errors?",
+   //        urlMemcheck::UndefVal );
+   addOpt( TRACK_ORI,   VkOPTION::ARG_BOOL,   VkOPTION::WDG_CHECK, 
+           "memcheck",  '\0',                 "track-origins",
+           "<yes|no>",  "yes|no",             "no",
+           "Show the origins of uninitialised values",
+           "show the origins of uninitialised values?",
+           urlMemcheck::TrackOri );
    addOpt( PARTIAL,     VkOPTION::ARG_BOOL,   VkOPTION::WDG_CHECK, 
            "memcheck",  '\0',                 "partial-loads-ok",
            "<yes|no>",  "yes|no",             "no",
@@ -91,7 +97,7 @@ Memcheck::Memcheck( int objId )
            urlMemcheck::Partial );
    addOpt( FREELIST,    VkOPTION::ARG_UINT,   VkOPTION::WDG_LEDIT, 
            "memcheck",  '\0',                 "freelist-vol",
-           "<number>",  "0|1000000000",       "5000000",
+           "<number>",  "0|1000000000",       "10000000",
            "Volume of freed blocks queue:",
            "volume of freed blocks queue",
            urlMemcheck::Freelist );
@@ -124,7 +130,8 @@ int Memcheck::checkOptArg( int optid, QString& argval )
    case FREELIST:
    case LEAK_RES:
    case SHOW_REACH:
-   case UNDEF_VAL:
+   //case UNDEF_VAL:
+   case TRACK_ORI:
    case GCC_296:
    case ALIGNMENT:
       opt->isValidArg( &errval, argval );
@@ -704,11 +711,25 @@ bool Memcheck::saveParsedOutput( QString& fname )
    bool ok;
    if (!m_fileSaved) {
       /* first save after a run, so just rename m_saveFname => fname */
-      //vkPrint("renaming: '%s' -> '%s'", m_saveFname.latin1(), fname.latin1() );
-      ok = QDir().rename( m_saveFname, fname );
+      if (0) vkPrint("renaming: '%s' -> '%s'",
+                     m_saveFname.latin1(), fname.latin1() );
+      if (m_saveFname != fname) {
+         ok = FileCopy( m_saveFname, fname );
+         if (ok)
+            ok = QDir().remove( m_saveFname );
+      } else {
+         ok = true; // no need to do anything
+      }
+      // OLD:
+      //ok = QDir().rename( m_saveFname, fname );
+      // but we can't just rename, because that fails when the src
+      // and dst files are in different partitions.  The longwinded
+      // but more reliable solution is to copy and then delete the
+      // original.
    } else {
       /* we've saved once already: must now copy m_saveFname => fname */
-      //vkPrint("copying: '%s' -> '%s'", m_saveFname.latin1(), fname.latin1() );
+      if (0) vkPrint("copying: '%s' -> '%s'",
+                     m_saveFname.latin1(), fname.latin1() );
       ok = FileCopy( m_saveFname, fname );
    }
    if (ok) {

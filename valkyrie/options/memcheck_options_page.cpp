@@ -37,8 +37,10 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
                       optionWidget( Memcheck::LEAK_CHECK, group1, true ) );
    m_itemList.insert( Memcheck::SHOW_REACH,                 /* checkbox */
                       optionWidget( Memcheck::SHOW_REACH, group1, false ) );
-   m_itemList.insert( Memcheck::UNDEF_VAL,                  /* checkbox */
-                      optionWidget( Memcheck::UNDEF_VAL,  group1, false ) );
+   //m_itemList.insert( Memcheck::UNDEF_VAL,                  /* checkbox */
+   //                   optionWidget( Memcheck::UNDEF_VAL,  group1, false ) );
+   m_itemList.insert( Memcheck::TRACK_ORI,                  /* checkbox */
+                      optionWidget( Memcheck::TRACK_ORI,  group1, false ) );
   
    m_itemList.insert( Memcheck::PARTIAL,                    /* checkbox */
                       optionWidget( Memcheck::PARTIAL,    group1, false ) );
@@ -66,7 +68,7 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
 
    grid1->addLayout( m_itemList[Memcheck::LEAK_CHECK]->hlayout(), row++, 0 );
    grid1->addWidget( m_itemList[Memcheck::SHOW_REACH]->widget(),  row++, 0 );
-   grid1->addWidget( m_itemList[Memcheck::UNDEF_VAL]->widget(),   row++, 0 );
+   //grid1->addWidget( m_itemList[Memcheck::UNDEF_VAL]->widget(),   row++, 0 );
 
    grid1->addMultiCellWidget( sep(group1,"sep1"), row,row, 0,1 );
 #if (QT_VERSION-0 >= 0x030200)
@@ -75,6 +77,7 @@ MemcheckOptionsPage::MemcheckOptionsPage( QWidget* parent, VkObject* obj )
    grid1->addRowSpacing( row++, m_topSpace );   /* add a bit more space here */
 #endif
 
+   grid1->addWidget( m_itemList[Memcheck::TRACK_ORI]->widget(),   row++, 0 );
    grid1->addWidget( m_itemList[Memcheck::PARTIAL]->widget(),     row++, 0 );
    grid1->addWidget( m_itemList[Memcheck::GCC_296]->widget(),     row++, 0 );
 

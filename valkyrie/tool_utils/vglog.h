@@ -27,8 +27,11 @@
 class VgElement : public QDomElement
 {
 public:
+   // shouldn't the following two really be called 
+   // getFirstChild and getLastChild?
    VgElement getFirstElem( QString tagname ) const;
    VgElement getLastElem( QString tagname ) const;
+   VgElement getNextSibling() const;
 
    bool isLeaf();
    /* leaf functions */
@@ -68,6 +71,14 @@ public:
    enum StateType { INIT=0, RUNNING, FINISHED };
    StateType state();
 };
+
+/**********************************************************************/
+class VgLogQual : public VgElement
+{
+public:
+};
+
+typedef QValueList<VgLogQual> VgLogQualList;
 
 /**********************************************************************/
 class VgFrame : public VgElement
@@ -187,21 +198,21 @@ private:
    bool mergeLeakErrors( VgErrorList sLeakErrors );
 
 public:
-   VgElement    docroot();     /* document element: <valgrindoutput/> */
-   VgElement    protocol();
-   VgPreamble   preamble();
-   VgElement    pid();
-   VgElement    ppid();
-   VgElement    tool();
-   VgElement    logqual();
-   VgElement    comment();
-   VgElement    args();
-   VgStatus     status_beg();
-   VgErrorList  errors();      /* errors (non-leak) before status_end */
-   VgErrCounts  errorcounts(); /* last errcounts element */
-   VgStatus     status_end();
-   VgSuppCounts suppcounts();
-   VgErrorList  leaks();       /* leak errors after status_end */
+   VgElement     docroot();     /* document element: <valgrindoutput/> */
+   VgElement     protocol();
+   VgPreamble    preamble();
+   VgElement     pid();
+   VgElement     ppid();
+   VgElement     tool();
+   VgLogQualList logquals();
+   VgElement     comment();
+   VgElement     args();
+   VgStatus      status_beg();
+   VgErrorList   errors();      /* errors (non-leak) before status_end */
+   VgErrCounts   errorcounts(); /* last errcounts element */
+   VgStatus      status_end();
+   VgSuppCounts  suppcounts();
+   VgErrorList   leaks();       /* leak errors after status_end */
 
 private:  
    QDomDocument log;

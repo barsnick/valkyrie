@@ -103,7 +103,8 @@ namespace urlMemcheck {
    extern const char* Leakcheck;
    extern const char* Leakres;
    extern const char* Showreach;
-   extern const char* UndefVal;
+   //extern const char* UndefVal;
+   extern const char* TrackOri;
    extern const char* gcc296;
 }
 
