@@ -2,7 +2,7 @@
 
 ########################################################################
 # ? AC_PREREQ(2.59)
-AC_INIT(Valkyrie, 1.3.0, info@open-works.co.uk)
+AC_INIT(Valkyrie, 1.4.0.SVN, info@open-works.co.uk)
 AC_CONFIG_SRCDIR([valkyrie/main.cpp])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR(m4)
@@ -46,7 +46,7 @@ AC_ARG_WITH([valgrind],
 
 if test x"$VALGRIND" = x ; then
    # Valgrind not found
-   AC_MSG_WARN([Valgrind not found: may be configured at runtime.])
+   AC_MSG_ERROR([Valgrind not found.])
 else
   # Valgrind found: check is ok
   AC_MSG_CHECKING([valgrind version (need >= 3.4.0)])
@@ -55,7 +55,7 @@ else
   VG_VERSION=`$VALGRIND --version | sed "s/^valgrind-//"`
   if test x"$VG_VERSION" = x; then
      # failed to start valgrind
-     AC_MSG_WARN([Failed to start Valgrind. Please check your Valgrind installation. Valgrind path may be set at runtime.])
+     AC_MSG_ERROR([Failed to start Valgrind. Please check your Valgrind installation.])
      VALGRIND=""
   else
      AC_MSG_RESULT([$VG_VERSION])
@@ -64,7 +64,7 @@ else
      if { test $VG_VERSION_1 -lt $VG_VERSION_MIN1  || \
           test $VG_VERSION_2 -lt $VG_VERSION_MIN2; }; then
         VALGRIND=""
-        AC_MSG_ERROR([Not configuring for valgrind: need minimum version of 3.4.0.  Please configure with a more recent version of Valgrind (may be done at runtime).])
+        AC_MSG_ERROR([Not configuring for valgrind: need minimum version of 3.4.0.])
      fi
   fi
 fi
