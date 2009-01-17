@@ -506,40 +506,40 @@ void ErrorItem::setOpen( bool open )
       stack_item1->setOpen( true );
       after = stack_item1;
 
-      /* aux what */
+      /* aux what & stack */
       VgElement aux_what = elem.getFirstElem( "auxwhat" );
       if ( ! aux_what.isNull() ) {
          VgOutputItem* aux_item = new VgOutputItem( this, after, aux_what );
          aux_item->setText( aux_what.text() );
          after = aux_item;
-      }
-      /* aux stack */
-      QDomElement aux_stack = aux_what.nextSibling().toElement();
-      if ( ! aux_stack.isNull() ) {
-         VgElement auxstack = (VgElement&)aux_stack;
-         new StackItem( this, after, auxstack );
+         QDomElement aux_stack = aux_what.nextSibling().toElement();
+         if ( ! aux_stack.isNull() ) {
+            VgElement auxstack = (VgElement&)aux_stack;
+            StackItem* si = new StackItem( this, after, auxstack );
+            after = si;
+            si->setOpen(true);
+         }
       }
 
-      /* origin */
+      /* origin & stack */
       VgElement origin = elem.getFirstElem( "origin" );
       if ( ! origin.isNull() ) {
          VgElement ori_what  = origin.getFirstElem( "what" );
          VgElement ori_stack = ori_what.getNextSibling();
 
-         VgOutputItem* zzz_aux_item = new VgOutputItem( this, after, ori_what );
-         zzz_aux_item->setText( ori_what.text() );
-         after = zzz_aux_item;
+         VgOutputItem* ori_item = new VgOutputItem( this, after, ori_what );
+         ori_item->setText( ori_what.text() );
+         after = ori_item;
 
-         //      }
-         //      /* aux stack */
-         //      QDomElement aux_stack = aux_what.nextSibling().toElement();
-         //      if ( ! aux_stack.isNull() ) {
          StackItem* si = new StackItem( this, after, ori_stack );
          si->setOpen(true);
       }
 
-      /* J sez there may be more than two stacks in the future .. */
-      vk_assert( aux_stack.nextSibling().isNull() );
+      /* We should really check that we've used up all the children at
+         this level.  But that's difficult since we don't scan through
+         them from one end to another using any 'cursor' kind of
+         arrangement, so we can't easily check that the 'cursor' is at
+         the last sibling. */
    }
    VgOutputItem::setOpen( open );
 }
