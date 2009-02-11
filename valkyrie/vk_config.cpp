@@ -844,9 +844,10 @@ bool VkConfig::checkRCTree( Valkyrie* vk )
       }
    }
 
-   /* Further, check for temporary log dir (VK_LOGS_DIR), make if !exists */
-   if ( !QFile::exists( VK_LOGS_DIR ) ) {
-      if ( !checkRCEntry( VK_LOGS_DIR, vk) ) {
+   /* Further, check for temporary log dir (VK_LOGS_DIRP + username),
+      make if !exists */
+   if ( !QFile::exists( get_VK_LOGS_DIR() ) ) {
+      if ( !checkRCEntry( get_VK_LOGS_DIR(), vk) ) {
          return false;
       }
    }

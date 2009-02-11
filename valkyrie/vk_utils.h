@@ -85,6 +85,9 @@ extern void vklmPrintErr( const char*, ... )
 /* create a unique filename -------------------------------------------- */
 QString vk_mkstemp( QString filepath, QString ext=QString::null );
 
+/* Get the log directory associated with this user --------------------- */
+QString get_VK_LOGS_DIR ();
+
 /* "valgrind 3.0.5" --> 0x030005 --------------------------------------- */
 int strVersion2hex( QString ver_str );
 

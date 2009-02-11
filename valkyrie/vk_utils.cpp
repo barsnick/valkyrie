@@ -15,6 +15,7 @@
 #include <stdarg.h>                 // va_start, va_end
 #include <sys/types.h>              // getpid
 #include <unistd.h>                 // getpid
+#include <pwd.h>                    // getpwuid
 
 #include <qapplication.h>
 #include <qfileinfo.h>
@@ -139,6 +140,24 @@ QString vk_mkstemp( QString filepath, QString ext/*=QString::null*/ )
     tmpname = vk_str_free( tmpname );
   }
   return unique;
+}
+
+
+/* Get the log directory associated with this user --------------------- */
+// Just do this once, and cache the results.
+QString get_VK_LOGS_DIR ()
+{
+  static QString res = NULL;
+  if (!res) {
+     pid_t me = getuid();
+     struct passwd* pw = getpwuid( me );
+     /* This should never fail.  Is it worth trying to continue if it
+        does?  I don't think so. */
+     vk_assert(pw);
+     res = QString( VK_LOGS_DIRP ) + QString( pw->pw_name ) + "/";
+     vk_assert(res);
+  }
+  return res;
 }
 
 

@@ -338,7 +338,8 @@ void Memcheck::stop()
 */
 bool Memcheck::runValgrind( QStringList vgflags )
 {
-   m_saveFname = vk_mkstemp( QString( VK_LOGS_DIR ) + "mc_log", "xml" );
+   m_saveFname = vk_mkstemp( QString( get_VK_LOGS_DIR() ) 
+                             + "mc_log", "xml" );
    vk_assert( !m_saveFname.isEmpty() );
 
    vgflags.insert( ++(vgflags.begin()), ("--log-file=" + m_saveFname) );
@@ -421,7 +422,8 @@ bool Memcheck::mergeLogFiles()
    QString fname_logList = vkConfig->rdEntry( "merge", "valkyrie" );
    statusMsg( "Merging logs in file-list", fname_logList );
  
-   m_saveFname = vk_mkstemp( QString( VK_LOGS_DIR ) + "mc_merged", "xml" );
+   m_saveFname = vk_mkstemp( QString( get_VK_LOGS_DIR() )
+                             + "mc_merged", "xml" );
    vk_assert( !m_saveFname.isEmpty() );
 
    QStringList flags;

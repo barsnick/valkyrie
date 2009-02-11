@@ -25,7 +25,7 @@
 
 
  // Minimum version of Valgrind required
-const char* pchVersionVgMin = "3.3.0";
+const char* pchVersionVgMin = "3.4.0";
 
 
 /* class Valkyrie --------------------------------------------------- */
@@ -102,7 +102,7 @@ Valkyrie::Valkyrie()
            "Browser:",   "",                   urlValkyrie::browser );
    addOpt( DFLT_LOGDIR,  VkOPTION::NOT_POPT,   VkOPTION::WDG_LEDIT, 
            "valkyrie",   '\0',                 "default-logdir", 
-           "",           "",                   VK_LOGS_DIR, 
+           "",           "",                   get_VK_LOGS_DIR(), 
            "Log Dir:",   "",                   urlValkyrie::logDir );
    addOpt( WORKING_DIR,  VkOPTION::ARG_STRING, VkOPTION::WDG_LEDIT, 
            "valkyrie",   '\0',                 "working-dir", 
