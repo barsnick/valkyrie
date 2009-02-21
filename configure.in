@@ -2,7 +2,7 @@
 
 ########################################################################
 # ? AC_PREREQ(2.59)
-AC_INIT(Valkyrie, 1.4.0.SVN, info@open-works.co.uk)
+AC_INIT(Valkyrie, 1.4.0, info@open-works.co.uk)
 AC_CONFIG_SRCDIR([valkyrie/main.cpp])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR(m4)
