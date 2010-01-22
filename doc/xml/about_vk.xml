@@ -15,8 +15,6 @@
 <para>Valkyrie is a graphical user interface for Valgrind: 
 <ulink url="http://www.valgrind.org">www.valgrind.org</ulink>.</para>
 
-<para>This program was built using Qt v%1, and is running using Qt v%2.</para>
-
 <para>You can download the latest version of Valkyrie from the
 OpenWorks website: <ulink url="http://&vk-url;"></ulink>.</para>
 
