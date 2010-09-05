@@ -1,0 +1,34 @@
+<RCC>
+    <qresource prefix="/vk_icons" >
+        <file>icons/msgbox_error.xpm</file>
+        <file>icons/msgbox_info.xpm</file>
+        <file>icons/msgbox_query.xpm</file>
+        <file>icons/tb_handbook_back.xpm</file>
+        <file>icons/tb_handbook_forward.xpm</file>
+        <file>icons/tb_handbook_help.xpm</file>
+        <file>icons/tb_handbook_home.xpm</file>
+        <file>icons/tb_handbook_reload.xpm</file>
+        <file>icons/tb_mainwin_blackbullet.xpm</file>
+        <file>icons/tb_mainwin_viewflags.xpm</file>
+        <file>icons/tb_mainwin_viewflags2.xpm</file>
+        <file>icons/valkyrie.xpm</file>
+        <file>icons/vglogview_readonly.xpm</file>
+        <file>icons/vglogview_readwrite.xpm</file>
+        <file>icons/context_help.xpm</file>
+        <file>icons/valgrind_run.png</file>
+        <file>icons/filesave.png</file>
+        <file>icons/filesaveas.png</file>
+        <file>icons/folder_blue.png</file>
+        <file>icons/folder_green.png</file>
+        <file>icons/filenew.png</file>
+        <file>icons/exit.png</file>
+        <file>icons/valgrind_stop.png</file>
+        <file>icons/gear.png</file>
+        <file>icons/item_close.png</file>
+        <file>icons/item_open.png</file>
+        <file>icons/tree_close.png</file>
+        <file>icons/tree_open.png</file>
+        <file>icons/text_less.png</file>
+        <file>icons/text_more.png</file>
+    </qresource>
+</RCC>

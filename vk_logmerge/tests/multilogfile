@@ -1,4 +1,0 @@
-#!/bin/bash
-# 'merge' three xml files
-
-../vk_logmerge ./multilogfile1.xml ./multilogfile2.xml ./multilogfile3.xml 

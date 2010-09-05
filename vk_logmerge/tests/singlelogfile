@@ -1,4 +1,0 @@
-#!/bin/bash
-# 'merge' a single xml file - output should be identical to input
-
-../vk_logmerge ./singlelogfile.stdout.exp

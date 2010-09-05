@@ -1,4 +1,0 @@
-// Ensure to edit this file with an editor supporting UTF8 encoding
-KDX.setScriptVersion(4);
-
-KDX.makeScreenDump( "/mainWindow", "/home/cerion/Work/valkyrie/trunk/tests/kdexec/startup1/shot-pypUB.png" )
