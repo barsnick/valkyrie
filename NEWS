@@ -1,4 +1,28 @@
 
+Release 1.4.0 (21 Feb 2009, svn r455)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1.4.0 adds support for Valgrind versions 3.4.x, and fixes a
+number of bugs reported in 1.3.0.
+
+NEW FUNCTIONALITY:
+
+- Support for Valgrind 3.4.x XML format
+
+BUGS and PROBLEMS FIXED:
+
+- Require Valgrind version 3.4.x, and fix a couple of quoting problems.
+
+- Per-user temp directory, rather than one for all users.
+
+- Make the detection of Valgrind more strict.  If no Valgrind is
+  detected, or the version number is wrong, just stop.
+
+- Save log: Don't use QDir::rename, since that fails when src and dst
+  are not in the same partition. Copy and delete the original instead.
+
+- Other small bug fixes.
+
+
 Release 1.3.0 (30 June 2008)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 1.3.0 adds support for Valgrind versions 3.3.0 and 3.3.1, and fixes a
