@@ -211,7 +211,7 @@ QStringList ToolObject::getVgFlags()
    foreach( VkOption * opt, options.getOptionHash() ) {
    
       QString defVal = opt->dfltValue.toString();
-      QString cfgVal = vkConfig->value( opt->configKey() ).toString();
+      QString cfgVal = vkCfgProj->value( opt->configKey() ).toString();
       
       if ( defVal != cfgVal ) {
          modFlags << "--" + opt->longFlag + "=" + cfgVal;
@@ -289,7 +289,7 @@ bool ToolObject::parseLogFile()
    vk_assert( toolView != 0 );
 
    //TODO: pass this via flags from the toolview, or something.
-   QString log_file = vkConfig->value( "valkyrie/view-log" ).toString();
+   QString log_file = vkCfgProj->value( "valkyrie/view-log" ).toString();
    statusMsg( "Parsing '" + log_file + "'" );
 
    // check this is a valid file, and has at least read perms
@@ -369,7 +369,7 @@ bool ToolObject::startProcess( QStringList flags )
    vgproc->setProcessChannelMode( QProcess::ForwardedChannels );
 
    // set working directory
-   vgproc->setWorkingDirectory( vkConfig->value( "valkyrie/working-dir" ).toString() );
+   vgproc->setWorkingDirectory( vkCfgProj->value( "valkyrie/working-dir" ).toString() );
 
    // start running process
    vgproc->start( program, args );
@@ -851,7 +851,7 @@ void ToolObject::checkParserFinished()
               "<p>The Valgrind process finished some time ago,<br>"
               "but the log reader is still active.<br><br>"
               "This could indicate that Valgrind didn't finish<br>"
-              "writing the XML log properly, or just that"
+              "writing the XML log properly, or just that<br>"
               "there is a huge amount of XML to read.<br><br>"
               "Press Stop if you want to force the process to stop.</p>" );
    }
@@ -875,7 +875,7 @@ bool ToolObject::fileSaveDialog( QString fname/*=QString()*/ )
    vk_assert( toolView != 0 );
 
 #if 0
-
+   // TODO
    QFileDialog dlg;
    dlg.setShowHiddenFiles( true );
    QString flt = "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)";
@@ -884,7 +884,7 @@ bool ToolObject::fileSaveDialog( QString fname/*=QString()*/ )
    /* Ask fname if don't have one already */
    if ( fname.isEmpty() ) {
       /* Start save-dialog in User-configured default log dir*/
-      QString start_path = vkConfig->rdEntry( "default-logdir", "valkyrie" );
+      QString start_path = vkCfgProj->rdEntry( "default-logdir", "valkyrie" );
       fname = dlg.getSaveFileName( start_path, flt, toolView, "fsdlg", cptn );
 
       if ( fname.isEmpty() ) {

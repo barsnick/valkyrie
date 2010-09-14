@@ -846,7 +846,7 @@ SrcItem::SrcItem( VgOutputItem* parent, QDomElement line, QString path )
    
    // num lines to show above / below the target line
    bool ok = false;
-   int n_lines = vkConfig->value( "valkyrie/src-lines" ).toInt( &ok );
+   int n_lines = vkCfgProj->value( "valkyrie/src-lines" ).toInt( &ok );
    if ( !ok ) {
       vkPrintErr( "SrcItem::cons: failed to retrieve/convert 'src-lines' from config." );
    }

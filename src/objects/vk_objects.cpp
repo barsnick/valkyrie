@@ -18,10 +18,10 @@
 **
 ****************************************************************************/
 
+#include "objects/valkyrie_object.h"
 #include "objects/vk_objects.h"
-#include "objects/vk_objects.h"
-#include "utils/vk_config.h"
 #include "options/vk_option.h"
+#include "utils/vk_config.h"
 #include "utils/vk_utils.h"
 
 
@@ -80,9 +80,12 @@ void VkObject::updateConfig( int optid, QString& argval )
 /*!
   Setup factory defaults for this object
 */
-void VkObject::setConfigDefaults()
+void VkObject::resetOptsToFactoryDefault()
 {
    foreach( VkOption * opt, options.getOptionHash() ) {
-      opt->updateConfig( opt->dfltValue );
+      // Only update config for options that hold persistant data
+      if ( opt->isaConfigOpt() ) {
+         opt->updateConfig( opt->dfltValue );
+      }
    }
 }

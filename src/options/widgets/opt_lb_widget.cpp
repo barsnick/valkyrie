@@ -73,7 +73,7 @@ LbWidget::LbWidget( QWidget* parent, VkOption* vkopt, bool mklabel )
    m_widg = m_lbox;
    m_lbox->setSelectionMode( QAbstractItemView::SingleSelection );//QListWidget::Single );
    
-   m_sep  = vkConfig->vkSepChar;
+   m_sep  = VkCfg::sepChar();
    
    update( m_currentValue );
    m_lbox->setContextMenuPolicy( Qt::CustomContextMenu );

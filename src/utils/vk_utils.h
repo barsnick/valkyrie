@@ -134,6 +134,8 @@ char* vk_strdup( const char* str );
 
 // ============================================================
 // helper functions
+bool strToBool( QString str, bool* ok = NULL );
+
 QString fileCheck( int* err_val, const QString fpath,
                    bool check_read=false, bool check_write=false,
                    bool check_exe=false );

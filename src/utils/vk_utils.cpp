@@ -30,8 +30,6 @@
 #include <QString>
 
 /*
-#include "config.h"                 // PACKAGE_BUGREPORT
-
 #include <stdlib.h>                 // mkstemp()
 #include <stdarg.h>                 // va_start, va_end
 #include <sys/types.h>              // getpid
@@ -50,12 +48,10 @@
 /* prints various info msgs to stdout --------------------------------- */
 void vkPrint( const char* msg, ... )
 {
-   QByteArray ba = vkConfig->vkName.toLatin1();
-   const char* vkname = vkConfig ? ba.constData() : "";
    va_list ap;
    va_start( ap, msg );
    va_end( ap );
-   fprintf( stdout, "===%s:%d=== ", vkname, ( int )getpid() );
+   fprintf( stdout, "===%s:%d=== ", qPrintable( VkCfg::appName() ), ( int )getpid() );
    vfprintf( stdout, msg, ap );
    va_end( ap );
    fprintf( stdout, "\n" );
@@ -66,12 +62,10 @@ void vkPrint( const char* msg, ... )
 /* prints error msg -------------------------------------------------- */
 void vkPrintErr( const char* msg, ... )
 {
-   QByteArray ba = vkConfig->vkName.toLatin1();
-   const char* vkname = vkConfig ? ba.constData() : "";
    va_list ap;
    va_start( ap, msg );
    va_end( ap );
-   fprintf( stderr, "===%s:%d=== ", vkname, ( int )getpid() );
+   fprintf( stderr, "===%s:%d=== ", qPrintable( VkCfg::appName() ), ( int )getpid() );
    vfprintf( stderr, msg, ap );
    va_end( ap );
    fprintf( stderr, "\n" );
@@ -83,12 +77,10 @@ void vkPrintErr( const char* msg, ... )
 void vkDebug( const char* msg, ... )
 {
 #ifdef DEBUG_ON
-   QByteArray ba = vkConfig->vkName.toLatin1();
-   const char* vkname = vkConfig ? ba.constData() : "";
    va_list ap;
    va_start( ap, msg );
    va_end( ap );
-   fprintf( stderr, "===%s:%d=== ", vkname, ( int )getpid() );
+   fprintf( stderr, "===%s:%d=== ", qPrintable( VkCfg::appName() ), ( int )getpid() );
    vfprintf( stderr, msg, ap );
    va_end( ap );
    fprintf( stderr, "\n" );
@@ -112,17 +104,14 @@ void vk_assert_never_reached_fail( const char* file,
                                    unsigned int line,
                                    const char* fn )
 {
-   QByteArray ba = vkConfig->vkName.toLatin1();
-   const char* vkname = vkConfig ? ba.constData() : "";
-   
    vkPrintErr( "Assertion 'never reached' failed," );
    vkPrintErr( "   at %s#%u:%s", file, line, fn );
-   vkPrintErr( "%s version: %s", vkname, PACKAGE_VERSION );
+   vkPrintErr( "%s version: %s", qPrintable( VkCfg::appName() ), qPrintable( VkCfg::appVersion() ) );
    vkPrintErr( "Built with QT version:   %s", QT_VERSION_STR );
    vkPrintErr( "Running with QT version: %s", qVersion() );
    vkPrintErr( "Hopefully, you should never see this message." );
    vkPrintErr( "If you are, then Something Really Bad just happened." );
-   vkPrintErr( "Please report this bug to: %s", PACKAGE_BUGREPORT );
+   vkPrintErr( "Please report this bug to: %s", qPrintable( VkCfg::email() ) );
    vkPrintErr( "In the bug report, please send the the above text," );
    vkPrintErr( "along with the output of `uname -a`." );
    vkPrintErr( "Thanks.\n" );
@@ -321,6 +310,37 @@ char* vk_strdup( const char* str )
 //***************************************************************************
 // helper functions
 //***************************************************************************
+
+/*!
+  Translate boolean strings into booleans
+  returns true if successfully parsed a 'true' string.
+  returns false if successfully parsed a 'false' string.
+  returns false if parsing failed.
+  Use argment 'ok' to detect a parsing failure.
+*/
+bool strToBool( QString str, bool* ok/*=NULL*/ )
+{
+   if ( ok )
+      *ok = true;
+
+   if ( str == "true" || str == "on"   ||
+        str == "yes"  || str == "1"    ||
+        str == "T" ) {
+      return true;
+   }
+   if ( str == "false" || str == "off" ||
+        str == "no"    || str == "0"   ||
+        str == "F" ) {
+      return false;
+   }
+
+   if ( ok ) {
+      *ok = false;
+      VK_DEBUG( "Failed to parse string as a boolean." );
+   }
+   return false;
+}
+
 
 /*!
   Local helper function to find file_name: either directly or via $PATH

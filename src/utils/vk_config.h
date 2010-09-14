@@ -1,6 +1,6 @@
 /****************************************************************************
-** Definition of VkConfig
-**  - Configuration
+** Definition of valkyrie config classes
+**  - based on persistent (file-based) application settings
 ** --------------------------------------------------------------------------
 **
 ** Copyright (C) 2000-2010, OpenWorks LLP. All rights reserved.
@@ -21,127 +21,144 @@
 #ifndef __VK_CONFIG_H
 #define __VK_CONFIG_H
 
-#if 0
-#include <qfile.h>
-#include <qmap.h>
-#include <qobject.h>
-#include <qcstring.h>
-#include <qstring.h>
-#include <qfont.h>
-
-#include "tool_object.h"
-#endif
-
-#include "vk_defines.h"
-#include "objects/valkyrie_object.h"
-
+#include <QChar>
 #include <QSettings>
+#include <QString>
 #include <QVariant>
 
 
 // ============================================================
-// Globally available object
-class VkConfig;
-extern VkConfig* vkConfig;
-
-
-// ============================================================
-#define VK_TMP_DIR "/tmp/valkyrie_"   // temp vk directory. Completed by vkTmpDir()
-
-#define VK_CFG_TEMP "valkyrie_temp"   // temp cfg fname (for the 'working' config)
-#define VK_CFG_GLBL_DIR ".valkyrie"   // global (user) cfg/data directory
-#define VK_CFG_GLBL "valkyrie_global" // global (user) cfg fname
-#define VK_CFG_EXT  "conf"            // valkyrie config file extension
-
-#define PACKAGE "valkyrie"
-#define PACKAGE_VERSION "2.0.0-SVN"
-#define PACKAGE_STRING "Valkyrie 1.4.0"
-#define PACKAGE_BUGREPORT "info@open-works.co.uk"
-
-#define VK_INSTALL_PREFIX "./" //"$VK_INSTALL_PREFIX"
-//#define VK_DOC_PATH "/doc/"
-#define VK_DBASE_DIR "dbase/"
-#define VK_BIN_VALGRIND "valgrind"
-#define VK_BIN_EDITOR "vi"
-//#define VK_COPYRIGHT "(c) 2003-2010"
-//#define VK_AUTHOR "OpenWorks LLP"
-//#define VG_COPYRIGHT "(c) 2000-2010 and GNU GPL'd by Julian Seward et al."
-
-
+// externals
+class VkCfgProj;
+class VkCfgGlbl;
+extern VkCfgProj* vkCfgProj;  // Project config
+extern VkCfgGlbl* vkCfgGlbl;  // Global (all non-project) config
 
 
 
 // ============================================================
-class VkConfig : public QSettings
+// namespace class only.
+class VkCfg
 {
 public:
-   VkConfig( QString& tmp_cfg );
-   ~VkConfig();
-   
-   static void createConfig( Valkyrie* vk, VkConfig** cfg );
-   
-   void createNewProject( QString& dir, QString& proj_name );
-   void createNewProject( QString proj_filename );
-   void openProject( Valkyrie* vk, QString& proj_filename );
-   
-   void sync();
-   void readFromProjConfigFile( Valkyrie* vk );
-   void readFromGlblConfigFile( Valkyrie* vk );
-   void saveToProjConfigFile();
-   void saveToGlblConfigFile();
-   
-   // Override QSettings::value(), to print error if doesn't exist
-   QVariant value( const QString& key, const QVariant& defaultValue = QVariant() ) const;
-   
-private:
-   void readFromConfigFile( Valkyrie* vk, QString cfg_filename );
-   void saveToConfigFile( QString cfg_filename );
-   
-public:
+   static unsigned int projCfgVersion();
+   static unsigned int glblCfgVersion();
+   static const QString& email();
+   static const QString& copyright();
+   static const QString& vgCopyright();
+   static const QString& vgVersion();
+   static const QString& appName();
+   static const QString& appVersion();
+   static const QString& appPackage();
+   static const QString& tmpDir();
+   static const QString& tmpCfgPath();
+   static const QString& cfgDir();
+   static const QString& projDfltPath();
+   static const QString& globalPath();
+   static const QString& filetype();
+   static const QString& suppsDir();
+   static const QString& docDir();
+   static const QChar& sepChar();
+
    // util functions
-   static bool strToBool( QString str, bool* ok=0 );
-   static QString vkCfgGlblFilename();
-   static QString vkTmpDir();
-   
-#if 0
-   QColor  rdColor( const QString& pKey );
-   void wrColor( const QColor&  pColor, const QString& pKey );
-   /* special version of wrEntry: adds values to the existing entry, rather than replacing */
-   void addEntry( const QString& pValue, const QString& pKey, const QString& pGroup );
-#endif
-   
-   
+   static bool checkConfigFile( const QString& cfgFile );
+   static bool checkConfigDir( const QString& cfgDir );
+
 private:
-   //   bool checkRCEntry( QString path, Valkyrie* vk );
-   //   bool checkRCTree( Valkyrie* vk );
-   //   void mkConfigDefaults( Valkyrie* vk );
-   void writeConfigDefaults( Valkyrie* vk );
-   //   bool updateCfgFile( EntryMap &newMap, EntryMap &rcMap, /*OUT*/EntryMap &dstMap );
-   
-public:
-   // Const Config
-   QString vkRcDir;
-   QChar   vkSepChar;          // separator for lists of strings
-   QString vkName;
-   QString vkVersion;
-   QString vkCopyright;
-   QString vkAuthor;
-   QString vkEmail;
-   QString vkDocPath;          // path to valkyrie docs dir
-   //   QString vgCopyright;
-   
-#if 0    // valkyrie cfg options -> PUT IN VK OBJECT!
-   QString vkCfgTempPath;         // path to run-specific config dir
-   QString vkCfgTempFilePath;     // filename for run-specific config
-   QString vkCfgProjectPath;      // path to project-specific config dir
-   QString vkCfgProjectFilePath;  // filename for project-specific config: Empty if none.
-   QString vkCfgGlobalPath;       // path to global config dir
-   QString vkCfgGlobalFilePath;   // filename for global config
-#endif
-   QString vkCfgProjectFilename;  // hold active project filename (may be empty)
-   
-private:
-   QString vkCfgTmpDir;
+   static const unsigned int _projCfgVersion;
+   static const unsigned int _glblCfgVersion;
+   static const QString _email;
+   static const QString _copyright;
+   static const QString _vgCopyright;
+   static const QString _vgVersion;
+   static const QString _name;
+   static const QString _version;
+   static const QString _package;
+   static const QString _fileType;
+   static const QString _tmpDir;
+   static const QString _tmpCfgName;
+   static const QString _cfgDir;
+   static const QString _prjDfltName;
+   static const QString _globalName;
+   static const QString _suppDir;
+   static const QString _docDir;
+   static const QChar   _sepChar;
 };
+
+
+
+
+// ============================================================
+// global (non-project) config
+class VkCfgGlbl : public QSettings
+{
+   // Singleton class constrution/destruction
+public:
+   static bool createConfig();
+   ~VkCfgGlbl();
+
+   QVariant value( const QString& key, const QVariant& defaultValue = QVariant() ) const;
+
+   // private cons's
+private:
+   VkCfgGlbl();
+   VkCfgGlbl( const QString cfg_fname );
+   VkCfgGlbl( const VkCfgGlbl& );
+   VkCfgGlbl& operator= ( const VkCfgGlbl& );
+
+private:
+   static bool checkVersionOk( unsigned int new_version );
+   void writeConfigDefaults();
+};
+
+
+
+
+
+
+
+// ============================================================
+// Project config
+// has-a QSettings, so we can change the underlying file.
+class Valkyrie;
+class VkCfgProj
+{
+   // Singleton class constrution/destruction
+public:
+   static bool createConfig( Valkyrie* valkyrie );
+   ~VkCfgProj();
+
+   // private cons's
+private:
+   VkCfgProj();
+   VkCfgProj( Valkyrie* valkyrie, const QString& cfg_fname );
+   VkCfgProj( const VkCfgProj& );
+   VkCfgProj& operator= ( const VkCfgProj& );
+
+   // public interface
+public:
+   QVariant value( const QString& key, const QVariant& defaultValue = QVariant() ) const;
+   bool contains ( const QString & key ) const;
+   void setValue ( const QString& key, const QVariant& value );
+   void sync();
+   void clear();
+   void createNewProject(const  QString& proj_filename );
+   void openProject( const QString& proj_filename );
+   void saveProjectAs( const QString proj_filename, bool replace=true );
+   void saveToDefaultCfg();
+
+private:
+   bool checkValidConfig( QSettings* cfg );
+   static bool checkVersionOk( unsigned int new_version );
+   static void cleanTempDir();
+   void writeConfigDefaults();
+   bool loadDefaultConfig();
+   void replaceConfig( QSettings* new_cfg );
+   
+private:
+   Valkyrie* vk;
+   QSettings* currentCfg;
+};
+
 
 #endif

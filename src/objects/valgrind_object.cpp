@@ -320,7 +320,7 @@ void Valgrind::setupOptions()
       "copy <str> verbatim to XML output",
       urlVgCore::xmlComment,
       VkOPT::ARG_STRING,
-      VkOPT::WDG_NONE
+      VkOPT::WDG_LEDIT
    );
    
    options.addOpt(
@@ -493,7 +493,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    VkOption* opt = getOption( optid );
    int errval = PARSED_OK;
 
-   QChar sep = vkConfig->vkSepChar;
+   QChar sep = VkCfg::sepChar();
    
    switch ( (VALGRIND::vgOptId)optid ) {
    
@@ -559,10 +559,10 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    
    case VALGRIND::TRACE_CH: {
 #if 0
-
+      // TODO
       if ( opt->isValidArg( &errval, argval ) ) {
          if ( argval == "yes" ) {
-            if ( vkConfig->rdBool( "db-attach", "valgrind" ) ) {
+            if ( vkCfgProj->rdBool( "db-attach", "valgrind" ) ) {
                errval = PERROR_DB_CONFLICT;
             }
          }
@@ -610,7 +610,7 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    
       if ( opt->isValidArg( &errval, argval ) ) {
          if ( argval == "yes" ) {
-            if ( vkConfig->rdBool( "trace-children", "valgrind" ) ) {
+            if ( vkCfgProj->rdBool( "trace-children", "valgrind" ) ) {
                errval = PERROR_DB_CONFLICT;
             }
          }
@@ -662,7 +662,7 @@ QStringList Valgrind::getVgFlags( ToolObject* tool_obj )
    
    foreach( VkOption * opt, options.getOptionHash() ) {
       QString defVal = opt->dfltValue.toString();
-      QString cfgVal = vkConfig->value( opt->configKey() ).toString();
+      QString cfgVal = vkCfgProj->value( opt->configKey() ).toString();
       
       switch (( VALGRIND::vgOptId )opt->optid ) {
       
@@ -675,7 +675,7 @@ QStringList Valgrind::getVgFlags( ToolObject* tool_obj )
       case VALGRIND::SUPPS_SEL: {
          if ( tool_obj->objectName() == "memcheck" ) {
             // we need '--suppressions=' before each and every filename
-            QString optEntry = vkConfig->value( opt->configKey() ).toString();
+            QString optEntry = vkCfgProj->value( opt->configKey() ).toString();
             QStringList files = optEntry.split( ",", QString::SkipEmptyParts );
             
             for ( int i = 0; i < files.count(); i++ ) {

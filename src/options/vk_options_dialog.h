@@ -47,7 +47,7 @@ private slots:
    void reject();  // overloaded
    void showPage();
    void pageModified();
-   void saveToGlobalConfig();
+   void overwriteDefaultConfig();
 
 signals:
    void flagsChanged();
@@ -56,7 +56,7 @@ private:
    QListWidget*      contentsListWidget;
    QStackedWidget*   optionPages;
    QDialogButtonBox* optionsButtonBox;
-   QPushButton*      saveGlblButton;
+   QPushButton*      updateDefaultsButton;
 };
 
 

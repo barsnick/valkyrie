@@ -29,8 +29,8 @@
 #include "utils/vk_config.h"
 
 
-VkConfig* vkConfig = NULL;
-
+VkCfgGlbl* vkCfgGlbl = NULL;  // Singleton VkCfgGlbl (non-project config)
+VkCfgProj* vkCfgProj = NULL;  // Singleton VkCfgProj (project config)
 
 
 
@@ -43,7 +43,7 @@ int main( int argc, char* argv[] )
    int exit_status = EXIT_SUCCESS;
    QApplication* app  = 0;
    MainWindow* vkWin  = 0;
-   
+
    // ------------------------------------------------------------
    // Create all VkObjects: Vk[ Vg[ Tools[] ] ]
    Valkyrie valkyrie;
@@ -60,19 +60,31 @@ int main( int argc, char* argv[] )
    
    QLocale::setDefault( QLocale( QLocale::English, QLocale::UnitedKingdom ) );
    
-   VkConfig::createConfig( &valkyrie, &vkConfig );
-   
-   if ( vkConfig == NULL ) {
-      VK_DEBUG( "Failed to initialise config properly: Aborting" );
+   bool cfg_ok = VkCfgProj::createConfig( &valkyrie );
+   if ( !cfg_ok || vkCfgProj == NULL ) {
+      VK_DEBUG( "Failed to initialise project config properly.  "
+                "Please check existence/permissions/versions of the "
+                "config dir '%s', and its files/sub-directories.</p>",
+                qPrintable( VkCfg::cfgDir() ) );
       goto cleanup_and_exit;
    }
-   
-   
+
+   cfg_ok = VkCfgGlbl::createConfig();
+   if ( !cfg_ok || vkCfgGlbl == NULL ) {
+      VK_DEBUG( "Failed to initialise global config properly.  "
+                "Please check existence/permissions of the "
+                "config dir '%s', and its files/sub-directories.</p>",
+                qPrintable( VkCfg::cfgDir() ) );
+      goto cleanup_and_exit;
+   }
+
+   //TODO: check docs found
+
    // ------------------------------------------------------------
    // Command-line parsing
-   //  - if a project file is given, the settings will override the initialised vkConfig.
+   //  - if a project file is given, the settings will override the initialised vkCfgProj.
    if ( argc > 1 ) {
-      // parse cmdline args, overwrite vkConfig with any options found.
+      // parse cmdline args, overwrite vkCfgProj with any options found.
       bool show_help_and_exit;
       
       if ( ! parseCmdArgs( argc, argv, &valkyrie, show_help_and_exit ) ) {
@@ -85,8 +97,8 @@ int main( int argc, char* argv[] )
       }
    }
    
-   // save the working config
-   vkConfig->sync();
+   // save the working config we've gotten so far.
+   vkCfgProj->sync();
    
    
    
@@ -94,7 +106,7 @@ int main( int argc, char* argv[] )
    // Start up the gui
    vkWin = new MainWindow( &valkyrie );
    
-   if ( vkConfig->value(
+   if ( vkCfgProj->value(
            valkyrie.getOption( VALKYRIE::BINARY )->configKey() ).toString().isEmpty() ) {
       vkWin->openOptions();
    }
@@ -117,11 +129,12 @@ cleanup_and_exit:
    if ( vkWin ) {
       delete vkWin;
    }
-   
-   if ( vkConfig ) {
-      delete vkConfig;
+   if ( vkCfgProj ) {
+      delete vkCfgProj;
    }
-   
+   if ( vkCfgGlbl ) {
+      delete vkCfgGlbl;
+   }
    if ( app ) {
       delete app;
    }

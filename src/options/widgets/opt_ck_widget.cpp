@@ -22,6 +22,7 @@
 #include "options/widgets/opt_ck_widget.h"
 #include "options/vk_option.h"
 #include "utils/vk_config.h"
+#include "utils/vk_utils.h"
 
 
 /***************************************************************************/
@@ -37,7 +38,7 @@ CkWidget::CkWidget( QWidget* parent, VkOption* vkopt, bool mklabel )
    m_cbox = new QCheckBox( m_opt->shortHelp, parent );
    m_widg = m_cbox;
    
-   bool cfgChecked = VkConfig::strToBool( m_initialValue );
+   bool cfgChecked = strToBool( m_initialValue );
    m_cbox->setChecked( cfgChecked );
    connect( m_cbox, SIGNAL( toggled( bool ) ),
             this,     SLOT( ckChanged( bool ) ) );
@@ -74,7 +75,7 @@ void CkWidget::ckChanged( bool on )
 void CkWidget::update( const QString& txt )
 {
    bool ok;
-   bool checked = VkConfig::strToBool( txt, &ok );
+   bool checked = strToBool( txt, &ok );
    if ( ok ) {
       m_cbox->setChecked( checked );
       // toggled signal sent -> calls ckChanged()

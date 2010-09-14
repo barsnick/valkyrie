@@ -35,7 +35,7 @@ OptionWidget::OptionWidget( QWidget* parent, VkOption* vkopt, bool mklabel )
    m_widg   = 0;
    m_wLabel = 0;
    
-   m_initialValue = vkConfig->value( m_opt->configKey() ).toString();
+   m_initialValue = vkCfgProj->value( m_opt->configKey() ).toString();
    m_currentValue = m_initialValue;
    
    if ( mklabel ) {

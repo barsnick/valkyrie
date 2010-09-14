@@ -142,7 +142,7 @@ void ValkyrieOptionsPage::setupOptions()
    fontGenLedit->setReadOnly( true );     // don't allow direct editing
    
    // start up in correct state
-   bool use_sys_font = vkConfig->value( "valkyrie/font-gen-sys" ).toBool();
+   bool use_sys_font = vkCfgProj->value( "valkyrie/font-gen-sys" ).toBool();
    fontGenLedit->setDisabled( use_sys_font );
    connect( fontGenSysLedit, SIGNAL( changed( bool ) ),
             fontGenLedit, SLOT( setDisabled( bool ) ) );

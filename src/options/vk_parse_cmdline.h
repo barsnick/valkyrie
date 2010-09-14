@@ -24,7 +24,7 @@
 
 /*!
   parseCmdArgs()
-  Command-line args parsing, updates global config settings.
+  Command-line args parsing, updates current config settings.
 */
 extern bool parseCmdArgs( int argc, char** argv, Valkyrie* vk,
                           bool& show_help_and_exit );

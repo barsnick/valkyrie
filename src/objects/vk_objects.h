@@ -54,7 +54,7 @@ public:
    
    virtual void updateConfig( int optid, QString& argval );
    
-   virtual void setConfigDefaults();
+   void resetOptsToFactoryDefault();
    
    virtual VkOptionsPage* createVkOptionsPage() = 0;
    

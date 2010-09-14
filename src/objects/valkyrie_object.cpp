@@ -211,7 +211,7 @@ void Valkyrie::setupOptions()
       '\0',
       "",
       "",
-      VK_BIN_EDITOR,
+      "gvim",
       "Src Editor:",
       "",
       urlValkyrie::srcEditor,
@@ -249,7 +249,7 @@ void Valkyrie::setupOptions()
       VkOPT::WDG_LEDIT
    );
    
-   QString projfile = QString("<project.") + VK_CFG_EXT + ">";
+   QString projfile = "<project." + VkCfg::filetype() + ">";
    options.addOpt(
       VALKYRIE::PROJ_FILE,
       this->objectName(),
@@ -262,7 +262,7 @@ void Valkyrie::setupOptions()
       "use " + projfile + " for project settings",
       urlValkyrie::projectFile,
       VkOPT::ARG_STRING,
-      VkOPT::WDG_LEDIT
+      VkOPT::WDG_NONE
    );
    
    
@@ -289,7 +289,7 @@ void Valkyrie::setupOptions()
       '\0',
       "",
       "",
-      VK_BIN_VALGRIND,
+      "valgrind",      // no path by default.
       "Valgrind:",
       "",
       urlValkyrie::vgDir,
@@ -349,112 +349,13 @@ void Valkyrie::setupOptions()
       '\0',
       "",
       "",
-      VkConfig::vkTmpDir(),
+      VkCfg::tmpDir(),
       "Tmp Log Dir:",
       "",
       urlValkyrie::logDir,
       VkOPT::NOT_POPT,
       VkOPT::WDG_LEDIT
    );
-
-
-   
-   // Internal configuration
-   options.addOpt(
-      VALKYRIE::MW_SIZE, this->objectName(), "mainwindow_size",
-      '\0', "", "", QSize( 600, 600 ), "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::MW_POS, this->objectName(), "mainwindow_pos",
-      '\0', "", "", QPoint( 400, 0 ), "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::HB_HIST, this->objectName(), "handbook_history",
-      '\0', "", "", "", "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::HB_BKMK, this->objectName(), "handbook_bookmarks",
-      '\0', "", "", "", "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::HB_MXHIST, this->objectName(), "handbook_max_history",
-      '\0', "", "", "20", "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::HB_MXBKMK, this->objectName(), "handbook_max_bookmarks",
-      '\0', "", "", "20", "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::COL_BKGD, this->objectName(), "colour_background",
-      '\0', "", "", QColor( 214, 205, 187 ), "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::COL_BASE, this->objectName(), "colour_base",
-      '\0', "", "", QColor( 255, 255, 255 ), "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::COL_DKGR, this->objectName(), "colour_dkgray",
-      '\0', "", "", QColor( 128, 128, 128 ), "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::COL_EDIT, this->objectName(), "colour_edit",
-      '\0', "", "", QColor( 254, 222, 190 ), "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::COL_HILT, this->objectName(), "colour_highlight",
-      '\0', "", "", QColor( 147, 40, 40 ), "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::COL_NULL, this->objectName(), "colour_null",
-      '\0', "", "", QColor( 239, 227, 211 ), "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-   
-   options.addOpt(
-      VALKYRIE::COL_TEXT, this->objectName(), "colour_text",
-      '\0', "", "", QColor( 0,  0,  0 ), "", "",
-      urlNone, VkOPT::NOT_POPT, VkOPT::WDG_NONE
-   );
-}
-
-
-void Valkyrie::setConfigDefaults()
-{
-   foreach( VkOption * opt, options.getOptionHash() ) {
-      // Don't create config entries for these options:
-      //  - They don't hold persistent data, and have no associated option widget
-      if ( opt->optid == VALKYRIE::HELP ) {
-         continue;
-      }
-      
-      if ( opt->optid == VALKYRIE::VGHELP ) {
-         continue;
-      }
-      
-      opt->updateConfig( opt->dfltValue );
-   }
 }
 
 
@@ -482,7 +383,7 @@ int Valkyrie::checkOptArg( QString optGrp, int optid, QString& argval )
 
 /*!
   Update config
-  General access function, when specific object not known
+  General access function, for when the specific object is not known
 */
 void Valkyrie::updateConfig( QString optGrp, int optid, QString& argval )
 {
@@ -505,16 +406,17 @@ void Valkyrie::updateConfig( QString optGrp, int optid, QString& argval )
 */
 void Valkyrie::updateConfig( int optid, QString& argval )
 {
-   // Load config settings from project file
-   //  - load these first before updating the rest
    if ( optid == VALKYRIE::PROJ_FILE ) {
-      QString proj_filename = argval;
-      
-      if ( !QFile::exists( proj_filename ) ) {
-         vkConfig->createNewProject( proj_filename );
+      // Load config settings from project file
+      //  - _before_ updating the rest!
+      // This is reached by specifying a project file on the command-line.
+      QString proj_fname = argval;
+
+      if ( !QFile::exists( proj_fname ) ) {
+         vkCfgProj->createNewProject( proj_fname );
       }
       else {
-         vkConfig->openProject( this, proj_filename );
+         vkCfgProj->openProject( proj_fname );
       }
    }
    
@@ -599,8 +501,8 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
             return errval;
          }
 
-         // check filename format: ".*\.VK_CFG_EXT$"
-         if ( !argval.contains( QRegExp( QString(".*\\.") + VK_CFG_EXT + "$" ) ) ) {
+         // check filename format: ".*\.VkCfg::filetype()$"
+         if ( !argval.contains( QRegExp( ".*\\." + VkCfg::filetype() + "$" ) ) ) {
             return PERROR_BADFILENAME;
          }
 
@@ -685,7 +587,6 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
 
 /*!
   Find the option owner, find option within that owner.
-  Called from VkConfig::readFromConfigFile(...)
   Warning: slow!
 */
 VkOption* Valkyrie::findOption( QString& optKey )
@@ -800,7 +701,7 @@ bool Valkyrie::runTool( VGTOOL::ToolID tId, int procId )
 
    // update the flags with the necessary options: xml etc.
    QString log_basename = activeTool->objectName() + "_log";
-   QString logfile = vk_mkstemp( QString( VkConfig::vkTmpDir() ) + log_basename, "xml" );
+   QString logfile = vk_mkstemp( VkCfg::tmpDir() + log_basename, "xml" );
    vk_assert( !logfile.isEmpty() );
 
 //TODO: rm
@@ -825,7 +726,7 @@ QStringList Valkyrie::getVgFlags( VGTOOL::ToolID tId )
    
    // if we don't find it in config, let's hope it's in $PATH
    VkOption* opt = options.getOption( VALKYRIE::VG_EXEC );
-   QString vg_exec = vkConfig->value( opt->configKey(), "valgrind" ).toString();
+   QString vg_exec = vkCfgProj->value( opt->configKey(), "valgrind" ).toString();
    
    QStringList vg_flags;
    vg_flags << vg_exec;                          // path/to/valgrind
@@ -844,7 +745,7 @@ QStringList Valkyrie::getTargetFlags()
 {
    QStringList modFlags;
    VkOption* opt  = options.getOption( VALKYRIE::BINARY );
-   QString cfgVal = vkConfig->value( opt->configKey() ).toString();
+   QString cfgVal = vkCfgProj->value( opt->configKey() ).toString();
    
    // only add binary & bin_flags if binary present
    if ( !cfgVal.isEmpty() ) {
@@ -852,7 +753,7 @@ QStringList Valkyrie::getTargetFlags()
       
       // add any target binary flags
       opt    = options.getOption( VALKYRIE::BIN_FLAGS );
-      cfgVal = vkConfig->value( opt->configKey() ).toString();
+      cfgVal = vkCfgProj->value( opt->configKey() ).toString();
       modFlags += cfgVal.split( " ", QString::SkipEmptyParts );
    }
    

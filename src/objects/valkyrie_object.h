@@ -61,25 +61,6 @@ enum vkOptId {
    VIEW_LOG,      // parse and view a valgrind logfile
    DFLT_LOGDIR,   // where to put our temporary logs
 
-   // internal-config: mainwindow
-   MW_SIZE,       // mainwindow size
-   MW_POS,        // mainwindow position
-
-   // internal-config: handbook
-   HB_HIST,       // handbook history (urls)
-   HB_BKMK,       // handbook bookmarks (urls)
-   HB_MXHIST,     // handbook max num history items
-   HB_MXBKMK,     // handbook max num bookmarks
-
-   // internal-config: colours
-   COL_BKGD,
-   COL_BASE,
-   COL_DKGR,
-   COL_EDIT,
-   COL_HILT,
-   COL_NULL,
-   COL_TEXT,
-
    NUM_OPTS
 };
 
@@ -117,8 +98,6 @@ public:
    Valgrind* valgrind() {
       return m_valgrind;
    }
-   
-   virtual void setConfigDefaults();
    
    VkOption* findOption( QString& optKey );
 //TODO: needed?

@@ -248,7 +248,7 @@ OptionWidget* VkOptionsPage::insertOptionWidget( int optid,
       
       bool ok;
       int step = ( opt->argType == VkOPT::ARG_PWR2 ) ? 0 : 1;
-      QString val = vkConfig->value( opt->configKey() ).toString();
+      QString val = vkCfgProj->value( opt->configKey() ).toString();
       int ival = val.toInt( &ok );
       
       if ( !ok ) {

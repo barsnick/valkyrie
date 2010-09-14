@@ -322,7 +322,7 @@ void HelgrindView::launchEditor( QTreeWidgetItem* item )
    }
 
    // check editor is set
-   QString editor = vkConfig->value( "valkyrie/src-editor" ).toString();
+   QString editor = vkCfgProj->value( "valkyrie/src-editor" ).toString();
    if ( editor.isEmpty() ) {
       vkError( this, "Editor Launch",
                "<p>Source editor not set.<br>"

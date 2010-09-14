@@ -2,7 +2,7 @@
 ** Option implementation
 ** --------------------------------------------------------------------------
 **
-** Copyright (C) 2000-2009, OpenWorks LLP. All rights reserved.
+** Copyright (C) 2000-2010, OpenWorks LLP. All rights reserved.
 ** <info@open-works.co.uk>
 **
 ** This file is part of Valkyrie, a front-end for Valgrind.
@@ -33,8 +33,7 @@
    3) Create a new options page for the Options dialog, and reimplement
       VgObject::createOptionsPage() to create this when needed.
    4) Create the ToolView subclass in its own files, in the src/tool_view dir
-
- */
+*/
 
 
 
@@ -216,13 +215,8 @@ VkOption::VkOption(
    vk_assert( !configGrp.isEmpty() );
    vk_assert( !longFlag.isEmpty() );
 
-   // no help for internal-config options: short|long help for others
-   if ( argType  == VkOPT::NOT_POPT &&
-        widgType == VkOPT::WDG_NONE ) {
-      vk_assert( longHelp.isEmpty() && shortHelp.isEmpty() );
-   } else {
-      vk_assert( !longHelp.isEmpty() || !shortHelp.isEmpty() );
-   }
+   // always at least short or long help
+   vk_assert( !longHelp.isEmpty() || !shortHelp.isEmpty() );
    
    // if ARG_NONE, we don't expect any argument related stuff
    if ( argType == VkOPT::ARG_NONE ) {
@@ -242,7 +236,10 @@ VkOption::VkOption(
          vk_assert( !shortHelp.isEmpty() );
          vk_assert( longHelp.isEmpty() );
       }
-      // else NOT_POPT && WDG_NONE => internal configure options only.
+      else {
+         // NOT_POPT && WDG_NONE => shouldn't exist!
+         vk_assert_never_reached();
+      }
    }
    
    // ARG_PWR2 options
@@ -326,13 +323,35 @@ QString VkOption::configKey() {
 }
 
 
+
 /*!
-  update
+   Defines which options have their values stored to disk (via vkCfgProj)
+   The following option types are NOT saved:
+   ::argType == ARG_NONE  (e.g. --help)
+    - They don't take args, so there's nothing to save
+   ::widgType == WDG_NONE (e.g. --project-file=<myfile>)
+    - These may or may not take an argument, but are only meant to drive
+      Valkyrie from the commandline. There nothing to save here either.
+*/
+bool VkOption::isaConfigOpt()
+{
+   return ( argType != VkOPT::ARG_NONE &&    // ARG_NONE: takes no args
+            widgType != VkOPT::WDG_NONE );   // WDG_NONE: has no UI widget
+}
+
+/*!
+  Update config with option key and value
+   - skip opts not destined for vkCfgProj
 */
 void VkOption::updateConfig( QVariant argVal )
 {
-   vkConfig->setValue( configKey(), argVal );
-   emit valueChanged();
+   if ( isaConfigOpt() ) {
+      QString key = configKey();
+      if ( !vkCfgProj->contains( key ) || vkCfgProj->value( key ) != argVal ) {
+         vkCfgProj->setValue( key, argVal );
+         emit valueChanged();
+      }
+   }
 }
 
 
@@ -400,9 +419,9 @@ bool VkOption::isValidArg( int* err_val, QString argval  )
          }
       } break;
 
-   // this option is only ever called from within an options page via
-   // radio buttons etc., so the values can never be typed in. ergo,
-   // don't bother to check.
+   // This option is only ever called from within an options page via
+   // radio buttons etc., so the values can never be typed in.
+   // Hence, there's nothing to check.
    case VkOPT::NOT_POPT:
          break;
 

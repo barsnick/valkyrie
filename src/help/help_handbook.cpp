@@ -23,7 +23,6 @@
 //#include "vk_messages.h"
 #include "utils/vk_utils.h"
 
-
 #include "QApplication"
 #include "QDockWidget"
 #include "QFile"
@@ -36,6 +35,8 @@
 #include "QTextStream"
 #include "QToolBar"
 
+
+#define BOOKMARK_NAME_ADDR_DIVIDER '|'
 
 
 /*!
@@ -56,8 +57,8 @@ HandBook::HandBook( QWidget* parent ) //, const char* name )
 {
    setObjectName( QString::fromUtf8( "handbook" ) );
    
-   QString VkName = vkConfig->vkName;
-   VkName.replace( 0, VkName[0].toUpper() );
+   QString VkName = VkCfg::appName();
+   VkName.replace( 0, 1, VkName[0].toUpper() );
    
    caption = VkName + " HandBook";
    this->setWindowTitle( caption );
@@ -70,10 +71,12 @@ HandBook::HandBook( QWidget* parent ) //, const char* name )
    
    browser->setOpenExternalLinks( true );
    browser->setFrameStyle( QFrame::Panel | QFrame::Sunken );
-   
+
+//TODO: if we set the install doc dir, but haven't installed yet, the docdir is incorrect...
+// - can we add the build docdir, and have it work?
    // set the list of dirs to search when files are requested
    QStringList paths;
-   paths << vkConfig->vkDocPath;
+   paths << VkCfg::docDir();
    browser->setSearchPaths( paths );
    
    connect( browser, SIGNAL( sourceChanged( const QUrl& ) ),
@@ -85,12 +88,12 @@ HandBook::HandBook( QWidget* parent ) //, const char* name )
             
             
    // default startup is with the index page loaded
-   QString home = vkConfig->vkDocPath + "/index.html";
+   QString home = VkCfg::docDir() + "/index.html";
    browser->setSource( home );
    
    //TODO: vkErrors?  hmm. in a constructor...
    
-   //TODO: vkConfig
+   //TODO: vkCfgProj
    resize( 560, 600 );
    hide();
 }
@@ -104,7 +107,7 @@ void HandBook::historyChosen( QAction* act )
 
 void HandBook::bookmarkChosen( QAction* act )
 {
-   if ( !bookmarkMenu->actions().contains( act ) ) {
+   if ( ! bookmarkMenu->actions().contains( act ) ) {
       cerr << "Error: HandBook::bookmarkChosen: act not in bookmarks!" << endl;
       //TODO: shouldn't ever happen: vkError
       return;
@@ -117,7 +120,7 @@ void HandBook::bookmarkChosen( QAction* act )
 
 void HandBook::bookmarkHighlighted( QAction* act )
 {
-   if ( !bookmarkMenu->actions().contains( act ) ) {
+   if ( ! bookmarkMenu->actions().contains( act ) ) {
       cerr << "Error: HandBook::bookmarkHighlighted: act not in bookmarks!" << endl;
       //TODO: shouldn't ever happen: vkError
       return;
@@ -211,7 +214,7 @@ void HandBook::openUrl( const QString& url )
 void HandBook::openFile()
 {
    QString fn = QFileDialog::getOpenFileName(
-                   this, "Open File", vkConfig->vkDocPath,
+                   this, "Open File", VkCfg::docDir(),
                    "Html Files (*.html *.htm);;All Files (*)" );
                    
    if ( !fn.isEmpty() ) {
@@ -430,7 +433,7 @@ void HandBook::mkMenuToolBars()
    
    pathCombo = new QComboBox( toolbar );
    pathCombo->setEditable( true );
-   pathCombo->addItem( vkConfig->vkDocPath );
+   pathCombo->addItem( VkCfg::docDir() );
    QSizePolicy sp = pathCombo->sizePolicy();
    sp.setHorizontalPolicy( QSizePolicy::MinimumExpanding );
    pathCombo->setSizePolicy( sp );
@@ -442,7 +445,7 @@ void HandBook::mkMenuToolBars()
    // ------------------------------------------------------------
    // Basic statusbar setup
    statusBar()->setObjectName( QString::fromUtf8( "helpStatusBar " ) );
-   //TODO: why disable?
+   //TODO: why disabled?
    //   statusBar()->setSizeGripEnabled( false );
 }
 
@@ -452,63 +455,29 @@ void HandBook::save()
 {
    vk_assert( historyMenu->actions().count() <= max_history );
    
-   //TODO: do this via vkConfig!
-#if 0
-   //TODO: need to write to _global_ config, not project/temp config...
+   // Save history
    QStringList history;
    foreach( QAction * act, historyMenu->actions() ) {
       history << act->text();
    }
-   vkConfig->setValue( "valkyrie/handbook_history", history );
-   
+   vkCfgGlbl->setValue( "handbook_history", history.join( VkCfg::sepChar() ) );
+
+   // Save bookmarks
    int nBookmarks = 0;
    QStringList bookmarks;
-   foreach( QAction * act, historyMenu->actions() ) {
+   foreach( QAction * act, bookmarkMenu->actions() ) {
       // skip non-bookmark actions
       if ( act->objectName() == QString::fromUtf8( "handbook_actBookmark" ) ) {
-         bookmarks << act->text() + vkConfig->vkSepChar + act->data().toString();
+         QString title = act->text();
+         QString url   = act->data().toString();
+         bookmarks << title + BOOKMARK_NAME_ADDR_DIVIDER + url;
          nBookmarks++;
       }
    }
-   vkConfig->setValue( "valkyrie/handbook_bookmarks", bookmarks );
-   
+   vkCfgGlbl->setValue( "handbook_bookmarks", bookmarks.join( VkCfg::sepChar() ) );
+   vkCfgGlbl->sync();
+
    vk_assert( nBookmarks <= max_bookmarks );
-   
-#else
-   // save the history
-   QFile aFile( vkConfig->vkRcDir + "/help.history" );
-   
-   if ( aFile.open( QIODevice::WriteOnly ) ) {
-      QTextStream stream( &aFile );
-   
-      foreach( QAction * act, historyMenu->actions() ) {
-         stream << act->text() << "\n";
-      }
-      aFile.close();
-   }
-   
-   // save the bookmarks
-   aFile.setFileName( vkConfig->vkRcDir + "/help.bookmarks" );
-   
-   if ( aFile.open( QIODevice::WriteOnly ) ) {
-      QTextStream stream( &aFile );
-   
-      int nBookmarks = 0;
-      foreach( QAction * act, bookmarkMenu->actions() ) {
-         // skip non-bookmark actions
-         if ( act->objectName() == QString::fromUtf8( "handbook_actBookmark" ) ) {
-            stream << act->text()
-                   << vkConfig->vkSepChar
-                   << act->data().toString() << "\n";
-            nBookmarks++;
-         }
-      }
-      aFile.close();
-   
-      vk_assert( nBookmarks <= max_bookmarks );
-   }
-   
-#endif
 }
 
 
@@ -518,16 +487,14 @@ void HandBook::save()
 void HandBook::readHistory()
 {
    bool ok = false;
-   max_history   = vkConfig->value( "valkyrie/handbook_max_history", 20 ).toInt( &ok );
-   
+   max_history   = vkCfgGlbl->value( "handbook_max_history", 20 ).toInt( &ok );
    if ( !ok ) {
-      cerr << "Error: bad value for config::valkyrie/handbook_max_history" << endl;
+      cerr << "Error: bad value for global config::handbook_max_history" << endl;
    }
    
-   // TODO: do this via vkConfig!
-#if 0
-   //TODO: need to write to _global_ config, not project/temp config...
-   QStringList history = vkConfig->value( "valkyrie/handbook_history" ).toStringList();
+   // don't use toStringList(): empty parts are kept
+   QStringList history = vkCfgGlbl->value( "handbook_history" )
+                         .toString().split( VkCfg::sepChar(), QString::SkipEmptyParts );
    int len = history.count() > max_history ? max_history : history.count();
    
    for ( int idx = 0; idx < len; idx++ ) {
@@ -538,27 +505,6 @@ void HandBook::readHistory()
       act->setText( link );
       historyMenu->addAction( act );
    }
-   
-#else
-   QFile aFile( vkConfig->vkRcDir + "/help.history" );
-   
-   if ( aFile.open( QIODevice::ReadOnly ) ) {
-      // read in max_history links
-      QTextStream stream( &aFile );
-   
-      for ( int idx = 0; idx < max_history && !stream.atEnd(); idx++ ) {
-         QString link = stream.readLine();
-   
-         QAction* act = new QAction( this );
-         act->setObjectName( QString::fromUtf8( "handbook_actHistory" ) );
-         act->setText( link );
-         historyMenu->addAction( act );
-      }
-   
-      aFile.close();
-   }
-   
-#endif
 }
 
 
@@ -569,22 +515,22 @@ void HandBook::readHistory()
 void HandBook::readBookmarks()
 {
    bool ok = false;
-   max_bookmarks = vkConfig->value( "valkyrie/handbook_max_bookmarks", 20 ).toInt( &ok );
+   max_bookmarks = vkCfgGlbl->value( "handbook_max_bookmarks", 20 ).toInt( &ok );
    
    if ( !ok ) {
-      cerr << "Error: bad value for config::valkyrie/handbook_max_bookmarks" << endl;
+      cerr << "Error: bad value for global config::handbook_max_bookmarks" << endl;
    }
    
-   // TODO: do this via vkConfig!
-#if 0
-   //TODO: need to write to _global_ config, not project/temp config...
-   QStringList bookmarks = vkConfig->value( "valkyrie/handbook_bookmarks" ).toStringList();
+   // don't use toStringList(): empty parts are kept
+   QStringList bookmarks = vkCfgGlbl->value( "handbook_bookmarks" )
+                           .toString().split( VkCfg::sepChar(), QString::SkipEmptyParts );
    int len = bookmarks.count() > max_bookmarks ? max_bookmarks : bookmarks.count();
-   
+
    for ( int idx = 0; idx < len; idx++ ) {
       QString str = bookmarks.at( idx );
       
-      QStringList sl = str.split( vkConfig->vkSepChar );  //, QString::SkipEmptyParts
+      QStringList sl = str.split( BOOKMARK_NAME_ADDR_DIVIDER, QString::SkipEmptyParts );
+      vk_assert( sl.count() == 2 );
       QString title = sl.first();
       QString url   = sl.last();
       
@@ -595,30 +541,4 @@ void HandBook::readBookmarks()
       act->setData( url );
       bookmarkMenu->addAction( act );
    }
-   
-#else
-   QFile aFile( vkConfig->vkRcDir + "/help.bookmarks" );
-   
-   if ( aFile.open( QIODevice::ReadOnly ) ) {
-      // read in max_bookmarks links
-      QTextStream stream( &aFile );
-   
-      for ( int idx = 0; idx < max_bookmarks && !stream.atEnd(); idx++ ) {
-         // read in one line at a time, and split on vkSepChar
-         QStringList sl = stream.readLine().split( vkConfig->vkSepChar, QString::SkipEmptyParts );
-         QString title = sl.first();
-         QString url   = sl.last();
-   
-         // menu list
-         QAction* act = new QAction( this );
-         act->setObjectName( QString::fromUtf8( "handbook_actBookmark" ) );
-         act->setText( title );
-         act->setData( url );
-         bookmarkMenu->addAction( act );
-      }
-   
-      aFile.close();
-   }
-   
-#endif
 }

@@ -176,6 +176,7 @@ public:
    
    QString configKey();
    
+   bool isaConfigOpt();
    void updateConfig( QVariant argVal );
 
 private:

@@ -19,10 +19,6 @@
 **
 ****************************************************************************/
 
-#include <QApplication>
-#include <QLabel>
-#include <QPushButton>
-
 #include "help/help_context.h"
 #include "help/help_urls.h"
 #include "mainwindow.h"
@@ -33,6 +29,9 @@
 #include "utils/vk_messages.h"
 #include "utils/vk_utils.h"
 
+#include <QApplication>
+#include <QLabel>
+#include <QPushButton>
 
 
 
@@ -180,9 +179,9 @@ void VkOptionsDialog::setupLayout()
    QHBoxLayout* hLayoutButtons = new QHBoxLayout( hButtonWidget );
    hLayoutButtons->setObjectName( QString::fromUtf8( "hLayoutButtons" ) );
    
-   saveGlblButton = new QPushButton( QPixmap( ":/vk_icons/icons/filesave.png" ),
-                                     "Save To Global Config" );
-   hLayoutButtons->addWidget( saveGlblButton );
+   updateDefaultsButton = new QPushButton( QPixmap( ":/vk_icons/icons/filesave.png" ),
+                                     "Save As Project Default" );
+   hLayoutButtons->addWidget( updateDefaultsButton );
    hLayoutButtons->addStretch( 1 );
    
    optionsButtonBox = new QDialogButtonBox( hButtonWidget );
@@ -204,7 +203,7 @@ void VkOptionsDialog::setupLayout()
    connect( applyButton,      SIGNAL( released() ), this, SLOT( apply()  ) ); // Apply
    connect( optionsButtonBox, SIGNAL( rejected() ), this, SLOT( reject() ) ); // Cancel
    connect( optionsButtonBox, SIGNAL( accepted() ), this, SLOT( accept() ) ); // Ok
-   connect( saveGlblButton,   SIGNAL( released() ), this, SLOT( saveToGlobalConfig() ) );
+   connect( updateDefaultsButton, SIGNAL( released() ), this, SLOT( overwriteDefaultConfig() ) );
 
    // ------------------------------------------------------------
    // setup default state
@@ -314,7 +313,7 @@ bool VkOptionsDialog::apply()
    }
    
    // ensure changes saved to disc
-   vkConfig->sync();
+   vkCfgProj->sync();
    
    return true;
 }
@@ -339,20 +338,20 @@ void VkOptionsDialog::accept()
 
 
 /*!
-  save applied edits to global config file
+  save applied edits to Default-Project-Config file
    - only enabled when no edits outstanding, to prevent any confusion.
 */
-void VkOptionsDialog::saveToGlobalConfig()
+void VkOptionsDialog::overwriteDefaultConfig()
 {
    int ok =
-      vkQuery( this, 2, "Overwrite Global Config",
-               "<p>Are you <b>sure</b> you want to overwrite the global config ?</p>"
-               "<p><i>Note: Valkyrie will regenerate factory global settings<br>"
-               "if the global config file is removed:<br>"
-               "%s</i></p>", qPrintable( vkConfig->vkCfgGlblFilename() ) );
+      vkQuery( this, 2, "Overwrite Default Config",
+               "<p>Are you <b>sure</b> you want to overwrite the default project config ?</p>"
+               "<p><i>Note: Valkyrie will regenerate factory default settings<br>"
+               "if the default project config file is removed:<br>"
+               "%s</i></p>", qPrintable( VkCfg::projDfltPath() ) );
 
    if ( ok == MsgBox::vkYes ) {
-      vkConfig->saveToGlblConfigFile();
+      vkCfgProj->saveToDefaultCfg();
    }
 }
 
@@ -372,8 +371,8 @@ void VkOptionsDialog::pageModified()
    QPushButton* cancelButton = optionsButtonBox->button( QDialogButtonBox::Cancel );
    applyButton->setEnabled( modified );
    cancelButton->setEnabled( modified );
-   // enable save-to-global only when no edits
-   saveGlblButton->setEnabled( !modified );
+   // enable update-defaults only when no edits
+   updateDefaultsButton->setEnabled( !modified );
    
    // updates the window title to indicate modified.
    this->setWindowModified( modified );

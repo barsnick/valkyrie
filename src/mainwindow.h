@@ -67,11 +67,15 @@ private:
    void setToggles( VGTOOL::ToolID toolId );
    void updateEventFilters( QObject* obj );
    bool eventFilter( QObject* obj, QEvent* e );
-   
+   void setCurrentProject( const QString &projName );
+   void updateActionsRecentProjs();
+
 private slots:
    void toolGroupTriggered( QAction* );
    void createNewProject();
    void openProject();
+   void openRecentProject();
+   void saveAsProject();
    void closeToolView();
    void runTool( int procId );
    void runValgrind();
@@ -94,8 +98,11 @@ private slots:
    
    
 private:
+   enum { MaxRecentProjs = 5 };
    QAction* actFile_NewProj;
    QAction* actFile_OpenProj;
+   QAction* actFile_RecentProjs[ MaxRecentProjs ];
+   QAction* actFile_SaveAs;
    QAction* actFile_Exit;
    QAction* actFile_Close;
    QAction* actEdit_Options;
@@ -108,9 +115,10 @@ private:
    QAction* actHelp_License;
    QAction* actHelp_Support;
    QActionGroup* toolActionGroup;
-   
+
    QMenuBar* menuBar;
    QMenu* menuFile;
+   QMenu* menuRecentProjs;
    QMenu* menuEdit;
    QMenu* menuTools;
    QMenu* menuProcess;

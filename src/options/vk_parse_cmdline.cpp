@@ -29,32 +29,34 @@
 
 void showHelp( vkPoptContext con, char key, Valkyrie* vk )
 {
-   QString VkName = vkConfig->vkName;
-   VkName.replace( 0, 1, vkConfig->vkName[0].toUpper() );
+   QString VkName = VkCfg::appName();
+   VkName.replace( 0, 1, VkName[0].toUpper() );
    
    switch ( key ) {
    case 'v':
-      printf( "%s-%s\n", vkConfig->vkName.toLatin1().constData(),
-              vkConfig->vkVersion.toLatin1().constData() );
+      printf( "%s\n", qPrintable( VkCfg::appPackage() ) );
       break;
-      
+
    case 'h':
       vkPoptPrintHelp( con, stdout, vk->objectName().toLatin1().constData() );
-      printf( "\n%s is copyright %s %s\n"
+      printf( "\n%s\n"
               "and licensed under the GNU General Public License, version 2.\n"
-              "Bug reports, feedback, praise, abuse, etc, to <%s>\n\n",
-              VkName.toLatin1().constData(),
-              vkConfig->vkCopyright.toLatin1().constData(),
-              vkConfig->vkAuthor.toLatin1().constData(),
-              vkConfig->vkEmail.toLatin1().constData() );
+              "Bug reports, feedback, praise, abuse, etc, to <%s>\n",
+              qPrintable( VkCfg::copyright() ),
+              qPrintable( VkCfg::email() ) );
+      printf( "\nThis Valkyrie release (v%s) supports Valgrind v%s\n\n",
+              qPrintable( VkCfg::appVersion() ),
+              qPrintable( VkCfg::vgVersion() ) );
       break;
       
    case 'V':
       vkPoptPrintHelp( con, stdout, NULL );
-      printf( "\n%s is copyright %s %s\n",
-              VkName.toLatin1().constData(),
-              vkConfig->vkCopyright.toLatin1().constData(),
-              vkConfig->vkAuthor.toLatin1().constData() );
+      printf( "%s\n%s\n",
+              qPrintable( VkCfg::copyright() ),
+              qPrintable( VkCfg::vgCopyright() ) );
+      printf( "\nThis Valkyrie release (v%s) supports Valgrind v%s\n\n",
+              qPrintable( VkCfg::appVersion() ),
+              qPrintable( VkCfg::vgVersion() ) );
       break;
       
    default:
@@ -68,11 +70,11 @@ void parseError( vkPoptContext con, const int err )
    // don't print anything; sender is dealing with msgs
    if ( err != PERROR_DEFAULT ) {
       fprintf( stderr, "%s: Parse error [%s] : %s\n",
-               vkConfig->vkName.toLatin1().constData(),
+               qPrintable( VkCfg::appName() ),
                vkPoptBadOption( con ),
                parseErrString( err ) );
       fprintf( stderr, "%s: Use --help for more information.\n",
-               vkConfig->vkName.toLatin1().constData() );
+               qPrintable( VkCfg::appName() ) );
    }
 }
 

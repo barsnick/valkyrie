@@ -39,7 +39,7 @@ HelpAbout::HelpAbout( QWidget* parent, HELPABOUT::TabId tabid )
    : QDialog( parent )
 {
    setObjectName( QString::fromUtf8( "HelpAbout" ) );
-   title = vkConfig->vkName + " Information";
+   title = VkCfg::appName() + " Information";
    setWindowTitle( title );
    
    // top layout
@@ -63,7 +63,7 @@ HelpAbout::HelpAbout( QWidget* parent, HELPABOUT::TabId tabid )
    
    // app info
    QLabel* appName = new QLabel( this );
-   QString str = vkConfig->vkName + " " + vkConfig->vkVersion;
+   QString str = VkCfg::appName() + " v" + VkCfg::appVersion();
    appName->setText( str );
    appName->setFont( QFont( "Times", 18, QFont::Bold ) );
    appName->setFixedSize( appName->sizeHint() );
@@ -82,7 +82,9 @@ HelpAbout::HelpAbout( QWidget* parent, HELPABOUT::TabId tabid )
    // about_vk tab
    aboutVk = new QTextBrowser( tabParent );
    aboutVk->setObjectName( QString::fromUtf8( "aboutVk" ) );
-   str = "About " + vkConfig->vkName;
+   QString VkName = VkCfg::appName();
+   VkName.replace( 0, 1, VkName[0].toUpper() );
+   str = "About " + VkName;
    tabParent->insertTab( HELPABOUT::ABOUT_VK, aboutVk, str );
    
    // license tab
@@ -104,10 +106,10 @@ HelpAbout::HelpAbout( QWidget* parent, HELPABOUT::TabId tabid )
    vbox->addWidget( okButt, 0, Qt::AlignRight );
    
    // setup text-browsers
-   license->setSource( vkConfig->vkDocPath + "about_gpl.html" );
-   support->setSource( vkConfig->vkDocPath + "support.html" );
+   license->setSource( VkCfg::docDir() + "/about_gpl.html" );
+   support->setSource( VkCfg::docDir() + "/support.html" );
    // about_vk source needs version args updating:
-   QFile file( vkConfig->vkDocPath + "about_vk.html" );
+   QFile file( VkCfg::docDir() + "/about_vk.html" );
    
    if ( file.open( QIODevice::ReadOnly ) ) {
       QTextStream ts( &file );

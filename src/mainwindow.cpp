@@ -69,8 +69,8 @@ MainWindow::MainWindow( Valkyrie* vk )
      handBook( 0 ), optionsDialog( 0 )
 {
    setObjectName( QString::fromUtf8( "MainWindowClass" ) );
-   QString title = vkConfig->vkName;
-   title[0] = title[0].toUpper();
+   QString title = VkCfg::appName();
+   title.replace( 0, 1, title[0].toUpper() );
    setWindowTitle( title );
    
    lastAppFont = qApp->font();
@@ -127,11 +127,9 @@ MainWindow::~MainWindow()
    delete toolViewStack;
    
    // Save window position to config.
-   VkOption* opt = valkyrie->getOption( VALKYRIE::MW_SIZE );
-   opt->updateConfig( size() );
-   opt = valkyrie->getOption( VALKYRIE::MW_POS );
-   opt->updateConfig( pos() );
-   vkConfig->sync();
+   vkCfgGlbl->setValue( "mainwindow_size", size() );
+   vkCfgGlbl->setValue( "mainwindow_pos", pos() );
+   vkCfgGlbl->sync();
    
    // handbook has no parent, so have to delete it.
    delete handBook;
@@ -170,10 +168,8 @@ void MainWindow::removeToolMenuAction( QAction* action )
 */
 void MainWindow::setupLayout()
 {
-   VkOption* opt = valkyrie->getOption( VALKYRIE::MW_SIZE );
-   resize( vkConfig->value( opt->configKey(), QSize( 600, 600 ) ).toSize() );
-   opt = valkyrie->getOption( VALKYRIE::MW_POS );
-   move( vkConfig->value( opt->configKey(), QPoint( 400, 0 ) ).toPoint() );
+   resize( vkCfgGlbl->value( "mainwindow_size", QSize( 600, 600 ) ).toSize() );
+   move( vkCfgGlbl->value( "mainwindow_pos", QPoint( 400, 0 ) ).toPoint() );
    
    toolViewStack  = new ToolViewStack( this );
    setCentralWidget( toolViewStack );
@@ -181,7 +177,7 @@ void MainWindow::setupLayout()
 
 
 /*!
-    Setup the global actions.
+    Setup the top-level actions.
 */
 void MainWindow::setupActions()
 {
@@ -208,6 +204,22 @@ void MainWindow::setupActions()
    actFile_OpenProj->setIcon( icon_openproj );
    connect( actFile_OpenProj, SIGNAL( triggered() ), this, SLOT( openProject() ) );
    
+   for (int i = 0; i < MaxRecentProjs; ++i) {
+      actFile_RecentProjs[i] = new QAction(this);
+      actFile_RecentProjs[i]->setVisible(false);
+      connect(actFile_RecentProjs[i], SIGNAL(triggered()), this, SLOT( openRecentProject() ));
+   }
+
+   actFile_SaveAs = new QAction( this );
+   actFile_SaveAs->setObjectName( QString::fromUtf8( "actFile_SaveAs" ) );
+   actFile_SaveAs->setText( tr( "Save &As..." ) );
+   actFile_SaveAs->setToolTip( tr( "Save current configuration to a new project" ) );
+   QIcon icon_saveas;
+   icon_saveas.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filesaveas.png" ) ),
+                          QIcon::Normal, QIcon::Off );
+   actFile_SaveAs->setIcon( icon_saveas );
+   connect( actFile_SaveAs, SIGNAL( triggered() ), this, SLOT( saveAsProject() ) );
+
    actFile_Close = new QAction( this );
    actFile_Close->setObjectName( QString::fromUtf8( "actFile_Close" ) );
    actFile_Close->setToolTip( tr( "Close the currently active tool" ) );
@@ -339,6 +351,9 @@ void MainWindow::setupMenus()
    menuFile = new QMenu( menuBar );
    menuFile->setObjectName( QString::fromUtf8( "menuFile" ) );
    menuFile->setTitle( tr( "&File" ) );
+   menuRecentProjs = new QMenu( menuBar );
+   menuRecentProjs->setObjectName( QString::fromUtf8( "menuRecentProjs" ) );
+   menuRecentProjs->setTitle( tr( "Recent Projects" ) );
    menuEdit = new QMenu( menuBar );
    menuEdit->setObjectName( QString::fromUtf8( "menuEdit" ) );
    menuEdit->setTitle( tr( "&Edit" ) );
@@ -367,10 +382,17 @@ void MainWindow::setupMenus()
    
    menuFile->addAction( actFile_NewProj );
    menuFile->addAction( actFile_OpenProj );
+   menuFile->addMenu( menuRecentProjs );
+   menuFile->addAction( actFile_SaveAs );
    menuFile->addSeparator();
    menuFile->addAction( actFile_Close );
    menuFile->addSeparator();
    menuFile->addAction( actFile_Exit );
+
+   for (int i = 0; i < MaxRecentProjs; ++i) {
+      menuRecentProjs->addAction( actFile_RecentProjs[i]);
+   }
+   updateActionsRecentProjs();
    
    menuEdit->addAction( actEdit_Options );
    
@@ -581,7 +603,7 @@ void MainWindow::setToggles( VGTOOL::ToolID toolId )
 void MainWindow::showLabels()
 {
    VkOption* opt = valkyrie->getOption( VALKYRIE::ICONTXT );
-   bool show = vkConfig->value( opt->configKey() ).toBool();
+   bool show = vkCfgProj->value( opt->configKey() ).toBool();
    
    if ( show ) {
       setToolButtonStyle( Qt::ToolButtonTextUnderIcon );
@@ -595,7 +617,7 @@ void MainWindow::showLabels()
 void MainWindow::showToolTips()
 {
    VkOption* opt = valkyrie->getOption( VALKYRIE::TOOLTIP );
-   fShowToolTips = vkConfig->value( opt->configKey() ).toBool();
+   fShowToolTips = vkCfgProj->value( opt->configKey() ).toBool();
 }
 
 
@@ -606,7 +628,7 @@ void MainWindow::setGenFont()
    
    QFont fnt;
    VkOption* opt = valkyrie->getOption( VALKYRIE::FNT_GEN_SYS );
-   bool useVkSysFont = vkConfig->value( opt->configKey() ).toBool();
+   bool useVkSysFont = vkCfgProj->value( opt->configKey() ).toBool();
    
    if ( useVkSysFont ) {
       fnt = lastAppFont;
@@ -614,7 +636,7 @@ void MainWindow::setGenFont()
    else {
       lastAppFont = qApp->font();
       VkOption* opt = valkyrie->getOption( VALKYRIE::FNT_GEN_USR );
-      QString str_fnt = vkConfig->value( opt->configKey() ).toString();
+      QString str_fnt = vkCfgProj->value( opt->configKey() ).toString();
       fnt.fromString( str_fnt );
    }
    
@@ -627,7 +649,7 @@ void MainWindow::setToolFont()
 {
    QFont fnt;
    VkOption* opt = valkyrie->getOption( VALKYRIE::FNT_TOOL_USR );
-   QString str = vkConfig->value( opt->configKey() ).toString();
+   QString str = vkCfgProj->value( opt->configKey() ).toString();
    fnt.fromString( str );
    
    // set font for all tool views
@@ -644,7 +666,7 @@ void MainWindow::setPalette()
 {
    QPalette pal;
    VkOption* opt = valkyrie->getOption( VALKYRIE::PALETTE );
-   bool useVkPalette = vkConfig->value( opt->configKey() ).toBool();
+   bool useVkPalette = vkCfgProj->value( opt->configKey() ).toBool();
    
    if ( !useVkPalette ) {
       pal = lastPalette;
@@ -652,11 +674,11 @@ void MainWindow::setPalette()
    else {
       lastPalette = qApp->palette();
       
-      QColor bg     = vkConfig->value( "valkyrie/colour_background" ).value<QColor>();
-      QColor base   = vkConfig->value( "valkyrie/colour_base" ).value<QColor>();
-      QColor text   = vkConfig->value( "valkyrie/colour_text" ).value<QColor>();
-      QColor dkgray = vkConfig->value( "valkyrie/colour_dkgray" ).value<QColor>();
-      QColor hilite = vkConfig->value( "valkyrie/colour_highlight" ).value<QColor>();
+      QColor bg     = vkCfgGlbl->value( "colour_background" ).value<QColor>();
+      QColor base   = vkCfgGlbl->value( "colour_base"       ).value<QColor>();
+      QColor text   = vkCfgGlbl->value( "colour_text"       ).value<QColor>();
+      QColor dkgray = vkCfgGlbl->value( "colour_dkgray"     ).value<QColor>();
+      QColor hilite = vkCfgGlbl->value( "colour_highlight"  ).value<QColor>();
       
       // anything not ok -> return default qApp palette:
       if ( bg.isValid() && base.isValid() && text.isValid() &&
@@ -716,14 +738,12 @@ void MainWindow::setLogFile( QString logFilename )
 
 
 /*!
-    Create a new project:
-    Save configuration in a project file.
+    Create a new project based on the default-project settings.
+    Save configuration in a new project file.
+    Previous settings are discarded.
 */
 void MainWindow::createNewProject()
 {
-   // ensure any existing project settings are saved first.
-   vkConfig->sync();
-   
    // TODO: put dir & name choice in one dialog.
    
    // Choose project directory
@@ -753,9 +773,14 @@ void MainWindow::createNewProject()
       }
    }
    
-   // TODO: check if exists may overwrite, etc...
-   
-   vkConfig->createNewProject( dir, proj_name );
+   // TODO: check if exists, may overwrite, etc...
+
+   QString proj_fname = dir + "/" + proj_name + "." + VkCfg::filetype();
+   vkCfgProj->createNewProject( proj_fname );
+
+   // TODO: ok/cancel?
+
+   setCurrentProject( proj_fname );
 }
 
 
@@ -764,20 +789,136 @@ void MainWindow::createNewProject()
 */
 void MainWindow::openProject()
 {
-   // ensure any existing project settings are saved first.
-   vkConfig->sync();
-   
-   QString proj_filename = QFileDialog::getOpenFileName( this, "Open Valkyrie Project",
-                           "./", "Valkyrie Projects (*.vk)" );
+   QString filter = QString("*.") + VkCfg::filetype();
+   QString proj_fname = QFileDialog::getOpenFileName( this, "Open Valkyrie Project",
+                           "./", "Valkyrie Projects (" + filter + ")" );
                            
-   if ( proj_filename.isEmpty() || proj_filename.isNull() ) {
+   if ( proj_fname.isEmpty() || proj_fname.isNull() ) {
       // Cancelled
       return;
    }
    
-   vkConfig->openProject( valkyrie, proj_filename );
+   vkCfgProj->openProject( proj_fname );
+
+   // TODO: ok/cancel?
+
+   setCurrentProject( proj_fname );
 }
 
+
+/*!
+    Open a recent existing project.
+*/
+void MainWindow::openRecentProject()
+{
+   QAction *action = qobject_cast<QAction *>(sender());
+   if (action) {
+      QString proj_fname = action->data().toString();
+      vkCfgProj->openProject( proj_fname );
+
+      // TODO: ok/cancel?
+
+      setCurrentProject( proj_fname );
+   }
+}
+
+
+/*!
+    Save current settings to a new project.
+*/
+void MainWindow::saveAsProject()
+{
+   // TODO: put dir & name choice in one dialog.
+
+   // Choose project directory
+   QString dir = QFileDialog::getExistingDirectory( this, "Choose Project Directory", "./",
+                 QFileDialog::ShowDirsOnly |
+                 QFileDialog::DontResolveSymlinks );
+
+   if ( dir.isEmpty() || dir.isNull() ) {
+      return;
+   }
+
+   // Choose project name
+   QString proj_name;
+
+   while ( true ) {
+      bool ok = true;
+      proj_name = QInputDialog::getText( this, "Enter Project Name",
+                                         "Project Name:", QLineEdit::Normal,
+                                         "", &ok );
+
+      if ( !ok ) {                  // User chaged their minds.
+         return;
+      }
+
+      if ( !proj_name.isEmpty() ) { // loop if empty name.
+         break;
+      }
+   }
+
+
+   // TODO: check if exists may overwrite, etc...
+   QString proj_fname = dir + "/" + proj_name + "." + VkCfg::filetype();
+   vkCfgProj->saveProjectAs( proj_fname );
+
+   // TODO: ok/cancel?
+
+   setCurrentProject( proj_fname );
+}
+
+
+/*!
+    Set current project
+     - update the config with the new project name
+     - update the actions to keep in sync.
+*/
+void MainWindow::setCurrentProject(const QString &projName)
+{
+#if 0 // TODO: maybe future, but then do consistently everywhere...
+   curFile = fileName;
+   if (curFile.isEmpty())
+      setWindowTitle(tr("Recent Files"));
+   else
+      setWindowTitle(tr("%1 - %2").arg(strippedName(curFile))
+                     .arg(tr("Recent Files")));
+#endif
+
+   QStringList files = vkCfgGlbl->value( "recent_projects" )
+                       .toString().split( VkCfg::sepChar(), QString::SkipEmptyParts );
+   files.removeAll( projName );
+   files.prepend( projName );
+   while (files.size() > MaxRecentProjs) {
+      files.removeLast();
+   }
+
+   vkCfgGlbl->setValue( "recent_projects", files.join( VkCfg::sepChar() ) );
+   vkCfgGlbl->sync();
+
+   updateActionsRecentProjs();
+}
+
+
+/*!
+  Update the actions for the list of recent projects
+*/
+void MainWindow::updateActionsRecentProjs()
+{
+   QStringList files = vkCfgGlbl->value( "recent_projects" )
+                       .toString().split( VkCfg::sepChar(), QString::SkipEmptyParts );
+   int numRecentProjs = qMin(files.size(), (int)MaxRecentProjs);
+
+   for (int i = 0; i < numRecentProjs; ++i) {
+      QString text = tr("&%1 %2").arg( i+1 )
+                     .arg( QFileInfo( files[i] ).fileName() );
+      actFile_RecentProjs[i]->setText(text);
+      actFile_RecentProjs[i]->setData(files[i]);
+      actFile_RecentProjs[i]->setVisible(true);
+   }
+   for (int j = numRecentProjs; j < MaxRecentProjs; ++j) {
+      actFile_RecentProjs[j]->setVisible(false);
+   }
+}
 
 
 /*!
@@ -908,7 +1049,7 @@ void MainWindow::runValgrind()
    
    // Valkyrie may have been started with no executable
    // specified. If so, show msgbox, then options dialog
-   if ( vkConfig->value( "valkyrie/binary" ).toString().isEmpty() ) {
+   if ( vkCfgProj->value( "valkyrie/binary" ).toString().isEmpty() ) {
    
       vkInfo( this, "Run Valgrind: No program specified",
               "Please specify (via Options->Valkyrie->Binary)<br>"

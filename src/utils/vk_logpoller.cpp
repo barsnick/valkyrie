@@ -21,6 +21,7 @@
 #include "utils/vk_logpoller.h"
 
 
+/***************************************************************************/
 VkLogPoller::VkLogPoller( QObject* parent )
    : QObject( parent )
 {
