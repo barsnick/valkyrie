@@ -490,7 +490,7 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
                   argval += " +%n";
                }
                else if ( fname.contains( QRegExp( "^kate[\\W]*" ) ) ) {
-                  argval += " --line %n";
+                  argval += " --line %n -use";
                }
                else {
                   // TODO: Warning msg: Unknown editor: use flag to have editor take us to the right line: %n is replaced by the line number
