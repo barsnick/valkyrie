@@ -1,0 +1,114 @@
+-----------------------------------------------------------------------------
+TODO list when doing a Valkyrie release (with release number "X.Y.Z")
+-----------------------------------------------------------------------------
+
+There are two kinds of releases:
+
+- Feature releases:  X.Y.0, which can include new features.
+
+- Bug-fix releases:  X.Y.[12...], which only include bug fixes.
+
+
+First of all:
+
+- Tell valkyrie-developers you want to do a release.  Give a timeframe for
+  everyone to check in any final features/bug-fixes they want in the
+  release.
+
+- Go over the docs, make sure they're up to date.
+
+- Update version number vk_config.pri.
+
+- Write release notes, add to NEWS.  Include a list of fixed bugs from
+  Bugzilla.
+
+- Other files that might need updating:  README.
+
+- Add X.Y.Z and X.Y+1.Z.SVN versions to Bugzilla.
+
+? - Add "wantedX.Y.Z+1" and "wantedX.Y+1.Z" milestones to Bugzilla.
+
+
+For each release candidate (should do release candidates for feature
+releases, bug-fix-only releases might not need one):
+
+- Build.
+
+- Do pre-release testing:
+
+  * Check it builds and regtests on a vanilla gcc-2.96 / RedHat 7.3 distro.
+
+  * Check XML output from the latest Valgrind release is readable
+
+  * Test with large applications (firefox and OOo 2.0) on all platforms.
+
+- Change VERSION number in vk_config.pri to "X.Y.Z-rcN", where
+  'N' is the release candidate number.
+
+- Make a distribution tarball and put it on the web
+  TODO: HOW WITH QMAKE ?
+
+- Ensure the tarball builds, runs, regtests on the platforms of interest.
+  However redundant this seems, sometimes it can be that a from-the-repo
+  build works whereas a from-the-tarball one doesn't, usually due to some
+  trivial installation problem.
+
+- Also check the HTML and print docs look sane (eg. links work).  And the
+  man pages, esp. that there are no broken references (look for "???").
+
+- Announce the release:
+  - Email valkyrie-users and valkyrie-developers.
+  - Make clear it's a release candidate.
+  - Make sure you tell everyone where to download from.
+  - Include the release notes in the email (maybe not necessary for release
+    candidates 2+).
+
+- Wait 2--3 days for feedback.  If bugs appear:
+  - Fix them.
+  - Update the bug-fix list in NEWS if necessary.
+  - Do another release candidate.
+
+
+For the official release:
+
+- Do pre-release testing:
+  - Make sure regtests run ok.
+  - Make sure Mozilla and OpenOffice run ok.
+
+- Change VERSION number in vk_config.pri to "X.Y.Z".
+
+- Make the tarball ("make dist").
+  TODO: HOW WITH QMAKE ?
+
+- Check tarball builds, installs, regtests on platforms of interest.
+  If not, fix and repeat until success.
+
+- Tag the repositorie: "VALKYRIE_X_Y_Z"
+
+  If it's a X.Y.0 release, make "VALKYRIE_X_Y_BRANCH" branch too.
+  Useful examples:
+
+    cd valkyrie
+    svn copy trunk tags/VALKYRIE
+    svn copy trunk branches/VALKYRIE_3_3_BRANCH
+
+- Update website: 
+  - Put the tarball up.
+  - Update the docs -- both the tarball'd docs, and the online-readable docs.
+  - Update www.valgrind.org/downloads/guis.html.  
+  - Update www.valgrind.org/downloads/current.html.
+  - Update www.open-works.net/projects/valkyrie.html
+    TODO: have a "Valkyrie Status' page on open-works.net, and update that!
+
+- Change VERSION number in vk_config.pri to "X.Y.Z.SVN", where
+  X.Y.Z is one more than the release just done.
+
+- Make sure the release notes are present in the NEWS file on the trunk and
+  the branch.
+
+- Announce the release:
+  - Email valkyrie-users, valkyrie-developers.
+?  - Email Linux Weekly News.
+  - Include the release notes in the email.
+
+- Go on holiday.
