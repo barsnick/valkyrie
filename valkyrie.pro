@@ -5,7 +5,7 @@
 # qmake "PREFIX=<your_dir>" && make && make install
 ######################################################################
 
-include( qwtconfig.pri )
+include( vk_config.pri )
 
 TEMPLATE = subdirs
 SUBDIRS  = src
