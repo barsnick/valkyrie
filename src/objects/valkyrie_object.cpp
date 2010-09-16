@@ -489,6 +489,12 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
                if ( fname.contains( QRegExp( "^(emacs|gedit|gvim|nano|nedit)[\\W]*" ) ) ) {
                   argval += " +%n";
                }
+               else if ( fname.contains( QRegExp( "^kate[\\W]*" ) ) ) {
+                  argval += " --line %n";
+               }
+               else {
+                  // TODO: Warning msg: Unknown editor: use flag to have editor take us to the right line: %n is replaced by the line number
+               }
             }
          }
       } break;
