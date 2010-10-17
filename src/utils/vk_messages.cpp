@@ -23,6 +23,7 @@
 
 #include <stdarg.h>           /* va_start, va_end */
 #include <stdlib.h>           /* exit errno */
+#include <stdio.h>            /* vsnprintf */
 
 #include <QApplication>
 #include <QHBoxLayout>
