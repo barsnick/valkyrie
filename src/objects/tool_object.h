@@ -60,7 +60,8 @@ public:
    ToolView* createView( QWidget* parent );
    ToolView* view();
    
-   bool start( int procId, QStringList vgflags, QString logfile );
+   bool start( VGTOOL::ToolProcessId procId,
+               QStringList vgflags, QString logfile );
 //   void stop();
    bool queryDone();
    bool isRunning();

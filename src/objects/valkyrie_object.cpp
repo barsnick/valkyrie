@@ -48,6 +48,7 @@ Valkyrie::Valkyrie()
    
    // init valgrind
    m_valgrind = new Valgrind();
+   m_startToolProcess = VGTOOL::PROC_NONE;
 }
 
 
@@ -331,7 +332,7 @@ void Valkyrie::setupOptions()
       VALKYRIE::VIEW_LOG,
       this->objectName(),
       "view-log",
-      'v',
+      'l',
       "<file>",
       "",
       "",
@@ -565,12 +566,14 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
       if ( !argval.isEmpty() ) {
          // see if we have a logfile with at least R permissions:
          argval = fileCheck( &errval, argval, true );
+         m_startToolProcess = VGTOOL::PROC_PARSE_LOG;
       } break;
 
    case VALKYRIE::BINARY:
       if ( !argval.isEmpty() ) {
          // see if we have a binary with at least X permissions:
          argval = fileCheck( &errval, argval, false, false, true );
+         m_startToolProcess = VGTOOL::PROC_VALGRIND;
       } break;
 
    case VALKYRIE::BIN_FLAGS:
@@ -694,7 +697,7 @@ bool Valkyrie::queryToolDone( VGTOOL::ToolID tId )
 /*!
   Run the tool with given process id.
 */
-bool Valkyrie::runTool( VGTOOL::ToolID tId, int procId )
+bool Valkyrie::runTool( VGTOOL::ToolID tId, VGTOOL::ToolProcessId procId )
 {
    cerr << "Valkyrie::runTool( "  << tId  << ", " << procId << ")" << endl;
    

@@ -43,6 +43,7 @@ int main( int argc, char* argv[] )
    int exit_status = EXIT_SUCCESS;
    QApplication* app  = 0;
    MainWindow* vkWin  = 0;
+   VGTOOL::ToolProcessId startProcess = VGTOOL::PROC_NONE;
 
    // ------------------------------------------------------------
    // Create all VkObjects: Vk[ Vg[ Tools[] ] ]
@@ -113,7 +114,12 @@ int main( int argc, char* argv[] )
    
    vkWin->showToolView( VGTOOL::ID_MEMCHECK );
    vkWin->show();
-   
+
+   // start up a process (run valgrind / view-log / ...) from the command line.
+   startProcess = valkyrie.getStartToolProcess();
+   if ( startProcess != VGTOOL::PROC_NONE ) {
+      vkWin->runTool( startProcess );
+   }
    
    qApp->processEvents();
    

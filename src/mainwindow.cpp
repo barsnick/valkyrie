@@ -527,8 +527,8 @@ void MainWindow::showToolView( VGTOOL::ToolID toolId )
       // + ToolObject::saveParsedOutput()...
       
       // view starts tool processes via this signal
-      connect( nextView, SIGNAL( run( int ) ),
-               this,       SLOT( runTool( int ) ) );
+      connect( nextView, SIGNAL( run( VGTOOL::ToolProcessId ) ),
+               this,       SLOT( runTool( VGTOOL::ToolProcessId ) ) );
                
       // add view to the stack
       toolViewStack->addView( nextView );
@@ -1005,13 +1005,13 @@ void MainWindow::openOptions()
 /*!
     Run the valgrind tool process.
 */
-void MainWindow::runTool( int procId )
+void MainWindow::runTool( VGTOOL::ToolProcessId procId )
 {
    VGTOOL::ToolID tId = toolViewStack->currentToolId();   
    cerr << "MainWindow::runTool( tool: " << tId
          << ", proc: " << procId << " )" << endl;
    
-   vk_assert( procId >= 0 );
+   vk_assert( procId > VGTOOL::PROC_NONE );
    
    // don't come in here if there's no current view
    if ( !toolViewStack->isVisible() ) {
@@ -1020,6 +1020,21 @@ void MainWindow::runTool( int procId )
       return;
    }
    
+   if ( procId == VGTOOL::PROC_VALGRIND ) {
+      // Valkyrie may have been started with no executable
+      // specified. If so, show msgbox, then options dialog
+      if ( vkCfgProj->value( "valkyrie/binary" ).toString().isEmpty() ) {
+
+         vkInfo( this, "Run Valgrind: No program specified",
+                 "Please specify (via Options->Valkyrie->Binary)<br>"
+                 "the path to the program you wish to run, along<br>"
+                 "with any arguments required" );
+         openOptions();
+
+         return;
+      }
+   }
+
    // last process might not be done ...
    if ( !valkyrie->queryToolDone( tId ) ) {
       cerr << "Warning: Last process not finished" << endl;
@@ -1040,26 +1055,6 @@ void MainWindow::runTool( int procId )
 */
 void MainWindow::runValgrind()
 {
-   cerr << "MainWindow::runValgrind()" << endl;
-   
-   // don't come in here if there's no current view
-   if ( !toolViewStack->isVisible() ) {
-      return;
-   }
-   
-   // Valkyrie may have been started with no executable
-   // specified. If so, show msgbox, then options dialog
-   if ( vkCfgProj->value( "valkyrie/binary" ).toString().isEmpty() ) {
-   
-      vkInfo( this, "Run Valgrind: No program specified",
-              "Please specify (via Options->Valkyrie->Binary)<br>"
-              "the path to the program you wish to run, along<br>"
-              "with any arguments required" );
-      openOptions();
-      
-      return;
-   }
-   
    runTool( VGTOOL::PROC_VALGRIND );
 }
 

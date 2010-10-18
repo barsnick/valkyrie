@@ -227,7 +227,8 @@ QStringList ToolObject::getVgFlags()
   Start a process
    - Slot, called from the ToolView
 */
-bool ToolObject::start( int procId, QStringList vgflags, QString logfile )
+bool ToolObject::start( VGTOOL::ToolProcessId procId,
+                        QStringList vgflags, QString logfile )
 {
    //cerr << "ToolObject::start(): "  << procId << endl;
    this->saveFname = logfile;

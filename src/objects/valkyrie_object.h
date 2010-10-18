@@ -78,7 +78,7 @@ public:
    Valkyrie();
    ~Valkyrie();
    
-   bool runTool( VGTOOL::ToolID tId, int procId );
+   bool runTool( VGTOOL::ToolID tId, VGTOOL::ToolProcessId procId );
    void stopTool( VGTOOL::ToolID tId );
    bool queryToolDone( VGTOOL::ToolID tId );
    
@@ -98,6 +98,10 @@ public:
    Valgrind* valgrind() {
       return m_valgrind;
    }
+
+   VGTOOL::ToolProcessId getStartToolProcess() {
+      return m_startToolProcess;
+   }
    
    VkOption* findOption( QString& optKey );
 //TODO: needed?
@@ -115,6 +119,7 @@ private:
    
 private:
    Valgrind* m_valgrind;
+   VGTOOL::ToolProcessId m_startToolProcess;
 };
 
 #endif  // __VALKYRIE_OBJECT_H

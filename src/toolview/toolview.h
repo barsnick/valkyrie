@@ -96,7 +96,7 @@ public slots:
    
 signals:
    // start appropriate process for given runState
-   void run( int procId );
+   void run( VGTOOL::ToolProcessId procId );
    void logFileChosen( QString logFilename );
    
 protected:

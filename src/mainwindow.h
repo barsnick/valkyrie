@@ -56,8 +56,9 @@ public:
 public slots:
    void setStatus( QString msg );
    void showToolView( VGTOOL::ToolID toolId );
+   void runTool( VGTOOL::ToolProcessId procId );
    void openOptions();
-   
+
 private:
    void setupLayout();
    void setupActions();
@@ -77,7 +78,6 @@ private slots:
    void openRecentProject();
    void saveAsProject();
    void closeToolView();
-   void runTool( int procId );
    void runValgrind();
    void stopTool();
    void openHandBook();
