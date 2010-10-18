@@ -329,14 +329,10 @@ QString VkOption::configKey() {
    The following option types are NOT saved:
    ::argType == ARG_NONE  (e.g. --help)
     - They don't take args, so there's nothing to save
-   ::widgType == WDG_NONE (e.g. --project-file=<myfile>)
-    - These may or may not take an argument, but are only meant to drive
-      Valkyrie from the commandline. There nothing to save here either.
 */
 bool VkOption::isaConfigOpt()
 {
-   return ( argType != VkOPT::ARG_NONE &&    // ARG_NONE: takes no args
-            widgType != VkOPT::WDG_NONE );   // WDG_NONE: has no UI widget
+   return ( argType != VkOPT::ARG_NONE );   // ARG_NONE: takes no args
 }
 
 /*!
@@ -349,8 +345,12 @@ void VkOption::updateConfig( QVariant argVal )
       QString key = configKey();
       if ( !vkCfgProj->contains( key ) || vkCfgProj->value( key ) != argVal ) {
          vkCfgProj->setValue( key, argVal );
+         vkCfgProj->sync();
          emit valueChanged();
       }
+   }
+   else {
+      VK_DEBUG( "Warning: Not a config opt: '%s'.", qPrintable( configKey() ) );
    }
 }
 
