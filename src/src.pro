@@ -33,7 +33,7 @@ INSTALLS  = target doc doc_imgs
 
 #TODO: This seems to work, but surely can't be right... what to do?
 #QtCreator wants this for debugging info
-SOURCES += /usr/share/qtcreator/gdbmacros/gdbmacros.cpp
+#SOURCES += /usr/share/qtcreator/gdbmacros/gdbmacros.cpp
 
 
 ######################################################################
@@ -134,9 +134,7 @@ RESOURCES += $${VK_ROOT}/icons.qrc
 
 VK_DEFINES_H = utils/vk_defines.h
 system(rm -f $${VK_DEFINES_H})  # make sure build fails if can't generate.
-system("echo '\
-$${LITERAL_HASH}define VK_NAME      \t \"$$NAME\"\n\
-$${LITERAL_HASH}define VK_VERSION   \t \"$$VERSION\"\n\
-$${LITERAL_HASH}define VK_PACKAGE   \t \"$$PACKAGE\"\n\
-$${LITERAL_HASH}define VK_DOC_PATH  \t \"$$doc.path\"\n\
-' > $$VK_DEFINES_H")
+system("echo '$${LITERAL_HASH}define VK_NAME     \"$$NAME\"'      > $$VK_DEFINES_H")
+system("echo '$${LITERAL_HASH}define VK_VERSION  \"$$VERSION\"'  >> $$VK_DEFINES_H")
+system("echo '$${LITERAL_HASH}define VK_PACKAGE  \"$$PACKAGE\"'  >> $$VK_DEFINES_H")
+system("echo '$${LITERAL_HASH}define VK_DOC_PATH \"$$doc.path\"' >> $$VK_DEFINES_H")
