@@ -107,7 +107,7 @@ int main( int argc, char* argv[] )
    // Start up the gui
    vkWin = new MainWindow( &valkyrie );
    
-   if ( vkCfgProj->value(
+   if ( 0 && vkCfgProj->value(
            valkyrie.getOption( VALKYRIE::BINARY )->configKey() ).toString().isEmpty() ) {
       vkWin->openOptions();
    }
