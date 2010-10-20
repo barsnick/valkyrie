@@ -1,8 +1,11 @@
 Introduction
 ============
 
-Valkyrie uses qmake to be built.
-qmake is part of a Qt distribution. 
+Valkyrie is a Qt4 application and uses qmake as part of the build
+process.  qmake is part of your Qt4 installation.  You should check
+that you have the correct qmake version, by running "qmake --version",
+because in some cases the installed "qmake" is actually a Qt3 version.
+It may be that the version you need is installed as "qmake-qt4".
 
 If you want to play around with the build config, check out:
 valyrie.pro    - main qmake project file
@@ -12,7 +15,11 @@ vk_config.pri  - project include file: included everywere
 In particular, you may want to edit the following:
 - src/src.pro:
   SOURCES += /usr/share/qtcreator/gdbmacros/gdbmacros.cpp
-Note: Qt want this in order to create lots of debug info. If you're not debugging, then you probably don't want this. Is also rather nasty to hardcode the path in like this, but I don't know of a good workaround...
+
+  Note: Qt wants this in order to create lots of debug info. If you're
+  not debugging, then you probably don't want this. Is also rather
+  nasty to hardcode the path in like this, but I don't know of a good
+  workaround...
 
 - vk_config.pri:
   CONFIG           += silent      # make --quiet
@@ -20,29 +27,24 @@ Note: Qt want this in order to create lots of debug info. If you're not debuggin
 
 
 
-*) Build and run without "installing"
-=====================================
+Build and run without "installing"
+==================================
 
- qmake
- make
-
+qmake   # or qmake-qt4, see comments above
+make
 
 The valkyrie binary is put here: ./bin/valkyrie
 make clean to clean up and start again
-make distclean to _really_ clean up and start again.
+make distclean to also remove all the Makefiles created by qmake.
 
 
 
-*) Build and install
-=====================
+Build and install
+=================
 
- qmake PREFIX=<your_dir>
- make
- make install
+qmake PREFIX=/path/to/installation/tree
+make
+make install
 
 
 That's it!
-
-Note: you may come across INSTALL_ROOT in src.pro
- - it seems to be a qt special which can't easily(?) be set, hence the PREFIX solution.
-

@@ -25,8 +25,8 @@ To check out Valkyrie via anonymous, read-only svn access:
 
 Requirements
 ~~~~~~~~~~~~
-Qt (>= not_sure, perhaps 4.6) <http://www.trolltech.com>
-Valgrind (>=v3.6.0) <http://www.valgrind.org>
+Qt (version 4.6 or later, earlier 4.x might also work) <http://www.trolltech.com>
+Valgrind (3.6.x series) <http://www.valgrind.org>
 
 
 Executive Summary
@@ -43,7 +43,7 @@ documentation: <http://www.valgrind.org/docs/>
 To get started, simply invoke valkyrie thusly:
   valkyrie ./myprog
 
-This will transparently call Valgrind and display it's output.
+This will transparently call Valgrind and display its output.
 For more help on Valkyrie, use the built-in Help->Handbook.
 
 

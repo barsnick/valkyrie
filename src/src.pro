@@ -2,7 +2,7 @@
 # Valkyrie qmake project file: build application
 #
 # Note: By default PREFIX="/usr/local". To change this simply do:
-# qmake "PREFIX=<your_dir>"
+# qmake "PREFIX=/path/to/install/tree"
 ######################################################################
 
 

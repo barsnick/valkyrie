@@ -6,7 +6,7 @@
 ######################################################################
 
 NAME    = valkyrie
-VERSION = 2.0.0-SVN
+VERSION = 2.0.0
 PACKAGE = $$NAME-$$VERSION
 
 ######################################################################
@@ -37,5 +37,5 @@ QT += xml
 CONFIG           += qt
 CONFIG           += warn_on     # compiler should issue max warnings
 CONFIG           += silent      # make --quiet
-CONFIG           += debug       # release/debug
+CONFIG           += release     # release/debug
 
