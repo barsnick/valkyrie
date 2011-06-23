@@ -248,9 +248,16 @@ void ValkyrieOptionsPage::getEditor()
 */
 void ValkyrieOptionsPage::getBinary()
 {
+   QString currbin = m_itemList[VALKYRIE::BINARY]->currValue();
+   QString currdir = "./";
+   if ( !currbin.isEmpty() ) {
+       QFileInfo fi( currbin );
+       currdir = fi.absolutePath();
+   }
+
    QString binfile =
          QFileDialog::getOpenFileName( this, tr("Select Executable To Debug"),
-                                       "./", tr("All Files (*)"));
+                                       currdir, tr("All Files (*)"));
 
    if ( !binfile.isEmpty() ) {   // user might have clicked Cancel
       (( LeWidget* )m_itemList[VALKYRIE::BINARY] )->setValue( binfile );
