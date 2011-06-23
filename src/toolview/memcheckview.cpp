@@ -27,6 +27,7 @@
 #include <QAction>
 #include <QApplication>
 #include <QFileDialog>
+#include <QHeaderView>
 #include <QLabel>
 #include <QMenuBar>
 #include <QProcess>
@@ -148,6 +149,11 @@ void MemcheckView::setupLayout()
    treeView->setObjectName( QString::fromUtf8( "treeview_Memcheck" ) );
    treeView->setHeaderHidden( true );
    treeView->setRootIsDecorated( false );
+
+   // give us a horizontal scrollbar rather than an ellipsis
+   treeView->header()->setResizeMode(0, QHeaderView::ResizeToContents);
+   treeView->header()->setStretchLastSection(false);
+
    vLayout->addWidget( treeView );
 }
 
