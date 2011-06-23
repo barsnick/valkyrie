@@ -1,7 +1,7 @@
 
 Release Notes for Valkyrie
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-Valkyrie version 2.0.0.SVN supports Valgrind 3.6.x.
+Valkyrie version 2.0.1.SVN supports Valgrind 3.6.x.
 Valkyrie supports the Valgrind tools Memcheck and Helgrind.
 
 Valkyrie is licensed under the GNU General Public License, version 2. 
