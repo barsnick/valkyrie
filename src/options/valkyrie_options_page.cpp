@@ -167,12 +167,19 @@ void ValkyrieOptionsPage::setupOptions()
 
    // ------------------------------------------------------------
    // tooltips
+   // TODO: put these in the options.
    QString tip_editor = tr( "Tip: \"%n\" will be replaced with "
                             "the source code line number.<br>"
                             "Set the appropriate editor flag to support "
                             "opening the source at this line." );
    editLedit->button()->setToolTip( tip_editor );
    editLedit->widget()->setToolTip( tip_editor );
+
+   QString tip_logdir = tr( "Tip: All files in this temporary directory are "
+                            "deleted by Valkyrie on startup and exit.<br>"
+                            "Don't save your own files here!" );
+   dirLogSave->button()->setToolTip( tip_logdir );
+   dirLogSave->widget()->setToolTip( tip_logdir );
 }
 
 
