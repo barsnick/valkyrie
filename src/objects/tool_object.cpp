@@ -47,6 +47,7 @@ stopProcess()
 #include "utils/vk_config.h"
 #include "utils/vk_utils.h"
 
+#include <QFileDialog>
 #include <QKeySequence>
 #include <QString>
 #include <QStringList>
@@ -91,14 +92,11 @@ stopProcess()
 */
 ToolObject::ToolObject( const QString& toolname, VGTOOL::ToolID id )
    : VkObject( toolname ),
-     toolView( 0 ), fileSaved( true ), processId( VGTOOL::PROC_NONE ), toolId( id )
+     toolView( 0 ), vgRunSaved( true ), processId( VGTOOL::PROC_NONE ),
+     toolId( id ), vgreader( 0 ), vgproc( 0 )
 {
-   // init vars
-   fileSaved = true;
-   vgproc    = 0;
-   vgreader  = 0;
+   // init logpoller
    logpoller = new VkLogPoller( this );
-
    connect( logpoller, SIGNAL( logUpdated() ),
             this,        SLOT( readVgLog() ) );
 }
@@ -127,9 +125,9 @@ ToolObject::~ToolObject()
 
    // logpoller auto deleted by Qt when 'this' dies
 
-   // unsaved log... delete our temp file
-   if ( !fileSaved && !saveFname.isEmpty() ) {
-      QDir().remove( saveFname );
+   // cleanup temp-log
+   if ( QFile::exists( tmplogFname ) ) {
+      QFile::remove( tmplogFname );
    }
 }
 
@@ -231,8 +229,6 @@ bool ToolObject::start( VGTOOL::ToolProcessId procId,
                         QStringList vgflags, QString logfile )
 {
    //cerr << "ToolObject::start(): "  << procId << endl;
-   this->saveFname = logfile;
-
    vk_assert( procId > VGTOOL::PROC_NONE );
    vk_assert( procId < VGTOOL::PROC_MAX );
    vk_assert( !isRunning() );
@@ -241,6 +237,7 @@ bool ToolObject::start( VGTOOL::ToolProcessId procId,
 
    switch ( procId ) {
    case VGTOOL::PROC_VALGRIND:
+      tmplogFname = logfile;
       ok = runValgrind( vgflags );
       break;
    case VGTOOL::PROC_PARSE_LOG:
@@ -248,31 +245,6 @@ bool ToolObject::start( VGTOOL::ToolProcessId procId,
       break;
    default:
       vk_assert_never_reached();
-   }
-
-   return ok;
-}
-
-bool ToolObject::runValgrind( QStringList vgflags )
-{
-   //VK_DEBUG( "Start Vg run" );
-
-   setProcessId( VGTOOL::PROC_VALGRIND );
-   fileSaved = false;
-   statusMsg( "Starting Valgrind ..." );
-
-   bool ok = startProcess( vgflags );
-
-   if ( !ok ) {
-      VK_DEBUG( "Error: Failed to start Valgrind" );
-      vk_assert( this->getProcessId() == VGTOOL::PROC_NONE );
-      statusMsg( "Error: Failed to start Valgrind" );
-      fileSaved = true;
-   }
-   else {
-      //VK_DEBUG( "Started Valgrind" );
-      vk_assert( this->getProcessId() == VGTOOL::PROC_VALGRIND );
-      statusMsg( "Started Valgrind ..." );
    }
 
    return ok;
@@ -288,9 +260,15 @@ bool ToolObject::runValgrind( QStringList vgflags )
 bool ToolObject::parseLogFile()
 {
    vk_assert( toolView != 0 );
+   // any vg run should have been cleaned up:
+   vk_assert( vgRunSaved );
+   vk_assert( tmplogFname.isEmpty() );
+
+   setProcessId( VGTOOL::PROC_PARSE_LOG );
 
    //TODO: pass this via flags from the toolview, or something.
    QString log_file = vkCfgProj->value( "valkyrie/view-log" ).toString();
+
    statusMsg( "Parsing '" + log_file + "'" );
 
    // check this is a valid file, and has at least read perms
@@ -301,15 +279,13 @@ bool ToolObject::parseLogFile()
       vkError( toolView, "File Error", "%s: \n\"%s\"",
                parseErrString( errval ),
                qPrintable( escapeEntities( log_file ) ) );
+      setProcessId( VGTOOL::PROC_NONE );
       return false;
    }
-
+   // log file ok
    log_file = ret_file;
-
-   // fileSaved true, 'cos we're just parsing an existing file
-   fileSaved = true;
-   setProcessId( VGTOOL::PROC_PARSE_LOG );
-
+   vkCfgProj->setValue( "valkyrie/view-log", log_file );
+   
    // Could be a very large file, so at least get ui up-to-date now
    qApp->processEvents( QEventLoop::AllEvents, 1000/*max msecs*/ );
 
@@ -319,7 +295,6 @@ bool ToolObject::parseLogFile()
 
    if ( success ) {
       statusMsg( "Loaded Logfile '" + log_file + "'" );
-      saveFname = log_file;
    }
    else {
       statusMsg( "Error Parsing Logfile '" + log_file + "'" );
@@ -334,18 +309,21 @@ bool ToolObject::parseLogFile()
 }
 
 
-
 /*!
   Run a VKProcess, as given by 'flags'.
    - Reads ouput from file, loading this to the listview.
 */
-bool ToolObject::startProcess( QStringList flags )
+bool ToolObject::runValgrind( QStringList flags )
 {
-   //VK_DEBUG( "Start VgProcess" );
+   //VK_DEBUG( "Start Vg run" );
    vk_assert( toolView != 0 );
+
+   setProcessId( VGTOOL::PROC_VALGRIND );
+   statusMsg( "Starting Valgrind ..." );
 
    QString     program = flags.at( 0 );
    QStringList args    = flags.mid( 1 );
+   vgRunSaved = false; // reset later if start failed
 
 #if 0//def DEBUG_ON
 
@@ -381,42 +359,38 @@ bool ToolObject::startProcess( QStringList flags )
    //  1) Vg may have finished already(!)
    //  2) QXmlSimpleReader won't start on an empty log: seems to need at least "<?x"
    // So just wait for a while until we find the valgrind output log...
-   int i = 0;
-
-   while ( i < WAIT_VG_START_LOOPS ) {
-      if ( QFile::exists( saveFname ) ) {
-         break;
-      }
-
+   int nLoops=0;
+   for (;nLoops < WAIT_VG_START_LOOPS; nLoops++) {
+      if ( QFile::exists( tmplogFname ) ) { break; }
       usleep( WAIT_VG_START_SLEEP * 1000 );
-      i++;
    }
+   bool vg_ok = (nLoops < WAIT_VG_START_LOOPS);
 
-   // If no logfile found, we have a problem:
-   if ( i >= WAIT_VG_START_LOOPS ) {
-      VK_DEBUG( "Valgrind failed to start properly (process not running)" );
+   if ( vg_ok ) {
+      //VK_DEBUG( "Started Valgrind" );
+      statusMsg( "Started Valgrind ..." );
+
+      // poll log regularly to trigger parsing of the latest data via readVgLog()
+      // doesn't matter if processDone() or readVgLog() gets called first.
+      logpoller->start( 250 );  // msec
+   }
+   else {
+      vgRunSaved = true;  // nothing to save
+
+      VK_DEBUG( "Error: Failed Vg startup: '%s'", qPrintable( flags.join( " " ) ) );
+      statusMsg( "Error: Failed to start Valgrind" );
       vkError( toolView, "Process Startup Error",
-               "<p>Failed to start valgrind properly.<br>"
-               "Please verify Valgrind and Binary paths (via Options->Valkyrie).<br>"
-               "Try running Valgrind (with _exactly_ the same arguments) via the command-line"
-               "<br><br>%s",
-               qPrintable( flags.join( "<br>   " ) ) );
-      goto failed_startup;
+            "<p>Failed to start valgrind properly.<br>"
+            "Please verify Valgrind and Binary paths (via Options->Valkyrie).<br>"
+            "Try running Valgrind (with _exactly_ the same arguments) via the command-line"
+            "<br><br>%s",
+            qPrintable( flags.join( "<br>   " ) ) );
+
+      stopProcess();
+      vk_assert( this->getProcessId() == VGTOOL::PROC_NONE );
    }
 
-   // poll log regularly to trigger parsing of the latest data via readVgLog()
-   logpoller->start( 250 );  // msec
-
-   statusMsg( "Error Parsing Logfile '" + saveFname + "'" );
-
-   // doesn't matter if processDone() or readVgLog() gets called first.
-   //VK_DEBUG( "Started logpoller" );
-   return true;
-
-failed_startup:
-   VK_DEBUG( "failed_startup: '%s'", qPrintable( flags.join( " " ) ) );
-   stopProcess();
-   return false;
+   return vg_ok;
 }
 
 
@@ -510,6 +484,8 @@ void ToolObject::stopProcess()
 
 /* are we done and dusted?
    anything we need to check/do before being deleted/closed?
+   return true -> all done.
+   return false -> not quite yet.
 */
 bool ToolObject::queryDone()
 {
@@ -523,59 +499,45 @@ bool ToolObject::queryDone()
 
       // Note: process may have finished while waiting for user
       if ( ok == MsgBox::vkYes ) {
-         stopProcess();                        // abort
+         stopProcess();                       // abort
          vk_assert( !isRunning() );
       }
       else if ( ok == MsgBox::vkNo ) {
-         return false;                         // continue
+         return false;                        // continue
       }
    }
 
-   if ( !queryFileSave() ) {
-      return false;   // not saved: procrastinate.
-   }
-
-   return true;
-}
-
-/* if current output not saved, ask user if want to save
-   returns false if not saved, but user wants to procrastinate.
-*/
-bool ToolObject::queryFileSave()
-{
-   vk_assert( toolView != 0 );
-#if 0
-   vk_assert( !isRunning() );
-
-   /* currently loaded / parsed stuff is saved to tmp file - ask user
-      if they want to save it to a 'real' file */
-   if ( !fileSaved ) {
-      int ok = vkQuery( toolView, "Unsaved File",
+   // if current output not saved, ask user if want to save
+   bool discardLog = true;
+   if ( !vgRunSaved ) {
+      int ok = vkQuery( toolView, "Unsaved Run Log",
                         "&Save;&Discard;&Cancel",
                         "<p>The current output is not saved, "
                         " and will be deleted.<br/>"
                         "Do you want to save it ?</p>" );
 
-      if ( ok == MsgBox::vkYes ) {            /* save */
-
-         if ( !fileSaveDialog() ) {
-            /* user clicked Cancel, but we already have the
-               auto-fname saved anyway, so get outta here. */
-            return false;
-         }
-
+      if ( ok == MsgBox::vkYes ) {            // Save log
+         discardLog = fileSaveDialog();       // not saved -> procrastinate
       }
-      else if ( ok == MsgBox::vkCancel ) {    /* procrastinate */
-         return false;
+      else if ( ok == MsgBox::vkCancel ) {    // Cancelled: procrastinate
+         discardLog = false;
       }
-      else {                                  /* discard */
-         QFile::remove( saveFname );
-         fileSaved = true;
-      }
+      // else discard log
    }
 
-#endif
-   return true;
+   if ( discardLog ) {
+      if ( QFile::exists( tmplogFname ) ) {
+         QFile::remove( tmplogFname );
+      }
+      tmplogFname = QString();
+      vgRunSaved = true; // nothing more to save
+
+      // TODO: clear View
+   }
+
+   vk_assert( vgproc == 0 );
+   vk_assert( !this->isRunning() );
+   return discardLog;
 }
 
 
@@ -742,7 +704,7 @@ void ToolObject::readVgLog()
    vk_assert( toolView != 0 );
    vk_assert( vgreader != 0 );
    vk_assert( logpoller != 0 );
-   vk_assert( !saveFname.isEmpty() );
+   vk_assert( !tmplogFname.isEmpty() );
 
    // Note: not calling qApp->processEvents(), since parser only
    // reads in a limited amount in one go anyway.
@@ -756,7 +718,7 @@ void ToolObject::readVgLog()
       // first time around...
       //VK_DEBUG( "Start parsing Valgrind XML log" );
 
-      ok = vgreader->parse( saveFname, true/*incremental*/ );
+      ok = vgreader->parse( tmplogFname, true/*incremental*/ );
 
       if ( !ok ) {
          VK_DEBUG( "Error: parse() failed" );
@@ -863,123 +825,60 @@ void ToolObject::checkParserFinished()
 
 
 /*!
-  Brings up a fileSaveDialog until successfully saved,
-  or user pressed Cancel.
-  If fname.isEmpty, ask user for a name first.
-  returns false on user pressing Cancel, else true.
-
-  Save-dialog started in user-configured default log dir
+  1. Brings up a Save File Dialog to choose a filename to save to
+  2. Gets log to read from
+  3. Copies log to given filename
+  returns false on: user pressing Cancel, src==dst, copy fail
+  else true.
 */
-bool ToolObject::fileSaveDialog( QString fname/*=QString()*/ )
+bool ToolObject::fileSaveDialog()
 {
-   cerr << "ToolObject::fileSaveDialog( '" << qPrintable( fname ) << "' )" << endl;
+   cerr << "ToolObject::fileSaveDialog()" << endl;
    vk_assert( toolView != 0 );
 
-#if 0
-   // TODO
-   QFileDialog dlg;
-   dlg.setShowHiddenFiles( true );
+   // --- Get filename to save to
    QString flt = "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)";
    QString cptn = "Save Log File As";
+   // use dir used by view-log as most-likely starting point
+   QFileInfo fi( vkCfgProj->value( "valkyrie/view-log" ).toString() );
+   QString start_path = fi.exists() ? fi.absolutePath() : "./";
 
-   /* Ask fname if don't have one already */
-   if ( fname.isEmpty() ) {
-      /* Start save-dialog in User-configured default log dir*/
-      QString start_path = vkCfgProj->rdEntry( "default-logdir", "valkyrie" );
-      fname = dlg.getSaveFileName( start_path, flt, toolView, "fsdlg", cptn );
-
-      if ( fname.isEmpty() ) {
-         return false;
-      }
+   // get filename to save to: asks for overwrite confirmation
+   QString fname = QFileDialog::getSaveFileName( toolView, cptn, start_path, flt);
+   if ( fname.isEmpty() ) { // Cancelled
+      return false;
    }
 
-   /* try to save file until succeed, or user Cancels */
-   while ( !saveParsedOutput( fname ) ) {
-      QString start_path = QFileInfo( fname ).dirPath();
-      fname = dlg.getSaveFileName( start_path, flt, toolView, "fsdlg", cptn );
-
-      if ( fname.isEmpty() ) { /* Cancelled */
-         return false;
-      }
+   // --- Get appropriate source log
+   // TODO: this is horrible, but good enough for now.
+   //  - relies on empty tmplogFname to indicate not a vg run but a loaded log
+   QString srcFname = tmplogFname;
+   if ( tmplogFname.isEmpty() ) {
+      srcFname = vkCfgProj->value( "valkyrie/view-log" ).toString();
    }
 
-#endif
-   return true;
-}
+   // trying to copy src to src?
+   if ( QFileInfo( srcFname ) == QFileInfo( fname ) ) {
+      return false;
+   }
 
-
-/* Save to file
-   - we already have everything in saveFname logfile, so just copy that
-*/
-bool ToolObject::saveParsedOutput( QString& )//fname )
-{
-#if 0
-   //vkPrint("saveParsedOutput(%s)", fname.latin1() );
-   vk_assert( toolView != 0 );
-   vk_assert( !fname.isEmpty() );
-
-   /* make sure path is absolute */
-   fname = QFileInfo( fname ).absFilePath();
-
-   /* if this filename already exists, check if we should over-write it */
+   // --- Copy src log to given filename ---
+   // first delete if already exists
    if ( QFile::exists( fname ) ) {
-      int ok = vkQuery( toolView, 2, "Overwrite File",
-                        "<p>Over-write existing file '%s' ?</p>",
-                        fname.latin1() );
-
-      if ( ok == MsgBox::vkNo ) {
-         /* nogo: return and try again */
-         return false;
-      }
+      QFile::remove( fname );
    }
-
-   /* save log (=copy/rename) */
-   bool ok;
-
-   if ( !fileSaved ) {
-      /* first save after a run, so just rename saveFname => fname */
-      if ( 0 ) vkPrint( "renaming: '%s' -> '%s'",
-                           saveFname.latin1(), fname.latin1() );
-
-      if ( saveFname != fname ) {
-         ok = FileCopy( saveFname, fname );
-
-         if ( ok ) {
-            ok = QDir().remove( saveFname );
-         }
-      }
-      else {
-         ok = true; // no need to do anything
-      }
-
-      // OLD:
-      //ok = QDir().rename( saveFname, fname );
-      // but we can't just rename, because that fails when the src
-      // and dst files are in different partitions.  The longwinded
-      // but more reliable solution is to copy and then delete the
-      // original.
-   }
-   else {
-      /* we've saved once already: must now copy saveFname => fname */
-      if ( 0 ) vkPrint( "copying: '%s' -> '%s'",
-                           saveFname.latin1(), fname.latin1() );
-
-      ok = FileCopy( saveFname, fname );
-   }
+   bool ok = QFile::copy( srcFname, fname );
 
    if ( ok ) {
-      saveFname = fname;
-      fileSaved = true;
-      statusMsg( "Saved", saveFname );
+      vgRunSaved = true;
+      statusMsg( "Saved: " + srcFname );
    }
    else {
-      /* nogo: return and try again */
+      // nogo: return and try again
       vkInfo( toolView, "Save Failed",
-              "<p>Failed to save file to '%s'",  fname.latin1() );
-      statusMsg( "Failed Save", saveFname );
+              "<p>Failed to save file to '%s'", qPrintable( fname ) );
+      statusMsg( "Failed Save: " + srcFname );
    }
 
    return ok;
-#endif
-   return true;
 }

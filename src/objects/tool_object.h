@@ -80,17 +80,14 @@ signals:
    
 protected:
    void setProcessId( int procId );
-   int getProcessId();
+   int  getProcessId();
 
 private:
    virtual ToolView* createToolView( QWidget* parent ) = 0;
    virtual void statusMsg( QString msg ) = 0;
    bool runValgrind( QStringList vgflags );
    bool parseLogFile();
-   bool startProcess( QStringList flags );
-
    bool queryFileSave();
-   bool saveParsedOutput( QString& fname );
 
 private slots:
    void stopProcess();
@@ -100,7 +97,7 @@ private slots:
    void checkParserFinished();
 
 public slots:
-   bool fileSaveDialog( QString fname = QString() );
+   bool fileSaveDialog();
 
 public:
    VGTOOL::ToolID getToolId() {
@@ -109,16 +106,16 @@ public:
    
 protected:
    ToolView*  toolView;  // the toolview window
-   QString    saveFname;
-   bool       fileSaved;
 
 private:
+   QString    tmplogFname;
+   bool       vgRunSaved;
+
    // tools need to add own processId's: classic enum extend problem :-(
    int processId;
    
    VGTOOL::ToolID toolId;  // which tool are we.
 
-private:
    VgLogReader* vgreader;
    QProcess*    vgproc;
    VkLogPoller* logpoller;

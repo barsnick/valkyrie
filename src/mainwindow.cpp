@@ -728,7 +728,10 @@ void MainWindow::setPalette()
 
 
 /*!
-  set logfile name to be loaded
+  Set logfile name to be loaded
+  Used from toolviews 'cos no access to vk from there
+  Necessary to set cfg as does cmd line --view-cfg...
+  TODO: this is just plain nasty...
 */
 void MainWindow::setLogFile( QString logFilename )
 {
@@ -940,6 +943,12 @@ void MainWindow::closeToolView()
    cerr << "MainWindow::closeToolView(): " <<
         tv->objectName().toLatin1().data() << endl;
         
+   // last process might not be done ...
+   if ( !valkyrie->queryToolDone( toolViewStack->currentToolId() ) ) {
+      cerr << "Warning: Last process not finished" << endl;
+      return;
+   }
+
    toolViewStack->removeView( tv );
    
    // current toolview will now have changed (maybe to NULL)
