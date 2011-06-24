@@ -121,21 +121,27 @@ VgLogView* HelgrindView::createVgLogView()
 
 /*!
     Parse and load an xml logfile.
+
+    TODO: fix. This starts a new 'run', so we should
+    trigger vk's "check last run over" before anything else...
 */
 void HelgrindView::openLogFile()
 {
 //   cerr << "HelgrindView::openLogFile()" << endl;
 
+   QString last_file = vkCfgProj->value( "valkyrie/view-log" ).toString();
+   if ( last_file.isEmpty() ) last_file = "./";
+
    QString captn = "Select Log File";
    QString filt = "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)";
-   QString log_file = QFileDialog::getOpenFileName( this, captn, "./", filt );
+   QString log_file = QFileDialog::getOpenFileName( this, captn, last_file, filt );
 
    // user might have clicked Cancel
    if ( log_file.isEmpty() ) {
       return;
    }
 
-   // updates config
+   // updates config (as does cmd line --view-cfg...)
    emit logFileChosen( log_file );
 
    // informs tool_object to load the log_file given in config
