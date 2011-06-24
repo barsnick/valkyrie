@@ -707,15 +707,10 @@ bool Valkyrie::runTool( VGTOOL::ToolID tId, VGTOOL::ToolProcessId procId )
    
    QStringList vg_flags = getVgFlags( tId );
 
-
    // update the flags with the necessary options: xml etc.
    QString log_basename = activeTool->objectName() + "_log";
    QString logfile = vk_mkstemp( VkCfg::tmpDir() + log_basename, "xml" );
    vk_assert( !logfile.isEmpty() );
-
-//TODO: rm
-// Vg < 3.6:
-//   vg_flags.insert( ++( vg_flags.begin() ), ( "--log-file=" + logfile ) );
 
    vg_flags.insert( ++( vg_flags.begin() ), ( "--xml-file=" + logfile ) );
    vg_flags.insert( ++( vg_flags.begin() ), "--xml=yes" );

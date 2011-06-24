@@ -508,7 +508,6 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    case VALGRIND::RUN_LIBC:
    case VALGRIND::NUM_CALLERS:
    case VALGRIND::DEMANGLE:
-      //   case VALGRIND::INPUT_FD: // TODO
    case VALGRIND::SHOW_BELOW:
    case VALGRIND::MAX_SFRAME:
    case VALGRIND::SMC_CHECK:
