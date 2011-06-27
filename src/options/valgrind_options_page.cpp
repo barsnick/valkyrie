@@ -488,6 +488,17 @@ void ValgrindOptionsPage::suppNewFromStr( const QString& str )
       return;
    }
    
+   // first check we have a file to write to
+   LbWidget* lbSel = ( LbWidget* )m_itemList[VALGRIND::SUPPS_SEL];
+   QListWidget* lwSuppFiles = (QListWidget*)lbSel->widget();
+   if ( lwSuppFiles->count() == 0 ) {
+      suppfileNew();
+   }
+   // still no supp file? user may have Cancelled...
+   if ( lwSuppFiles->count() == 0 ) {
+      return;
+   }
+   
    // Edit new supp: update model and suppfile first...
    if ( supplist.editSupp( -1, supp ) ) {
       // ... then update the view
