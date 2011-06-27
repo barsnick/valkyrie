@@ -26,6 +26,26 @@
 
 
 // ============================================================
+// reimplementation of QListWidget, in order to catch row changes
+class MyListWidget : public QListWidget
+{
+   Q_OBJECT
+public:
+   MyListWidget( QWidget* parent = 0 ) : QListWidget( parent ) {}
+private:
+   MyListWidget( const MyListWidget& lw );
+
+signals:
+   void rowsChanged( bool, int );
+   
+protected slots:
+   void rowsInserted(const QModelIndex &parent, int start, int end);
+   void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);   
+};
+
+
+
+// ============================================================
 // listbox widget - for lists of files
 class LbWidget : public OptionWidget
 {
@@ -37,16 +57,12 @@ public:
    QString printCurrValue();  // overloads base class
 
 private slots:
-   void popupMenu( const QPoint& );
    void update( const QString& txt );
+   void updateValueFromView( bool isInserted, int row );
 
 private:
-   QString lbText();
-   void lbChanged();
-   
-private:
-   QListWidget* m_lbox;
-   QChar        m_sep;
+   MyListWidget* m_lbox;
+   QChar         m_sep;
 };
 
 #endif  // __VK_OPTION_LB_WIDGET_H

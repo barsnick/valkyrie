@@ -18,6 +18,11 @@
 **
 ****************************************************************************/
 
+#include "mainwindow.h"
+#include "options/suppressions.h"
+#include "options/vk_options_dialog.h"
+#include "options/valgrind_options_page.h"
+#include "options/vk_suppressions_dialog.h"
 #include "toolview/memcheckview.h"
 #include "toolview/memcheck_logview.h"
 #include "utils/vk_config.h"
@@ -26,11 +31,13 @@
 
 #include <QAction>
 #include <QApplication>
+#include <QClipboard>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QLabel>
 #include <QMenuBar>
 #include <QProcess>
+#include <QTextStream>
 #include <QToolBar>
 #include <QVBoxLayout>
 
@@ -80,6 +87,10 @@ MemcheckView::MemcheckView( QWidget* parent )
    // launch editor with src file loaded
    connect( treeView, SIGNAL( itemDoubleClicked( QTreeWidgetItem*, int ) ),
             this,       SLOT( launchEditor( QTreeWidgetItem* ) ) );
+
+   treeView->setContextMenuPolicy( Qt::CustomContextMenu );
+   connect( treeView, SIGNAL( customContextMenuRequested( const QPoint& ) ),
+            this,       SLOT( popupMenu( const QPoint& ) ) );
 }
 
 
@@ -380,6 +391,75 @@ void MemcheckView::launchEditor( QTreeWidgetItem* item )
                "<p>Failed to launch editor:<br>%s %s</p>",
                qPrintable( program ),
                qPrintable( args.join("<br>") ) );
+   }
+}
+
+
+void MemcheckView::popupMenu( const QPoint& pos )
+{
+   VgOutputItem* item = (VgOutputItem*)treeView->itemAt( pos );
+   if ( !item ) return;
+
+   // Setup title   
+   QAction actTitle( "[Item: " + item->getElement().tagName() + "]", this );
+   actTitle.setEnabled(false);
+   QFont f = qApp->font();
+   f.setBold(true);
+   //f.setItalic(true);
+   f.setPointSize( f.pointSize()+2 );
+   actTitle.setFont( f );
+
+   // the actions
+   QAction actCopyTxt( "Copy text", this );
+   QAction actCopyXML( "Copy XML", this );
+   QAction actSuppr( "Add suppression", this );
+   if ( ( item->elemType() != VG_ELEM::ERROR ) )
+      actSuppr.setEnabled( false );
+   
+   // the menu
+   QMenu menu( treeView );
+   menu.addAction( &actTitle );   // title: no action
+   menu.addAction( &actCopyTxt ); // plain text of node tree -> clipboard
+   menu.addAction( &actCopyXML ); // xml of node tree -> clipboard
+   menu.addAction( &actSuppr );
+   
+   // popup
+   QAction* act = menu.exec( treeView->mapToGlobal( pos ) );
+   if ( act == &actCopyTxt ) { 
+      QString txt = item->getElement().text();
+      QClipboard *clipboard = QApplication::clipboard();
+      clipboard->setText( txt );
+   }
+   else if ( act == &actCopyXML ) {
+      QString xml;
+      QTextStream ts(&xml);
+      ts << item->getElement() << endl;
+      QClipboard *clipboard = QApplication::clipboard();
+      clipboard->setText( xml );
+   }
+   else if ( act == &actSuppr ) {
+      // get suppression from ErrorItem
+      QString str_supp = ((ErrorItem*)item)->getSuppressionStr();
+
+      if ( str_supp.isEmpty() ) {
+         vkPrintErr("No suppression found for this Error");
+         vkInfo( this, "No suppression could be found for this Error.",
+                 "Please check (via Options->Valgrind->Error Reporting)<br>"
+                 "that the option \"Print suppressions for errors\"<br/>"
+                 "is set to \"all\".");
+      }
+      else {
+         // Send gathered supp to Options->Supp Editor
+         // NOTE: Assuming first supp_file in list is our default
+         // TODO:  - document that!
+         
+         // TODO: this is just nasty. What's an elegant solution?
+         VkOptionsDialog optionsDlg( (MainWindow*)this->parent()->parent()->parent() );
+         ValgrindOptionsPage* pg = (ValgrindOptionsPage*)optionsDlg.setCurrentPage( 1 );
+         pg->setCurrentTab( 2 );
+         pg->suppNewFromStr( str_supp );
+         optionsDlg.exec();
+      }
    }
 }
 

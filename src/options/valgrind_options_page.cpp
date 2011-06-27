@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 #include <QDir>
+#include <QFileDialog>
 #include <QListWidget>
 #include <QTabWidget>
 
@@ -62,7 +63,7 @@ void ValgrindOptionsPage::setupOptions()
    group1->setObjectName( QString::fromUtf8( "ValgrindOptionsPage_group1" ) );
    pageTopVLayout->addWidget( group1 );
    
-   QTabWidget* tabWidget = new QTabWidget( this );
+   tabWidget = new QTabWidget( this );
    tabWidget->setObjectName( QString::fromUtf8( "ValgrindOptionsPage_tabWidget" ) );
    pageTopVLayout->addWidget( tabWidget );
    
@@ -201,16 +202,93 @@ void ValgrindOptionsPage::setupOptions()
    tabWidget->addTab( tabSupps, " Suppressions " );
    ContextHelp::addHelp( tabSupps, urlValkyrie::suppsTab );
    
-   // tabErep - vbox
-   QVBoxLayout* supp_vbox = new QVBoxLayout( tabSupps );
-   supp_vbox->setObjectName( QString::fromUtf8( "supp_vbox" ) );
-   
-   // tabErep - options
-   insertOptionWidget( VALGRIND::SUPPS_SEL, tabSupps, true );  // listbox
-   
+   // tabSupps - suppression files
+   QGroupBox* suppfile_groupbox = new QGroupBox();
+   QHBoxLayout* suppfile_hbox = new QHBoxLayout();
+   suppfile_hbox->setObjectName( QString::fromUtf8( "suppfile_hbox" ) );
+   suppfile_hbox->setMargin(0);
+   // listbox(options)
+   insertOptionWidget( VALGRIND::SUPPS_SEL, tabSupps, false );  // listbox
    LbWidget* lbSel = ( LbWidget* )m_itemList[VALGRIND::SUPPS_SEL];
-   supp_vbox->addLayout( lbSel->vlayout() );
+   QListWidget* lwSuppFiles = (QListWidget*)lbSel->widget();
+   connect( lwSuppFiles, SIGNAL(currentRowChanged(int)), this, SLOT(setSuppFileBtns()) );
+   connect( lwSuppFiles, SIGNAL(currentRowChanged(int)), this, SLOT(suppLoad()) );
+   // buttongroup
+   QWidget* butts1_groupbox = new QWidget();
+   QVBoxLayout* butts1_vbox = new QVBoxLayout();
+   butts1_vbox->setObjectName( QString::fromUtf8( "butts1_vbox" ) );
+   butts1_vbox->setMargin(0);
    
+   QIcon icon_arrow_up;
+   icon_arrow_up.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/arrow_up.png" ) ) );
+   QIcon icon_arrow_down;
+   icon_arrow_down.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/arrow_down.png" ) ) );
+   
+   btn_suppfile_up  = new QPushButton( icon_arrow_up, "", butts1_groupbox );
+   btn_suppfile_dwn = new QPushButton( icon_arrow_down, "", butts1_groupbox );
+   btn_suppfile_new = new QPushButton("New", butts1_groupbox );
+   btn_suppfile_add = new QPushButton("Add", butts1_groupbox );
+   btn_suppfile_rmv = new QPushButton("Remove", butts1_groupbox );
+   setSuppFileBtns();
+   connect( btn_suppfile_up,  SIGNAL(clicked()), this, SLOT( suppfileUp() ) );
+   connect( btn_suppfile_dwn, SIGNAL(clicked()), this, SLOT( suppfileDown() ) );
+   connect( btn_suppfile_new, SIGNAL(clicked()), this, SLOT( suppfileNew() ) );
+   connect( btn_suppfile_add, SIGNAL(clicked()), this, SLOT( suppfileAdd() ) );
+   connect( btn_suppfile_rmv, SIGNAL(clicked()), this, SLOT( suppfileRemove() ) );
+   butts1_vbox->addWidget( btn_suppfile_up  );
+   butts1_vbox->addWidget( btn_suppfile_dwn );
+   butts1_vbox->addWidget( btn_suppfile_new );
+   butts1_vbox->addWidget( btn_suppfile_add );
+   butts1_vbox->addWidget( btn_suppfile_rmv );
+   butts1_vbox->addStretch( 1 );
+   butts1_groupbox->setLayout( butts1_vbox );
+   // setup horizontal layout
+   suppfile_hbox->addWidget( lbSel->widget() );
+   suppfile_hbox->addWidget( butts1_groupbox );
+   suppfile_groupbox->setLayout( suppfile_hbox );
+   
+   // tabSupps - suppressions
+   QGroupBox* supps_groupbox = new QGroupBox();
+   QHBoxLayout* supps_hbox = new QHBoxLayout();
+   supps_hbox->setObjectName( QString::fromUtf8( "supps_hbox" ) );
+   supps_hbox->setMargin(0);
+   // listview
+   lwSupps = new QListWidget( supps_groupbox );
+   lwSupps->setObjectName( QString::fromUtf8( "list_widget_supps" ) );
+   lwSupps->setSelectionMode( QAbstractItemView::SingleSelection );//QListWidget::Single );
+   ContextHelp::addHelp( lwSupps, urlValkyrie::suppsTab );
+   connect( lwSupps, SIGNAL(currentRowChanged(int)), this, SLOT(setSuppBtns()) );
+   connect( lwSupps, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+           this,       SLOT(suppEdit(QListWidgetItem*)) );
+   
+   // buttongroup
+   QWidget* butts_groupbox = new QWidget();
+   QVBoxLayout* butts_vbox = new QVBoxLayout();
+   butts_vbox->setObjectName( QString::fromUtf8( "butts_vbox" ) );
+   butts_vbox->setMargin(0);
+   btn_supp_new = new QPushButton("New", butts_groupbox );
+   btn_supp_edt = new QPushButton("Edit", butts_groupbox );
+   btn_supp_del = new QPushButton("Delete", butts_groupbox );
+   suppLoad();
+   connect( btn_supp_new, SIGNAL(clicked()), this, SLOT( suppNew() ) );
+   connect( btn_supp_edt, SIGNAL(clicked()), this, SLOT( suppEdit() ) );
+   connect( btn_supp_del, SIGNAL(clicked()), this, SLOT( suppDelete() ) );
+   butts_vbox->addWidget( btn_supp_new );
+   butts_vbox->addWidget( btn_supp_edt );
+   butts_vbox->addWidget( btn_supp_del );
+   butts_vbox->addStretch( 1 );
+   butts_groupbox->setLayout( butts_vbox );
+   // setup horizontal layout   
+   supps_hbox->addWidget( lwSupps );
+   supps_hbox->addWidget( butts_groupbox );
+   supps_groupbox->setLayout( supps_hbox );
+   
+   // tabSupps - Add everything to our top vbox layout
+   QVBoxLayout* suppressions_vlayout = new QVBoxLayout();
+   suppressions_vlayout->setObjectName( QString::fromUtf8( "suppfile_vlayout" ) );
+   suppressions_vlayout->addWidget( suppfile_groupbox );
+   suppressions_vlayout->addWidget( supps_groupbox );
+   tabSupps->setLayout( suppressions_vlayout );
    
    
    // ============================================================
@@ -245,12 +323,11 @@ void ValgrindOptionsPage::setupOptions()
    m_itemList[VALGRIND::VERBOSITY  ]->setEnabled( false );
    m_itemList[VALGRIND::TRACK_FDS  ]->setEnabled( false );
    m_itemList[VALGRIND::EM_WARNS   ]->setEnabled( false );
-   m_itemList[VALGRIND::GEN_SUPP   ]->setEnabled( false );
    m_itemList[VALGRIND::ERROR_LIMIT]->setEnabled( false );
    m_itemList[VALGRIND::DB_ATTACH  ]->setEnabled( false );
    m_itemList[VALGRIND::DB_COMMAND ]->setEnabled( false );
    dbLedit->button()->setEnabled( false );
-   
+
    vk_assert( m_itemList.count() <= VALGRIND::NUM_OPTS );
 }
 
@@ -258,6 +335,211 @@ void ValgrindOptionsPage::setupOptions()
 void ValgrindOptionsPage::getDbBin()
 {
    vkPrintErr( "TODO: ValgrindOptionsPage::getDbBin()\n" );
+}
+
+
+
+
+
+//---------------------------------------------------------------------
+// Suppression routines
+void ValgrindOptionsPage::setSuppFileBtns()
+{
+   QListWidget* lwSuppFiles = (QListWidget*)m_itemList[VALGRIND::SUPPS_SEL]->widget();
+   
+   if ( lwSuppFiles->currentItem() != 0 ) {
+      btn_suppfile_rmv->setEnabled( true );
+      btn_suppfile_up->setEnabled( lwSuppFiles->currentRow() > 0 );
+      btn_suppfile_dwn->setEnabled( lwSuppFiles->currentRow() < lwSuppFiles->count()-1 );
+   }
+   else {
+      btn_suppfile_rmv->setEnabled( false );
+      btn_suppfile_up->setEnabled( false );
+      btn_suppfile_dwn->setEnabled( false );
+   }
+}
+
+void ValgrindOptionsPage::suppfileUp()
+{
+   QListWidget* lwSuppFiles = (QListWidget*)m_itemList[VALGRIND::SUPPS_SEL]->widget();
+   int currRow = lwSuppFiles->currentRow();
+   
+   QListWidgetItem* item = lwSuppFiles->takeItem( currRow );
+   lwSuppFiles->insertItem( currRow-1, item );
+   lwSuppFiles->setCurrentItem( item );
+}
+
+void ValgrindOptionsPage::suppfileDown()
+{
+   QListWidget* lwSuppFiles = (QListWidget*)m_itemList[VALGRIND::SUPPS_SEL]->widget();
+   int currRow = lwSuppFiles->currentRow();
+   
+   QListWidgetItem* item = lwSuppFiles->takeItem( currRow );
+   lwSuppFiles->insertItem( currRow+1, item );
+   lwSuppFiles->setCurrentItem( item );
+}
+
+void ValgrindOptionsPage::suppfileNew()
+{
+   LbWidget* lbSel = ( LbWidget* )m_itemList[VALGRIND::SUPPS_SEL];
+   QListWidget* lwSuppFiles = (QListWidget*)lbSel->widget();
+
+   QString supp_file =
+      QFileDialog::getSaveFileName( this,
+                                    tr( "Enter Supporessions Filename" ),
+                                    "./", tr("Suppression Files (*.supp)") );
+
+   if ( supp_file.isEmpty() ) { // user clicked Cancel
+      // ignore.
+   }
+   else {
+      // create clean suppfile, add filename to view and opt_list
+      if ( supplist.initSuppsFile( supp_file ) ) {
+         lwSuppFiles->addItem( supp_file );
+         lwSuppFiles->setCurrentRow( lwSuppFiles->count()-1 );
+      }
+      else {
+         vkPrintErr("Failed to write suppressions file '%s'", qPrintable(supp_file));
+         // TODO: file write error: tell user
+      }
+   }
+}
+
+
+void ValgrindOptionsPage::suppfileAdd()
+{
+   LbWidget* lbSel = ( LbWidget* )m_itemList[VALGRIND::SUPPS_SEL];
+   QListWidget* lwSuppFiles = (QListWidget*)lbSel->widget();
+
+   QString supp_file =
+      QFileDialog::getOpenFileName( this,
+                                    tr( "Choose Suppression File" ),
+                                    "./", tr("Suppression Files (*.supp)") );
+
+   if ( ! supp_file.isEmpty() ) { // user clicked Cancel ?
+      lwSuppFiles->addItem( supp_file );
+      lwSuppFiles->setCurrentRow( lwSuppFiles->count()-1 );
+   }
+}
+
+void ValgrindOptionsPage::suppfileRemove()
+{
+   LbWidget* lbSel = ( LbWidget* )m_itemList[VALGRIND::SUPPS_SEL];
+   QListWidget* lwSuppFiles = (QListWidget*)lbSel->widget();
+   
+   QListWidgetItem* item = lwSuppFiles->currentItem();
+   vk_assert( item );
+   
+   lwSuppFiles->takeItem( lwSuppFiles->row( item ) );
+   
+   setSuppFileBtns();
+}
+
+
+
+void ValgrindOptionsPage::setSuppBtns()
+{
+   QListWidget* lwFiles = (QListWidget*)m_itemList[VALGRIND::SUPPS_SEL]->widget();
+   bool suppfileSelected = (lwFiles->currentItem() != 0);
+   bool suppItemSelected = (lwSupps->currentItem() != 0);
+   
+   btn_supp_new->setEnabled( suppfileSelected );
+   btn_supp_edt->setEnabled( suppfileSelected && suppItemSelected );
+   btn_supp_del->setEnabled( suppfileSelected && suppItemSelected );
+}
+
+void ValgrindOptionsPage::suppLoad()
+{
+   QListWidget* lwFiles = (QListWidget*)m_itemList[VALGRIND::SUPPS_SEL]->widget();
+   bool suppfileSelected = (lwFiles->currentItem() != 0);
+
+   // first clear the last entries
+   lwSupps->clear();
+   supplist.clear();
+
+   if ( suppfileSelected ) {    // show the suppression names from the file
+      QString fname = lwFiles->currentItem()->text();
+      if (!supplist.readSuppFile( fname )) {
+         // TODO: error
+         vkPrintErr("Failed to read/parse supp file '%s'", qPrintable(fname));
+         return;
+      }
+      lwSupps->addItems( supplist.suppNames() );
+      lwSupps->setCurrentRow( 0 );
+   }
+   
+   setSuppBtns();
+}
+
+//
+void ValgrindOptionsPage::setCurrentTab( int idx )
+{
+   tabWidget->setCurrentIndex( idx );
+}
+
+
+// add supp from string, pass to editor, save if ok
+void ValgrindOptionsPage::suppNewFromStr( const QString& str )
+{
+   Suppression supp;
+   if ( !supp.fromStringList( str.split("\n") ) ) {
+      // TODO: err
+      vkPrintErr("Failed to parse supp from input string '%s'", qPrintable(str));
+      return;
+   }
+   
+   // Edit new supp: update model and suppfile first...
+   if ( supplist.editSupp( -1, supp ) ) {
+      // ... then update the view
+      lwSupps->addItem( supplist.suppNames().last() );
+      lwSupps->setCurrentRow( lwSupps->count()-1 );
+   }
+}
+   
+
+// create default supp, pass to editor, save if ok
+void ValgrindOptionsPage::suppNew()
+{
+   // New supp: update model and suppfile first...
+   if ( supplist.newSupp() ) {
+      // then update the view
+      lwSupps->addItem( supplist.suppNames().last() );
+      lwSupps->setCurrentRow( lwSupps->count()-1 );
+   }
+}
+
+// pass supp to editor, save to file
+void ValgrindOptionsPage::suppEdit( QListWidgetItem* )
+{
+   // currentRow() already updated, so just use that
+   suppEdit();
+}
+
+// pass supp to editor, save to file
+void ValgrindOptionsPage::suppEdit()
+{
+   int suppIdx = lwSupps->currentRow();
+   vk_assert( suppIdx != -1 );
+
+   // Edit supp:
+   if ( supplist.editSupp( suppIdx ) ) {
+      // then update the view
+      lwSupps->currentItem()->setText( supplist.suppNames().at(suppIdx) );
+      lwSupps->setCurrentRow( suppIdx );
+   }
+}
+
+// delete supp from file, view, list
+void ValgrindOptionsPage::suppDelete()
+{
+   int suppIdx = lwSupps->currentRow();
+   vk_assert( suppIdx != -1 );
+
+   // Delete supp: update model and suppfile first...
+   if ( supplist.deleteSupp( suppIdx ) ) {
+      // then update the view
+      lwSupps->takeItem( suppIdx );
+   }
 }
 
 
@@ -274,3 +556,5 @@ void ValgrindOptionsPage::getDbBin()
    }
 }
 #endif
+
+      

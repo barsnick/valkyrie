@@ -409,9 +409,9 @@ void Valgrind::setupOptions()
       this->objectName(),
       "gen-suppressions",
       '\0',
-      "<yes|no|all>",
-      "yes|no|all",
-      "no",
+      "<no|all>",
+      "no|all",
+      "all",     // Vg default is 'no', but we (generally) want this on.
       "Print suppressions for errors",
       "print suppressions for errors?",
       urlVgCore::genSuppressions,
@@ -511,14 +511,14 @@ int Valgrind::checkOptArg( int optid, QString& argval )
    case VALGRIND::SHOW_BELOW:
    case VALGRIND::MAX_SFRAME:
    case VALGRIND::SMC_CHECK:
+   case VALGRIND::GEN_SUPP:
       opt->isValidArg( &errval, argval );
       break;
-      
+
    case VALGRIND::VERBOSITY:
    case VALGRIND::TRACK_FDS:
    case VALGRIND::TIME_STAMP:
    case VALGRIND::EM_WARNS:
-   case VALGRIND::GEN_SUPP:
    case VALGRIND::ERROR_LIMIT:
    case VALGRIND::DB_COMMAND:
    case VALGRIND::DB_ATTACH:
@@ -724,7 +724,6 @@ QStringList Valgrind::getVgFlags( ToolObject* tool_obj )
       case VALGRIND::TRACK_FDS:
       case VALGRIND::TIME_STAMP:
       case VALGRIND::EM_WARNS:
-      case VALGRIND::GEN_SUPP:
       case VALGRIND::ERROR_LIMIT:
       case VALGRIND::DB_ATTACH:
       case VALGRIND::DB_COMMAND:
@@ -738,6 +737,12 @@ QStringList Valgrind::getVgFlags( ToolObject* tool_obj )
             }
          }
          
+         break;
+
+         // suppressions
+      case VALGRIND::GEN_SUPP:
+         // always add, irrespective of cfgVal / dfltVal
+         modFlags << "--" + opt->longFlag + "=" + cfgVal;
          break;
          
          // all tools use an internal logging option,

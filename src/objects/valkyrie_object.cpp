@@ -714,7 +714,7 @@ bool Valkyrie::runTool( VGTOOL::ToolID tId, VGTOOL::ToolProcessId procId )
 
    vg_flags.insert( ++( vg_flags.begin() ), ( "--xml-file=" + logfile ) );
    vg_flags.insert( ++( vg_flags.begin() ), "--xml=yes" );
-   
+
    return activeTool->start( procId, vg_flags, logfile );
 }
 

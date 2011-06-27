@@ -32,53 +32,48 @@
 
 /***************************************************************************/
 /*!
-    Constructs a LbWidget object
-    has-a QListBox
+  class MyListWidget
+  - sends signals for row add/delete
+*/
+void MyListWidget::rowsInserted(const QModelIndex &parent, int start, int end)
+{
+   vk_assert( start == end );
+   QListWidget::rowsInserted(parent, start, end);
+   emit rowsChanged( true, start );
+}
+
+void MyListWidget::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
+{
+   vk_assert( start == end );
+   QListWidget::rowsAboutToBeRemoved(parent, start, end);
+   emit rowsChanged( false, start );
+}
+
+
+
+/*!
+   Constructs a LbWidget object
+   has-a QListWidget
 
    Note: This widget was specifically written to handle suppression files
-   stuff and nothing else.
+   stuff and nothing else. This because of the difference in stored
+   (with comma's, for opt) and displayed (list)
 */
-
-static const char* sel_supp_xpm[] = {
-   "11 11 8 1",
-   "   c None",
-   ".  c #024266",
-   "+  c #5A9AB8",
-   "@  c #1B5F8E",
-   "#  c #79B7CD",
-   "$  c #5A97B5",
-   "%  c #AEDDE9",
-   "&  c #8ECADC",
-   "     .     ",
-   "  . .+. .  ",
-   " .+.@#@.+. ",
-   "  .#$%$#.  ",
-   " .@$&%&$@. ",
-   ".+#%%%%%#+.",
-   " .@$&%&$@. ",
-   "  .#$%$#.  ",
-   " .+.@#@.+. ",
-   "  . .+. .  ",
-   "     .     "
-};
-
-
 LbWidget::LbWidget( QWidget* parent, VkOption* vkopt, bool mklabel )
    : OptionWidget( parent, vkopt, mklabel )
 {
    this->setObjectName( "lb_widget" );
    
-   m_lbox = new QListWidget( parent );
+   m_lbox = new MyListWidget( parent );
    m_lbox->setObjectName( QString::fromUtf8( "list_box" ) );
    m_widg = m_lbox;
-   m_lbox->setSelectionMode( QAbstractItemView::SingleSelection );//QListWidget::Single );
+   m_lbox->setSelectionMode( QAbstractItemView::SingleSelection );
+   connect( m_lbox, SIGNAL(rowsChanged(bool,int)),
+           this, SLOT(updateValueFromView(bool, int)));
    
    m_sep  = VkCfg::sepChar();
    
    update( m_currentValue );
-   m_lbox->setContextMenuPolicy( Qt::CustomContextMenu );
-   connect( m_lbox, SIGNAL( customContextMenuRequested( const QPoint& ) ),
-            this,     SLOT( popupMenu( const QPoint& ) ) );
             
    // not added if the url is empty
    ContextHelp::addHelp( m_widg, m_opt->urlAddress );
@@ -107,6 +102,28 @@ void LbWidget::update( const QString& txt )
    for ( int i = 0; i < sfiles.count(); i++ ) {
       m_lbox->addItem( sfiles[i] );
    }
+
+   // auto-select the top row   
+   m_lbox->setCurrentRow( 0 );
+}
+
+
+/*!
+  Update underlying value from lbox
+  Triggered by signals rowsInserted, rowsToBeDeleted
+   - inserted row is easy: just concat the items
+   - to_be_deleted row isn't yet gone: skip that row.
+ */
+void LbWidget::updateValueFromView( bool isInserted, int row )
+{
+   QStringList items;
+   for ( int i=0; i < m_lbox->count(); i++ ) {
+      if (!isInserted && i == row) continue;   // 'row' is to be removed
+      items += m_lbox->item( i )->text();
+   }
+   QString listViewText = items.join( m_sep );
+
+   setCurrValue( listViewText );
 }
 
 
@@ -116,57 +133,4 @@ void LbWidget::update( const QString& txt )
 QString LbWidget::printCurrValue()
 {
    return "For one (or more) of:<br>" + currValue().replace( m_sep, "<br>" );
-}
-
-
-/*!
-  return all contents concat'd with m_sep
-*/
-QString LbWidget::lbText()
-{
-   QStringList items;
-
-   for ( int i = 0; i < m_lbox->count(); i++ ) {
-      items += m_lbox->item( i )->text();
-   }
-   
-   return ( items.count() == 0 ) ? "" : items.join( m_sep );
-}
-
-
-/*!
-  different menus and stuff for the different modes
-*/
-void LbWidget::popupMenu( const QPoint& pos )
-{
-   QListWidgetItem* lb_item = m_lbox->itemAt( pos );
-   
-   QAction actRemove( QPixmap( sel_supp_xpm ), "Remove File", this );
-   QAction actAdd( QPixmap( sel_supp_xpm ), "Add File", this );
-
-   if ( !lb_item ) {
-      actRemove.setEnabled( false );
-   }
-   
-   QMenu menu( m_lbox );
-   menu.addAction( &actRemove );
-   menu.addAction( &actAdd );
-   QAction* act = menu.exec( m_lbox->mapToGlobal( pos ) );
-   
-   if ( act == &actRemove ) {
-      vk_assert( lb_item );
-      m_lbox->takeItem( m_lbox->row( lb_item ) );
-      setCurrValue( lbText() );
-   }
-   else if ( act == &actAdd ) {
-      QString supp_file =
-         QFileDialog::getOpenFileName( m_lbox,
-                                       tr( "Choose Suppression File" ),
-                                       "./", tr("Suppression Files (*.supp)") );
-                            
-      if ( ! supp_file.isEmpty() ) { // user clicked Cancel ?
-         m_lbox->addItem( supp_file );
-         setCurrValue( lbText() );
-      }
-   }
 }

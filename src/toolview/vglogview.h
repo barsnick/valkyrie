@@ -258,6 +258,7 @@ public:
 
    void showFullSrcPath( bool show );
    bool isFullSrcPathShown();
+   QString getSuppressionStr();
 
    void setupChildren();
 
@@ -267,6 +268,7 @@ protected:
 private:
    QString err_tmplt;
    bool fullSrcPathShown;
+   QString str_supp;
 };
 
 

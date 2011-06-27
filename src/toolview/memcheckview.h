@@ -55,6 +55,7 @@ private slots:
    void launchEditor( QTreeWidgetItem* item );
    void itemExpanded( QTreeWidgetItem* item );
    void itemCollapsed( QTreeWidgetItem* item );
+   void popupMenu( const QPoint& pos );
    void updateItemActions();
 
 private:

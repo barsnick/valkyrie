@@ -113,6 +113,13 @@ MainWindow::MainWindow( Valkyrie* vk )
    
    updateEventFilters( this );
    updateEventFilters( handBook );
+
+#if 0
+   // CAB: Handy shortcut for testing: load last project
+   QString proj_fname = actFile_RecentProjs[0]->data().toString();
+   vkCfgProj->openProject( proj_fname );
+   setCurrentProject( proj_fname );
+#endif
 }
 
 

@@ -529,6 +529,34 @@ ErrorItem::ErrorItem( VgOutputItem* parent, QTreeWidgetItem* after,
 
    err_tmplt  = acnym + " [%1]: " + description;
    updateCount( "1" );
+   
+   // Store suppression for later use
+   QDomElement supp = elem.firstChildElement( "suppression" );
+   if ( !supp.isNull() ) {
+      // Qt has killed the <rawtext> newlines, so convert xml to text
+      QTextStream strm(&str_supp);
+
+      QDomElement snameEl = supp.firstChildElement( "sname" );
+      if ( !snameEl.isNull() )
+         strm << snameEl.text();
+      QDomElement skindEl = supp.firstChildElement( "skind" );
+      if ( !skindEl.isNull() )
+         strm << endl << skindEl.text();
+      QDomElement skauxEl = supp.firstChildElement( "skaux" );
+      if ( !skauxEl.isNull() )
+         strm << endl << skauxEl.text();
+
+      QDomElement sframeEl = supp.firstChildElement( "sframe" );
+      for ( ; !sframeEl.isNull();
+              sframeEl = sframeEl.nextSiblingElement("sframe") ) {
+         QDomElement objEl = sframeEl.firstChildElement( "obj" );
+         if ( !objEl.isNull() )
+            strm << endl << "obj:" << objEl.text();
+         QDomElement funEl = sframeEl.firstChildElement( "fun" );
+         if ( !funEl.isNull() )
+            strm << endl << "fun:" << funEl.text();
+      }
+   }
 }
 
 void ErrorItem::updateCount( QString count )
@@ -610,7 +638,6 @@ void ErrorItem::setupChildren()
 
          case VG_ELEM::SUPPRESSION: {
             // don't display this here.
-            // TODO: right click on ErrorItem => copy suppression (if available)
             break;
          }
 
@@ -666,6 +693,14 @@ void ErrorItem::showFullSrcPath( bool show )
 bool ErrorItem::isFullSrcPathShown()
 {
    return fullSrcPathShown;
+}
+
+/*!
+  getter: getSuppressionStr()
+*/
+QString ErrorItem::getSuppressionStr()
+{
+   return str_supp;
 }
 
 

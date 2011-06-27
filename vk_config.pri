@@ -37,5 +37,5 @@ QT += xml
 CONFIG           += qt
 CONFIG           += warn_on     # compiler should issue max warnings
 CONFIG           += silent      # make --quiet
-CONFIG           += release     # release/debug
-
+#CONFIG           += release     # release/debug
+CONFIG           += debug       # release/debug

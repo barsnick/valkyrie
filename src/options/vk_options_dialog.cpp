@@ -103,6 +103,14 @@ VkOptionsDialog::~VkOptionsDialog()
 }
 
 
+QWidget* VkOptionsDialog::setCurrentPage( int idx )
+{
+   optionPages->setCurrentIndex( idx );
+   contentsListWidget->setCurrentRow( idx );
+   
+   return optionPages->currentWidget();
+}
+
 /*!
   A return/enter keypress in an option widget isn't eaten up by that
   widgets' event handler - it's propogated to the QDialog parent.

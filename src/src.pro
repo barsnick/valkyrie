@@ -52,11 +52,13 @@ SOURCES += \
     objects/vk_objects.cpp \
     options/helgrind_options_page.cpp \
     options/memcheck_options_page.cpp \
+    options/suppressions.cpp \
     options/vk_option.cpp \
     options/vk_options_dialog.cpp \
     options/vk_options_page.cpp \
     options/vk_parse_cmdline.cpp \
     options/vk_popt.cpp \
+    options/vk_suppressions_dialog.cpp \
     options/valgrind_options_page.cpp \
     options/valkyrie_options_page.cpp \
     options/widgets/opt_base_widget.cpp \
@@ -91,6 +93,7 @@ HEADERS += \
     objects/vk_objects.h \
     options/helgrind_options_page.h \
     options/memcheck_options_page.h \
+    options/suppressions.h \
     options/vk_option.h \
     options/vk_options_dialog.h \
     options/vk_options_page.h \
@@ -98,6 +101,7 @@ HEADERS += \
     options/vk_popt.h \
     options/valgrind_options_page.h \
     options/valkyrie_options_page.h \
+    options/vk_suppressions_dialog.h \
     options/widgets/opt_base_widget.h \
     options/widgets/opt_cb_widget.h \
     options/widgets/opt_ck_widget.h \

@@ -68,6 +68,8 @@ public:
    void rejectEdits();
    bool applyEdits();
    bool isModified() { return m_mod; }
+
+   static QFrame* sep( QWidget* parent );
    
 signals:
    void modified();
@@ -79,7 +81,6 @@ protected slots:
 
 protected:
    OptionWidget* insertOptionWidget( int optid, QWidget* parent, bool mklabel );
-   QFrame* sep( QWidget* parent );
       
 protected:
    bool m_mod;
