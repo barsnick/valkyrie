@@ -329,6 +329,16 @@ void ValgrindOptionsPage::setupOptions()
    dbLedit->button()->setEnabled( false );
 
    vk_assert( m_itemList.count() <= VALGRIND::NUM_OPTS );
+
+
+   // ------------------------------------------------------------
+   // tooltips
+   // TODO: put these in the options.
+   QString tip_supp = tr( "Tip: To enable generation of suppressions "
+                         "from Valgrind output, set this to 'all'.<br/>"
+                         "Then right-click an error item to generate a suppression.");
+   m_itemList[VALGRIND::GEN_SUPP]->label()->setToolTip( tip_supp );
+   m_itemList[VALGRIND::GEN_SUPP]->widget()->setToolTip( tip_supp );
 }
 
 
