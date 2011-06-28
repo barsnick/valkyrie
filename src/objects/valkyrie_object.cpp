@@ -699,8 +699,6 @@ bool Valkyrie::queryToolDone( VGTOOL::ToolID tId )
 */
 bool Valkyrie::runTool( VGTOOL::ToolID tId, VGTOOL::ToolProcessId procId )
 {
-   cerr << "Valkyrie::runTool( "  << tId  << ", " << procId << ")" << endl;
-   
    vk_assert( tId != VGTOOL::ID_NULL );
    ToolObject* activeTool = valgrind()->getToolObj( tId );
    vk_assert( activeTool != 0 );

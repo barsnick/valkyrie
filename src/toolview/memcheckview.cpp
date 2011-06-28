@@ -3,7 +3,7 @@
 **  - memcheck's personal window
 ** --------------------------------------------------------------------------
 **
-** Copyright (C) 2000-2009, OpenWorks LLP. All rights reserved.
+** Copyright (C) 2000-2011, OpenWorks LLP. All rights reserved.
 ** <info@open-works.co.uk>
 **
 ** This file is part of Valkyrie, a front-end for Valgrind.
@@ -133,7 +133,7 @@ VgLogView* MemcheckView::createVgLogView()
 */
 void MemcheckView::openLogFile()
 {
-//   cerr << "MemcheckView::openLogFile()" << endl;
+   //vkDebug( "MemcheckView::openLogFile()" );
    
    QString last_file = vkCfgProj->value( "valkyrie/view-log" ).toString();
    if ( last_file.isEmpty() ) last_file = "./";
@@ -161,6 +161,7 @@ void MemcheckView::openLogFile()
 void MemcheckView::setupLayout()
 {
    QVBoxLayout* vLayout = new QVBoxLayout( this );
+   vLayout->setMargin(0);
    
    treeView = new QTreeWidget( this );
    treeView->setObjectName( QString::fromUtf8( "treeview_Memcheck" ) );
@@ -185,43 +186,43 @@ void MemcheckView::setupActions()
    act_OpenClose_item = new QAction( this );
    act_OpenClose_item->setObjectName( QString::fromUtf8( "act_OpenClose_item" ) );
    QIcon icon_opencloseitem;
-   icon_opencloseitem.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/item_open.png" ) ),
-                                 QIcon::Normal, QIcon::Off );
+   icon_opencloseitem.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/item_open.png" ) ) );
    act_OpenClose_item->setIcon( icon_opencloseitem );
+   act_OpenClose_item->setIconVisibleInMenu( true );
    connect( act_OpenClose_item, SIGNAL( triggered() ),
             this,                   SLOT( opencloseOneItem() ) );
    
    act_OpenClose_all = new QAction( this );
    act_OpenClose_all->setObjectName( QString::fromUtf8( "act_OpenClose_all" ) );
    QIcon icon_opencloseall;
-   icon_opencloseall.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/tree_open.png" ) ),
-                                QIcon::Normal, QIcon::Off );
+   icon_opencloseall.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/tree_open.png" ) ) );
    act_OpenClose_all->setIcon( icon_opencloseall );
+   act_OpenClose_all->setIconVisibleInMenu( true );
    connect( act_OpenClose_all, SIGNAL( triggered() ),
             this,                  SLOT( opencloseAllItems() ) );
    
    act_ShowSrcPaths = new QAction( this );
    act_ShowSrcPaths->setObjectName( QString::fromUtf8( "act_ShowSrcPaths" ) );
    QIcon icon_showsrcpaths;
-   icon_showsrcpaths.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/text_more.png" ) ),
-                                QIcon::Normal, QIcon::Off );
+   icon_showsrcpaths.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/text_more.png" ) ) );
    act_ShowSrcPaths->setIcon( icon_showsrcpaths );
+   act_ShowSrcPaths->setIconVisibleInMenu( true );
    connect( act_ShowSrcPaths, SIGNAL( triggered() ), this, SLOT( showSrcPath() ) );
    
    act_OpenLog = new QAction( this );
    act_OpenLog->setObjectName( QString::fromUtf8( "act_OpenLog" ) );
    QIcon icon_openlog;
-   icon_openlog.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/folder_green.png" ) ),
-                           QIcon::Normal, QIcon::Off );
+   icon_openlog.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/folder_green.png" ) ) );
    act_OpenLog->setIcon( icon_openlog );
+   act_OpenLog->setIconVisibleInMenu( true );
    connect( act_OpenLog, SIGNAL( triggered() ), this, SLOT( openLogFile() ) );
    
    act_SaveLog = new QAction( this );
    act_SaveLog->setObjectName( QString::fromUtf8( "act_SaveLog" ) );
    QIcon icon_savelog;
-   icon_savelog.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filesaveas.png" ) ),
-                           QIcon::Normal, QIcon::Off );
+   icon_savelog.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filesaveas.png" ) ) );
    act_SaveLog->setIcon( icon_savelog );
+   act_SaveLog->setIconVisibleInMenu( true );
    connect( act_SaveLog, SIGNAL( triggered() ), this, SIGNAL( saveLogFile() ) );
    
    // ------------------------------------------------------------
@@ -279,6 +280,8 @@ void MemcheckView::setupToolBar()
 */
 void MemcheckView::setState( bool run )
 {
+   //vkDebug( "MemcheckView::setState( %d )", run );
+   
    act_OpenLog->setEnabled( !run );  // just turn off while running
    
    if ( run ) {
@@ -316,7 +319,7 @@ void MemcheckView::setState( bool run )
 */
 void MemcheckView::launchEditor( QTreeWidgetItem* item )
 {
-//   cerr << "MemcheckView::launchEditor(): " << qPrintable( item->text( 0 ) ) << endl;
+   vkDebug( "MemcheckView::launchEditor( %s )", qPrintable( item->text( 0 ) ) );
 
    VgOutputItem* vgItemCurr = (VgOutputItem*)item;
    if ( !vgItemCurr ||
@@ -397,6 +400,7 @@ void MemcheckView::launchEditor( QTreeWidgetItem* item )
 
 void MemcheckView::popupMenu( const QPoint& pos )
 {
+   //vkDebug( "MemcheckView::popupMenu()" );
    VgOutputItem* item = (VgOutputItem*)treeView->itemAt( pos );
    if ( !item ) return;
 
@@ -469,7 +473,7 @@ void MemcheckView::popupMenu( const QPoint& pos )
 */
 void MemcheckView::showSrcPath()
 {
-//   cerr << "MemcheckView::showSrcPath()" << endl;
+   //vkDebug( "MemcheckView::showSrcPath()" );
 
    if ( treeView->topLevelItemCount() == 0 ) {
       return;
@@ -520,7 +524,7 @@ void MemcheckView::showSrcPath()
 */
 void MemcheckView::opencloseAllItems()
 {
-//   cerr << "MemcheckView::opencloseAllItems()" << endl;
+   //vkDebug( "MemcheckView::opencloseAllItems()" );
 
    if ( treeView->topLevelItemCount() == 0 ) {
       // empty tree.
@@ -529,7 +533,7 @@ void MemcheckView::opencloseAllItems()
 
    VgOutputItem* vgItemTop = (VgOutputItem*)treeView->topLevelItem( 0 );
    if ( !vgItemTop || vgItemTop->childCount() == 0 ) {
-      cerr << "Error: listview not populated as expected" << endl;
+      vkPrintErr( "Error: listview not populated. This shouldn't happen!" );
       return;
    }
 
@@ -560,8 +564,7 @@ void MemcheckView::opencloseAllItems()
    }
    if ( idxItemERR == -1 ) {
       // first ERROR element not found :-(
-      cerr << "Error: listview not populated as expected "
-           << "(no VG_ELEM::ERROR found)" << endl;
+      vkDebug( "No VG_ELEM::ERROR found." );
       return;
    }
 
@@ -596,6 +599,7 @@ void MemcheckView::opencloseAllItems()
 */
 void MemcheckView::opencloseOneItem()
 {
+   //vkDebug( "MemcheckView::opencloseOneItem():" );
    QTreeWidgetItem* item = treeView->currentItem();
    if ( item == 0 )
       return;
@@ -616,7 +620,7 @@ void MemcheckView::opencloseOneItem()
 */
 void MemcheckView::itemExpanded( QTreeWidgetItem* item )
 {
-//   cerr << "MemcheckView::itemExpanded(): " << endl;
+   //vkDebug( "MemcheckView::itemExpanded():" );
    ((VgOutputItem*)item)->openChildren();
 }
 
@@ -626,7 +630,7 @@ void MemcheckView::itemExpanded( QTreeWidgetItem* item )
 */
 void MemcheckView::itemCollapsed( QTreeWidgetItem* item )
 {
-//   cerr << "MemcheckView::itemCollapsed(): " << endl;
+   //vkDebug( "MemcheckView::itemCollapsed():" );
 
    if ( item != treeView->currentItem() ) {
       // this should be a slot. grr!
@@ -640,7 +644,7 @@ void MemcheckView::itemCollapsed( QTreeWidgetItem* item )
 */
 void MemcheckView::updateItemActions()
 {
-//   cerr << "MemcheckView::updateItemActions(): " << endl;
+   //vkDebug( "MemcheckView::updateItemActions():" );
 
    QTreeWidgetItem* item = treeView->currentItem();
    if ( !item ) {

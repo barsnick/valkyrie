@@ -54,7 +54,6 @@ public:
    }
    
 public slots:
-   void setStatus( QString msg );
    void showToolView( VGTOOL::ToolID toolId );
    void runTool( VGTOOL::ToolProcessId procId );
    void openOptions();

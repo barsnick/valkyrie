@@ -127,7 +127,7 @@ VgLogView* HelgrindView::createVgLogView()
 */
 void HelgrindView::openLogFile()
 {
-//   cerr << "HelgrindView::openLogFile()" << endl;
+   //vkDebug( "HelgrindView::openLogFile()\n" );
 
    QString last_file = vkCfgProj->value( "valkyrie/view-log" ).toString();
    if ( last_file.isEmpty() ) last_file = "./";
@@ -155,7 +155,8 @@ void HelgrindView::openLogFile()
 void HelgrindView::setupLayout()
 {
    QVBoxLayout* vLayout = new QVBoxLayout( this );
-
+   vLayout->setMargin(0);
+   
    treeView = new QTreeWidget( this );
    treeView->setObjectName( QString::fromUtf8( "treeview_Helgrind" ) );
    treeView->setHeaderHidden( true );
@@ -174,43 +175,43 @@ void HelgrindView::setupActions()
    act_OpenClose_item = new QAction( this );
    act_OpenClose_item->setObjectName( QString::fromUtf8( "act_OpenClose_item" ) );
    QIcon icon_opencloseitem;
-   icon_opencloseitem.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/item_open.png" ) ),
-                                 QIcon::Normal, QIcon::Off );
+   icon_opencloseitem.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/item_open.png" ) ) );
    act_OpenClose_item->setIcon( icon_opencloseitem );
+   act_OpenClose_item->setIconVisibleInMenu( true );
    connect( act_OpenClose_item, SIGNAL( triggered() ),
             this,                   SLOT( opencloseOneItem() ) );
 
    act_OpenClose_all = new QAction( this );
    act_OpenClose_all->setObjectName( QString::fromUtf8( "act_OpenClose_all" ) );
    QIcon icon_opencloseall;
-   icon_opencloseall.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/tree_open.png" ) ),
-                                QIcon::Normal, QIcon::Off );
+   icon_opencloseall.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/tree_open.png" ) ) );
    act_OpenClose_all->setIcon( icon_opencloseall );
+   act_OpenClose_all->setIconVisibleInMenu( true );
    connect( act_OpenClose_all, SIGNAL( triggered() ),
             this,                  SLOT( opencloseAllItems() ) );
 
    act_ShowSrcPaths = new QAction( this );
    act_ShowSrcPaths->setObjectName( QString::fromUtf8( "act_ShowSrcPaths" ) );
    QIcon icon_showsrcpaths;
-   icon_showsrcpaths.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/text_more.png" ) ),
-                                QIcon::Normal, QIcon::Off );
+   icon_showsrcpaths.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/text_more.png" ) ) );
    act_ShowSrcPaths->setIcon( icon_showsrcpaths );
+   act_ShowSrcPaths->setIconVisibleInMenu( true );
    connect( act_ShowSrcPaths, SIGNAL( triggered() ), this, SLOT( showSrcPath() ) );
 
    act_OpenLog = new QAction( this );
    act_OpenLog->setObjectName( QString::fromUtf8( "act_OpenLog" ) );
    QIcon icon_openlog;
-   icon_openlog.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/folder_green.png" ) ),
-                           QIcon::Normal, QIcon::Off );
+   icon_openlog.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/folder_green.png" ) ) );
    act_OpenLog->setIcon( icon_openlog );
+   act_OpenLog->setIconVisibleInMenu( true );
    connect( act_OpenLog, SIGNAL( triggered() ), this, SLOT( openLogFile() ) );
 
    act_SaveLog = new QAction( this );
    act_SaveLog->setObjectName( QString::fromUtf8( "act_SaveLog" ) );
    QIcon icon_savelog;
-   icon_savelog.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filesaveas.png" ) ),
-                           QIcon::Normal, QIcon::Off );
+   icon_savelog.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filesaveas.png" ) ) );
    act_SaveLog->setIcon( icon_savelog );
+   act_SaveLog->setIconVisibleInMenu( true );
    connect( act_SaveLog, SIGNAL( triggered() ), this, SIGNAL( saveLogFile() ) );
 
    // ------------------------------------------------------------
@@ -305,7 +306,7 @@ void HelgrindView::setState( bool run )
 */
 void HelgrindView::launchEditor( QTreeWidgetItem* item )
 {
-//   cerr << "HelgrindView::launchEditor(): " << qPrintable( item->text( 0 ) ) << endl;
+   //vkDebug( "HelgrindView::launchEditor( %s )", qPrintable( item->text( 0 ) ) );
 
    VgOutputItem* vgItemCurr = (VgOutputItem*)item;
    if ( !vgItemCurr ||
@@ -389,7 +390,7 @@ void HelgrindView::launchEditor( QTreeWidgetItem* item )
 */
 void HelgrindView::showSrcPath()
 {
-//   cerr << "HelgrindView::showSrcPath()" << endl;
+   //vkDebug( "HelgrindView::showSrcPath()" );
 
    if ( treeView->topLevelItemCount() == 0 ) {
       return;
@@ -440,7 +441,7 @@ void HelgrindView::showSrcPath()
 */
 void HelgrindView::opencloseAllItems()
 {
-//   cerr << "HelgrindView::opencloseAllItems()" << endl;
+   //vkDebug( "HelgrindView::opencloseAllItems()" );
 
    if ( treeView->topLevelItemCount() == 0 ) {
       // empty tree.
@@ -449,7 +450,7 @@ void HelgrindView::opencloseAllItems()
 
    VgOutputItem* vgItemTop = (VgOutputItem*)treeView->topLevelItem( 0 );
    if ( !vgItemTop || vgItemTop->childCount() == 0 ) {
-      cerr << "Error: listview not populated as expected" << endl;
+      vkPrintErr( "Error: listview not populated. This shouldn't happen!" );
       return;
    }
 
@@ -479,9 +480,8 @@ void HelgrindView::opencloseAllItems()
       }
    }
    if ( idxItemERR == -1 ) {
-      // first ERROR element not found :-(
-      cerr << "Error: listview not populated as expected "
-           << "(no VG_ELEM::ERROR found)" << endl;
+      // first ERROR element not found - perhaps there were no errors!
+      vkDebug( "No VG_ELEM::ERROR found." );
       return;
    }
 
@@ -516,6 +516,8 @@ void HelgrindView::opencloseAllItems()
 */
 void HelgrindView::opencloseOneItem()
 {
+   //vkDebug( "HelgrindView::opencloseOneItem():" );
+   
    QTreeWidgetItem* item = treeView->currentItem();
    if ( item == 0 )
       return;
@@ -536,7 +538,7 @@ void HelgrindView::opencloseOneItem()
 */
 void HelgrindView::itemExpanded( QTreeWidgetItem* item )
 {
-//   cerr << "HelgrindView::itemExpanded(): " << endl;
+   //vkDebug( "HelgrindView::itemExpanded():" );
    ((VgOutputItem*)item)->openChildren();
 }
 
@@ -546,7 +548,7 @@ void HelgrindView::itemExpanded( QTreeWidgetItem* item )
 */
 void HelgrindView::itemCollapsed( QTreeWidgetItem* item )
 {
-//   cerr << "HelgrindView::itemCollapsed(): " << endl;
+   //vkDebug( "HelgrindView::itemCollapsed():" );
 
    if ( item != treeView->currentItem() ) {
       // this should be a slot. grr!
@@ -560,7 +562,7 @@ void HelgrindView::itemCollapsed( QTreeWidgetItem* item )
 */
 void HelgrindView::updateItemActions()
 {
-//   cerr << "HelgrindView::updateItemActions(): " << endl;
+   //vkDebug( "HelgrindView::updateItemActions():" );
 
    QTreeWidgetItem* item = treeView->currentItem();
    if ( !item ) {

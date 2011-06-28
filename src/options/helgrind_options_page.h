@@ -18,7 +18,6 @@
 **
 ****************************************************************************/
 
-
 #ifndef __HELGRIND_OPTIONS_PAGE_H
 #define __HELGRIND_OPTIONS_PAGE_H
 

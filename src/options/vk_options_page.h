@@ -1,7 +1,7 @@
 /****************************************************************************
 ** VkOptionsPage definition
 **  - Each vkObject has different options | flags | prefs, and
-**    creates its own 'page', which is inherited from this base class. *
+**    creates its own 'page', which is inherited from this base class.
 **  - The 'page' is contained within the top-level Options Window.
 ** --------------------------------------------------------------------------
 **
@@ -19,19 +19,6 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-
-/* ----------------------------------------------------------------------
- * Definition of class VkOptionsPage                         options_page.h
- *
- * Each vkObject has different options | flags | prefs, and
- * creates its own 'page', which is inherited from this base class.
- * The 'page' is contained within the top-level Options Window.
- * ----------------------------------------------------------------------
- * This file is part of Valkyrie, a front-end for Valgrind
- * Copyright (C) 2000-2008, OpenWorks LLP <info@open-works.co.uk>
- * This program is released under the terms of the GNU GPL v.2
- * See the file COPYING for the full license details.
- */
 
 #ifndef __VK_OPTIONS_PAGE_H
 #define __VK_OPTIONS_PAGE_H

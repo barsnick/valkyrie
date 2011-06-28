@@ -77,7 +77,7 @@ MainWindow::MainWindow( Valkyrie* vk )
    lastPalette = qApp->palette();
    
    QIcon icon_vk;
-   icon_vk.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/valkyrie.xpm" ) ), QIcon::Normal, QIcon::Off );
+   icon_vk.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/valkyrie.xpm" ) ) );
    setWindowIcon( icon_vk );
    
    // handbook: init before menubar / toolbar
@@ -89,7 +89,6 @@ MainWindow::MainWindow( Valkyrie* vk )
    setupMenus();
    setupToolBars();
    setupStatusBar();
-   setStatus( "Status message goes here..." );
    
    // functions for dealing with config updates
    VkOption* opt = valkyrie->getOption( VALKYRIE::ICONTXT );
@@ -128,8 +127,6 @@ MainWindow::MainWindow( Valkyrie* vk )
 */
 MainWindow::~MainWindow()
 {
-   //   cerr << "MainWindow::~MainWindow()" << endl;
-   
    // cleanup toolviews
    delete toolViewStack;
    
@@ -196,9 +193,9 @@ void MainWindow::setupActions()
    actFile_NewProj->setText( tr( "&New Project..." ) );
    actFile_NewProj->setToolTip( tr( "Create a project to save your configuration" ) );
    QIcon icon_newproj;
-   icon_newproj.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filenew.png" ) ),
-                           QIcon::Normal, QIcon::Off );
+   icon_newproj.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filenew.png" ) ) );
    actFile_NewProj->setIcon( icon_newproj );
+   actFile_NewProj->setIconVisibleInMenu( true );
    connect( actFile_NewProj, SIGNAL( triggered() ), this, SLOT( createNewProject() ) );
    
    actFile_OpenProj = new QAction( this );
@@ -206,9 +203,9 @@ void MainWindow::setupActions()
    actFile_OpenProj->setText( tr( "&Open Project..." ) );
    actFile_OpenProj->setToolTip( tr( "Open an existing project to load a saved configuration" ) );
    QIcon icon_openproj;
-   icon_openproj.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/folder_blue.png" ) ),
-                            QIcon::Normal, QIcon::Off );
+   icon_openproj.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/folder_blue.png" ) ) );
    actFile_OpenProj->setIcon( icon_openproj );
+   actFile_OpenProj->setIconVisibleInMenu( true );
    connect( actFile_OpenProj, SIGNAL( triggered() ), this, SLOT( openProject() ) );
    
    for (int i = 0; i < MaxRecentProjs; ++i) {
@@ -222,9 +219,9 @@ void MainWindow::setupActions()
    actFile_SaveAs->setText( tr( "Save &As..." ) );
    actFile_SaveAs->setToolTip( tr( "Save current configuration to a new project" ) );
    QIcon icon_saveas;
-   icon_saveas.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filesaveas.png" ) ),
-                          QIcon::Normal, QIcon::Off );
+   icon_saveas.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filesaveas.png" ) ) );
    actFile_SaveAs->setIcon( icon_saveas );
+   actFile_SaveAs->setIconVisibleInMenu( true );
    connect( actFile_SaveAs, SIGNAL( triggered() ), this, SLOT( saveAsProject() ) );
 
    actFile_Close = new QAction( this );
@@ -238,9 +235,9 @@ void MainWindow::setupActions()
    actFile_Exit->setText( tr( "E&xit" ) );
    actFile_Exit->setToolTip( tr( "Exit Valkyrie" ) );
    QIcon icon_exit;
-   icon_exit.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/exit.png" ) ),
-                        QIcon::Normal, QIcon::Off );
+   icon_exit.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/exit.png" ) ) );
    actFile_Exit->setIcon( icon_exit );
+   actFile_Exit->setIconVisibleInMenu( true );
    connect( actFile_Exit, SIGNAL( triggered() ), qApp, SLOT( closeAllWindows() ) );
    
    actEdit_Options = new QAction( this );
@@ -248,9 +245,9 @@ void MainWindow::setupActions()
    actEdit_Options->setText( tr( "O&ptions" ) );
    actEdit_Options->setToolTip( tr( "Open the options-editing window" ) );
    QIcon icon_options;
-   icon_options.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/gear.png" ) ),
-                           QIcon::Normal, QIcon::Off );
+   icon_options.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/gear.png" ) ) );
    actEdit_Options->setIcon( icon_options );
+   actEdit_Options->setIconVisibleInMenu( true );
    connect( actEdit_Options, SIGNAL( triggered() ), this, SLOT( openOptions() ) );
    
    actProcess_Run = new QAction( this );
@@ -259,8 +256,7 @@ void MainWindow::setupActions()
    actProcess_Run->setToolTip( tr( "Run Valgrind with the currently active tool" ) );
    actProcess_Run->setShortcut( QString::fromUtf8( "Ctrl+R" ) );
    QIcon icon_run;
-   icon_run.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/valgrind_run.png" ) ),
-                       QIcon::Normal, QIcon::Off );
+   icon_run.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/valgrind_run.png" ) ) );
    actProcess_Run->setIcon( icon_run );
    actProcess_Run->setIconVisibleInMenu( true );
    connect( actProcess_Run, SIGNAL( triggered() ), this, SLOT( runValgrind() ) );
@@ -270,9 +266,9 @@ void MainWindow::setupActions()
    actProcess_Stop->setText( tr( "S&top" ) );
    actProcess_Stop->setToolTip( tr( "Stop Valgrind" ) );
    QIcon icon_stop;
-   icon_stop.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/valgrind_stop.png" ) ),
-                        QIcon::Normal, QIcon::Off );
+   icon_stop.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/valgrind_stop.png" ) ) );
    actProcess_Stop->setIcon( icon_stop );
+   actProcess_Stop->setIconVisibleInMenu( true );
    connect( actProcess_Stop, SIGNAL( triggered() ), this, SLOT( stopTool() ) );
    
    actHelp_Handbook = new QAction( this );
@@ -281,8 +277,9 @@ void MainWindow::setupActions()
    actHelp_Handbook->setToolTip( tr( "Open the Valkyrie Handbook" ) );
    actHelp_Handbook->setShortcut( QString::fromUtf8( "F1" ) );
    QIcon icon_handbook;
-   icon_handbook.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/tb_handbook_help.xpm" ) ), QIcon::Normal, QIcon::Off );
+   icon_handbook.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/tb_handbook_help.xpm" ) ) );
    actHelp_Handbook->setIcon( icon_handbook );
+   actHelp_Handbook->setIconVisibleInMenu( true );
    connect( actHelp_Handbook, SIGNAL( triggered() ), this, SLOT( openHandBook() ) );
    
    actHelp_About_Valkyrie = new QAction( this );
@@ -317,8 +314,7 @@ void MainWindow::setupActions()
             this,              SLOT( toolGroupTriggered( QAction* ) ) );
    
    QIcon icon_bullet;
-   icon_bullet.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/tb_mainwin_blackbullet.xpm" ) ),
-                          QIcon::Normal, QIcon::Off );
+   icon_bullet.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/tb_mainwin_blackbullet.xpm" ) ) );
    
    ToolObjList tools = valkyrie->valgrind()->getToolObjList();
    vk_assert( tools.size() > 0 );
@@ -463,7 +459,6 @@ void MainWindow::setupStatusBar()
    statusLabel = new QLabel( mainStatusBar );
    statusLabel->setObjectName( QString::fromUtf8( "statusLabel " ) );
    
-   mainStatusBar->addWidget( new QLabel(" "), 0); // spacing
    mainStatusBar->addWidget( statusLabel, 1 );
 //   mainStatusBar->addPermanentWidget( permanentLabel, 0 );
 }
@@ -531,7 +526,7 @@ void MainWindow::showToolView( VGTOOL::ToolID toolId )
       connect( nextTool, SIGNAL( running( bool ) ),
                this,       SLOT( updateVgButtons( bool ) ) );
       connect( nextTool, SIGNAL( message( QString ) ),
-               this,       SLOT( setStatus( QString ) ) );
+               statusLabel,       SLOT( setText( QString ) ) );
                
       // Set a vg logfile. Loading done by tool_object
       connect( nextView, SIGNAL( logFileChosen( QString ) ),
@@ -926,8 +921,7 @@ void MainWindow::updateActionsRecentProjs()
    int numRecentProjs = qMin(files.size(), (int)MaxRecentProjs);
 
    for (int i = 0; i < numRecentProjs; ++i) {
-      QString text = tr("&%1 %2").arg( i+1 )
-                     .arg( QFileInfo( files[i] ).fileName() );
+      QString text = QFileInfo( files[i] ).fileName();
       actFile_RecentProjs[i]->setText(text);
       actFile_RecentProjs[i]->setData(files[i]);
       actFile_RecentProjs[i]->setVisible(true);
@@ -950,16 +944,16 @@ void MainWindow::closeToolView()
    
    // if there ain't no toolview, we cain't do much
    if ( tv == 0 ) {
-      cerr << "MainWindow::closeToolView(): No toolview!" << endl;
+      vkPrintErr( "MainWindow::closeToolView(): No toolview. "
+                  "This shouldn't happen!" );
       return;
    }
    
-   cerr << "MainWindow::closeToolView(): " <<
-        tv->objectName().toLatin1().data() << endl;
+   vkDebug( "MainWindow::closeToolView(): %s", qPrintable( tv->objectName() ) );
         
    // last process might not be done ...
    if ( !valkyrie->queryToolDone( toolViewStack->currentToolId() ) ) {
-      cerr << "Warning: Last process not finished" << endl;
+      vkPrintErr( "Warning: Last process not finished" );
       return;
    }
 
@@ -968,16 +962,6 @@ void MainWindow::closeToolView()
    // current toolview will now have changed (maybe to NULL)
    setToggles( toolViewStack->currentToolId() );
 }
-
-
-/*!
-    Set the status message for the main status bar
-*/
-void MainWindow::setStatus( QString msg )
-{
-   statusLabel->setText( "Vk: " + msg );
-}
-
 
 
 
@@ -993,9 +977,6 @@ void MainWindow::setStatus( QString msg )
 void MainWindow::toolGroupTriggered( QAction* action )
 {
    VGTOOL::ToolID toolId = ( VGTOOL::ToolID )action->property( "toolId" ).toInt();
-   
-   //   cerr << "MainWindow::toolGroupTriggered() for toolview " << toolId << endl;
-   
    showToolView( toolId );
 }
 
@@ -1031,15 +1012,14 @@ void MainWindow::openOptions()
 void MainWindow::runTool( VGTOOL::ToolProcessId procId )
 {
    VGTOOL::ToolID tId = toolViewStack->currentToolId();   
-   cerr << "MainWindow::runTool( tool: " << tId
-         << ", proc: " << procId << " )" << endl;
-   
+
    vk_assert( procId > VGTOOL::PROC_NONE );
-   
+
    // don't come in here if there's no current view
    if ( !toolViewStack->isVisible() ) {
       //This should never happen... assert?
-      cerr << "Error: No toolview visible!" << endl;
+      vkPrintErr( "Error: No toolview visible (procId=%d)."
+                  "This shouldn't happen!", procId );
       return;
    }
    
@@ -1060,7 +1040,7 @@ void MainWindow::runTool( VGTOOL::ToolProcessId procId )
 
    // last process might not be done ...
    if ( !valkyrie->queryToolDone( tId ) ) {
-      cerr << "Warning: Last process not finished" << endl;
+      vkPrintErr( "Warning: Last process not finished" );
       return;
    }
    

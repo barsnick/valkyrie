@@ -18,7 +18,6 @@
 **
 ****************************************************************************/
 
-
 #ifndef __MEMCHECK_OPTIONS_PAGE_H
 #define __MEMCHECK_OPTIONS_PAGE_H
 
