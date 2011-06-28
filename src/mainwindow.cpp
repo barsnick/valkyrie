@@ -454,11 +454,18 @@ void MainWindow::setupStatusBar()
    // Basic statusbar setup
    mainStatusBar = this->statusBar();
    mainStatusBar->setObjectName( QString::fromUtf8( "mainStatusBar " ) );
+
+#if 0 //TODO: make use of this...
+   QLabel* permanentLabel = new QLabel( mainStatusBar );
+   permanentLabel->setObjectName( QString::fromUtf8( "permanentLabel " ) );
+#endif
    
    statusLabel = new QLabel( mainStatusBar );
    statusLabel->setObjectName( QString::fromUtf8( "statusLabel " ) );
-   //   statusLabel->setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
-   mainStatusBar->addPermanentWidget( statusLabel, 10 );
+   
+   mainStatusBar->addWidget( new QLabel(" "), 0); // spacing
+   mainStatusBar->addWidget( statusLabel, 1 );
+//   mainStatusBar->addPermanentWidget( permanentLabel, 0 );
 }
 
 

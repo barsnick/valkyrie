@@ -235,7 +235,7 @@ void MemcheckView::setupActions()
    act_OpenClose_all->setText(     tr( "Open/Close all" ) );
    act_OpenClose_all->setToolTip(  tr( "Open/Close all Valgrind::ERROR items" ) );
    act_ShowSrcPaths->setText(      tr( "Display simple" ) );
-   act_ShowSrcPaths->setToolTip(   tr( "Display complex / simplified view" ) );
+   act_ShowSrcPaths->setToolTip(   tr( "Display short / full source paths" ) );
    
    act_OpenLog->setText(    tr( "Open Log" ) );
    act_OpenLog->setToolTip( tr( "Open Memcheck XML log" ) );

@@ -160,6 +160,7 @@ ToolViewStack::ToolViewStack( QWidget* parent )
    widgetStack->setObjectName( QString::fromUtf8( "widgetStack" ) );
    
    QHBoxLayout* layout = new QHBoxLayout;
+   layout->setMargin( 0 );
    layout->setSpacing( 0 );
    layout->addWidget( widgetStack );
    setLayout( layout );
