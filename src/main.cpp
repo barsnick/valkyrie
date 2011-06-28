@@ -3,7 +3,7 @@
 **  - the program entry point
 ** --------------------------------------------------------------------------
 **
-** Copyright (C) 2000-2010, OpenWorks LLP. All rights reserved.
+** Copyright (C) 2000-2011, OpenWorks LLP. All rights reserved.
 ** <info@open-works.co.uk>
 **
 ** This file is part of Valkyrie, a front-end for Valgrind.

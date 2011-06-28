@@ -3,7 +3,7 @@
 **  - subclass of VkOptionsPage to hold valgrind-specific options
 ** --------------------------------------------------------------------------
 **
-** Copyright (C) 2000-2009, OpenWorks LLP. All rights reserved.
+** Copyright (C) 2000-2011, OpenWorks LLP. All rights reserved.
 ** <info@open-works.co.uk>
 **
 ** This file is part of Valkyrie, a front-end for Valgrind.
