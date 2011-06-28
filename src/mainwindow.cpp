@@ -216,7 +216,7 @@ void MainWindow::setupActions()
 
    actFile_SaveAs = new QAction( this );
    actFile_SaveAs->setObjectName( QString::fromUtf8( "actFile_SaveAs" ) );
-   actFile_SaveAs->setText( tr( "Save &As..." ) );
+   actFile_SaveAs->setText( tr( "Save Project &As..." ) );
    actFile_SaveAs->setToolTip( tr( "Save current configuration to a new project" ) );
    QIcon icon_saveas;
    icon_saveas.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filesaveas.png" ) ) );
