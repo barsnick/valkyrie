@@ -27,7 +27,6 @@
 #include <QFile>
 
 
-SuppRanges *SuppRanges::s_instance = 0;
 
 /*!
   class SuppRanges
@@ -88,6 +87,9 @@ SuppRanges::SuppRanges()
 
 
 
+
+
+
 /*!
   class Suppression
   */
@@ -123,14 +125,14 @@ bool Suppression::setKind( QString str )
    }
    
    QRegExp re( list[0], Qt::CaseInsensitive );
-   int idx = SuppRanges::instance()->kindTools.indexOf( re );
+   int idx = SuppRanges::instance().getKindTools().indexOf( re );
    if ( idx == -1 ) {
       vkPrintErr("Bad Tool (%s) for this suppression (%s).",
                  qPrintable(list[0]), qPrintable(m_name));
       return false;
    }
    else {
-      QStringList kindTypes = SuppRanges::instance()->kindTypes[idx];
+      const QStringList kindTypes = SuppRanges::instance().getKindTypes()[idx];
       if ( !kindTypes.contains( list[1], Qt::CaseInsensitive ) ) {
          vkPrintErr("Bad SupprType (%s) for Tool (%s) for this suppression (%s).",
                     qPrintable(list[1]), qPrintable(list[0]), qPrintable(m_name));
@@ -163,7 +165,7 @@ bool Suppression::addFrame( QString str )
       return false;
    }
 
-   if ( !SuppRanges::instance()->frameTypes.contains( list[0], Qt::CaseInsensitive ) ) {
+   if ( !SuppRanges::instance().getFrameTypes().contains( list[0], Qt::CaseInsensitive ) ) {
       vkPrintErr( "Unsupported frame type (%s) for suppression '%s'.",
                   qPrintable(list[0]), qPrintable(m_name) );
       return false;

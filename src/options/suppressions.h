@@ -29,29 +29,33 @@
 #define MAX_SUPP_FRAMES 20
 
 
-
 // ============================================================
-// Singleton class holding some handy reference data
+// SuppRanges: read-only configuration data for Suppressions
+//  - implemented as a stack-based singleton
 class SuppRanges
 {
-public:
-   static SuppRanges *instance()
-   {
-      if (!s_instance)
-         s_instance = new SuppRanges;
-      return s_instance;
-   }
+private:
+   SuppRanges();
+   SuppRanges(SuppRanges const&);            // Not implemented
+   SuppRanges& operator=(SuppRanges const&); // Not implemented
    
+public:
+   static SuppRanges& instance() {
+      static SuppRanges theInstance;
+      return theInstance;
+   }
+   ~SuppRanges() {};
+   
+   // limit access to read-only, so issues with global access
+   const QStringList& getKindTools() { return kindTools; }
+   const QList<QStringList>& getKindTypes() { return kindTypes; }
+   const QStringList& getFrameTypes() { return frameTypes; }
+   
+private:
    QStringList kindTools;        // Memcheck|...
    QList<QStringList> kindTypes; // list for every tool
    QStringList frameTypes;       // obj|fun
-
-private:
-   SuppRanges();
-   static SuppRanges *s_instance;
 };
-
-
 
 
 // ============================================================

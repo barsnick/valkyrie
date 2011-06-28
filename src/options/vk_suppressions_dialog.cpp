@@ -51,7 +51,7 @@ SuppFrame::SuppFrame( bool isFirstFrame, QWidget* parent )
    
    frame_cmb = new QComboBox();
    frame_cmb->setMinimumWidth( width_col1 );
-   frame_cmb->addItems( SuppRanges::instance()->frameTypes );
+   frame_cmb->addItems( SuppRanges::instance().getFrameTypes() );
    
    frame_le  = new QLineEdit();
    
@@ -125,7 +125,7 @@ void VkSuppressionsDialog::setupLayout()
    // Kind-Tool
    QLabel* tool_lbl = new QLabel("Kind-Tool:");
    tool_cmb = new QComboBox();
-   tool_cmb->addItems( SuppRanges::instance()->kindTools );
+   tool_cmb->addItems( SuppRanges::instance().getKindTools() );
    connect( tool_cmb, SIGNAL(currentIndexChanged(int)), this, SLOT(ToolChanged(int)) );
 
    // Kind-Type
@@ -249,7 +249,7 @@ void VkSuppressionsDialog::removeSuppFrame( SuppFrame* frm )
 void VkSuppressionsDialog::ToolChanged( int idx )
 {
    type_cmb->clear();
-   type_cmb->addItems( SuppRanges::instance()->kindTypes[idx] );
+   type_cmb->addItems( SuppRanges::instance().getKindTypes()[idx] );
 }
 
 void VkSuppressionsDialog::TypeChanged( int )
