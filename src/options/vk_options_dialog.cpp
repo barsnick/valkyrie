@@ -217,7 +217,7 @@ void VkOptionsDialog::setupLayout()
    // ------------------------------------------------------------
    // setup default state
    applyButton->setEnabled( false );
-   cancelButton->setEnabled( false );
+   cancelButton->setEnabled( true );
    okButton->setDefault( true );
 }
 
@@ -377,9 +377,7 @@ void VkOptionsDialog::pageModified()
    bool modified = page->isModified();
    
    QPushButton* applyButton  = optionsButtonBox->button( QDialogButtonBox::Apply );
-   QPushButton* cancelButton = optionsButtonBox->button( QDialogButtonBox::Cancel );
    applyButton->setEnabled( modified );
-   cancelButton->setEnabled( modified );
    // enable update-defaults only when no edits
    updateDefaultsButton->setEnabled( !modified );
    
