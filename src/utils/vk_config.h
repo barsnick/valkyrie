@@ -48,6 +48,7 @@ public:
    static const QString& vgCopyright();
    static const QString& vgVersion();
    static const QString& appName();
+   static const QString  appTitle();
    static const QString& appVersion();
    static const QString& appPackage();
    static const QString& tmpDir();

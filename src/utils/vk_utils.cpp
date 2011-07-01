@@ -17,7 +17,7 @@
 **
 ****************************************************************************/
 
-#include "vk_utils.h"
+#include "utils/vk_utils.h"
 #include "options/vk_option.h"
 #include "utils/vk_config.h"        // vkname()
 
@@ -25,6 +25,7 @@
 
 #include <QDateTime>
 #include <QFile>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QRegExp>
 #include <QString>
@@ -351,6 +352,7 @@ static QString getFileAbsPath( const QString file_name )
    QString absPath = QString::null;
 
    if ( QFile::exists( file_name ) ) {
+      // true for (good) directories, too.
       // file_name exists: get its absolute path.
       absPath = QFileInfo( file_name ).absoluteFilePath();
    }
@@ -474,3 +476,210 @@ QString dirCheck( int* err_val, const QString dir,
 bye:
    return absPath;
 }
+
+
+
+/*!
+  Dialog to choose a file
+   - start_path gives the path to first show (default: current dir)
+   - cfg_key_path is the (proj/glbl) cfg key for the item's path.
+     This is used to find the 'filefilter/<cfg_key_path>' setting.
+     If no key is given, default (and only) filter is "All files (*)".
+   - mode indicates save / open (changes QFileDialog)
+  Returns: chosen file path
+*/
+QString vkDlgGetFile( QWidget* parent,
+                      const QString& start_path/*="./"*/,
+                      const QString& cfg_key_path/*=QString()*/,
+                      QFileDialog::AcceptMode mode/*=QFileDialog::AcceptOpen*/ )
+{
+   // defaults
+   QString filterlist = "All Files (*)";   // default filter list
+   QString filter = "";                    // default filter
+   QString cfg_key_filterlist = "";        // glbl key, built from key_path
+   QString cfg_key_filter = "";            // glbl key, built from key_path
+   QString start_dir = start_path;
+   
+   if ( start_dir.isEmpty() ) {
+      start_dir = "./";
+   }
+   else {
+      // start_dir may be a path-less file, a bad dir, or who knows what.
+      // try to resolve: first through given path, then via $PATH env var.
+      start_dir = getFileAbsPath( start_dir );
+   }
+
+   // setup filters
+   if ( !cfg_key_path.isEmpty() ){
+      // check the global cfg (derive key from key_path)
+      cfg_key_filterlist = cfg_key_path;
+      cfg_key_filterlist = "filefilters/" + cfg_key_filterlist.replace("/", "_");
+      cfg_key_filter = cfg_key_filterlist + "-default";
+
+      QString cfg_filterlist = vkCfgGlbl->value( cfg_key_filterlist ).toString();
+      QString cfg_filter = vkCfgGlbl->value( cfg_key_filter ).toString();
+
+      if ( !cfg_filterlist.isEmpty() ) {
+         filterlist = cfg_filterlist;
+         if ( cfg_filterlist.contains( cfg_filter ) ) {
+            filter = cfg_filter;
+         }
+      }
+   }
+
+   // Setup dialog
+   QString caption = "Choose File";
+   if ( mode == QFileDialog::AcceptSave )
+      caption = "Save As";
+   
+   QFileDialog dlg( parent, caption, start_dir, filterlist );
+   dlg.setFileMode(QFileDialog::AnyFile);
+   dlg.setViewMode(QFileDialog::Detail);
+   dlg.setAcceptMode( mode );
+   dlg.selectFilter( filter );
+
+   // Run dialog - get filename to save to: asks for overwrite confirmation
+   QString fname;
+   if ( dlg.exec() ) {
+      QStringList fileNames = dlg.selectedFiles();
+      if ( !fileNames.isEmpty() )
+         fname = fileNames.first();
+   }
+   
+   // save chosen filter (if changed) for next time
+   if ( !cfg_key_path.isEmpty() ) {
+      QString filter_new = dlg.selectedNameFilter();
+      
+      if ( filter_new != filter ) {
+         vkCfgGlbl->setValue( cfg_key_filter, filter_new );
+      }
+   }
+
+   return fname;
+}
+
+
+/*!
+  Dialog to choose a file, using cached start_paths and filters
+   - start_path gives the directory to first show (default: current dir)
+   - cfg_key_path is the (proj/glbl) cfg key for the item's path.
+     This is used to get:
+     1) the directory to open the dialog in  (default: currentdir)
+     2) the filter settings                  (default: "All files (*)")
+   - mode indicates save / open (changes QFileDialog)
+  Returns: chosen file path
+
+  Note: don't use from options pages: they save to cache already.
+*/
+QString vkDlgCfgGetFile( QWidget* parent,
+                         const QString& cfg_key_path/*=QString()*/,
+                         QFileDialog::AcceptMode mode/*=QFileDialog::AcceptOpen*/ )
+{
+   // defaults
+   QString start_path = "./";               // default dir
+   bool pathIsDir = true;
+   bool isProjKey = true;                  // is key_path a project key
+   
+   // setup start directory
+   if ( !cfg_key_path.isEmpty() ){
+      QFileInfo fi;
+      // check first project cfg then glbl cfg for the path key
+      if ( vkCfgProj->contains( cfg_key_path ) ) {
+         fi = vkCfgProj->value( cfg_key_path ).toString();
+      }
+      else if ( vkCfgGlbl->contains( cfg_key_path ) ) {
+         fi = vkCfgGlbl->value( cfg_key_path ).toString();
+         isProjKey = false;
+      }
+      else {
+         vkPrintErr( "Cfg key not found: '%s'. This shouldn't happen!",
+                     qPrintable( cfg_key_path ) );
+      }
+
+      if ( fi.exists() ) {
+         pathIsDir = fi.isDir();
+         // looks like a bug in Qt: if dir, absolutePath still takes off the last dir!
+         start_path = pathIsDir ? fi.absoluteFilePath() : fi.absolutePath();
+      }
+      else {
+         vkDebug( "Bad path: '%s'", qPrintable( fi.absoluteFilePath() ) );
+         // ignore a bad path.
+      }
+   }
+   
+   QString fname = vkDlgGetFile( parent, start_path, cfg_key_path, mode );
+
+   // save chosen path to cfg for next time   
+   if ( !cfg_key_path.isEmpty() && !fname.isEmpty() ) {
+      QString path = fname;
+      QFileInfo fi( path );
+      path = pathIsDir ? fi.absolutePath() : fi.absoluteFilePath();
+      if ( isProjKey )
+         vkCfgProj->setValue( cfg_key_path, path );
+      else
+         vkCfgGlbl->setValue( cfg_key_path, path );
+   }
+   
+   return fname;
+}
+
+
+
+
+/*!
+  Dialog to choose a directory
+   - default start_dir is current directory
+  Returns: chosen directory path
+*/
+QString vkDlgGetDir( QWidget* parent, const QString& start_dir/*="./"*/ )
+{
+   // Setup dialog
+   QFileDialog dlg( parent, "Choose Directory", start_dir );
+   dlg.setFileMode( QFileDialog::Directory );
+   dlg.setViewMode( QFileDialog::Detail );
+   dlg.setAcceptMode( QFileDialog::AcceptOpen );
+   dlg.setOption( QFileDialog::ShowDirsOnly );
+   
+   // Run dialog - get filename to save to: asks for overwrite confirmation
+   QString dir_selected;
+   if ( dlg.exec() ) {
+      QStringList fileNames = dlg.selectedFiles();
+      if ( !fileNames.isEmpty() )
+         dir_selected = fileNames.first();
+   }
+
+   return dir_selected;
+}
+
+
+#if 0 // As-yet unused, untested...
+/*!
+  Dialog to choose a directory
+   - cfg_key_path is the (proj/glbl) cfg key for the start directory
+  The cfg is updated if a directory is chosen.
+  Returns: chosen directory path
+  
+  Note: don't use from options pages: they save to cache already.// - careful: don't use in options pages: don't want to save cfg before our turn!
+*/
+QString vkDirCfgDialog( QWidget* parent,
+                        const QString& cfg_key_dir/*=QString()*/ )
+{
+   // setup start directory
+   QString start_dir  = "./";
+   if ( !cfg_key_dir.isEmpty() ) {
+      QFileInfo fi( vkCfgProj->value( cfg_key_dir ).toString() );
+      start_dir = fi.exists() ? fi.absolutePath() : "./";
+   }
+   
+   QString dirname = vkDlgGetDir( parent, start_dir );
+   
+   // save chosen directory for next time   
+   if ( !cfg_key_dir.isEmpty() && !dirname.isEmpty() ) {
+      vkCfgProj->setValue( cfg_key_dir, dirname );
+   }
+   
+   return dirname;
+}
+#endif
+
+

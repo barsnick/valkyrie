@@ -24,6 +24,7 @@
 #include <iostream>
 
 #include <QString>
+#include <QFileDialog>
 
 using namespace std;
 
@@ -143,6 +144,23 @@ QString fileCheck( int* err_val, const QString fpath,
 QString dirCheck( int* err_val, const QString fpath,
                   bool check_read=false, bool check_write=false,
                   bool check_exe=false );
+
+
+// ============================================================
+// file/dir dialogs,
+QString vkDlgGetFile( QWidget* parent,
+                      const QString& start_dir = "./",
+                      const QString& cfg_key_path = QString(),
+                      QFileDialog::AcceptMode mode = QFileDialog::AcceptOpen );
+
+QString vkDlgCfgGetFile( QWidget* parent,
+                         const QString& cfg_key_path = QString(),
+                         QFileDialog::AcceptMode mode = QFileDialog::AcceptOpen );
+
+QString vkDlgGetDir( QWidget* parent,
+                     const QString& start_dir = "./" );
+
+
 
 
 #endif

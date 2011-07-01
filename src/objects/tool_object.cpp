@@ -836,15 +836,9 @@ bool ToolObject::fileSaveDialog()
    cerr << "ToolObject::fileSaveDialog()" << endl;
    vk_assert( toolView != 0 );
 
-   // --- Get filename to save to
-   QString flt = "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)";
-   QString cptn = "Save Log File As";
-   // use dir used by view-log as most-likely starting point
-   QFileInfo fi( vkCfgProj->value( "valkyrie/view-log" ).toString() );
-   QString start_path = fi.exists() ? fi.absolutePath() : "./";
+   QString fname = vkDlgCfgGetFile( toolView, "valkyrie/view-log",
+                                    QFileDialog::AcceptSave );
 
-   // get filename to save to: asks for overwrite confirmation
-   QString fname = QFileDialog::getSaveFileName( toolView, cptn, start_path, flt);
    if ( fname.isEmpty() ) { // Cancelled
       return false;
    }

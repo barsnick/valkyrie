@@ -213,10 +213,8 @@ void HandBook::openUrl( const QString& url )
 */
 void HandBook::openFile()
 {
-   QString fn = QFileDialog::getOpenFileName(
-                   this, "Open File", VkCfg::docDir(),
-                   "Html Files (*.html *.htm);;All Files (*)" );
-                   
+   QString fn = vkDlgCfgGetFile( this, "handbook_docdir" );
+   
    if ( !fn.isEmpty() ) {
       browser->setSource( fn );
    }

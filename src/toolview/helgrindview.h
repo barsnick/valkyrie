@@ -48,7 +48,6 @@ private:
    void setupToolBar();
 
 private slots:
-   void openLogFile();
    void opencloseAllItems();
    void opencloseOneItem();
    void showSrcPath();

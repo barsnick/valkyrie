@@ -224,27 +224,15 @@ void ValkyrieOptionsPage::chooseToolFont()
 */
 void ValkyrieOptionsPage::getEditor()
 {
-   // try and start up somewhere sensible
-   QString start_dir = "/";
-
-   // get current dir of current editor
-   LeWidget* editLedit = (( LeWidget* )m_itemList[VALKYRIE::SRC_EDITOR] );
-   QString ed = editLedit->currValue();
-   if ( !ed.isEmpty() ) {
-      QString ed_file = ed.split( " ", QString::SkipEmptyParts ).first();
-      int err_val;
-      ed_file = fileCheck( &err_val, ed_file, false, false, true );
-
-      QFileInfo fi( ed_file );
-      start_dir = fi.absolutePath();
-   }
+   // get path of current editor
+   QString ed_curr = m_itemList[VALKYRIE::SRC_EDITOR]->currValue();
+   if ( !ed_curr.isEmpty() )
+      ed_curr = ed_curr.split( " ", QString::SkipEmptyParts ).first();
    
-   QString editor =
-         QFileDialog::getOpenFileName( this, tr("Select Source Editor"),
-                                       start_dir, tr("All Files (*)"));
-                                    
-   if ( !editor.isEmpty() ) { // user might have clicked Cancel
-      editLedit->setValue( editor );
+   QString ed_new = vkDlgGetFile( this, ed_curr );
+   
+   if ( !ed_new.isEmpty() ) { // user might have clicked Cancel
+      (( LeWidget* )m_itemList[VALKYRIE::SRC_EDITOR] )->setValue( ed_new );
       // update triggers checkOption()
    }
 }
@@ -255,19 +243,12 @@ void ValkyrieOptionsPage::getEditor()
 */
 void ValkyrieOptionsPage::getBinary()
 {
-   QString currbin = m_itemList[VALKYRIE::BINARY]->currValue();
-   QString currdir = "./";
-   if ( !currbin.isEmpty() ) {
-       QFileInfo fi( currbin );
-       currdir = fi.absolutePath();
-   }
+   QString bin_curr = m_itemList[VALKYRIE::BINARY]->currValue();
 
-   QString binfile =
-         QFileDialog::getOpenFileName( this, tr("Select Executable To Debug"),
-                                       currdir, tr("All Files (*)"));
-
-   if ( !binfile.isEmpty() ) {   // user might have clicked Cancel
-      (( LeWidget* )m_itemList[VALKYRIE::BINARY] )->setValue( binfile );
+   QString bin_new = vkDlgGetFile( this, bin_curr );
+   
+   if ( !bin_new.isEmpty() ) {   // user might have clicked Cancel
+      (( LeWidget* )m_itemList[VALKYRIE::BINARY] )->setValue( bin_new );
       // update triggers checkOption()
    }
 }
@@ -278,12 +259,12 @@ void ValkyrieOptionsPage::getBinary()
 */
 void ValkyrieOptionsPage::getBrowser()
 {
-   QString brwsr =
-         QFileDialog::getOpenFileName( this, tr("Select Browser"),
-                                       "./", tr("All Files (*)"));
+   QString browser_curr = m_itemList[VALKYRIE::BINARY]->currValue();
 
-   if ( !brwsr.isEmpty() ) { // user might have clicked Cancel
-      (( LeWidget* )m_itemList[VALKYRIE::BROWSER] )->setValue( brwsr );
+   QString browser_new = vkDlgGetFile( this, browser_curr );
+
+   if ( !browser_new.isEmpty() ) { // user might have clicked Cancel
+      (( LeWidget* )m_itemList[VALKYRIE::BROWSER] )->setValue( browser_new );
       // update triggers checkOption()
    }
 }
@@ -294,12 +275,12 @@ void ValkyrieOptionsPage::getBrowser()
 */
 void ValkyrieOptionsPage::getVgExec()
 {
-   QString vg_exec =
-         QFileDialog::getOpenFileName( this, tr("Select Valgrind"),
-                                       "./", tr("All Files (*)"));
+   QString vg_curr = m_itemList[VALKYRIE::VG_EXEC]->currValue();
+
+   QString vg_new = vkDlgGetFile( this, vg_curr );
                                     
-   if ( !vg_exec.isEmpty() ) { // user might have clicked Cancel
-      (( LeWidget* )m_itemList[VALKYRIE::VG_EXEC] )->setValue( vg_exec );
+   if ( !vg_new.isEmpty() ) { // user might have clicked Cancel
+      (( LeWidget* )m_itemList[VALKYRIE::VG_EXEC] )->setValue( vg_new );
       // update triggers checkOption()
    }
 }
@@ -310,16 +291,12 @@ void ValkyrieOptionsPage::getVgExec()
 */
 void ValkyrieOptionsPage::getDfltLogDir()
 {
-   QString currdir = m_itemList[VALKYRIE::DFLT_LOGDIR]->currValue();
+   QString dir_curr = m_itemList[VALKYRIE::DFLT_LOGDIR]->currValue();
 
-   QString dir_logsave =
-         QFileDialog::getExistingDirectory( this,
-                                            tr("Choose Directory"),
-                                            currdir,
-                                            QFileDialog::ShowDirsOnly );
-                                         
-   if ( !dir_logsave.isEmpty() ) { // user might have clicked Cancel
-      (( LeWidget* )m_itemList[VALKYRIE::DFLT_LOGDIR] )->setValue( dir_logsave );
+   QString dir_new = vkDlgGetDir( this, dir_curr );
+   
+   if ( !dir_new.isEmpty() ) { // user might have clicked Cancel
+      (( LeWidget* )m_itemList[VALKYRIE::DFLT_LOGDIR] )->setValue( dir_new );
       // update triggers checkOption()
    }
 }
@@ -329,16 +306,12 @@ void ValkyrieOptionsPage::getDfltLogDir()
 */
 void ValkyrieOptionsPage::getWorkingDir()
 {
-   QString currdir = m_itemList[VALKYRIE::WORKING_DIR]->currValue();
+   QString dir_curr = m_itemList[VALKYRIE::WORKING_DIR]->currValue();
 
-   QString dir_working =
-      QFileDialog::getExistingDirectory( this,
-                                         tr("Choose Directory"),
-                                         currdir,
-                                         QFileDialog::ShowDirsOnly );
-
-   if ( !dir_working.isEmpty() ) { // user might have clicked Cancel
-      (( LeWidget* )m_itemList[VALKYRIE::WORKING_DIR] )->setValue( dir_working );
+   QString dir_new = vkDlgGetDir( this, dir_curr );
+      
+   if ( !dir_new.isEmpty() ) { // user might have clicked Cancel
+      (( LeWidget* )m_itemList[VALKYRIE::WORKING_DIR] )->setValue( dir_new );
       // update triggers checkOption()
    }
 }

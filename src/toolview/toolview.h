@@ -90,6 +90,9 @@ protected:
       return toolId;
    }
    
+protected slots:
+   void openLogFile();
+   
 public slots:
    // called by the view's object
    virtual void setState( bool run ) = 0;

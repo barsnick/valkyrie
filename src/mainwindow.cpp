@@ -23,6 +23,7 @@
 #include <QColorGroup>
 #include <QEvent>
 #include <QFileDialog>
+#include <QGroupBox>
 #include <QInputDialog>
 #include <QMenu>
 #include <QMenuBar>
@@ -40,6 +41,7 @@
 #include "utils/vk_config.h"
 #include "utils/vk_messages.h"
 #include "utils/vk_utils.h"
+#include "utils/vknewprojectdialog.h"
 
 
 /***************************************************************************/
@@ -69,9 +71,7 @@ MainWindow::MainWindow( Valkyrie* vk )
      handBook( 0 ), optionsDialog( 0 )
 {
    setObjectName( QString::fromUtf8( "MainWindowClass" ) );
-   QString title = VkCfg::appName();
-   title.replace( 0, 1, title[0].toUpper() );
-   setWindowTitle( title );
+   setWindowTitle( VkCfg::appTitle() + " - <no project>" );
    
    lastAppFont = qApp->font();
    lastPalette = qApp->palette();
@@ -756,43 +756,17 @@ void MainWindow::setLogFile( QString logFilename )
 */
 void MainWindow::createNewProject()
 {
-   // TODO: put dir & name choice in one dialog.
-   
-   // Choose project directory
-   QString dir = QFileDialog::getExistingDirectory( this, "Choose Project Directory", "./",
-                 QFileDialog::ShowDirsOnly |
-                 QFileDialog::DontResolveSymlinks );
-                 
-   if ( dir.isEmpty() || dir.isNull() ) {
+   VkNewProjectDialog dlg( this );
+
+   if ( dlg.exec() == QDialog::Rejected ) {
       return;
    }
-   
-   // Choose project name
-   QString proj_name;
-   
-   while ( true ) {
-      bool ok = true;
-      proj_name = QInputDialog::getText( this, "Choose New Project Name",
-                                         "Project Name:", QLineEdit::Normal,
-                                         "", &ok );
-                                         
-      if ( !ok ) {                  // User chaged their minds.
-         return;
-      }
-      
-      if ( !proj_name.isEmpty() ) { // loop if empty name.
-         break;
-      }
-   }
-   
-   // TODO: check if exists, may overwrite, etc...
 
-   QString proj_fname = dir + "/" + proj_name + "." + VkCfg::filetype();
-   vkCfgProj->createNewProject( proj_fname );
+   QString proj_path = dlg.getProjectPath();
+   
+   vkCfgProj->createNewProject( proj_path );
 
-   // TODO: ok/cancel?
-
-   setCurrentProject( proj_fname );
+   setCurrentProject( proj_path );
 }
 
 
@@ -801,18 +775,13 @@ void MainWindow::createNewProject()
 */
 void MainWindow::openProject()
 {
-   QString filter = QString("*.") + VkCfg::filetype();
-   QString proj_fname = QFileDialog::getOpenFileName( this, "Open Valkyrie Project",
-                           "./", "Valkyrie Projects (" + filter + ")" );
-                           
-   if ( proj_fname.isEmpty() || proj_fname.isNull() ) {
-      // Cancelled
-      return;
+   QString proj_fname = vkDlgCfgGetFile( this, "project_path" );
+   
+   if ( proj_fname.isEmpty() ) {
+      return;      // cancelled
    }
    
    vkCfgProj->openProject( proj_fname );
-
-   // TODO: ok/cancel?
 
    setCurrentProject( proj_fname );
 }
@@ -826,11 +795,20 @@ void MainWindow::openRecentProject()
    QAction *action = qobject_cast<QAction *>(sender());
    if (action) {
       QString proj_fname = action->data().toString();
-      vkCfgProj->openProject( proj_fname );
+      
+      QFileInfo fi( proj_fname );
+      if ( fi.exists() && fi.isFile() ) {
+         // cache project path
+         vkCfgGlbl->setValue( "project_path", proj_fname );
 
-      // TODO: ok/cancel?
-
-      setCurrentProject( proj_fname );
+         // open project
+         vkCfgProj->openProject( proj_fname );
+         setCurrentProject( proj_fname );
+      }
+      else {
+         vkError( this, "Open Recent Project",
+                  "<p>Project not found:<br>%s</p>", qPrintable( proj_fname ) );
+      }
    }
 }
 
@@ -840,41 +818,13 @@ void MainWindow::openRecentProject()
 */
 void MainWindow::saveAsProject()
 {
-   // TODO: put dir & name choice in one dialog.
-
-   // Choose project directory
-   QString dir = QFileDialog::getExistingDirectory( this, "Choose Project Directory", "./",
-                 QFileDialog::ShowDirsOnly |
-                 QFileDialog::DontResolveSymlinks );
-
-   if ( dir.isEmpty() || dir.isNull() ) {
-      return;
+   QString proj_fname = vkDlgCfgGetFile( this, "project_path",
+                                         QFileDialog::AcceptSave );
+   if ( proj_fname.isEmpty() ) {
+      return;      // cancelled
    }
-
-   // Choose project name
-   QString proj_name;
-
-   while ( true ) {
-      bool ok = true;
-      proj_name = QInputDialog::getText( this, "Enter Project Name",
-                                         "Project Name:", QLineEdit::Normal,
-                                         "", &ok );
-
-      if ( !ok ) {                  // User chaged their minds.
-         return;
-      }
-
-      if ( !proj_name.isEmpty() ) { // loop if empty name.
-         break;
-      }
-   }
-
-
-   // TODO: check if exists may overwrite, etc...
-   QString proj_fname = dir + "/" + proj_name + "." + VkCfg::filetype();
+   
    vkCfgProj->saveProjectAs( proj_fname );
-
-   // TODO: ok/cancel?
 
    setCurrentProject( proj_fname );
 }
@@ -885,21 +835,16 @@ void MainWindow::saveAsProject()
      - update the config with the new project name
      - update the actions to keep in sync.
 */
-void MainWindow::setCurrentProject(const QString &projName)
+void MainWindow::setCurrentProject(const QString &projPath )
 {
-#if 0 // TODO: maybe future, but then do consistently everywhere...
-   curFile = fileName;
-   if (curFile.isEmpty())
-      setWindowTitle(tr("Recent Files"));
-   else
-      setWindowTitle(tr("%1 - %2").arg(strippedName(curFile))
-                     .arg(tr("Recent Files")));
-#endif
-
+   QString projName = QFileInfo( projPath ).baseName();
+   projName.replace( 0, 1, projName[0].toUpper() );
+   setWindowTitle( VkCfg::appTitle() + " - " + projName );
+   
    QStringList files = vkCfgGlbl->value( "recent_projects" )
                        .toString().split( VkCfg::sepChar(), QString::SkipEmptyParts );
-   files.removeAll( projName );
-   files.prepend( projName );
+   files.removeAll( projPath );
+   files.prepend( projPath );
    while (files.size() > MaxRecentProjs) {
       files.removeLast();
    }
@@ -921,7 +866,7 @@ void MainWindow::updateActionsRecentProjs()
    int numRecentProjs = qMin(files.size(), (int)MaxRecentProjs);
 
    for (int i = 0; i < numRecentProjs; ++i) {
-      QString text = QFileInfo( files[i] ).fileName();
+      QString text = QFileInfo( files[i] ).baseName();
       actFile_RecentProjs[i]->setText(text);
       actFile_RecentProjs[i]->setData(files[i]);
       actFile_RecentProjs[i]->setVisible(true);

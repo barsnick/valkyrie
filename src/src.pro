@@ -77,7 +77,8 @@ SOURCES += \
     utils/vk_config.cpp \
     utils/vk_logpoller.cpp \
     utils/vk_messages.cpp \
-    utils/vk_utils.cpp
+    utils/vk_utils.cpp \
+    utils/vknewprojectdialog.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -119,7 +120,8 @@ HEADERS += \
     utils/vk_defines.h \
     utils/vk_logpoller.h \
     utils/vk_messages.h \
-    utils/vk_utils.h
+    utils/vk_utils.h \
+    utils/vknewprojectdialog.h
 
 RESOURCES += $${VK_ROOT}/icons.qrc
 

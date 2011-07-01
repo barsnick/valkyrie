@@ -18,11 +18,13 @@
 **
 ****************************************************************************/
 
+#include <QFileDialog>
 #include <QMenuBar>
 #include <QToolBar>
 
 #include "toolview/toolview.h"
 #include "mainwindow.h"
+#include "utils/vk_config.h"
 #include "utils/vk_utils.h"
 
 
@@ -132,6 +134,30 @@ void ToolView::hideToolMenus()
    }
 }
 
+
+/*!
+    Parse and load a valgrind xml logfile.
+
+    TODO: fix. This starts a new 'run', so we should
+    trigger vk's "check last run over" before anything else...
+*/
+void ToolView::openLogFile()
+{
+   //vkDebug( "ToolView::openLogFile()" );
+   
+   QString log_file = vkDlgCfgGetFile( this, "valkyrie/view-log" );
+   
+   // user might have clicked Cancel
+   if ( log_file.isEmpty() ) {
+      return;
+   }
+   
+   // updates config (as does cmd line --view-cfg...)
+   emit logFileChosen( log_file );
+
+   // informs tool_object to load the log_file given in config
+   emit run( VGTOOL::PROC_PARSE_LOG );
+}
 
 
 

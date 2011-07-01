@@ -29,6 +29,7 @@
 #include <QColor>
 #include <QDir>
 #include <QFile>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QPoint>
@@ -42,10 +43,10 @@
   Initialise static data: Basic configuration setup
 */
 const unsigned int VkCfg::_projCfgVersion = 1;   // @@@ increment if project config keys change @@@
-const unsigned int VkCfg::_glblCfgVersion = 1;   // @@@ increment if  global config keys change @@@
+const unsigned int VkCfg::_glblCfgVersion = 2;   // @@@ increment if  global config keys change @@@
 
 const QString VkCfg::_email       = "info@open-works.net"; // bug-reports
-const QString VkCfg::_copyright   = "Valkyrie is Copyright (C) 2003-2010 by OpenWorks GbR";
+const QString VkCfg::_copyright   = "Valkyrie is Copyright (C) 2003-2011 by OpenWorks GbR";
 const QString VkCfg::_vgCopyright = "Valgrind is Copyright (C) 2000-2010, and GNU GPL'd, by Julian Seward et al.";
 const QString VkCfg::_vgVersion   = "3.6.0";               // supports this major Vg release
 const QString VkCfg::_name        = VK_NAME;               // application name
@@ -99,6 +100,15 @@ const QString& VkCfg::vgVersion()    { return _vgVersion; }
   Valkyrie application name
 */
 const QString& VkCfg::appName()      { return _name; }
+
+/*!
+  Valkyrie application title
+*/
+const QString VkCfg::appTitle()
+{ 
+   QString title = _name;
+   return title.replace( 0, 1, title[0].toUpper() );
+}
 
 /*!
   Valkyrie application release version
@@ -381,13 +391,18 @@ void VkCfgGlbl::writeConfigDefaults()
    clear();
    vk_assert( allKeys().count() == 0 );
 
+//TODO: switch to using sections, and figure out backwards-compatibility issues...
+   
    setValue( "config_glbl_version",    VkCfg::glblCfgVersion() );
    setValue( "mainwindow_size",        QSize( 600, 600 ) );
    setValue( "mainwindow_pos",         QPoint( 400, 0 ) );
+
    setValue( "handbook_history",       QString() );
    setValue( "handbook_bookmarks",     QString() );
    setValue( "handbook_max_history",   20 );
    setValue( "handbook_max_bookmarks", 20 );
+   setValue( "handbook_docdir",        VkCfg::docDir() );
+
    setValue( "colour_background",      QColor( 214, 205, 187 ) );
    setValue( "colour_base",            QColor( 255, 255, 255 ) );
    setValue( "colour_dkgray",          QColor( 128, 128, 128 ) );
@@ -395,8 +410,21 @@ void VkCfgGlbl::writeConfigDefaults()
    setValue( "colour_highlight",       QColor( 147,  40,  40 ) );
    setValue( "colour_null",            QColor( 239, 227, 211 ) );
    setValue( "colour_text",            QColor(   0,   0,   0 ) );
-   setValue( "recent_projects",        QString() );
 
+   setValue( "recent_projects",        QString() );
+   setValue( "project_path",           "./" );
+
+   // filefilters
+   // These are settings/caches for file/dir-dialogs: filterlist + default filter to use
+   // - list key = filefilters/<proj or glbl key, with all '/' replaced by '_'>
+   // - dflt key = <list key>-default
+   setValue( "filefilters/valkyrie_view-log", "XML Files (*.xml);;Log Files (*.log.*);;All Files (*)" );
+   setValue( "filefilters/valkyrie_view-log-default", "" );
+   setValue( "filefilters/handbook_docdir", "Html Files (*.html *.htm);;All Files (*)" );
+   setValue( "filefilters/handbook_docdir-default", "" );
+   setValue( "filefilters/project_path", "Valkyrie Projects (*." + VkCfg::filetype() + ")" );
+   setValue( "filefilters/project_path-default", "" );
+   
    sync();
 }
 
