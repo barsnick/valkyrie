@@ -661,7 +661,7 @@ void VkCfgProj::createNewProject( const QString& proj_filename )
    QFileInfo fi( proj_filename );
    if ( fi.exists() ) {
       VK_DEBUG( "Creating new project: File exists: overwriting: '%s'", qPrintable( proj_filename ) );
-      if ( fi.isWritable() ) {
+      if ( !fi.isWritable() ) {
          VK_DEBUG( "Can't overwrite file: '%s'", qPrintable( proj_filename ) );
          return;
       }
