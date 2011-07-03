@@ -402,8 +402,9 @@ void MainWindow::setupMenus()
    menuProcess->addAction( actProcess_Run );
    menuProcess->addAction( actProcess_Stop );
    
-   foreach( QAction * actTool, toolActionGroup->actions() )
-   menuTools->addAction( actTool );
+   foreach( QAction * actTool, toolActionGroup->actions() ) {
+      menuTools->addAction( actTool );
+   }
    
    menuHelp->addAction( ctxtHlpAction );
    menuHelp->addSeparator();
@@ -577,9 +578,9 @@ void MainWindow::setToggles( VGTOOL::ToolID toolId )
       
       // disable all actions in the tool actiongroup
       // TODO: nicer way to do this? - maybe connect sig/slot toolview to action?
-      foreach( QAction * actTool, toolActionGroup->actions() )
-      actTool->setChecked( false );
-      
+      foreach( QAction * actTool, toolActionGroup->actions() ) {
+         actTool->setChecked( false );
+      }
       actFile_Close->setEnabled( false );
       actProcess_Run->setEnabled( false );
       actProcess_Stop->setEnabled( false );
