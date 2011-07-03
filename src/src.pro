@@ -69,6 +69,7 @@ SOURCES += \
     options/widgets/opt_lb_widget.cpp \
     toolview/helgrindview.cpp \
     toolview/helgrind_logview.cpp \
+    toolview/logviewfilter_mc.cpp \
     toolview/memcheckview.cpp \
     toolview/memcheck_logview.cpp \
     toolview/toolview.cpp \
@@ -111,6 +112,7 @@ HEADERS += \
     options/widgets/opt_lb_widget.h \
     toolview/helgrindview.h \
     toolview/helgrind_logview.h \
+    toolview/logviewfilter_mc.h \
     toolview/memcheckview.h \
     toolview/memcheck_logview.h \
     toolview/toolview.h \

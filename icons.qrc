@@ -32,5 +32,8 @@
         <file>icons/text_more.png</file>
         <file>icons/arrow_down.png</file>
         <file>icons/arrow_up.png</file>
+        <file>icons/filter.png</file>
+        <file>icons/refresh.png</file>
+        <file>icons/filter_off.png</file>
     </qresource>
 </RCC>

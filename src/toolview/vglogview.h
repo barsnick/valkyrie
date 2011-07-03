@@ -23,6 +23,7 @@
 
 #include <QColorGroup>
 #include <QDateTime>
+#include <QObject>
 #include <QPainter>
 #include <QPixmap>
 #include <QTreeWidget>
@@ -67,8 +68,9 @@ class TopStatusItem;
       the branch. the QDomElement refs held by item are then queried
       to fill the item data.
 */
-class VgLogView
+class VgLogView : public QObject
 {
+   Q_OBJECT
 public:
    VgLogView( QTreeWidget* );
    ~VgLogView();

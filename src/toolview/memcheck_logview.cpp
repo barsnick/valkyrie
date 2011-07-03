@@ -104,7 +104,7 @@ void TopStatusItemMC::updateToolStatus( QDomElement err )
          /* HACK ALERT!
             VALGRIND_DO_LEAK_CHECK gives repeated leaks...
             taking apart error::what to get record number
-            - if '1' then reset counters
+            - if this is 'record 1' then reset counters
          */
          QDomElement text = xwhat.firstChildElement( "text" );
          if ( ! text.isNull() ) {
@@ -184,6 +184,10 @@ bool MemcheckLogView::appendNodeTool( QDomElement elem, QString& errMsg )
       QDomElement err = elem;
       lastItem = new ErrorItemMC( topStatus, lastItem, err );
 
+// TODO: 
+//      flicker a problem?
+      emit this->errorItemAdded( lastItem );
+      
       // update topStatus
       topStatus->updateToolStatus( err );
       break;

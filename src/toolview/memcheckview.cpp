@@ -23,6 +23,7 @@
 #include "options/vk_options_dialog.h"
 #include "options/valgrind_options_page.h"
 #include "options/vk_suppressions_dialog.h"
+#include "toolview/logviewfilter_mc.h"          // filters
 #include "toolview/memcheckview.h"
 #include "toolview/memcheck_logview.h"
 #include "utils/vk_config.h"
@@ -120,6 +121,11 @@ VgLogView* MemcheckView::createVgLogView()
    }
 
    logview = new MemcheckLogView( treeView );
+   
+   // let filter show/hide an item
+   connect( logview, SIGNAL(errorItemAdded(VgOutputItem*)),
+            logviewFilter, SLOT(showHideItem(VgOutputItem*)) );
+
    return logview;
 }
 
@@ -142,6 +148,11 @@ void MemcheckView::setupLayout()
    treeView->header()->setResizeMode(0, QHeaderView::ResizeToContents);
    treeView->header()->setStretchLastSection(false);
 
+   // filter
+   logviewFilter = new LogViewFilterMC( this, treeView );
+
+   // layout
+   vLayout->addWidget( logviewFilter );
    vLayout->addWidget( treeView );
 }
 
@@ -195,6 +206,20 @@ void MemcheckView::setupActions()
    act_SaveLog->setIconVisibleInMenu( true );
    connect( act_SaveLog, SIGNAL( triggered() ), this, SIGNAL( saveLogFile() ) );
    
+   act_enableFilter = new QAction( this );
+   act_enableFilter->setObjectName( QString::fromUtf8( "act_enableFilter" ) );
+   QIcon icon_filter;
+   icon_filter.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filter_off.png" ) ),
+                         QIcon::Normal, QIcon::On );
+   icon_filter.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/filter.png" ) ),
+                         QIcon::Normal, QIcon::Off );
+   act_enableFilter->setIcon( icon_filter );
+   act_enableFilter->setIconVisibleInMenu( true );
+   act_enableFilter->setCheckable( true );
+   act_enableFilter->setChecked( true );
+   connect( act_enableFilter, SIGNAL(toggled(bool)),
+            logviewFilter, SLOT(enableFilter(bool)) );
+   
    // ------------------------------------------------------------
    // initialise actions (enable / disable)
    setState( false );
@@ -212,6 +237,10 @@ void MemcheckView::setupActions()
    act_OpenLog->setToolTip( tr( "Open Memcheck XML log" ) );
    act_SaveLog->setText(    tr( "Save Log" ) );
    act_SaveLog->setToolTip( tr( "Save Valgrind output to an XML log" ) );
+   
+   act_enableFilter->setText( tr( "Filters on/off" ) );
+   act_enableFilter->setToolTip( tr( "Enable or disable the temporary log filters." ) );
+   
 }
 
 
@@ -230,6 +259,7 @@ void MemcheckView::setupToolBar()
    toolToolBar->addAction( act_ShowSrcPaths );
    toolToolBar->addAction( act_OpenLog );
    toolToolBar->addAction( act_SaveLog );
+   toolToolBar->addAction( act_enableFilter );
    
    // ------------------------------------------------------------
    // Memcheck menu (created in base class)
@@ -241,6 +271,7 @@ void MemcheckView::setupToolBar()
    toolMenu->addAction( act_ShowSrcPaths );
    toolMenu->addAction( act_OpenLog );
    toolMenu->addAction( act_SaveLog );
+   toolMenu->addAction( act_enableFilter );
 }
 
 

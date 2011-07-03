@@ -23,6 +23,7 @@
 
 #include "toolview/toolview.h"
 #include "toolview/vglogview.h"
+#include "toolview/logviewfilter_mc.h"
 
 #include <QMenu>
 #include <QTreeWidget>
@@ -63,9 +64,12 @@ private:
    QAction* act_ShowSrcPaths;
    QAction* act_OpenLog;
    QAction* act_SaveLog;
+   QAction* act_enableFilter;
    
    QTreeWidget* treeView;
    VgLogView*   logview;
+   
+   LogViewFilterMC* logviewFilter;
 };
 
 #endif // __MEMCHECKVIEW_H

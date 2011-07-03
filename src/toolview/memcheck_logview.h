@@ -27,10 +27,14 @@
 // ============================================================
 class MemcheckLogView : public VgLogView
 {
+   Q_OBJECT
 public:
    MemcheckLogView( QTreeWidget* );
    ~MemcheckLogView();
-
+   
+signals:
+   void errorItemAdded( VgOutputItem* item );
+   
 private:
    // Template method functions:
    TopStatusItem* createTopStatus( QTreeWidget* view, QDomElement exe,
