@@ -618,7 +618,7 @@ void ToolObject::killProcess()
 */
 void ToolObject::processDone( int exitCode, QProcess::ExitStatus exitStatus )
 {
-   cerr << "ToolObject::processDone( " << exitCode << ", " << exitStatus << " )" << endl;
+   //vkDebug( "ToolObject::processDone( %d, %d )", exitCode, exitStatus );
    vk_assert( toolView != 0 );
 
    if ( vgproc == 0 ) {

@@ -110,7 +110,6 @@ void VkSuppressionsDialog::setupLayout()
    layoutWidget->setObjectName( QString::fromUtf8( "layoutWidget" ) );
    topVLayout->addWidget( layoutWidget, 0 );
    
-   // Note: not using opt_widget->hlayout()'s as button width won't match qlabel width.
    QGridLayout* gridLayout = new QGridLayout( layoutWidget );
    gridLayout->setColumnStretch( 0, 0 );
    gridLayout->setColumnStretch( 1, 1 );
