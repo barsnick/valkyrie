@@ -25,8 +25,8 @@ isEmpty(DATADIR) {
 ######################################################################
 # Install paths relative to $$PREFIX:
 target.path    = $$BINDIR
-doc.path       = $$DATADIR/$$PACKAGE/doc
-doc_imgs.path  = $$DATADIR/$$PACKAGE/doc/images
+doc.path       = $$DATADIR/doc/$$PACKAGE
+doc_imgs.path  = $$DATADIR/doc/$$PACKAGE/images
 
 ######################################################################
 # Qt modules
