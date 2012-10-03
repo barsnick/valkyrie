@@ -67,6 +67,7 @@ stopProcess()
 #include <QDir>
 #include <QTimer>
 #endif
+#include <unistd.h>	// for usleep
 
 // Waiting for Vg to start:
 #define WAIT_VG_START_MAX   1000 // msecs before giving up
