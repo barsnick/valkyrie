@@ -24,6 +24,7 @@
 #include "utils/vk_defines.h"  // build-generated file.
 #include "utils/vk_utils.h"
 
+#include <unistd.h>  // getuid
 #include <pwd.h>     // getpwuid
 
 #include <QColor>
