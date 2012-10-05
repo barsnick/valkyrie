@@ -22,6 +22,7 @@
 #include "utils/vk_config.h"        // vkname()
 
 #include <cstdlib>                  // exit, mkstemp, free/malloc, etc
+#include <unistd.h>                 // getpid
 
 #include <QDateTime>
 #include <QFile>
