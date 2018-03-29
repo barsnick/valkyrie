@@ -28,7 +28,7 @@
 #include "QFile"
 #include "QFileDialog"
 #include "QMenu"
-#include "QPrinter"
+#include "QtPrintSupport/QPrinter"
 #include "QProcess"
 #include "QString"
 #include "QStringList"

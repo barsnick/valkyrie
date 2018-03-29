@@ -21,7 +21,7 @@
 #ifndef __VK_VGLOGVIEW_H
 #define __VK_VGLOGVIEW_H
 
-#include <QColorGroup>
+#include <QColormap>
 #include <QDateTime>
 #include <QObject>
 #include <QPainter>

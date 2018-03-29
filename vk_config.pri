@@ -31,6 +31,8 @@ doc_imgs.path  = $$DATADIR/doc/$$PACKAGE/images
 ######################################################################
 # Qt modules
 QT += xml
+QT += widgets
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x000000
 
 ######################################################################
 # Project configuration & compiler options

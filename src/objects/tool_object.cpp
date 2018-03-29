@@ -50,6 +50,7 @@ stopProcess()
 #include <QFileDialog>
 #include <QKeySequence>
 #include <QString>
+#include <QThread>
 #include <QStringList>
 
 
