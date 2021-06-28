@@ -40,7 +40,7 @@ public:
    ~LeWidget();
    
    void addButton( QWidget* parent, const QObject* receiver,
-                   const char* slot, QString txt = QString::null,
+                   const char* slot, QString txt = QString(),
                    bool icon = false );
    void setReadOnly( bool );
    QPushButton* button();

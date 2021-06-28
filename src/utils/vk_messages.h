@@ -60,7 +60,7 @@ public:
    enum rVal { vkYes = 0, vkNo = 1, vkCancel = 2 };
    
    MsgBox( QWidget* parent, Icon icon, QString msg,
-           const QString& hdr = QString::null, int num_buttons = 1 );
+           const QString& hdr = QString(), int num_buttons = 1 );
    ~MsgBox();
    
    void setButtonTexts( const QStringList& texts );

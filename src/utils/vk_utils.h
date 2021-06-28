@@ -101,7 +101,7 @@ __attribute__(( format( printf, 1, 2 ) ) );
 
 
 /* create a unique filename -------------------------------------------- */
-QString vk_mkstemp( QString filepath, QString ext = QString::null );
+QString vk_mkstemp( QString filepath, QString ext = QString() );
 
 /* "valgrind 3.0.5" --> 0x030005 --------------------------------------- */
 int strVersion2hex( QString ver_str );

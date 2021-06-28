@@ -112,7 +112,7 @@ void LeWidget::setReadOnly( bool ro )
 }
 
 void LeWidget::addButton( QWidget* parent, const QObject* receiver,
-                          const char* slot, QString txt/*=QString::null*/,
+                          const char* slot, QString txt/*=QString()*/,
                           bool /*icon=false*/ )
 {
    QString label = !txt.isNull() ? txt : m_opt->shortHelp;

@@ -131,7 +131,7 @@ const QString& VkCfg::filetype()     { return _fileType; }
 */
 const QString& VkCfg::tmpDir()
 {
-   static QString res = QString::null;
+   static QString res = QString();
    if ( res.isNull() ) {
       pid_t me = getuid();
       struct passwd* pw = getpwuid( me );
@@ -147,7 +147,7 @@ const QString& VkCfg::tmpDir()
 */
 const QString& VkCfg::tmpCfgPath()
 {
-   static QString res = QString::null;
+   static QString res = QString();
    if ( res.isNull() ) {
       QString cfgTmpPath = tmpDir() + _tmpCfgName;
       res = vk_mkstemp( cfgTmpPath, filetype() );
@@ -164,7 +164,7 @@ const QString& VkCfg::tmpCfgPath()
 */
 const QString& VkCfg::cfgDir()
 {
-   static QString res = QString::null;
+   static QString res = QString();
    if ( res.isNull() ) {
       res = QString( _cfgDir ).replace( "%home", QDir::homePath() );
    }
@@ -177,7 +177,7 @@ const QString& VkCfg::cfgDir()
 */
 const QString& VkCfg::projDfltPath()
 {
-   static QString res = QString::null;
+   static QString res = QString();
    if ( res.isNull() ) {
       res = cfgDir() + _prjDfltName + "." + filetype();
    }
@@ -189,7 +189,7 @@ const QString& VkCfg::projDfltPath()
 */
 const QString& VkCfg::globalPath()
 {
-   static QString res = QString::null;
+   static QString res = QString();
    if ( res.isNull() ) {
       res = cfgDir() + _globalName + "." + filetype();
    }
@@ -201,7 +201,7 @@ const QString& VkCfg::globalPath()
 */
 const QString& VkCfg::suppsDir()
 {
-   static QString res = QString::null;
+   static QString res = QString();
    if ( res.isNull() ) {
       res = cfgDir() + _suppDir;
    }

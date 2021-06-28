@@ -122,7 +122,7 @@ void vk_assert_never_reached_fail( const char* file,
 
 
 /* Create a unique filename, with an optional extension ---------------- */
-QString vk_mkstemp( QString filepath, QString ext/*=QString::null*/ )
+QString vk_mkstemp( QString filepath, QString ext/*=QString()*/ )
 {
    // create tempfiles with datetime, so can sort easily if they stay around
    
@@ -143,7 +143,7 @@ QString vk_mkstemp( QString filepath, QString ext/*=QString::null*/ )
          /* something went wrong */
          VK_DEBUG( "failed to create unique filename from '%s'.",
                    qPrintable( filepath ) );
-         return QString::null;
+         return QString();
       }
       
       unique = QString( tmpname );
@@ -350,7 +350,7 @@ bool strToBool( QString str, bool* ok/*=NULL*/ )
 */
 static QString getFileAbsPath( const QString file_name )
 {
-   QString absPath = QString::null;
+   QString absPath = QString();
 
    if ( QFile::exists( file_name ) ) {
       // true for (good) directories, too.
@@ -378,7 +378,7 @@ static QString getFileAbsPath( const QString file_name )
 
 /*!
   Checks file exists and has correct permissions.
-  Returns absolute path to file, if it exists: else QString::null
+  Returns absolute path to file, if it exists: else QString()
 */
 QString fileCheck( int* err_val, const QString fpath,
                    bool check_read/*=false*/,
@@ -386,7 +386,7 @@ QString fileCheck( int* err_val, const QString fpath,
                    bool check_exe/*=false*/ )
 {
    *err_val = PARSED_OK;
-   QString absPath = QString::null;
+   QString absPath = QString();
    QFileInfo fi;
 
    // check exists: if so, return absolute path
@@ -436,7 +436,7 @@ bye:
 
 /*!
   Checks dir exists and has correct permissions.
-  Returns absolute path to dir, if it exists: else QString::null
+  Returns absolute path to dir, if it exists: else QString()
 */
 QString dirCheck( int* err_val, const QString dir,
                   bool check_read/*=false*/,
@@ -444,7 +444,7 @@ QString dirCheck( int* err_val, const QString dir,
                   bool check_exe/*=false*/ )
 {
    *err_val = PARSED_OK;
-   QString absPath = QString::null;
+   QString absPath = QString();
    QFileInfo fi( dir );
 
    // check exists: if so, return absolute path
