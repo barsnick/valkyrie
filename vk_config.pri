@@ -32,6 +32,7 @@ doc_imgs.path  = $$DATADIR/doc/$$PACKAGE/images
 # Qt modules
 QT += xml
 QT += widgets
+QT += printsupport
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x000000
 
 ######################################################################
