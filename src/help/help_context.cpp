@@ -19,7 +19,6 @@
 ****************************************************************************/
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QMouseEvent>
 
 
