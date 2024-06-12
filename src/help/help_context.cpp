@@ -19,7 +19,9 @@
 ****************************************************************************/
 
 #include <QApplication>
+#include <QGuiApplication>
 #include <QMouseEvent>
+#include <QScreen>
 
 
 #include "help/help_context.h"
@@ -267,14 +269,13 @@ void ContextHelp::showHelp( const QString& text )
    if ( !hbook->isVisible() ) {
    
       // find out where MainWindow is, and park up beside it
-      QWidget* mw = qApp->activeWindow();
-      int scr = QApplication::desktop()->screenNumber( mw );
-      QRect screen = QApplication::desktop()->screenGeometry( scr );
+      QRect screen = QGuiApplication::primaryScreen()->geometry();
       
       int x;
       int hw = hbook->width();
       
       // get the global co-ords of the top-left pixel of MainWin
+      QWidget* mw = qApp->activeWindow();
       QPoint pos = mw->mapToGlobal( QPoint( 0, 0 ) );
       
       if ( hw < ( pos.x() - screen.x() ) ) {
