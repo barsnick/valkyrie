@@ -492,7 +492,7 @@ void HandBook::readHistory()
    
    // don't use toStringList(): empty parts are kept
    QStringList history = vkCfgGlbl->value( "handbook_history" )
-                         .toString().split( VkCfg::sepChar(), QString::SkipEmptyParts );
+                         .toString().split( VkCfg::sepChar(), Qt::SkipEmptyParts );
    int len = history.count() > max_history ? max_history : history.count();
    
    for ( int idx = 0; idx < len; idx++ ) {
@@ -521,13 +521,13 @@ void HandBook::readBookmarks()
    
    // don't use toStringList(): empty parts are kept
    QStringList bookmarks = vkCfgGlbl->value( "handbook_bookmarks" )
-                           .toString().split( VkCfg::sepChar(), QString::SkipEmptyParts );
+                           .toString().split( VkCfg::sepChar(), Qt::SkipEmptyParts );
    int len = bookmarks.count() > max_bookmarks ? max_bookmarks : bookmarks.count();
 
    for ( int idx = 0; idx < len; idx++ ) {
       QString str = bookmarks.at( idx );
       
-      QStringList sl = str.split( BOOKMARK_NAME_ADDR_DIVIDER, QString::SkipEmptyParts );
+      QStringList sl = str.split( BOOKMARK_NAME_ADDR_DIVIDER, Qt::SkipEmptyParts );
       vk_assert( sl.count() == 2 );
       QString title = sl.first();
       QString url   = sl.last();

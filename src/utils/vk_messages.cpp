@@ -77,7 +77,7 @@ int vkQuery( QWidget* w, QString hdr,
    va_end( ap );
    
    // setup and show dialog box
-   QStringList buttonLabels( labels.split( ";", QString::SkipEmptyParts ) );
+   QStringList buttonLabels( labels.split( ";", Qt::SkipEmptyParts ) );
    int nbutts = buttonLabels.count();
    MsgBox mb( w, MsgBox::Query, buf, hdr, nbutts );
    mb.setButtonTexts( buttonLabels );

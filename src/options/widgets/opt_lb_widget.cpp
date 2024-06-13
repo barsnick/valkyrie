@@ -97,7 +97,7 @@ void LbWidget::update( const QString& txt )
    setCurrValue( txt );
 
    m_lbox->clear();
-   QStringList sfiles = m_currentValue.split( m_sep, QString::SkipEmptyParts );
+   QStringList sfiles = m_currentValue.split( m_sep, Qt::SkipEmptyParts );
 
    for ( int i = 0; i < sfiles.count(); i++ ) {
       m_lbox->addItem( sfiles[i] );
