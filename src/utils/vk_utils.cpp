@@ -586,10 +586,10 @@ QString vkDlgCfgGetFile( QWidget* parent,
       QFileInfo fi;
       // check first project cfg then glbl cfg for the path key
       if ( vkCfgProj->contains( cfg_key_path ) ) {
-         fi = vkCfgProj->value( cfg_key_path ).toString();
+         fi.setFile( vkCfgProj->value( cfg_key_path ).toString() );
       }
       else if ( vkCfgGlbl->contains( cfg_key_path ) ) {
-         fi = vkCfgGlbl->value( cfg_key_path ).toString();
+         fi.setFile( vkCfgGlbl->value( cfg_key_path ).toString() );
          isProjKey = false;
       }
       else {
