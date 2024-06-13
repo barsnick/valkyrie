@@ -47,7 +47,7 @@ SuppFrame::SuppFrame( bool isFirstFrame, QWidget* parent )
    
    QHBoxLayout* topHLayout = new QHBoxLayout( this );
    topHLayout->setObjectName( QString::fromUtf8( "topHLayout" ) );
-   topHLayout->setMargin(0);
+   topHLayout->setContentsMargins(0, 0, 0, 0);
    
    frame_cmb = new QComboBox();
    frame_cmb->setMinimumWidth( width_col1 );
@@ -114,7 +114,7 @@ void VkSuppressionsDialog::setupLayout()
    gridLayout->setColumnStretch( 0, 0 );
    gridLayout->setColumnStretch( 1, 1 );
    gridLayout->setColumnMinimumWidth( 0, width_col1 );
-   gridLayout->setMargin(0);
+   gridLayout->setContentsMargins(0, 0, 0, 0);
    
    // ------------------------------------------------------------
    // Name
@@ -146,7 +146,7 @@ void VkSuppressionsDialog::setupLayout()
 
    QWidget* pb_addFrame = new QWidget();
    QHBoxLayout* hLayout = new QHBoxLayout( pb_addFrame );
-   hLayout->setMargin(0);
+   hLayout->setContentsMargins(0, 0, 0, 0);
    hLayout->addWidget( cchn_but );
    hLayout->addStretch(10);
    
@@ -179,7 +179,7 @@ void VkSuppressionsDialog::setupLayout()
          
    callChainLayout = new QVBoxLayout( scroll );
    callChainLayout->setObjectName( QString::fromUtf8( "callChainLayout" ) );
-   callChainLayout->setMargin(5);
+   callChainLayout->setContentsMargins(5, 5, 5, 5);
    // this needed else internal widgets resize to nothing!
    callChainLayout->setSizeConstraint( QLayout::SetMinAndMaxSize );
 

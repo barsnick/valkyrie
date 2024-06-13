@@ -85,7 +85,7 @@ LogViewFilterMC::LogViewFilterMC( QWidget *parent, QTreeWidget* view )
    gridLayout->setColumnStretch( 1, 0 );
    gridLayout->setColumnStretch( 2, 0 );
    gridLayout->setColumnStretch( 3, 1 );
-   gridLayout->setMargin(0);
+   gridLayout->setContentsMargins(0, 0, 0, 0);
    gridLayout->addWidget( butt_refresh,    0, 0 );
    gridLayout->addWidget( combo_xmltag,    0, 1 );
    gridLayout->addWidget( cmpWidgStack,    0, 2 );

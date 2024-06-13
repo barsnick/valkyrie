@@ -186,7 +186,7 @@ void VkOptionsDialog::setupLayout()
    // options button box
    QHBoxLayout* hLayoutButtons = new QHBoxLayout( hButtonWidget );
    hLayoutButtons->setObjectName( QString::fromUtf8( "hLayoutButtons" ) );
-   hLayoutButtons->setMargin(0);
+   hLayoutButtons->setContentsMargins(0, 0, 0, 0);
    
    updateDefaultsButton = new QPushButton( QPixmap( ":/vk_icons/icons/filesave.png" ),
                                      "Save As Project Default" );

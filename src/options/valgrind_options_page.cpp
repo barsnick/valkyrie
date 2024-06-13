@@ -206,7 +206,7 @@ void ValgrindOptionsPage::setupOptions()
    QGroupBox* suppfile_groupbox = new QGroupBox();
    QHBoxLayout* suppfile_hbox = new QHBoxLayout();
    suppfile_hbox->setObjectName( QString::fromUtf8( "suppfile_hbox" ) );
-   suppfile_hbox->setMargin(0);
+   suppfile_hbox->setContentsMargins(0, 0, 0, 0);
    // listbox(options)
    insertOptionWidget( VALGRIND::SUPPS_SEL, tabSupps, false );  // listbox
    LbWidget* lbSel = ( LbWidget* )m_itemList[VALGRIND::SUPPS_SEL];
@@ -217,7 +217,7 @@ void ValgrindOptionsPage::setupOptions()
    QWidget* butts1_groupbox = new QWidget();
    QVBoxLayout* butts1_vbox = new QVBoxLayout();
    butts1_vbox->setObjectName( QString::fromUtf8( "butts1_vbox" ) );
-   butts1_vbox->setMargin(0);
+   butts1_vbox->setContentsMargins(0, 0, 0, 0);
    
    QIcon icon_arrow_up;
    icon_arrow_up.addPixmap( QPixmap( QString::fromUtf8( ":/vk_icons/icons/arrow_up.png" ) ) );
@@ -251,7 +251,7 @@ void ValgrindOptionsPage::setupOptions()
    QGroupBox* supps_groupbox = new QGroupBox();
    QHBoxLayout* supps_hbox = new QHBoxLayout();
    supps_hbox->setObjectName( QString::fromUtf8( "supps_hbox" ) );
-   supps_hbox->setMargin(0);
+   supps_hbox->setContentsMargins(0, 0, 0, 0);
    // listview
    lwSupps = new QListWidget( supps_groupbox );
    lwSupps->setObjectName( QString::fromUtf8( "list_widget_supps" ) );
@@ -265,7 +265,7 @@ void ValgrindOptionsPage::setupOptions()
    QWidget* butts_groupbox = new QWidget();
    QVBoxLayout* butts_vbox = new QVBoxLayout();
    butts_vbox->setObjectName( QString::fromUtf8( "butts_vbox" ) );
-   butts_vbox->setMargin(0);
+   butts_vbox->setContentsMargins(0, 0, 0, 0);
    btn_supp_new = new QPushButton("New", butts_groupbox );
    btn_supp_edt = new QPushButton("Edit", butts_groupbox );
    btn_supp_del = new QPushButton("Delete", butts_groupbox );

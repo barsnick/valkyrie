@@ -125,7 +125,7 @@ VgLogView* HelgrindView::createVgLogView()
 void HelgrindView::setupLayout()
 {
    QVBoxLayout* vLayout = new QVBoxLayout( this );
-   vLayout->setMargin(0);
+   vLayout->setContentsMargins(0, 0, 0, 0);
    
    treeView = new QTreeWidget( this );
    treeView->setObjectName( QString::fromUtf8( "treeview_Helgrind" ) );
