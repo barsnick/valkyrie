@@ -378,7 +378,7 @@ bool SuppList::initSuppsFile( const QString& fname )
              << "# Note: Multiple tools per kind e.g. TOOL(,TOOL)*::KIND' is not (yet) supported.\n"
              << "#\n"
              << "# Note: For Memcheck, the the optional aux info is:\n"
-             << "#       if (KIND == 'Param'): KAUX = system call param e.g. 'write(buf)'\n" << endl;
+             << "#       if (KIND == 'Param'): KAUX = system call param e.g. 'write(buf)'\n" << Qt::endl;
       
       file.close();
       return true;
