@@ -42,7 +42,7 @@ SuppFrame::SuppFrame( bool isFirstFrame, QWidget* parent )
    setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred );
    
    QFontMetrics fm( qApp->font() );
-   int width_col1 = fm.width( SIZE_COL1 );
+   int width_col1 = fm.horizontalAdvance( SIZE_COL1 );
    width_col1 -= 5; // compensate for margin of central widget
    
    QHBoxLayout* topHLayout = new QHBoxLayout( this );
@@ -98,7 +98,7 @@ VkSuppressionsDialog::VkSuppressionsDialog( QWidget *parent )
 void VkSuppressionsDialog::setupLayout()
 {
    QFontMetrics fm( qApp->font() );
-   int width_col1 = fm.width( SIZE_COL1 );
+   int width_col1 = fm.horizontalAdvance( SIZE_COL1 );
 
    // ------------------------------------------------------------
    QVBoxLayout* topVLayout = new QVBoxLayout( this );
