@@ -28,7 +28,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QString>
 
 /*
@@ -160,15 +160,15 @@ QString vk_mkstemp( QString filepath, QString ext/*=QString()*/ )
 */
 int strVersion2hex( QString ver_str )
 {
-   QRegExp rxver( ".*(\\d{1,2})\\.(\\d{1,2})\\.(\\d{1,2}).*" );
-   
-   if ( rxver.indexIn( ver_str ) == -1 ) {
+   QRegularExpression rxver( ".*(\\d{1,2})\\.(\\d{1,2})\\.(\\d{1,2}).*" );
+   QRegularExpressionMatch match = rxver.match( ver_str );
+   if ( !match.hasMatch() ) {
       return -1;
    }
    
-   int major = rxver.cap( 1 ).toInt();
-   int minor = rxver.cap( 2 ).toInt();
-   int patch = rxver.cap( 3 ).toInt();
+   int major = match.captured( 1 ).toInt();
+   int minor = match.captured( 2 ).toInt();
+   int patch = match.captured( 3 ).toInt();
    return ( major << 16 ) + ( minor << 8 ) + patch;
 }
 

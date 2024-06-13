@@ -253,7 +253,7 @@ void VkSuppressionsDialog::ToolChanged( int idx )
 
 void VkSuppressionsDialog::TypeChanged( int )
 {
-   QRegExp re("^Param$", Qt::CaseInsensitive);
+   QRegularExpression re("^Param$", QRegularExpression::CaseInsensitiveOption);
    bool hasAux = type_cmb->currentText().contains(re);
    kaux_lbl->setEnabled( hasAux );
    kaux_le->setEnabled( hasAux );

@@ -102,8 +102,7 @@ bool VgLogHandler::processingInstruction( const QString& target, const QString& 
 }
 
 bool VgLogHandler::startElement( const QString&, const QString&,
-                                 const QString& tag,
-                                 const QXmlAttributes& )
+                                 const QString& tag )
 {
    //  vkPrintErr("VgLogHandler::startElement: '%s'", tag.latin1());
    QDomNode n = doc.createElement( tag );

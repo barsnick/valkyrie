@@ -124,7 +124,7 @@ bool Suppression::setKind( QString str )
       return false;
    }
    
-   QRegExp re( list[0], Qt::CaseInsensitive );
+   QRegularExpression re( list[0], QRegularExpression::CaseInsensitiveOption );
    int idx = SuppRanges::instance().getKindTools().indexOf( re );
    if ( idx == -1 ) {
       vkPrintErr("Bad Tool (%s) for this suppression (%s).",
@@ -197,7 +197,7 @@ bool Suppression::fromStringList( const QStringList& lines )
    if ( !setKind( lines[i++] ) ) return false;
 
    // kaux (optional)
-   QRegExp re( "Memcheck:Param", Qt::CaseInsensitive );
+   QRegularExpression re( "Memcheck:Param", QRegularExpression::CaseInsensitiveOption );
    if ( m_kind.contains( re ) &&
          !(lines.at(i).startsWith("obj:") ||
            lines.at(i).startsWith("fun:") ) ) {
@@ -261,7 +261,7 @@ bool SuppList::readSuppFile( QString& fname )
 
    while (!in.atEnd()) {
       QString line = in.readLine().simplified();
-      if ( line.contains(QRegExp("^\\{$")) ) {     // start of new supp
+      if ( line.contains(QRegularExpression("^\\{$")) ) {     // start of new supp
          QStringList suppLines;
          Suppression supp;
 
@@ -269,7 +269,7 @@ bool SuppList::readSuppFile( QString& fname )
             line = in.readLine().simplified();
             if ( line.startsWith("#") || line.isEmpty() )
                continue;
-            if ( line.contains(QRegExp("^\\}$")) ) // end of supp
+            if ( line.contains(QRegularExpression("^\\}$")) ) // end of supp
                break;
             suppLines += line;
          }

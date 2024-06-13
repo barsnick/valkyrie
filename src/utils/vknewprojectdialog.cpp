@@ -26,6 +26,7 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QVBoxLayout>
 
 #define LBL_STYLE_WARN "QLabel { background-color : red; color : black; }"
@@ -139,7 +140,7 @@ void VkNewProjectDialog::checkInput()
       name_ok = false;
    }
    else {
-      int idx = name.lastIndexOf( QRegExp("[^a-zA-Z0-9_-]") );
+      int idx = name.lastIndexOf( QRegularExpression("[^a-zA-Z0-9_-]") );
       if ( idx != -1 ) {
          warning = QString( "invalid character: '%1'").arg( name.at( idx ) );
          name_ok = false;

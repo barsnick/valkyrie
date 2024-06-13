@@ -28,6 +28,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QPoint>
+#include <QRegularExpression>
 #include <QStringList>
 
 
@@ -487,10 +488,10 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
                // editor flag, plus our replacement string (%n)
                QFileInfo fi( argval );
                QString fname = fi.fileName();
-               if ( fname.contains( QRegExp( "^(emacs|gedit|gvim|nano|nedit)[\\W]*" ) ) ) {
+               if ( fname.contains( QRegularExpression( "^(emacs|gedit|gvim|nano|nedit)[\\W]*" ) ) ) {
                   argval += " +%n";
                }
-               else if ( fname.contains( QRegExp( "^kate[\\W]*" ) ) ) {
+               else if ( fname.contains( QRegularExpression( "^kate[\\W]*" ) ) ) {
                   argval += " --line %n -use";
                }
                else {
@@ -509,7 +510,7 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
          }
 
          // check filename format: ".*\.VkCfg::filetype()$"
-         if ( !argval.contains( QRegExp( ".*\\." + VkCfg::filetype() + "$" ) ) ) {
+         if ( !argval.contains( QRegularExpression( ".*\\." + VkCfg::filetype() + "$" ) ) ) {
             return PERROR_BADFILENAME;
          }
 
