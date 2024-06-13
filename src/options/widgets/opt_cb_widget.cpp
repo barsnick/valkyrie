@@ -24,6 +24,7 @@
 #include "utils/vk_utils.h"
 
 #include <QComboBox>
+#include <QCompleter>
 #include <QHBoxLayout>
 #include <QWidget>
 #include <QString>
@@ -44,7 +45,8 @@ CbWidget::CbWidget( QWidget* parent, VkOption* vkopt, bool mklabel )
    m_widg    = m_combo;
    
    m_combo->setInsertPolicy( QComboBox::NoInsert );
-   m_combo->setAutoCompletion( true );
+   QCompleter *completer = new QCompleter( this );
+   m_combo->setCompleter( completer );
    m_combo->addItems( m_opt->possValues );
    m_combo->setCurrentIndex( m_currIdx );
    
