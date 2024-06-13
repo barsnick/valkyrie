@@ -62,8 +62,7 @@ public:
                                const QString& data );
    bool startElement( const QString& nsURI,
                       const QString& localName,
-                      const QString& qName,
-                      const QXmlAttributes& atts );
+                      const QString& qName );
    bool endElement( const QString& nsURI,
                     const QString& localName,
                     const QString& qName );
