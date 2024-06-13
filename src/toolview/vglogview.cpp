@@ -260,12 +260,12 @@ void TopStatusItem::updateStatus( QDomElement status )
    }
 
    // start count
-   ret = sscanf( start_time.toAscii().constData(), "%d:%d:%d:%d.%4d",
+   ret = sscanf( start_time.toLatin1().constData(), "%d:%d:%d:%d.%4d",
                  &sday, &shours, &smins, &ssecs, &smsecs );
 
    if ( ret == 5 ) {
       QString end_time = status.firstChildElement( "time" ).text();
-      ret = sscanf( end_time.toAscii().constData(), "%d:%d:%d:%d.%4d",
+      ret = sscanf( end_time.toLatin1().constData(), "%d:%d:%d:%d.%4d",
                     &eday, &ehours, &emins, &esecs, &emsecs );
 
       if ( ret == 5 ) {
