@@ -528,7 +528,6 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
          const char* cmd = cmd_qstr.toLatin1().constData();
          FILE* fp = popen( cmd, "r" );
          if ( !fp ) {
-            pclose( fp );
             return PERROR_BADFILE;
          }
 
