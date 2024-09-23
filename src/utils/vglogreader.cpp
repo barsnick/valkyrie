@@ -54,7 +54,7 @@ VgLogReader::~VgLogReader()
    }
 }
 
-bool VgLogReader::parse( QString filepath, bool incremental/*=false*/ )
+bool VgLogReader::parseFile( QString filepath, bool incremental/*=false*/ )
 {
    if ( source ) {
       delete source;

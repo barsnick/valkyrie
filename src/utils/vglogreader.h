@@ -111,7 +111,7 @@ public:
    VgLogReader( VgLogView* lv );
    ~VgLogReader();
    
-   bool parse( QString filepath, bool incremental = false );
+   bool parseFile( QString filepath, bool incremental = false );
    bool parseContinue();
    
    VgLogHandler* handler() {

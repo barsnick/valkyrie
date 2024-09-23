@@ -293,7 +293,7 @@ bool ToolObject::parseLogFile()
 
    // Parse the log
    VgLogReader vgLogFileReader( toolView->createVgLogView() );
-   bool success = vgLogFileReader.parse( log_file );
+   bool success = vgLogFileReader.parseFile( log_file );
 
    if ( success ) {
       statusMsg( "Loaded Logfile '" + log_file + "'" );
@@ -720,7 +720,7 @@ void ToolObject::readVgLog()
       // first time around...
       //VK_DEBUG( "Start parsing Valgrind XML log" );
 
-      ok = vgreader->parse( tmplogFname, true/*incremental*/ );
+      ok = vgreader->parseFile( tmplogFname, true/*incremental*/ );
 
       if ( !ok ) {
          VK_DEBUG( "Error: parse() failed" );
@@ -801,7 +801,7 @@ void ToolObject::readVgLog()
   inform the user and remind of option to stopping by hand.
 
   Notes:
-  * vgreader->parse() and parseContinue() call QXmlInputSource::fetchData(),
+  * vgreader->parseFile() and parseContinue() call QXmlInputSource::fetchData(),
     which reads in only a limited amount (512B for Qt3.3.6) from the logfile.
     Valgrind, after finishing up, can write a whole bunch of data in one go
     to the logfile, which takes some iterations of parserContinue() to read in.
