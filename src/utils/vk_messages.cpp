@@ -20,6 +20,7 @@
 
 #include "utils/vk_messages.h"
 #include "utils/vk_config.h"
+#include "utils/vk_utils.h"
 
 #include <stdarg.h>           /* va_start, va_end */
 #include <stdlib.h>           /* exit errno */
@@ -77,7 +78,7 @@ int vkQuery( QWidget* w, QString hdr,
    va_end( ap );
    
    // setup and show dialog box
-   QStringList buttonLabels( labels.split( ";", Qt::SkipEmptyParts ) );
+   QStringList buttonLabels( labels.split( ";", QT_SKIPEMPTYPARTS ) );
    int nbutts = buttonLabels.count();
    MsgBox mb( w, MsgBox::Query, buf, hdr, nbutts );
    mb.setButtonTexts( buttonLabels );

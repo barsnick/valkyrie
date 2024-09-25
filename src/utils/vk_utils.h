@@ -161,6 +161,15 @@ QString vkDlgGetDir( QWidget* parent,
                      const QString& start_dir = "./" );
 
 
+// ============================================================
+// compatibility
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+#define QT_ENDL endl
+#define QT_SKIPEMPTYPARTS QString::SkipEmptyParts
+#else
+#define QT_ENDL Qt::endl
+#define QT_SKIPEMPTYPARTS Qt::SkipEmptyParts
+#endif
 
 
 #endif

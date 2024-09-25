@@ -541,20 +541,20 @@ ErrorItem::ErrorItem( VgOutputItem* parent, QTreeWidgetItem* after,
          strm << snameEl.text();
       QDomElement skindEl = supp.firstChildElement( "skind" );
       if ( !skindEl.isNull() )
-         strm << Qt::endl << skindEl.text();
+         strm << QT_ENDL << skindEl.text();
       QDomElement skauxEl = supp.firstChildElement( "skaux" );
       if ( !skauxEl.isNull() )
-         strm << Qt::endl << skauxEl.text();
+         strm << QT_ENDL << skauxEl.text();
 
       QDomElement sframeEl = supp.firstChildElement( "sframe" );
       for ( ; !sframeEl.isNull();
               sframeEl = sframeEl.nextSiblingElement("sframe") ) {
          QDomElement objEl = sframeEl.firstChildElement( "obj" );
          if ( !objEl.isNull() )
-            strm << Qt::endl << "obj:" << objEl.text();
+            strm << QT_ENDL << "obj:" << objEl.text();
          QDomElement funEl = sframeEl.firstChildElement( "fun" );
          if ( !funEl.isNull() )
-            strm << Qt::endl << "fun:" << funEl.text();
+            strm << QT_ENDL << "fun:" << funEl.text();
       }
    }
 }

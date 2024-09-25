@@ -438,7 +438,7 @@ void MemcheckView::popupMenu( const QPoint& pos )
    else if ( act == &actCopyXML ) {
       QString xml;
       QTextStream ts(&xml);
-      ts << item->getElement() << Qt::endl;
+      ts << item->getElement() << QT_ENDL;
       QClipboard *clipboard = QApplication::clipboard();
       clipboard->setText( xml );
    }

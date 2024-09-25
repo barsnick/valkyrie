@@ -128,7 +128,7 @@ void SpWidget::update( const QString& txt )
       m_intspin->setValue( txt.toInt() );
    }
    else {
-      QStringList values = txt.split( ",", Qt::SkipEmptyParts );
+      QStringList values = txt.split( ",", QT_SKIPEMPTYPARTS );
 
       for ( int i = 0; i < values.count(); i++ ) {
          //TODO: multisections
