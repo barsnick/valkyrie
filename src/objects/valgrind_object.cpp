@@ -535,7 +535,11 @@ int Valgrind::checkOptArg( int optid, QString& argval )
       break;
       
    case VALGRIND::SUPPS_SEL: {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
       QStringList files = argval.split( sep, Qt::SkipEmptyParts );
+#else
+      QStringList files = argval.split( sep, QString::SkipEmptyParts );
+#endif
 
       QStringList::iterator it = files.begin();
       for ( ; it != files.end(); ++it ) {
@@ -675,7 +679,11 @@ QStringList Valgrind::getVgFlags( ToolObject* tool_obj )
          if ( tool_obj->objectName() == "memcheck" ) {
             // we need '--suppressions=' before each and every filename
             QString optEntry = vkCfgProj->value( opt->configKey() ).toString();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
             QStringList files = optEntry.split( ",", Qt::SkipEmptyParts );
+#else
+            QStringList files = optEntry.split( ",", QString::SkipEmptyParts );
+#endif
             
             for ( int i = 0; i < files.count(); i++ ) {
                modFlags << "--" + opt->longFlag + "=" + files[i];

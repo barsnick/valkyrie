@@ -843,7 +843,11 @@ void MainWindow::setCurrentProject(const QString &projPath )
    setWindowTitle( VkCfg::appTitle() + " - " + projName );
    
    QStringList files = vkCfgGlbl->value( "recent_projects" )
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
                        .toString().split( VkCfg::sepChar(), Qt::SkipEmptyParts );
+#else
+                       .toString().split( VkCfg::sepChar(), QString::SkipEmptyParts );
+#endif
    files.removeAll( projPath );
    files.prepend( projPath );
    while (files.size() > MaxRecentProjs) {
@@ -863,7 +867,11 @@ void MainWindow::setCurrentProject(const QString &projPath )
 void MainWindow::updateActionsRecentProjs()
 {
    QStringList files = vkCfgGlbl->value( "recent_projects" )
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
                        .toString().split( VkCfg::sepChar(), Qt::SkipEmptyParts );
+#else
+                       .toString().split( VkCfg::sepChar(), QString::SkipEmptyParts );
+#endif
    int numRecentProjs = qMin(files.size(), (int)MaxRecentProjs);
 
    for (int i = 0; i < numRecentProjs; ++i) {

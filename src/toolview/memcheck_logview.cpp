@@ -112,7 +112,11 @@ void TopStatusItemMC::updateToolStatus( QDomElement err )
             QString lossrec_str = text_str.mid( text_str.indexOf( "in loss record " ) );
 
             if ( !lossrec_str.isEmpty() ) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
                QString record = lossrec_str.split( " ", Qt::SkipEmptyParts )[3];
+#else
+               QString record = lossrec_str.split( " ", QString::SkipEmptyParts )[3];
+#endif
 
                if ( record == "1" ) {
                   num_bytes = num_blocks = 0;

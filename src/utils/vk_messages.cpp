@@ -77,7 +77,11 @@ int vkQuery( QWidget* w, QString hdr,
    va_end( ap );
    
    // setup and show dialog box
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
    QStringList buttonLabels( labels.split( ";", Qt::SkipEmptyParts ) );
+#else
+   QStringList buttonLabels( labels.split( ";", QString::SkipEmptyParts ) );
+#endif
    int nbutts = buttonLabels.count();
    MsgBox mb( w, MsgBox::Query, buf, hdr, nbutts );
    mb.setButtonTexts( buttonLabels );
