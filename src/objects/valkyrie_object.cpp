@@ -600,11 +600,7 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
 */
 VkOption* Valkyrie::findOption( QString& optKey )
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
    QStringList parts = optKey.split( "/", Qt::SkipEmptyParts );
-#else
-   QStringList parts = optKey.split( "/", QString::SkipEmptyParts );
-#endif
    vk_assert( parts.count() == 2 );
    QString optGrp = parts.at( 0 );
    QString optFlag = parts.at( 1 );
@@ -760,11 +756,7 @@ QStringList Valkyrie::getTargetFlags()
       // add any target binary flags
       opt    = options.getOption( VALKYRIE::BIN_FLAGS );
       cfgVal = vkCfgProj->value( opt->configKey() ).toString();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
       modFlags += cfgVal.split( " ", Qt::SkipEmptyParts );
-#else
-      modFlags += cfgVal.split( " ", QString::SkipEmptyParts );
-#endif
    }
    
    return modFlags;

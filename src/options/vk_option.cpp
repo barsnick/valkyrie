@@ -192,11 +192,7 @@ VkOption::VkOption(
    longFlag   = _longFlag;
    shortFlag  = _shortFlag;
    flagDescr  = _flagDescr;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
    possValues = _possVals.split( '|', Qt::SkipEmptyParts );
-#else
-   possValues = _possVals.split( '|', QString::SkipEmptyParts );
-#endif
    dfltValue  = _dfltValue;
    shortHelp  = _shortHelp;
    longHelp   = _longHelp;

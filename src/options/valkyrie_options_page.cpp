@@ -227,11 +227,7 @@ void ValkyrieOptionsPage::getEditor()
    // get path of current editor
    QString ed_curr = m_itemList[VALKYRIE::SRC_EDITOR]->currValue();
    if ( !ed_curr.isEmpty() )
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
       ed_curr = ed_curr.split( " ", Qt::SkipEmptyParts ).first();
-#else
-      ed_curr = ed_curr.split( " ", QString::SkipEmptyParts ).first();
-#endif
    
    QString ed_new = vkDlgGetFile( this, ed_curr );
    
