@@ -58,7 +58,11 @@ CbWidget::CbWidget( QWidget* parent, VkOption* vkopt, bool mklabel )
    }
    
    m_combo->setCurrentIndex( m_currIdx );
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+   connect( m_combo, SIGNAL( textActivated( const QString& ) ),
+#else
    connect( m_combo, SIGNAL( activated( const QString& ) ),
+#endif
             this,      SLOT( update( const QString& ) ) );
             
    // not added if the url is empty

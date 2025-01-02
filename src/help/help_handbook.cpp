@@ -435,7 +435,11 @@ void HandBook::mkMenuToolBars()
    QSizePolicy sp = pathCombo->sizePolicy();
    sp.setHorizontalPolicy( QSizePolicy::MinimumExpanding );
    pathCombo->setSizePolicy( sp );
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+   connect( pathCombo, SIGNAL( textActivated( const QString& ) ),
+#else
    connect( pathCombo, SIGNAL( activated( const QString& ) ),
+#endif
             this,        SLOT( openUrl( const QString& ) ) );
    toolbar->addWidget( pathCombo );
    
