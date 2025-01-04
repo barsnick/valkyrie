@@ -40,7 +40,11 @@ SpWidget::SpWidget( QWidget* parent, VkOption* vkopt,
    m_widg    = m_intspin;
    
    m_numSections = num_sections;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+   connect( m_intspin, SIGNAL( textChanged( const QString& ) ),
+#else
    connect( m_intspin, SIGNAL( valueChanged( const QString& ) ),
+#endif
             this,        SLOT( setCurrValue( const QString& ) ) );
 
    // not added if the url is empty
