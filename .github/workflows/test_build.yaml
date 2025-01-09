@@ -1,0 +1,46 @@
+name: Build Tests (ubuntu-latest gcc)
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Available versions can be listed using
+        # $ aqt list-qt linux desktop
+        # and the corresponding arch(s) to use with
+        # $ aqt list-qt linux desktop --arch <version>
+        # and the names of extra modules with
+        # $ aqt list-qt linux desktop --modules <version> <arch>
+        #
+        # Note the change of arch from `gcc_64` to `linux_gcc_64` starting with 6.7.0.
+        qt-config:
+          - version: '5.15.*'
+            arch: gcc_64
+          - version: '5.13.*'
+            arch: gcc_64
+          - version: '5.9.*'
+            arch: gcc_64
+          - version: '6.*'
+            arch: linux_gcc_64
+            modules: qt5compat
+          - version: '6.5.*'
+            arch: gcc_64
+            modules: qt5compat
+          - version: '6.2.*'
+            arch: gcc_64
+            modules: qt5compat
+    steps:
+      - id: install_qt
+        name: "Install Qt using GHA"
+        uses: jurplel/install-qt-action@v4
+        with:
+          arch: ${{ matrix.qt-config.arch }}
+          version: ${{ matrix.qt-config.version }}
+          modules: ${{ matrix.qt-config.modules }}
+      - uses: actions/checkout@v4
+      - id: make
+        name: "Build with qmake and make"
+        run: qmake && make -j$(nproc)
+      - id: show_binary
+        name: "Show details of the final binary"
+        run: ls -l bin/valkyrie; ldd -r bin/valkyrie
