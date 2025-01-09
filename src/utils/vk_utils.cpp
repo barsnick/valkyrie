@@ -52,7 +52,6 @@ void vkPrint( const char* msg, ... )
 {
    va_list ap;
    va_start( ap, msg );
-   va_end( ap );
    fprintf( stdout, "===%s:%d=== ", qPrintable( VkCfg::appName() ), ( int )getpid() );
    vfprintf( stdout, msg, ap );
    va_end( ap );
@@ -66,7 +65,6 @@ void vkPrintErr( const char* msg, ... )
 {
    va_list ap;
    va_start( ap, msg );
-   va_end( ap );
    fprintf( stderr, "===%s:%d=== ", qPrintable( VkCfg::appName() ), ( int )getpid() );
    vfprintf( stderr, msg, ap );
    va_end( ap );
@@ -81,7 +79,6 @@ void vkDebug( const char* msg, ... )
 #ifdef DEBUG_ON
    va_list ap;
    va_start( ap, msg );
-   va_end( ap );
    fprintf( stderr, "===%s:%d=== ", qPrintable( VkCfg::appName() ), ( int )getpid() );
    vfprintf( stderr, msg, ap );
    va_end( ap );
