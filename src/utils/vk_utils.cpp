@@ -222,16 +222,6 @@ QString str2html( QString str )
 
 /* wrappers to free(3)
    hides const compilation noise, permit NULL, return NULL always. */
-void* vk_free( const void* ptr )
-{
-   if ( ptr != NULL ) {
-      free(( void* )ptr );
-      ptr = NULL;
-   }
-   
-   return NULL;
-}
-
 char* vk_str_free( const char* ptr )
 {
    if ( ptr != NULL ) {

@@ -114,8 +114,6 @@ QString escapeEntities( const QString& str );
 QString str2html( QString str );
 
 /* malloc and free fns ------------------------------------------------- */
-void* vk_free( const void* p );
-
 char* vk_str_free( const char* ptr );
 
 void* vk_malloc( unsigned long n_bytes );
