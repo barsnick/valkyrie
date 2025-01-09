@@ -160,8 +160,11 @@ static const char* vkExpandNextArg( const char* s )
    }
    
    *te = '\0';
-   // memory leak, hard to plug
+   char * t_tmp = t;
    t = ( char* )realloc( t, strlen( t ) + 1 );
+   if ( t == NULL ) {
+      free( t_tmp );
+   }
    return t;
 }
 
