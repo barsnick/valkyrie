@@ -1,7 +1,8 @@
 name: Build Tests (ubuntu-latest gcc)
 on: [push, pull_request, workflow_dispatch]
 jobs:
-  build-and-test:
+  compile:
+    name: Test compilation
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -31,7 +32,7 @@ jobs:
             modules: qt5compat
     steps:
       - id: install_qt
-        name: "Install Qt using GHA"
+        name: Install Qt using GHA
         uses: jurplel/install-qt-action@v4
         with:
           arch: ${{ matrix.qt-config.arch }}
@@ -39,8 +40,8 @@ jobs:
           modules: ${{ matrix.qt-config.modules }}
       - uses: actions/checkout@v4
       - id: make
-        name: "Build with qmake and make"
+        name: Build with qmake and make
         run: qmake && make -j$(nproc)
       - id: show_binary
-        name: "Show details of the final binary"
+        name: Show details of the final binary
         run: ls -l bin/valkyrie; ldd -r bin/valkyrie
