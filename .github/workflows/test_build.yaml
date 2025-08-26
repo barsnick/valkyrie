@@ -38,7 +38,7 @@ jobs:
           arch: ${{ matrix.qt-config.arch }}
           version: ${{ matrix.qt-config.version }}
           modules: ${{ matrix.qt-config.modules }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - id: make
         name: Build with qmake and make
         run: qmake && make -j$(nproc)
