@@ -525,7 +525,8 @@ int Valkyrie::checkOptArg( int optid, QString& argval )
 
          // check the version
          QString cmd_qstr = argval + " --version 2>&1";
-         const char* cmd = cmd_qstr.toLatin1().constData();
+         QByteArray cmd_bytes = cmd_qstr.toLatin1();
+         const char* cmd = cmd_bytes.constData();
          FILE* fp = popen( cmd, "r" );
          if ( !fp ) {
             return PERROR_BADFILE;
