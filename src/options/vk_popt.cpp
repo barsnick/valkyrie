@@ -174,7 +174,7 @@ static const char* vkExpandNextArg( const char* s )
   returns 0 on success, PERROR_* on error
 */
 int vkPoptGetNextOpt( vkPoptContext con,
-                      char* arg_val/*OUT*/,
+                      char* arg_val/*OUT*/, size_t arg_val_size,
                       const vkPoptOption** opt_ret/*OUT*/,
                       bool& done_vk_flags/*OUT*/ )
 {
@@ -359,8 +359,8 @@ int vkPoptGetNextOpt( vkPoptContext con,
          longArg = NULL;
          
          // store the argument value for checking
-         if ( con->os->nextArg ) {
-            sprintf( arg_val, "%s", con->os->nextArg );
+         if ( con->os->nextArg && arg_val != NULL && arg_val_size > 0 ) {
+            snprintf( arg_val, arg_val_size, "%s", con->os->nextArg );
          }
       } // end of "if ! VkOPT::ARG_NONE"
       

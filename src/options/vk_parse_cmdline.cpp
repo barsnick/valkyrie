@@ -205,7 +205,8 @@ bool parseCmdArgs( int argc, char** argv, Valkyrie* vk,
    while ( true ) {
       const vkPoptOption* opt = NULL;
       bool done_vk_flags = false;
-      rc = vkPoptGetNextOpt( optCon, argVal, &opt, done_vk_flags );
+      rc = vkPoptGetNextOpt( optCon, argVal, sizeof( argVal ),
+                             &opt, done_vk_flags );
       
       if ( rc != PARSED_OK ) {
          // an error occurred during option processing
