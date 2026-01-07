@@ -62,7 +62,7 @@ extern "C" {
                                    
    /* get next option opt_ret
       returns 0 on success, PERROR_* on error */
-   int vkPoptGetNextOpt( vkPoptContext con, char* arg_val,
+   int vkPoptGetNextOpt( vkPoptContext con, char* arg_val, size_t arg_val_size,
                          const vkPoptOption** opt/*OUT*/,
                          bool& done_vk_flags/*OUT*/ );
                          
