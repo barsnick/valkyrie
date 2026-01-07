@@ -140,11 +140,12 @@ QString vk_mkstemp( QString filepath, QString ext/*=QString()*/ )
          /* something went wrong */
          VK_DEBUG( "failed to create unique filename from '%s'.",
                    qPrintable( filepath ) );
+         vk_str_free( tmpname );
          return QString();
       }
       
       unique = QString( tmpname );
-      tmpname = vk_str_free( tmpname );
+      vk_str_free( tmpname );
    }
    
    return unique;
@@ -669,5 +670,4 @@ QString vkDirCfgDialog( QWidget* parent,
    return dirname;
 }
 #endif
-
 
