@@ -27,14 +27,21 @@
   VgLogReader
 */
 VgLogReader::VgLogReader( VgLogView* lv )
-   : vghandler( 0 ), source( 0 )
+   : vghandler( 0 )
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
+   , readPos( 0 ), incremental( false )
+#else
+   , source( 0 )
+#endif
 {
    vghandler = new VgLogHandler( lv );
+#if QT_VERSION < QT_VERSION_CHECK( 5, 15, 0 )
    setContentHandler( vghandler );
    setErrorHandler( vghandler );
    //  setLexicalHandler( vghandler );
    //  setDeclHandler( vghandler );
    //  setDTDHandler( vghandler );
+#endif
 }
 
 VgLogReader::~VgLogReader()
@@ -44,10 +51,12 @@ VgLogReader::~VgLogReader()
       vghandler = 0;
    }
    
+#if QT_VERSION < QT_VERSION_CHECK( 5, 15, 0 )
    if ( source ) {
       delete source;
       source = 0;
    }
+#endif
    
    if ( file.isOpen() ) {
       file.close();
@@ -56,6 +65,26 @@ VgLogReader::~VgLogReader()
 
 bool VgLogReader::parseFile( QString filepath, bool incremental/*=false*/ )
 {
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
+   if ( file.isOpen() ) {
+      file.close();
+   }
+   
+   file.setFileName( filepath );
+   if ( !file.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
+      return false;
+   }
+   
+   reader.clear();
+   readPos = 0;
+   this->incremental = incremental;
+   
+   if ( !readPendingData() ) {
+      return false;
+   }
+   
+   return parseChunk();
+#else
    if ( source ) {
       delete source;
    }
@@ -67,16 +96,101 @@ bool VgLogReader::parseFile( QString filepath, bool incremental/*=false*/ )
    file.setFileName( filepath );
    source = new QXmlInputSource( &file );
    return QXmlSimpleReader::parse( source, incremental );
+#endif
 }
 
 bool VgLogReader::parseContinue()
 {
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
+   if ( !readPendingData() ) {
+      return false;
+   }
+   
+   return parseChunk();
+#else
    if ( source ) {
       source->fetchData();
    }
    
    return QXmlSimpleReader::parseContinue();
+#endif
 }
+
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
+bool VgLogReader::readPendingData()
+{
+   if ( !file.isOpen() ) {
+      return false;
+   }
+   
+   if ( !file.seek( readPos ) ) {
+      return false;
+   }
+   
+   QByteArray data = file.readAll();
+   readPos = file.pos();
+   
+   if ( !data.isEmpty() ) {
+      reader.addData( data );
+   }
+   
+   return true;
+}
+
+bool VgLogReader::parseChunk()
+{
+   while ( !reader.atEnd() ) {
+      switch ( reader.readNext() ) {
+      case QXmlStreamReader::StartDocument:
+         if ( !vghandler->startDocument() ) {
+            return false;
+         }
+         break;
+      case QXmlStreamReader::ProcessingInstruction:
+         if ( !vghandler->processingInstruction(
+                 reader.processingInstructionTarget().toString(),
+                 reader.processingInstructionData().toString() ) ) {
+            return false;
+         }
+         break;
+      case QXmlStreamReader::StartElement:
+         if ( !vghandler->startElement( QString(),
+                                        reader.name().toString(),
+                                        reader.qualifiedName().toString(),
+                                        reader.attributes() ) ) {
+            return false;
+         }
+         break;
+      case QXmlStreamReader::EndElement:
+         if ( !vghandler->endElement( QString(),
+                                      reader.name().toString(),
+                                      reader.qualifiedName().toString() ) ) {
+            return false;
+         }
+         break;
+      case QXmlStreamReader::Characters:
+         if ( !reader.isWhitespace() &&
+              !vghandler->characters( reader.text().toString() ) ) {
+            return false;
+         }
+         break;
+      case QXmlStreamReader::EndDocument:
+         return vghandler->endDocument();
+      case QXmlStreamReader::Invalid:
+         if ( reader.error() == QXmlStreamReader::PrematureEndOfDocumentError &&
+              incremental ) {
+            return true;
+         }
+         
+         return vghandler->fatalError( reader );
+      default:
+         break;
+      }
+   }
+   
+   return !reader.hasError();
+}
+#endif
 
 
 /**********************************************************************/
@@ -102,7 +216,7 @@ bool VgLogHandler::processingInstruction( const QString& target, const QString& 
 }
 
 bool VgLogHandler::startElement( const QString&, const QString&,
-                                 const QString& tag, const QXmlAttributes& )
+                                 const QString& tag, const VgXmlAttributes& )
 {
    //  vkPrintErr("VgLogHandler::startElement: '%s'", tag.latin1());
    QDomNode n = doc.createElement( tag );
@@ -213,27 +327,50 @@ bool VgLogHandler::endDocument()
 }
 
 /* non-fatal error: just report it */
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
+bool VgLogHandler::error( const QXmlStreamReader& reader )
+#else
 bool VgLogHandler::error( const QXmlParseException& exception )
+#endif
 {
    //   vkPrintErr("VgLogHandler::error");
-   QString err = exception.message() +
-                 " (line: " + QString::number( exception.lineNumber() ) +
-                 ", col: " + QString::number( exception.columnNumber() ) + ")";
+   QString err =
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
+      reader.errorString() +
+      " (line: " + QString::number( reader.lineNumber() ) +
+      ", col: " + QString::number( reader.columnNumber() ) + ")";
+#else
+      exception.message() +
+      " (line: " + QString::number( exception.lineNumber() ) +
+      ", col: " + QString::number( exception.columnNumber() ) + ")";
+#endif
                  
    // printf("VgLogHandler::non-fatal error: %s", err.latin1());
    
    return true; /* try to continue. */
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
+bool VgLogHandler::fatalError( const QXmlStreamReader& reader )
+#else
 bool VgLogHandler::fatalError( const QXmlParseException& exception )
+#endif
 {
    //  vkPrintErr("fatalError");
 
    // msg previously set by logview: print everything.
-   m_fatalMsg = exception.message() +
-                " (line: " + QString::number( exception.lineNumber() ) +
-                ", col: " + QString::number( exception.columnNumber() ) + ")" +
-                "\n\n" + m_fatalMsg;
+   m_fatalMsg =
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
+      reader.errorString() +
+      " (line: " + QString::number( reader.lineNumber() ) +
+      ", col: " + QString::number( reader.columnNumber() ) + ")" +
+      "\n\n" + m_fatalMsg;
+#else
+      exception.message() +
+      " (line: " + QString::number( exception.lineNumber() ) +
+      ", col: " + QString::number( exception.columnNumber() ) + ")" +
+      "\n\n" + m_fatalMsg;
+#endif
                 
    if ( m_finished ) {
       /* If we finished before we got the error, this is probably the
