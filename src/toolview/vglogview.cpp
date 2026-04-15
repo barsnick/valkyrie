@@ -674,8 +674,8 @@ void ErrorItem::showFullSrcPath( bool show )
       StackItem* stack = (StackItem*)child( i );
       if ( stack->elemType() == VG_ELEM::STACK ) {
          // multiple frames
-         for ( int i=0; i<stack->childCount(); ++i ) {
-            VgOutputItem* item = (VgOutputItem*)stack->child( i );
+         for ( int j=0; j<stack->childCount(); ++j ) {
+            VgOutputItem* item = (VgOutputItem*)stack->child( j );
             if ( item->elemType() == VG_ELEM::FRAME ) {
                QString text = ((FrameItem*)item)->describe_IP( show );
                item->setText( text );
@@ -1213,8 +1213,8 @@ void VgLogView::updateErrorItems( QDomElement ec )
 
       // search errorcount pairs for err_unique
       QDomNodeList pairs = ec.childNodes();
-      for ( int i = 0; i < pairs.count(); i++ ) {
-         QDomNode pair = pairs.item( i );
+      for ( int j = 0; j < pairs.count(); j++ ) {
+         QDomNode pair = pairs.item( j );
          QDomNodeList pair_details = pair.childNodes();
          QString unique = pair_details.item( 1 ).toElement().text();
 
