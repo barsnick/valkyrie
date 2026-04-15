@@ -26,13 +26,18 @@
 #include <QFile>
 #include <QString>
 #include <QDomDocument>
+#include <QtGlobal>
 
-#if 1
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
+#include <QXmlStreamReader>
+typedef QXmlStreamAttributes VgXmlAttributes;
+#elif 1
 #include <QXmlAttributes>
 #include <QXmlDefaultHandler>
 #include <QXmlSimpleReader>
 #include <QXmlInputSource>
 #include <QXmlParseException>
+typedef QXmlAttributes VgXmlAttributes;
 #else
 // For debugging xml parser
 #include <vkxml.h>
@@ -41,6 +46,7 @@
 #define QXmlDefaultHandler VkXmlDefaultHandler
 #define QXmlAttributes VkXmlAttributes
 #define QXmlParseException VkXmlParseException
+typedef QXmlAttributes VgXmlAttributes;
 #endif
 
 
@@ -51,7 +57,10 @@
   - hands off complete top-level branches to VgLog
   (e.g. preamble, error etc)
 */
-class VgLogHandler : public QXmlDefaultHandler
+class VgLogHandler
+#if QT_VERSION < QT_VERSION_CHECK( 5, 15, 0 )
+   : public QXmlDefaultHandler
+#endif
 {
 public:
    VgLogHandler( VgLogView* lv );
@@ -63,7 +72,7 @@ public:
    bool startElement( const QString& nsURI,
                       const QString& localName,
                       const QString& qName,
-                      const QXmlAttributes& atts );
+                      const VgXmlAttributes& atts );
    bool endElement( const QString& nsURI,
                     const QString& localName,
                     const QString& qName );
@@ -72,8 +81,13 @@ public:
    bool endDocument();
    
    // reimplement error handlers
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
+   bool error( const QXmlStreamReader& reader );
+   bool fatalError( const QXmlStreamReader& reader );
+#else
    bool error( const QXmlParseException& exception );
    bool fatalError( const QXmlParseException& exception );
+#endif
    
    /* only set if fatal error */
    QString fatalMsg() {
@@ -105,7 +119,10 @@ private:
   Simple subclass of QXmlSimpleReader,
   to setup VgLogHandler for this reader
 */
-class VgLogReader : public QXmlSimpleReader
+class VgLogReader
+#if QT_VERSION < QT_VERSION_CHECK( 5, 15, 0 )
+   : public QXmlSimpleReader
+#endif
 {
 public:
    VgLogReader( VgLogView* lv );
@@ -120,7 +137,16 @@ public:
    
 private:
    VgLogHandler* vghandler;
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
+   bool parseChunk();
+   bool readPendingData();
+
+   QXmlStreamReader reader;
+   qint64 readPos;
+   bool incremental;
+#else
    QXmlInputSource* source;
+#endif
    QFile file;
 };
 
