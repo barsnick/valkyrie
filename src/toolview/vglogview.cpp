@@ -86,6 +86,25 @@ static ElemTypeMap setupElemTypeMap()
    etmap["skaux"]            = VG_ELEM::SKAUX;
    etmap["sframe"]           = VG_ELEM::SFRAME;
    etmap["rawtext"]          = VG_ELEM::RAWTEXT;
+   etmap["heap_summary"]     = VG_ELEM::HEAP_SUMMARY;
+   etmap["leak_summary"]     = VG_ELEM::LEAK_SUMMARY;
+   etmap["error_summary"]    = VG_ELEM::ERROR_SUMMARY;
+   etmap["total_heap_usage"] = VG_ELEM::HEAP_SUMMARY;
+   etmap["memory_in_use_at_exit"] = VG_ELEM::HEAP_SUMMARY;
+   etmap["all_heap_blocks_freed"] = VG_ELEM::HEAP_SUMMARY;
+   etmap["definitely_lost"]  = VG_ELEM::LEAK_SUMMARY;
+   etmap["indirectly_lost"]  = VG_ELEM::LEAK_SUMMARY;
+   etmap["possibly_lost"]    = VG_ELEM::LEAK_SUMMARY;
+   etmap["still_reachable"]  = VG_ELEM::LEAK_SUMMARY;
+   etmap["suppressed"]       = VG_ELEM::LEAK_SUMMARY;
+   etmap["errors"]           = VG_ELEM::ERROR_SUMMARY;
+   etmap["error_contexts"]   = VG_ELEM::ERROR_SUMMARY;
+   etmap["suppressed_contexts"] = VG_ELEM::ERROR_SUMMARY;
+   etmap["allocs"]           = VG_ELEM::HEAP_SUMMARY;
+   etmap["frees"]            = VG_ELEM::HEAP_SUMMARY;
+   etmap["bytes_allocated"]  = VG_ELEM::HEAP_SUMMARY;
+   etmap["bytes"]            = VG_ELEM::HEAP_SUMMARY;
+   etmap["blocks"]           = VG_ELEM::HEAP_SUMMARY;
    return etmap;
 }
 
@@ -1100,7 +1119,7 @@ bool VgLogView::appendNode( QDomNode node, QString& errMsg )
 
    switch ( elemtype ) {
    case VG_ELEM::PROTOCOL_VERSION: {
-      if ( elem.text() != "4" ) {
+      if ( elem.text().toInt() < 4 ) {
          errMsg = "Unsupported XML protocol version: (" + elem.text() + ")";
          vkPrintErr( "%s", qPrintable( "VgLogView::appendNode(): " + errMsg ) );
          return false;
