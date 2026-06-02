@@ -172,7 +172,7 @@ bool MemcheckLogView::appendNodeTool( QDomElement elem, QString& errMsg )
 {
    switch ( VgOutputItem::elemType( elem.tagName() ) ) {
    case VG_ELEM::PROTOCOL_VERSION : {
-      if ( elem.text() != "4" ) {
+      if ( elem.text().toInt() < 4 ) {
          errMsg = "Memcheck tool doesn't support XML protocol version: (" + elem.text() + ")";
          vkPrintErr( "%s", qPrintable( "MemcheckLogView::appendNodeTool(): " + errMsg ) );
          return false;
