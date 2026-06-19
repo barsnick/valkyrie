@@ -32,9 +32,6 @@ doc_imgs.path  = $$DATADIR/doc/$$PACKAGE/images
 # Qt modules
 QT += xml
 QT += widgets
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += core5compat
-}
 
 ######################################################################
 # Project configuration & compiler options
